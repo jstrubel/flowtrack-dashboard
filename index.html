@@ -729,11 +729,172 @@
         </div>
     </div>
 
+        <!-- TradingView Charts Section -->
+        <div class="section" style="margin-top: 20px;">
+            <div class="section-header">
+                <div class="section-title">📈 Market Structure Charts</div>
+            </div>
+            <div class="grid-2">
+                <!-- BTC Dominance Chart -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">Bitcoin Dominance (BTC.D)</div>
+                        <div class="card-subtitle">Weekly Timeframe • CRYPTOCAP</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 450px;">
+                        <div id="btc-dominance-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+                
+                <!-- ETH/BTC Chart -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">ETH/BTC Ratio</div>
+                        <div class="card-subtitle">Weekly Timeframe • Binance</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 450px;">
+                        <div id="eth-btc-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Additional TradingView Charts -->
+        <div class="section" style="margin-top: 20px;">
+            <div class="section-header">
+                <div class="section-title">💹 Price Charts</div>
+            </div>
+            <div class="grid-2">
+                <!-- BTC/USD Chart -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">Bitcoin (BTC/USD)</div>
+                        <div class="card-subtitle">Weekly Timeframe • Binance</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 450px;">
+                        <div id="btc-usd-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+                
+                <!-- ETH/USD Chart -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">Ethereum (ETH/USD)</div>
+                        <div class="card-subtitle">Weekly Timeframe • Binance</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 450px;">
+                        <div id="eth-usd-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <p><strong>FLOWTRACK</strong> — Crypto Derivatives Intelligence</p>
-        <p style="margin-top: 6px;">Data from Binance Futures API, CoinGecko, Alternative.me</p>
+        <p style="margin-top: 6px;">Data from Binance Futures API, CoinGecko, Alternative.me, TradingView</p>
         <p style="margin-top: 6px;">Auto-refreshes every 60 seconds • Not financial advice</p>
     </footer>
+    
+    <!-- TradingView Widget Script -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script type="text/javascript">
+        // Initialize TradingView charts after page load
+        function initTradingViewCharts() {
+            // BTC Dominance Chart
+            new TradingView.widget({
+                "container_id": "btc-dominance-chart",
+                "autosize": true,
+                "symbol": "CRYPTOCAP:BTC.D",
+                "interval": "W",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#0a0e17",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "backgroundColor": "#0a0e17",
+                "gridColor": "rgba(255, 255, 255, 0.05)",
+                "hide_volume": true,
+                "studies": []
+            });
+            
+            // ETH/BTC Chart
+            new TradingView.widget({
+                "container_id": "eth-btc-chart",
+                "autosize": true,
+                "symbol": "BINANCE:ETHBTC",
+                "interval": "W",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#0a0e17",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "backgroundColor": "#0a0e17",
+                "gridColor": "rgba(255, 255, 255, 0.05)",
+                "hide_volume": true,
+                "studies": []
+            });
+            
+            // BTC/USD Chart
+            new TradingView.widget({
+                "container_id": "btc-usd-chart",
+                "autosize": true,
+                "symbol": "BINANCE:BTCUSDT",
+                "interval": "W",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#0a0e17",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "backgroundColor": "#0a0e17",
+                "gridColor": "rgba(255, 255, 255, 0.05)",
+                "hide_volume": true,
+                "studies": []
+            });
+            
+            // ETH/USD Chart
+            new TradingView.widget({
+                "container_id": "eth-usd-chart",
+                "autosize": true,
+                "symbol": "BINANCE:ETHUSDT",
+                "interval": "W",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#0a0e17",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "backgroundColor": "#0a0e17",
+                "gridColor": "rgba(255, 255, 255, 0.05)",
+                "hide_volume": true,
+                "studies": []
+            });
+        }
+        
+        // Wait for TradingView script to load
+        if (document.readyState === 'complete') {
+            setTimeout(initTradingViewCharts, 500);
+        } else {
+            window.addEventListener('load', function() {
+                setTimeout(initTradingViewCharts, 500);
+            });
+        }
+    </script>
 
     <script>
         // ==================== CONFIGURATION ====================
