@@ -293,20 +293,29 @@
         
         /* Section */
         .section {
-            margin-bottom: 20px;
+            margin-bottom: 32px;
         }
         
         .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
         }
         
         .section-title {
-            font-size: 15px;
+            font-size: 18px;
             font-weight: 700;
             color: var(--text);
+            letter-spacing: -0.3px;
+        }
+        
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(to right, var(--border), transparent);
+            margin: 32px 0;
         }
         
         /* Chart Container */
@@ -619,10 +628,40 @@
             </div>
         </div>
 
-        <!-- TradingView Charts Section -->
+        <!-- Price Charts Section - BTC/ETH -->
         <div class="section">
             <div class="section-header">
-                <div class="section-title">📈 Market Structure Charts</div>
+                <div class="section-title">Price Charts</div>
+            </div>
+            <div class="grid-2">
+                <!-- BTC/USD Chart -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">Bitcoin (BTC/USD)</div>
+                        <div class="card-subtitle">Weekly Timeframe • Binance</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 400px;">
+                        <div id="btc-usd-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+                
+                <!-- ETH/USD Chart -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">Ethereum (ETH/USD)</div>
+                        <div class="card-subtitle">Weekly Timeframe • Binance</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 400px;">
+                        <div id="eth-usd-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Market Structure Charts -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">Market Structure</div>
             </div>
             <div class="grid-2">
                 <!-- BTC Dominance Chart -->
@@ -652,11 +691,11 @@
         <!-- Cross-Asset Comparison Chart -->
         <div class="section">
             <div class="section-header">
-                <div class="section-title">🔄 Cross-Asset Performance Comparison</div>
+                <div class="section-title">Cross-Asset Performance</div>
             </div>
             <div class="card" style="padding: 0; overflow: hidden;">
                 <div style="padding: 16px 18px 8px 18px;">
-                    <div class="card-title">BTC vs ETH vs SPX vs NDX (% Change)</div>
+                    <div class="card-title">BTC vs ETH vs S&P 500 vs NASDAQ (% Change)</div>
                     <div class="card-subtitle">Hourly Timeframe • Percentage Scale Comparison</div>
                 </div>
                 <div class="tradingview-widget-container" style="height: 500px;">
@@ -668,7 +707,7 @@
         <!-- Stablecoin Section -->
         <div class="section">
             <div class="section-header">
-                <div class="section-title">💵 Stablecoin Market Overview</div>
+                <div class="section-title">Stablecoin Market</div>
             </div>
             <div class="grid-4" style="margin-bottom: 16px;">
                 <div class="market-card">
@@ -726,7 +765,7 @@
             <!-- Stablecoin Historical Chart -->
             <div class="card" style="margin-top: 16px;">
                 <div class="card-header">
-                    <div class="card-title">📊 Total Stablecoin Supply History</div>
+                    <div class="card-title">Total Stablecoin Supply History</div>
                     <div class="time-selector">
                         <button class="time-btn" onclick="updateStablecoinChart('30')">30D</button>
                         <button class="time-btn" onclick="updateStablecoinChart('90')">90D</button>
@@ -745,7 +784,7 @@
             <!-- Funding Rates Section -->
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">💰 Funding Rates (Binance Perps)</div>
+                    <div class="card-title">Funding Rates (Binance Perps)</div>
                     <div class="card-badge" id="fundingBadge">--</div>
                 </div>
                 <div class="card-value" id="avgFunding">--</div>
@@ -772,7 +811,7 @@
             <!-- Open Interest -->
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">📊 Open Interest Distribution</div>
+                    <div class="card-title">Open Interest Distribution</div>
                     <div class="card-badge badge-neutral">BINANCE</div>
                 </div>
                 <div class="card-value" id="totalOI">--</div>
@@ -805,7 +844,7 @@
             <!-- Long/Short Ratio -->
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">📈 Global Long/Short Ratio</div>
+                    <div class="card-title">Global Long/Short Ratio</div>
                     <div class="card-badge" id="lsBadge">--</div>
                 </div>
                 <div class="card-value" id="lsRatio">--</div>
@@ -832,7 +871,7 @@
             <!-- Fear & Greed -->
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">🎭 Fear & Greed Index</div>
+                    <div class="card-title">Fear & Greed Index</div>
                     <div class="card-badge" id="fgBadge">--</div>
                 </div>
                 <div class="card-value lg" id="fgValue">--</div>
@@ -854,7 +893,7 @@
         <!-- Funding Heatmap -->
         <div class="section" style="margin-top: 20px;">
             <div class="section-header">
-                <div class="section-title">💰 Funding Rate Heatmap (Top 20 Perps)</div>
+                <div class="section-title">Funding Rate Heatmap</div>
             </div>
             <div class="funding-grid" id="fundingHeatmap">
                 <div class="loading-text">Loading funding rates...</div>
@@ -864,7 +903,7 @@
         <!-- Funding History Chart -->
         <div class="card" style="margin-top: 20px;">
             <div class="card-header">
-                <div class="card-title">📊 BTC Funding Rate History</div>
+                <div class="card-title">BTC Funding Rate History</div>
                 <div class="time-selector">
                     <button class="time-btn" onclick="updateFundingChart(50)">50</button>
                     <button class="time-btn active" onclick="updateFundingChart(100)">100</button>
@@ -877,35 +916,6 @@
             </div>
         </div>
         
-        <!-- Price Charts -->
-        <div class="section" style="margin-top: 20px;">
-            <div class="section-header">
-                <div class="section-title">💹 Price Charts</div>
-            </div>
-            <div class="grid-2">
-                <!-- BTC/USD Chart -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">Bitcoin (BTC/USD)</div>
-                        <div class="card-subtitle">Weekly Timeframe • Binance</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 400px;">
-                        <div id="btc-usd-chart" style="height: 100%;"></div>
-                    </div>
-                </div>
-                
-                <!-- ETH/USD Chart -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">Ethereum (ETH/USD)</div>
-                        <div class="card-subtitle">Weekly Timeframe • Binance</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 400px;">
-                        <div id="eth-usd-chart" style="height: 100%;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <footer>
@@ -1015,7 +1025,7 @@
                 "interval": "W"
             });
             
-            // Cross-Asset Comparison Chart (BTC vs ETH vs SPX vs NDX)
+            // Cross-Asset Comparison Chart (BTC vs ETH vs S&P500 vs NASDAQ)
             new TradingView.widget({
                 "autosize": true,
                 "symbol": "BINANCE:BTCUSDT",
@@ -1035,8 +1045,8 @@
                 "hide_volume": true,
                 "studies": [
                     { id: "Compare@tv-basicstudies", inputs: { symbol: "BINANCE:ETHUSDT" } },
-                    { id: "Compare@tv-basicstudies", inputs: { symbol: "SP:SPX" } },
-                    { id: "Compare@tv-basicstudies", inputs: { symbol: "NASDAQ:NDX" } }
+                    { id: "Compare@tv-basicstudies", inputs: { symbol: "FOREXCOM:SPXUSD" } },
+                    { id: "Compare@tv-basicstudies", inputs: { symbol: "FOREXCOM:NSXUSD" } }
                 ]
             });
         }
