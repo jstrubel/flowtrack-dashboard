@@ -31,7 +31,6 @@
             --purple: #8b5cf6;
             --cyan: #06b6d4;
             --orange: #f97316;
-            --gradient: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%);
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -49,7 +48,7 @@
             background: rgba(13, 19, 33, 0.95);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
-            padding: 14px 24px;
+            padding: 12px 24px;
             position: sticky;
             top: 0;
             z-index: 100;
@@ -71,27 +70,10 @@
             gap: 12px;
         }
         
-        .logo-icon {
-            width: 38px;
-            height: 38px;
-            background: var(--gradient);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            font-size: 16px;
-            color: white;
-            box-shadow: 0 4px 20px var(--accent-glow);
-        }
-        
-        .logo-text {
-            font-size: 22px;
-            font-weight: 900;
-            background: var(--gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .logo-img {
+            height: 32px;
+            width: auto;
+            filter: invert(1) brightness(1.1);
         }
         
         .nav-status {
@@ -152,6 +134,53 @@
             margin: 0 auto;
             padding: 20px;
         }
+        
+        /* Market Overview Bar */
+        .market-overview {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 900px) {
+            .market-overview { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 500px) {
+            .market-overview { grid-template-columns: 1fr; }
+        }
+        
+        .market-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+        }
+        
+        .market-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        
+        .market-value {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        
+        .market-change {
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        
+        .market-change.positive { color: var(--good); }
+        .market-change.negative { color: var(--bad); }
+        .market-subtitle { color: var(--text-muted); font-size: 11px; margin-top: 2px; }
         
         /* Grid */
         .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
@@ -219,15 +248,6 @@
             font-size: 12px;
             color: var(--text-muted);
         }
-        
-        .card-change {
-            font-size: 12px;
-            font-weight: 600;
-            margin-top: 6px;
-        }
-        
-        .card-change.positive { color: var(--good); }
-        .card-change.negative { color: var(--bad); }
         
         /* Summary Row */
         .summary-row {
@@ -509,6 +529,12 @@
         
         .time-btn:hover { color: var(--text); }
         .time-btn.active { background: var(--panel); color: var(--text); }
+        
+        /* TradingView Charts */
+        .tradingview-widget-container {
+            border-radius: 0 0 14px 14px;
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
@@ -516,8 +542,10 @@
     <nav class="nav">
         <div class="nav-content">
             <div class="logo">
-                <div class="logo-icon">F</div>
-                <div class="logo-text">FLOWTRACK</div>
+                <img src="logo.webp" alt="Flowtrack" class="logo-img" 
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                     id="logoImg">
+                <span style="display:none; font-size: 24px; font-weight: 800; color: white;" id="logoText">Flowtrack</span>
             </div>
             
             <div class="nav-status">
@@ -533,6 +561,35 @@
     </nav>
 
     <div class="container">
+        <!-- Market Overview (Top) -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">🌐 Market Overview</div>
+            </div>
+            <div class="market-overview">
+                <div class="market-card">
+                    <div class="market-label">Total Market Cap</div>
+                    <div class="market-value" id="totalMcap">--</div>
+                    <div class="market-change" id="mcapChange">--</div>
+                </div>
+                <div class="market-card">
+                    <div class="market-label">24H Volume</div>
+                    <div class="market-value" id="totalVol">--</div>
+                    <div class="market-subtitle">Global trading volume</div>
+                </div>
+                <div class="market-card">
+                    <div class="market-label">BTC Price</div>
+                    <div class="market-value" id="btcPrice">--</div>
+                    <div class="market-change" id="btcChange">--</div>
+                </div>
+                <div class="market-card">
+                    <div class="market-label">ETH Price</div>
+                    <div class="market-value" id="ethPrice">--</div>
+                    <div class="market-change" id="ethChange">--</div>
+                </div>
+            </div>
+        </div>
+
         <!-- Summary Row -->
         <div class="summary-row">
             <div class="summary-card">
@@ -559,6 +616,36 @@
                 <div class="summary-label">BTC Dominance</div>
                 <div class="summary-value" id="summaryDom">--</div>
                 <div class="summary-change" id="summaryDomChange">--</div>
+            </div>
+        </div>
+
+        <!-- TradingView Charts Section -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">📈 Market Structure Charts</div>
+            </div>
+            <div class="grid-2">
+                <!-- BTC Dominance Chart -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">Bitcoin Dominance (BTC.D)</div>
+                        <div class="card-subtitle">Weekly Timeframe • CRYPTOCAP</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 400px;">
+                        <div id="btc-dominance-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+                
+                <!-- ETH/BTC Chart -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">ETH/BTC Ratio</div>
+                        <div class="card-subtitle">Weekly Timeframe • Binance</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 400px;">
+                        <div id="eth-btc-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -699,67 +786,7 @@
             </div>
         </div>
         
-        <!-- Market Overview from CoinGecko -->
-        <div class="section" style="margin-top: 20px;">
-            <div class="section-header">
-                <div class="section-title">🌐 Market Overview (CoinGecko)</div>
-            </div>
-            <div class="grid-4" id="marketOverview">
-                <div class="card">
-                    <div class="card-title">Total Market Cap</div>
-                    <div class="card-value" style="font-size: 22px;" id="totalMcap">--</div>
-                    <div class="card-change" id="mcapChange">--</div>
-                </div>
-                <div class="card">
-                    <div class="card-title">24h Volume</div>
-                    <div class="card-value" style="font-size: 22px;" id="totalVol">--</div>
-                    <div class="card-subtitle">Global trading volume</div>
-                </div>
-                <div class="card">
-                    <div class="card-title">BTC Price</div>
-                    <div class="card-value" style="font-size: 22px;" id="btcPrice">--</div>
-                    <div class="card-change" id="btcChange">--</div>
-                </div>
-                <div class="card">
-                    <div class="card-title">ETH Price</div>
-                    <div class="card-value" style="font-size: 22px;" id="ethPrice">--</div>
-                    <div class="card-change" id="ethChange">--</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-        <!-- TradingView Charts Section -->
-        <div class="section" style="margin-top: 20px;">
-            <div class="section-header">
-                <div class="section-title">📈 Market Structure Charts</div>
-            </div>
-            <div class="grid-2">
-                <!-- BTC Dominance Chart -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">Bitcoin Dominance (BTC.D)</div>
-                        <div class="card-subtitle">Weekly Timeframe • CRYPTOCAP</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 450px;">
-                        <div id="btc-dominance-chart" style="height: 100%;"></div>
-                    </div>
-                </div>
-                
-                <!-- ETH/BTC Chart -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">ETH/BTC Ratio</div>
-                        <div class="card-subtitle">Weekly Timeframe • Binance</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 450px;">
-                        <div id="eth-btc-chart" style="height: 100%;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Additional TradingView Charts -->
+        <!-- Price Charts -->
         <div class="section" style="margin-top: 20px;">
             <div class="section-header">
                 <div class="section-title">💹 Price Charts</div>
@@ -771,7 +798,7 @@
                         <div class="card-title">Bitcoin (BTC/USD)</div>
                         <div class="card-subtitle">Weekly Timeframe • Binance</div>
                     </div>
-                    <div class="tradingview-widget-container" style="height: 450px;">
+                    <div class="tradingview-widget-container" style="height: 400px;">
                         <div id="btc-usd-chart" style="height: 100%;"></div>
                     </div>
                 </div>
@@ -782,7 +809,7 @@
                         <div class="card-title">Ethereum (ETH/USD)</div>
                         <div class="card-subtitle">Weekly Timeframe • Binance</div>
                     </div>
-                    <div class="tradingview-widget-container" style="height: 450px;">
+                    <div class="tradingview-widget-container" style="height: 400px;">
                         <div id="eth-usd-chart" style="height: 100%;"></div>
                     </div>
                 </div>
@@ -798,104 +825,7 @@
     
     <!-- TradingView Widget Script -->
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-    <script type="text/javascript">
-        // Initialize TradingView charts after page load
-        function initTradingViewCharts() {
-            // BTC Dominance Chart
-            new TradingView.widget({
-                "container_id": "btc-dominance-chart",
-                "autosize": true,
-                "symbol": "CRYPTOCAP:BTC.D",
-                "interval": "W",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "#0a0e17",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "hide_volume": true,
-                "studies": []
-            });
-            
-            // ETH/BTC Chart
-            new TradingView.widget({
-                "container_id": "eth-btc-chart",
-                "autosize": true,
-                "symbol": "BINANCE:ETHBTC",
-                "interval": "W",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "#0a0e17",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "hide_volume": true,
-                "studies": []
-            });
-            
-            // BTC/USD Chart
-            new TradingView.widget({
-                "container_id": "btc-usd-chart",
-                "autosize": true,
-                "symbol": "BINANCE:BTCUSDT",
-                "interval": "W",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "#0a0e17",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "hide_volume": true,
-                "studies": []
-            });
-            
-            // ETH/USD Chart
-            new TradingView.widget({
-                "container_id": "eth-usd-chart",
-                "autosize": true,
-                "symbol": "BINANCE:ETHUSDT",
-                "interval": "W",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "#0a0e17",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "hide_volume": true,
-                "studies": []
-            });
-        }
-        
-        // Wait for TradingView script to load
-        if (document.readyState === 'complete') {
-            setTimeout(initTradingViewCharts, 500);
-        } else {
-            window.addEventListener('load', function() {
-                setTimeout(initTradingViewCharts, 500);
-            });
-        }
-    </script>
-
+    
     <script>
         // ==================== CONFIGURATION ====================
         const BINANCE_FAPI = 'https://fapi.binance.com/fapi/v1';
@@ -944,6 +874,57 @@
             update.textContent = text;
         }
         
+        // ==================== TRADINGVIEW CHARTS ====================
+        function initTradingViewCharts() {
+            const chartConfig = {
+                "autosize": true,
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#0a0e17",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "backgroundColor": "rgba(10, 14, 23, 1)",
+                "gridColor": "rgba(255, 255, 255, 0.05)",
+                "hide_volume": true
+            };
+            
+            // BTC Dominance Chart
+            new TradingView.widget({
+                ...chartConfig,
+                "container_id": "btc-dominance-chart",
+                "symbol": "CRYPTOCAP:BTC.D",
+                "interval": "W"
+            });
+            
+            // ETH/BTC Chart
+            new TradingView.widget({
+                ...chartConfig,
+                "container_id": "eth-btc-chart",
+                "symbol": "BINANCE:ETHBTC",
+                "interval": "W"
+            });
+            
+            // BTC/USD Chart
+            new TradingView.widget({
+                ...chartConfig,
+                "container_id": "btc-usd-chart",
+                "symbol": "BINANCE:BTCUSDT",
+                "interval": "W"
+            });
+            
+            // ETH/USD Chart
+            new TradingView.widget({
+                ...chartConfig,
+                "container_id": "eth-usd-chart",
+                "symbol": "BINANCE:ETHUSDT",
+                "interval": "W"
+            });
+        }
+        
         // ==================== BINANCE FUTURES API ====================
         async function fetchFundingRates() {
             try {
@@ -951,7 +932,6 @@
                 if (!response.ok) throw new Error('Binance API error');
                 const data = await response.json();
                 
-                // Filter for our target perps
                 fundingData = data
                     .filter(d => TOP_PERPS.includes(d.symbol))
                     .map(d => ({
@@ -973,7 +953,6 @@
         }
         
         function updateFundingUI() {
-            // Calculate weighted average (by rough market cap proxy)
             const weights = { BTC: 10, ETH: 5, SOL: 2, BNB: 2 };
             let weightedSum = 0;
             let totalWeight = 0;
@@ -986,11 +965,9 @@
             
             const avgRate = weightedSum / totalWeight;
             
-            // Update summary
             document.getElementById('summaryFunding').textContent = formatPercent(avgRate, true);
             document.getElementById('summaryFunding').style.color = avgRate > 0.01 ? 'var(--bad)' : avgRate < -0.01 ? 'var(--good)' : 'var(--text)';
             
-            // Update signal
             const signalEl = document.getElementById('summaryFundingSignal');
             if (avgRate > 0.03) {
                 signalEl.textContent = '🔥 Longs Crowded';
@@ -1003,10 +980,8 @@
                 signalEl.style.color = 'var(--text-muted)';
             }
             
-            // Update main card
             document.getElementById('avgFunding').textContent = formatPercent(avgRate, true);
             
-            // Update badge
             const badge = document.getElementById('fundingBadge');
             if (avgRate > 0.03) {
                 badge.textContent = 'CROWDED LONGS';
@@ -1019,11 +994,9 @@
                 badge.className = 'card-badge badge-neutral';
             }
             
-            // Update meter
             const pointerPos = Math.min(100, Math.max(0, (avgRate + 0.05) / 0.1 * 100));
             document.getElementById('fundingPointer').style.left = pointerPos + '%';
             
-            // Update signal box
             const signalBox = document.getElementById('fundingSignal');
             if (avgRate > 0.05) {
                 signalBox.innerHTML = `
@@ -1067,7 +1040,6 @@
                 `;
             }
             
-            // Update heatmap
             updateFundingHeatmap();
         }
         
@@ -1113,7 +1085,6 @@
                 const results = await Promise.all(promises);
                 const prices = {};
                 
-                // Get prices from funding data
                 fundingData.forEach(d => {
                     prices[d.symbol + 'USDT'] = d.markPrice;
                 });
@@ -1126,14 +1097,12 @@
                 
                 const totalOI = oiData.reduce((sum, d) => sum + d.oiUSD, 0);
                 
-                // Update UI
                 document.getElementById('summaryOI').textContent = formatCurrency(oiData[0].oiUSD);
                 document.getElementById('totalOI').textContent = formatCurrency(totalOI);
                 document.getElementById('btcOI').textContent = formatCurrency(oiData[0].oiUSD);
                 document.getElementById('ethOI').textContent = formatCurrency(oiData[1].oiUSD);
                 document.getElementById('solOI').textContent = formatCurrency(oiData[2].oiUSD);
                 
-                // Update bar
                 const btcPct = (oiData[0].oiUSD / totalOI * 100);
                 const ethPct = (oiData[1].oiUSD / totalOI * 100);
                 const solPct = (oiData[2].oiUSD / totalOI * 100);
@@ -1162,7 +1131,6 @@
                     const longPct = parseFloat(latest.longAccount) * 100;
                     const shortPct = parseFloat(latest.shortAccount) * 100;
                     
-                    // Update summary
                     document.getElementById('summaryLS').textContent = formatNumber(ratio, 2);
                     const lsSignal = document.getElementById('summaryLSSignal');
                     if (ratio > 1.5) {
@@ -1176,14 +1144,12 @@
                         lsSignal.style.color = 'var(--text-muted)';
                     }
                     
-                    // Update card
                     document.getElementById('lsRatio').textContent = formatNumber(ratio, 2);
                     document.getElementById('lsLong').style.width = longPct + '%';
                     document.getElementById('lsShort').style.width = shortPct + '%';
                     document.getElementById('lsLongPct').textContent = `Longs: ${formatNumber(longPct, 1)}%`;
                     document.getElementById('lsShortPct').textContent = `Shorts: ${formatNumber(shortPct, 1)}%`;
                     
-                    // Update badge
                     const badge = document.getElementById('lsBadge');
                     if (ratio > 2) {
                         badge.textContent = 'EXTREME LONG';
@@ -1202,7 +1168,6 @@
                         badge.className = 'card-badge badge-neutral';
                     }
                     
-                    // Update signal
                     const signalBox = document.getElementById('lsSignal');
                     if (ratio > 2) {
                         signalBox.innerHTML = `
@@ -1313,11 +1278,9 @@
                     const value = parseInt(fng.value);
                     const classification = fng.value_classification;
                     
-                    // Update summary
                     document.getElementById('summaryFG').textContent = value;
                     document.getElementById('summaryFGLabel').textContent = classification;
                     
-                    // Color based on value
                     let color = 'var(--text)';
                     if (value <= 25) color = 'var(--bad)';
                     else if (value <= 45) color = 'var(--warn)';
@@ -1327,12 +1290,10 @@
                     document.getElementById('summaryFG').style.color = color;
                     document.getElementById('summaryFGLabel').style.color = color;
                     
-                    // Update card
                     document.getElementById('fgValue').textContent = value;
                     document.getElementById('fgValue').style.color = color;
                     document.getElementById('fgLabel').textContent = classification;
                     
-                    // Update badge
                     const badge = document.getElementById('fgBadge');
                     badge.textContent = classification.toUpperCase();
                     if (value <= 25) badge.className = 'card-badge badge-bad';
@@ -1341,7 +1302,6 @@
                     else if (value >= 55) badge.className = 'card-badge badge-good';
                     else badge.className = 'card-badge badge-neutral';
                     
-                    // Update pointer
                     document.getElementById('fgPointer').style.left = value + '%';
                 }
             } catch (error) {
@@ -1352,35 +1312,31 @@
         // ==================== COINGECKO ====================
         async function fetchMarketData() {
             try {
-                // Global data
                 const globalResponse = await fetch(`${COINGECKO_API}/global`);
                 if (!globalResponse.ok) throw new Error('CoinGecko global API error');
                 const globalData = await globalResponse.json();
                 
                 const g = globalData.data;
                 
-                // Update dominance
                 document.getElementById('summaryDom').textContent = formatNumber(g.market_cap_percentage.btc, 1) + '%';
                 document.getElementById('summaryDomChange').textContent = 'ETH: ' + formatNumber(g.market_cap_percentage.eth, 1) + '%';
                 
-                // Update market overview
                 document.getElementById('totalMcap').textContent = formatCurrency(g.total_market_cap.usd);
                 document.getElementById('mcapChange').textContent = formatPercent(g.market_cap_change_percentage_24h_usd, true);
-                document.getElementById('mcapChange').className = 'card-change ' + (g.market_cap_change_percentage_24h_usd >= 0 ? 'positive' : 'negative');
+                document.getElementById('mcapChange').className = 'market-change ' + (g.market_cap_change_percentage_24h_usd >= 0 ? 'positive' : 'negative');
                 document.getElementById('totalVol').textContent = formatCurrency(g.total_volume.usd);
                 
-                // Fetch BTC/ETH prices
                 const priceResponse = await fetch(`${COINGECKO_API}/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true`);
                 if (!priceResponse.ok) throw new Error('CoinGecko price API error');
                 const priceData = await priceResponse.json();
                 
                 document.getElementById('btcPrice').textContent = '$' + formatNumber(priceData.bitcoin.usd, 0);
                 document.getElementById('btcChange').textContent = formatPercent(priceData.bitcoin.usd_24h_change, true);
-                document.getElementById('btcChange').className = 'card-change ' + (priceData.bitcoin.usd_24h_change >= 0 ? 'positive' : 'negative');
+                document.getElementById('btcChange').className = 'market-change ' + (priceData.bitcoin.usd_24h_change >= 0 ? 'positive' : 'negative');
                 
                 document.getElementById('ethPrice').textContent = '$' + formatNumber(priceData.ethereum.usd, 0);
                 document.getElementById('ethChange').textContent = formatPercent(priceData.ethereum.usd_24h_change, true);
-                document.getElementById('ethChange').className = 'card-change ' + (priceData.ethereum.usd_24h_change >= 0 ? 'positive' : 'negative');
+                document.getElementById('ethChange').className = 'market-change ' + (priceData.ethereum.usd_24h_change >= 0 ? 'positive' : 'negative');
                 
             } catch (error) {
                 console.error('Error fetching market data:', error);
@@ -1395,7 +1351,6 @@
             setStatus('loading', 'Updating...');
             
             try {
-                // Fetch all data in parallel
                 await Promise.all([
                     fetchFundingRates(),
                     fetchOpenInterest(),
@@ -1419,6 +1374,9 @@
         // ==================== INITIALIZE ====================
         document.addEventListener('DOMContentLoaded', () => {
             refreshAllData();
+            
+            // Initialize TradingView charts
+            setTimeout(initTradingViewCharts, 500);
             
             // Auto refresh every 60 seconds
             setInterval(refreshAllData, 60000);
