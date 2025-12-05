@@ -924,6 +924,49 @@
             <div class="section-header">
                 <div class="section-title">Derivatives Market Data</div>
             </div>
+            
+            <!-- Coinalyze Multi-Panel Chart -->
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">BTC Price vs Funding Rate vs Open Interest</div>
+                        <div class="card-subtitle">Aggregated data across all exchanges • Daily timeframe • Data from Coinalyze</div>
+                    </div>
+                    <div class="time-selector">
+                        <button class="time-btn" onclick="updateCoinalyzeChart(90)">3M</button>
+                        <button class="time-btn" onclick="updateCoinalyzeChart(180)">6M</button>
+                        <button class="time-btn active" onclick="updateCoinalyzeChart(365)">1Y</button>
+                        <button class="time-btn" onclick="updateCoinalyzeChart(730)">2Y</button>
+                    </div>
+                </div>
+                
+                <!-- BTC Price Panel -->
+                <div style="height: 200px; position: relative; border-bottom: 1px solid var(--border);">
+                    <div style="position: absolute; top: 8px; left: 12px; font-size: 11px; color: var(--text-muted); z-index: 10;">BTC/USD</div>
+                    <canvas id="coinalyzePriceChart"></canvas>
+                </div>
+                
+                <!-- Funding Rate Panel -->
+                <div style="height: 120px; position: relative; border-bottom: 1px solid var(--border);">
+                    <div style="position: absolute; top: 8px; left: 12px; font-size: 11px; color: var(--text-muted); z-index: 10;">Aggregated Funding Rate (Global AVG)</div>
+                    <canvas id="coinalyzeFundingChart"></canvas>
+                </div>
+                
+                <!-- Open Interest Panel -->
+                <div style="height: 120px; position: relative;">
+                    <div style="position: absolute; top: 8px; left: 12px; font-size: 11px; color: var(--text-muted); z-index: 10;">Aggregated Open Interest (USD)</div>
+                    <canvas id="coinalyzeOIChart"></canvas>
+                </div>
+                
+                <div id="coinalyzeLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; display: none;">
+                    <div style="font-size: 14px; color: var(--text-muted);">Loading Coinalyze data...</div>
+                </div>
+                
+                <div id="coinalyzeError" style="display: none; padding: 20px; text-align: center;">
+                    <div style="color: var(--bad); font-size: 13px;">Failed to load Coinalyze data</div>
+                    <div style="color: var(--text-muted); font-size: 11px; margin-top: 4px;">Check API key or try refreshing</div>
+                </div>
+            </div>
 
         <!-- Main Content -->
         <div class="grid-2">
@@ -1133,6 +1176,14 @@
         let fundingChart = null;
         let fundingData = [];
         
+        // Coinalyze API Configuration
+        const COINALYZE_API_KEY = '206ab6db-6464-46b6-84da-782d2a74a807';
+        const COINALYZE_BASE = 'https://api.coinalyze.net/v1';
+        let coinalyzePriceChart = null;
+        let coinalyzeFundingChart = null;
+        let coinalyzeOIChart = null;
+        let coinalyzeData = { price: [], funding: [], oi: [] };
+        
         // ==================== TAB NAVIGATION ====================
         function switchTab(tabName) {
             // Hide all tab contents
@@ -1158,6 +1209,258 @@
             if (tabName === 'dashboard') {
                 setTimeout(initTradingViewCharts, 100);
             }
+            
+            // Load Coinalyze data when switching to derivatives tab
+            if (tabName === 'derivatives' && coinalyzeData.price.length === 0) {
+                loadCoinalyzeData(365);
+            }
+        }
+        
+        // ==================== COINALYZE API ====================
+        async function loadCoinalyzeData(days = 365) {
+            const loadingEl = document.getElementById('coinalyzeLoading');
+            const errorEl = document.getElementById('coinalyzeError');
+            
+            if (loadingEl) loadingEl.style.display = 'block';
+            if (errorEl) errorEl.style.display = 'none';
+            
+            const now = Math.floor(Date.now() / 1000);
+            const from = now - (days * 24 * 60 * 60);
+            
+            try {
+                // Fetch all data in parallel
+                // Using BTC_PERP.A for aggregated data (all exchanges)
+                const [priceRes, fundingRes, oiRes] = await Promise.all([
+                    fetch(`${COINALYZE_BASE}/ohlcv-history?symbols=BTCUSD_PERP.A&interval=daily&from=${from}&to=${now}&api_key=${COINALYZE_API_KEY}`),
+                    fetch(`${COINALYZE_BASE}/funding-rate-history?symbols=BTCUSD_PERP.A&interval=daily&from=${from}&to=${now}&api_key=${COINALYZE_API_KEY}`),
+                    fetch(`${COINALYZE_BASE}/open-interest-history?symbols=BTCUSD_PERP.A&interval=daily&from=${from}&to=${now}&convert_to_usd=true&api_key=${COINALYZE_API_KEY}`)
+                ]);
+                
+                const [priceData, fundingData, oiData] = await Promise.all([
+                    priceRes.json(),
+                    fundingRes.json(),
+                    oiRes.json()
+                ]);
+                
+                // Process price data (OHLCV)
+                if (priceData && priceData[0] && priceData[0].history) {
+                    coinalyzeData.price = priceData[0].history.map(d => ({
+                        t: d.t * 1000,
+                        o: d.o,
+                        h: d.h,
+                        l: d.l,
+                        c: d.c
+                    }));
+                }
+                
+                // Process funding rate data
+                if (fundingData && fundingData[0] && fundingData[0].history) {
+                    coinalyzeData.funding = fundingData[0].history.map(d => ({
+                        t: d.t * 1000,
+                        value: d.c * 100 // Convert to percentage
+                    }));
+                }
+                
+                // Process open interest data
+                if (oiData && oiData[0] && oiData[0].history) {
+                    coinalyzeData.oi = oiData[0].history.map(d => ({
+                        t: d.t * 1000,
+                        value: d.c
+                    }));
+                }
+                
+                if (loadingEl) loadingEl.style.display = 'none';
+                renderCoinalyzeCharts();
+                
+            } catch (error) {
+                console.error('Coinalyze API error:', error);
+                if (loadingEl) loadingEl.style.display = 'none';
+                if (errorEl) errorEl.style.display = 'block';
+            }
+        }
+        
+        function renderCoinalyzeCharts() {
+            // Destroy existing charts
+            if (coinalyzePriceChart) coinalyzePriceChart.destroy();
+            if (coinalyzeFundingChart) coinalyzeFundingChart.destroy();
+            if (coinalyzeOIChart) coinalyzeOIChart.destroy();
+            
+            const priceCtx = document.getElementById('coinalyzePriceChart');
+            const fundingCtx = document.getElementById('coinalyzeFundingChart');
+            const oiCtx = document.getElementById('coinalyzeOIChart');
+            
+            if (!priceCtx || !fundingCtx || !oiCtx) return;
+            
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(26, 32, 44, 0.95)',
+                        titleColor: '#fff',
+                        bodyColor: '#a0aec0',
+                        borderColor: '#2d3748',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: { unit: 'month', displayFormats: { month: 'MMM yy' } },
+                        grid: { color: 'rgba(255,255,255,0.03)' },
+                        ticks: { color: '#718096', font: { size: 10 }, maxTicksLimit: 12 }
+                    },
+                    y: {
+                        position: 'right',
+                        grid: { color: 'rgba(255,255,255,0.03)' },
+                        ticks: { color: '#718096', font: { size: 10 } }
+                    }
+                },
+                interaction: { mode: 'index', intersect: false }
+            };
+            
+            // Price Chart (Candlestick-style line with fill)
+            const priceLabels = coinalyzeData.price.map(d => new Date(d.t));
+            const priceClose = coinalyzeData.price.map(d => d.c);
+            
+            coinalyzePriceChart = new Chart(priceCtx, {
+                type: 'line',
+                data: {
+                    labels: priceLabels,
+                    datasets: [{
+                        label: 'BTC Price',
+                        data: priceClose,
+                        borderColor: '#48bb78',
+                        backgroundColor: 'rgba(72, 187, 120, 0.1)',
+                        borderWidth: 1.5,
+                        fill: true,
+                        tension: 0,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    ...chartOptions,
+                    scales: {
+                        ...chartOptions.scales,
+                        y: {
+                            ...chartOptions.scales.y,
+                            ticks: {
+                                ...chartOptions.scales.y.ticks,
+                                callback: v => '$' + (v >= 1000 ? (v/1000).toFixed(0) + 'K' : v)
+                            }
+                        }
+                    },
+                    plugins: {
+                        ...chartOptions.plugins,
+                        tooltip: {
+                            ...chartOptions.plugins.tooltip,
+                            callbacks: {
+                                label: ctx => 'BTC: $' + ctx.parsed.y.toLocaleString()
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Funding Rate Chart (Bar chart - green positive, red negative)
+            const fundingLabels = coinalyzeData.funding.map(d => new Date(d.t));
+            const fundingValues = coinalyzeData.funding.map(d => d.value);
+            const fundingColors = fundingValues.map(v => v >= 0 ? 'rgba(72, 187, 120, 0.8)' : 'rgba(245, 101, 101, 0.8)');
+            
+            coinalyzeFundingChart = new Chart(fundingCtx, {
+                type: 'bar',
+                data: {
+                    labels: fundingLabels,
+                    datasets: [{
+                        label: 'Funding Rate',
+                        data: fundingValues,
+                        backgroundColor: fundingColors,
+                        borderWidth: 0,
+                        barPercentage: 0.8
+                    }]
+                },
+                options: {
+                    ...chartOptions,
+                    scales: {
+                        ...chartOptions.scales,
+                        y: {
+                            ...chartOptions.scales.y,
+                            ticks: {
+                                ...chartOptions.scales.y.ticks,
+                                callback: v => v.toFixed(3) + '%'
+                            }
+                        }
+                    },
+                    plugins: {
+                        ...chartOptions.plugins,
+                        tooltip: {
+                            ...chartOptions.plugins.tooltip,
+                            callbacks: {
+                                label: ctx => 'Funding: ' + ctx.parsed.y.toFixed(4) + '%'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Open Interest Chart (Line with area fill)
+            const oiLabels = coinalyzeData.oi.map(d => new Date(d.t));
+            const oiValues = coinalyzeData.oi.map(d => d.value);
+            
+            coinalyzeOIChart = new Chart(oiCtx, {
+                type: 'line',
+                data: {
+                    labels: oiLabels,
+                    datasets: [{
+                        label: 'Open Interest',
+                        data: oiValues,
+                        borderColor: '#a78bfa',
+                        backgroundColor: 'rgba(167, 139, 250, 0.15)',
+                        borderWidth: 1.5,
+                        fill: true,
+                        tension: 0.1,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    ...chartOptions,
+                    scales: {
+                        ...chartOptions.scales,
+                        y: {
+                            ...chartOptions.scales.y,
+                            ticks: {
+                                ...chartOptions.scales.y.ticks,
+                                callback: v => '$' + (v / 1e9).toFixed(1) + 'B'
+                            }
+                        }
+                    },
+                    plugins: {
+                        ...chartOptions.plugins,
+                        tooltip: {
+                            ...chartOptions.plugins.tooltip,
+                            callbacks: {
+                                label: ctx => 'OI: $' + (ctx.parsed.y / 1e9).toFixed(2) + 'B'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateCoinalyzeChart(days) {
+            // Update button states
+            event.target.parentElement.querySelectorAll('.time-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Clear existing data and reload
+            coinalyzeData = { price: [], funding: [], oi: [] };
+            loadCoinalyzeData(days);
         }
         
         // ==================== UTILITIES ====================
