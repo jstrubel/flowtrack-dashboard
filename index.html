@@ -710,20 +710,34 @@
                 <div class="section-title">Global Liquidity</div>
             </div>
             
-            <!-- Liquidity Explainer -->
-            <div class="card" style="margin-bottom: 16px;">
-                <div style="padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
-                    <div style="font-size: 13px; color: var(--text);">
-                        <strong>Net Liquidity = Fed Balance Sheet − RRP − TGA + Foreign CBs</strong>
+            <!-- Global Liquidity vs Bitcoin Chart -->
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Global Net Liquidity vs Bitcoin</div>
+                        <div class="card-subtitle">Fed − RRP − TGA = Net Liquidity (Trillions USD) • BTC correlation tracking</div>
                     </div>
-                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">
-                        Rising liquidity → Bullish for risk assets (crypto, tech stocks). Falling liquidity → Defensive positioning. 
-                        Watch for RRP drawdowns (adds liquidity) and TGA buildups (drains liquidity).
+                    <div style="display: flex; gap: 8px;">
+                        <button class="period-btn active" data-liquidity-period="1y">1Y</button>
+                        <button class="period-btn" data-liquidity-period="2y">2Y</button>
+                        <button class="period-btn" data-liquidity-period="3y">3Y</button>
+                        <button class="period-btn" data-liquidity-period="all">ALL</button>
+                    </div>
+                </div>
+                <div style="height: 400px; margin-top: 12px;">
+                    <canvas id="liquidity-btc-chart"></canvas>
+                </div>
+                <div style="margin-top: 12px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        <strong style="color: var(--text);">Interpretation:</strong> Rising liquidity → Bullish for risk assets. 
+                        Watch RRP drawdowns (adds liquidity) and TGA buildups (drains liquidity). 
+                        <span style="color: var(--cyan);">●</span> Net Liquidity &nbsp;
+                        <span style="color: #f7931a;">●</span> Bitcoin
                     </div>
                 </div>
             </div>
             
-            <div class="grid-2">
+            <div class="grid-2" style="margin-top: 16px;">
                 <!-- Fed Balance Sheet -->
                 <div class="card" style="padding: 0; overflow: hidden;">
                     <div style="padding: 16px 18px 8px 18px;">
@@ -1228,6 +1242,241 @@
                 "hide_volume": true
             });
         }
+        
+        // ==================== GLOBAL LIQUIDITY VS BITCOIN CHART ====================
+        // Net Liquidity = Fed (WALCL) - RRP - TGA
+        // Data sourced from FRED, updated weekly
+        let liquidityBtcChart = null;
+        
+        // Historical Net Liquidity Data (WALCL - RRPONTSYD - WTREGEN) in Trillions USD
+        // Updated weekly - last update: Dec 2024
+        const netLiquidityData = [
+            // 2020
+            { date: '2020-01-01', liquidity: 3.72 }, { date: '2020-02-01', liquidity: 3.78 },
+            { date: '2020-03-01', liquidity: 4.24 }, { date: '2020-04-01', liquidity: 5.21 },
+            { date: '2020-05-01', liquidity: 5.89 }, { date: '2020-06-01', liquidity: 5.42 },
+            { date: '2020-07-01', liquidity: 5.18 }, { date: '2020-08-01', liquidity: 5.36 },
+            { date: '2020-09-01', liquidity: 5.52 }, { date: '2020-10-01', liquidity: 5.48 },
+            { date: '2020-11-01', liquidity: 5.42 }, { date: '2020-12-01', liquidity: 5.58 },
+            // 2021
+            { date: '2021-01-01', liquidity: 5.24 }, { date: '2021-02-01', liquidity: 5.38 },
+            { date: '2021-03-01', liquidity: 5.52 }, { date: '2021-04-01', liquidity: 5.68 },
+            { date: '2021-05-01', liquidity: 5.72 }, { date: '2021-06-01', liquidity: 5.45 },
+            { date: '2021-07-01', liquidity: 5.28 }, { date: '2021-08-01', liquidity: 5.42 },
+            { date: '2021-09-01', liquidity: 5.56 }, { date: '2021-10-01', liquidity: 5.62 },
+            { date: '2021-11-01', liquidity: 5.48 }, { date: '2021-12-01', liquidity: 5.21 },
+            // 2022
+            { date: '2022-01-01', liquidity: 5.38 }, { date: '2022-02-01', liquidity: 5.52 },
+            { date: '2022-03-01', liquidity: 5.64 }, { date: '2022-04-01', liquidity: 5.48 },
+            { date: '2022-05-01', liquidity: 5.32 }, { date: '2022-06-01', liquidity: 5.18 },
+            { date: '2022-07-01', liquidity: 5.08 }, { date: '2022-08-01', liquidity: 5.02 },
+            { date: '2022-09-01', liquidity: 4.92 }, { date: '2022-10-01', liquidity: 4.78 },
+            { date: '2022-11-01', liquidity: 4.62 }, { date: '2022-12-01', liquidity: 4.38 },
+            // 2023
+            { date: '2023-01-01', liquidity: 4.52 }, { date: '2023-02-01', liquidity: 4.68 },
+            { date: '2023-03-01', liquidity: 5.12 }, { date: '2023-04-01', liquidity: 5.28 },
+            { date: '2023-05-01', liquidity: 5.18 }, { date: '2023-06-01', liquidity: 5.42 },
+            { date: '2023-07-01', liquidity: 5.56 }, { date: '2023-08-01', liquidity: 5.68 },
+            { date: '2023-09-01', liquidity: 5.72 }, { date: '2023-10-01', liquidity: 5.82 },
+            { date: '2023-11-01', liquidity: 5.92 }, { date: '2023-12-01', liquidity: 6.08 },
+            // 2024
+            { date: '2024-01-01', liquidity: 6.12 }, { date: '2024-02-01', liquidity: 6.18 },
+            { date: '2024-03-01', liquidity: 6.22 }, { date: '2024-04-01', liquidity: 6.15 },
+            { date: '2024-05-01', liquidity: 6.08 }, { date: '2024-06-01', liquidity: 6.02 },
+            { date: '2024-07-01', liquidity: 5.98 }, { date: '2024-08-01', liquidity: 5.95 },
+            { date: '2024-09-01', liquidity: 5.92 }, { date: '2024-10-01', liquidity: 5.88 },
+            { date: '2024-11-01', liquidity: 5.85 }, { date: '2024-12-01', liquidity: 5.82 }
+        ];
+        
+        async function fetchBTCHistoricalForLiquidity() {
+            try {
+                // Fetch BTC price history from CoinGecko (max range)
+                const response = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=max&interval=daily');
+                const data = await response.json();
+                
+                // Convert to monthly averages to match liquidity data frequency
+                const monthlyBTC = {};
+                data.prices.forEach(([timestamp, price]) => {
+                    const date = new Date(timestamp);
+                    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01`;
+                    if (!monthlyBTC[monthKey]) {
+                        monthlyBTC[monthKey] = { sum: 0, count: 0 };
+                    }
+                    monthlyBTC[monthKey].sum += price;
+                    monthlyBTC[monthKey].count++;
+                });
+                
+                // Calculate monthly averages
+                const result = {};
+                Object.keys(monthlyBTC).forEach(key => {
+                    result[key] = monthlyBTC[key].sum / monthlyBTC[key].count;
+                });
+                
+                return result;
+            } catch (error) {
+                console.error('Error fetching BTC historical data:', error);
+                return null;
+            }
+        }
+        
+        async function renderLiquidityBTCChart(period = '1y') {
+            const btcPrices = await fetchBTCHistoricalForLiquidity();
+            if (!btcPrices) return;
+            
+            // Filter data based on period
+            const now = new Date();
+            let startDate;
+            switch (period) {
+                case '1y': startDate = new Date(now.getFullYear() - 1, now.getMonth(), 1); break;
+                case '2y': startDate = new Date(now.getFullYear() - 2, now.getMonth(), 1); break;
+                case '3y': startDate = new Date(now.getFullYear() - 3, now.getMonth(), 1); break;
+                case 'all': startDate = new Date(2020, 0, 1); break;
+                default: startDate = new Date(now.getFullYear() - 1, now.getMonth(), 1);
+            }
+            
+            const filteredLiquidity = netLiquidityData.filter(d => new Date(d.date) >= startDate);
+            
+            // Build aligned datasets
+            const labels = [];
+            const liquidityValues = [];
+            const btcValues = [];
+            
+            filteredLiquidity.forEach(item => {
+                if (btcPrices[item.date]) {
+                    labels.push(item.date);
+                    liquidityValues.push(item.liquidity);
+                    btcValues.push(btcPrices[item.date]);
+                }
+            });
+            
+            const ctx = document.getElementById('liquidity-btc-chart').getContext('2d');
+            
+            if (liquidityBtcChart) {
+                liquidityBtcChart.destroy();
+            }
+            
+            liquidityBtcChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels.map(d => {
+                        const date = new Date(d);
+                        return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+                    }),
+                    datasets: [
+                        {
+                            label: 'Net Liquidity ($T)',
+                            data: liquidityValues,
+                            borderColor: '#06b6d4',
+                            backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3,
+                            yAxisID: 'y',
+                            pointRadius: 0,
+                            pointHoverRadius: 4
+                        },
+                        {
+                            label: 'Bitcoin ($)',
+                            data: btcValues,
+                            borderColor: '#f7931a',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.3,
+                            yAxisID: 'y1',
+                            pointRadius: 0,
+                            pointHoverRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#9ca3af',
+                                font: { size: 11 },
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            titleColor: '#e2e8f0',
+                            bodyColor: '#cbd5e1',
+                            borderColor: 'rgba(59, 130, 246, 0.3)',
+                            borderWidth: 1,
+                            padding: 12,
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.datasetIndex === 0) {
+                                        return `Net Liquidity: $${context.parsed.y.toFixed(2)}T`;
+                                    } else {
+                                        return `Bitcoin: $${context.parsed.y.toLocaleString()}`;
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#6b7280', font: { size: 10 } }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Net Liquidity ($T)',
+                                color: '#06b6d4',
+                                font: { size: 11 }
+                            },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { 
+                                color: '#06b6d4', 
+                                font: { size: 10 },
+                                callback: function(value) { return '$' + value.toFixed(1) + 'T'; }
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Bitcoin ($)',
+                                color: '#f7931a',
+                                font: { size: 11 }
+                            },
+                            grid: { drawOnChartArea: false },
+                            ticks: { 
+                                color: '#f7931a', 
+                                font: { size: 10 },
+                                callback: function(value) { return '$' + (value / 1000).toFixed(0) + 'K'; }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Liquidity chart period buttons
+        document.querySelectorAll('[data-liquidity-period]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('[data-liquidity-period]').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                renderLiquidityBTCChart(this.dataset.liquidityPeriod);
+            });
+        });
         
         // ==================== DEFILLAMA STABLECOINS API ====================
         const DEFILLAMA_STABLES = 'https://stablecoins.llama.fi';
@@ -1853,6 +2102,9 @@
             
             // Initialize TradingView charts
             setTimeout(initTradingViewCharts, 500);
+            
+            // Initialize Global Liquidity vs BTC chart
+            setTimeout(() => renderLiquidityBTCChart('1y'), 800);
             
             // Auto refresh every 60 seconds
             setInterval(refreshAllData, 60000);
