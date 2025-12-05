@@ -1255,7 +1255,7 @@
         
         // Artemis API Configuration
         const ARTEMIS_API_KEY = '1w424NZfFc9brLOexLvSQR6Iq9N50I--TrwAi9ARyuM';
-        const ARTEMIS_BASE = 'https://api.artemis.xyz';
+        const ARTEMIS_BASE = 'https://data.artemis.xyz/api/v1';
         let artemisVolumeChart = null;
         let artemisOIChart = null;
         
@@ -1727,31 +1727,31 @@
                         {
                             label: 'Others',
                             data: oiDominanceData.others,
-                            backgroundColor: 'rgba(237, 137, 92, 0.9)',
+                            backgroundColor: 'rgba(237, 137, 92, 0.85)',
                             borderColor: 'rgba(237, 137, 92, 1)',
-                            borderWidth: 0,
-                            fill: true,
-                            tension: 0.3,
+                            borderWidth: 1,
+                            fill: 'origin',
+                            tension: 0.2,
                             pointRadius: 0
                         },
                         {
                             label: 'ETH',
-                            data: oiDominanceData.eth.map((v, i) => v + oiDominanceData.others[i]),
-                            backgroundColor: 'rgba(72, 187, 168, 0.9)',
+                            data: oiDominanceData.eth,
+                            backgroundColor: 'rgba(72, 187, 168, 0.85)',
                             borderColor: 'rgba(72, 187, 168, 1)',
-                            borderWidth: 0,
-                            fill: true,
-                            tension: 0.3,
+                            borderWidth: 1,
+                            fill: '-1',
+                            tension: 0.2,
                             pointRadius: 0
                         },
                         {
                             label: 'BTC',
-                            data: oiDominanceData.btc.map((v, i) => v + oiDominanceData.eth[i] + oiDominanceData.others[i]),
-                            backgroundColor: 'rgba(59, 130, 246, 0.9)',
+                            data: oiDominanceData.btc,
+                            backgroundColor: 'rgba(59, 130, 246, 0.85)',
                             borderColor: 'rgba(59, 130, 246, 1)',
-                            borderWidth: 0,
-                            fill: true,
-                            tension: 0.3,
+                            borderWidth: 1,
+                            fill: '-1',
+                            tension: 0.2,
                             pointRadius: 0
                         }
                     ]
@@ -1780,15 +1780,7 @@
                             bodyColor: '#a0aec0',
                             callbacks: {
                                 title: ctx => new Date(ctx[0].parsed.x).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
-                                label: ctx => {
-                                    const datasetIndex = ctx.datasetIndex;
-                                    const i = ctx.dataIndex;
-                                    let value;
-                                    if (datasetIndex === 0) value = oiDominanceData.others[i];
-                                    else if (datasetIndex === 1) value = oiDominanceData.eth[i];
-                                    else value = oiDominanceData.btc[i];
-                                    return ctx.dataset.label + ': ' + value.toFixed(1) + '%';
-                                }
+                                label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%'
                             }
                         }
                     },
@@ -1803,7 +1795,7 @@
                             ticks: { color: '#718096', font: { size: 10 } }
                         },
                         y: {
-                            stacked: false,
+                            stacked: true,
                             min: 0,
                             max: 55,
                             grid: { 
@@ -1833,28 +1825,34 @@
         }
         
         // ==================== ARTEMIS API ====================
-        // Perp protocol list for comparison (matching Artemis screenshot)
+        // Perp protocol list for comparison (matching Artemis screenshot exactly)
         const PERP_PROTOCOLS = [
-            'hyperliquid', 'lighter', 'aster', 'edgex', 'apex', 
-            'dydx', 'paradex', 'jupiter', 'gmx', 'aevo',
-            'gains-network', 'drift-protocol', 'vertex-protocol'
+            'hyperliquid', 'lighter', 'aster', 'edgex', 'apex-protocol', 
+            'dydx', 'paradex', 'jupiter-perps', 'gmx', 'aevo',
+            'gains-network', 'drift', 'vertex-protocol', 'bluefin',
+            'ktx-finance', 'perpetual-protocol', 'mux-protocol', 'holdstation'
         ];
         
-        // Protocol display names and colors
+        // Protocol display names and colors (matching Artemis style)
         const PROTOCOL_META = {
             'hyperliquid': { name: 'Hyperliquid', color: '#4ade80' },
             'lighter': { name: 'Lighter', color: '#a78bfa' },
             'aster': { name: 'Aster', color: '#60a5fa' },
             'edgex': { name: 'edgeX', color: '#f472b6' },
-            'apex': { name: 'ApeX', color: '#facc15' },
+            'apex-protocol': { name: 'ApeX', color: '#facc15' },
             'dydx': { name: 'dYdX', color: '#f97316' },
             'paradex': { name: 'Paradex', color: '#818cf8' },
-            'jupiter': { name: 'Jupiter', color: '#22d3ee' },
+            'jupiter-perps': { name: 'Jupiter', color: '#22d3ee' },
             'gmx': { name: 'GMX', color: '#3b82f6' },
             'aevo': { name: 'Aevo', color: '#ec4899' },
             'gains-network': { name: 'Gains', color: '#10b981' },
-            'drift-protocol': { name: 'Drift', color: '#8b5cf6' },
-            'vertex-protocol': { name: 'Vertex', color: '#f59e0b' }
+            'drift': { name: 'Drift', color: '#8b5cf6' },
+            'vertex-protocol': { name: 'Vertex', color: '#f59e0b' },
+            'bluefin': { name: 'Bluefin', color: '#06b6d4' },
+            'ktx-finance': { name: 'KTX Finance', color: '#84cc16' },
+            'perpetual-protocol': { name: 'Perpetual', color: '#ef4444' },
+            'mux-protocol': { name: 'Mux', color: '#0ea5e9' },
+            'holdstation': { name: 'Holdstation', color: '#d946ef' }
         };
         
         async function loadArtemisData() {
@@ -1862,26 +1860,43 @@
             const oiLoading = document.getElementById('artemisOILoading');
             
             try {
+                // Artemis API endpoint: GET /asset/{asset_id}/metric/{metric}
+                // Try direct first, then CORS proxy
+                const fetchWithFallback = async (url) => {
+                    try {
+                        const directRes = await fetch(url, {
+                            headers: { 'x-api-key': ARTEMIS_API_KEY }
+                        });
+                        if (directRes.ok) return directRes;
+                    } catch (e) {
+                        console.log('Direct Artemis request failed, trying CORS proxy');
+                    }
+                    // Fallback to CORS proxy
+                    return fetch(CORS_PROXY + encodeURIComponent(url + `${url.includes('?') ? '&' : '?'}api_key=${ARTEMIS_API_KEY}`));
+                };
+                
                 // Fetch data for all protocols
-                // Artemis API endpoint pattern: /asset/{asset_id}/metric/{metric}
                 const volumePromises = PERP_PROTOCOLS.map(async (protocol) => {
                     try {
-                        const res = await fetch(`${ARTEMIS_BASE}/asset/${protocol}/metric/perp_volume?api_key=${ARTEMIS_API_KEY}`);
+                        const url = `${ARTEMIS_BASE}/asset/${protocol}/metric/perp_volume`;
+                        const res = await fetchWithFallback(url);
                         if (!res.ok) return { protocol, volume: 0 };
                         const data = await res.json();
-                        // Get latest value
+                        // Get latest value (last data point)
                         const latestValue = data.data && data.data.length > 0 
                             ? data.data[data.data.length - 1].val 
                             : 0;
                         return { protocol, volume: latestValue || 0 };
                     } catch (e) {
+                        console.log(`Failed to fetch volume for ${protocol}:`, e);
                         return { protocol, volume: 0 };
                     }
                 });
                 
                 const oiPromises = PERP_PROTOCOLS.map(async (protocol) => {
                     try {
-                        const res = await fetch(`${ARTEMIS_BASE}/asset/${protocol}/metric/open_interest?api_key=${ARTEMIS_API_KEY}`);
+                        const url = `${ARTEMIS_BASE}/asset/${protocol}/metric/open_interest`;
+                        const res = await fetchWithFallback(url);
                         if (!res.ok) return { protocol, oi: 0 };
                         const data = await res.json();
                         const latestValue = data.data && data.data.length > 0 
@@ -1889,6 +1904,7 @@
                             : 0;
                         return { protocol, oi: latestValue || 0 };
                     } catch (e) {
+                        console.log(`Failed to fetch OI for ${protocol}:`, e);
                         return { protocol, oi: 0 };
                     }
                 });
@@ -1898,23 +1914,41 @@
                     Promise.all(oiPromises)
                 ]);
                 
+                console.log('Artemis volume results:', volumeResults);
+                console.log('Artemis OI results:', oiResults);
+                
                 // Sort by volume/OI descending
                 volumeResults.sort((a, b) => b.volume - a.volume);
                 oiResults.sort((a, b) => b.oi - a.oi);
                 
-                // Filter out zeros and take top 10
-                const topVolume = volumeResults.filter(v => v.volume > 0).slice(0, 10);
-                const topOI = oiResults.filter(v => v.oi > 0).slice(0, 10);
+                // Filter out zeros and take top 12
+                const topVolume = volumeResults.filter(v => v.volume > 0).slice(0, 12);
+                const topOI = oiResults.filter(v => v.oi > 0).slice(0, 12);
                 
                 if (volumeLoading) volumeLoading.style.display = 'none';
                 if (oiLoading) oiLoading.style.display = 'none';
+                
+                // If we got no data, show error
+                if (topVolume.length === 0 && topOI.length === 0) {
+                    if (volumeLoading) volumeLoading.innerHTML = '<div style="color: var(--text-muted); font-size: 11px;">No data available<br><span style="font-size: 10px; color: var(--text-dim);">Check Artemis API access</span></div>';
+                    volumeLoading.style.display = 'block';
+                    if (oiLoading) oiLoading.innerHTML = '<div style="color: var(--text-muted); font-size: 11px;">No data available</div>';
+                    oiLoading.style.display = 'block';
+                    return;
+                }
                 
                 renderArtemisCharts(topVolume, topOI);
                 
             } catch (error) {
                 console.error('Artemis API error:', error);
-                if (volumeLoading) volumeLoading.innerHTML = '<div style="color: var(--bad); font-size: 11px;">Failed to load data</div>';
-                if (oiLoading) oiLoading.innerHTML = '<div style="color: var(--bad); font-size: 11px;">Failed to load data</div>';
+                if (volumeLoading) {
+                    volumeLoading.innerHTML = '<div style="color: var(--bad); font-size: 11px;">Failed to load data</div>';
+                    volumeLoading.style.display = 'block';
+                }
+                if (oiLoading) {
+                    oiLoading.innerHTML = '<div style="color: var(--bad); font-size: 11px;">Failed to load data</div>';
+                    oiLoading.style.display = 'block';
+                }
             }
         }
         
