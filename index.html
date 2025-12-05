@@ -1701,6 +1701,8 @@
             
             console.log('Rendering OI dominance with data points:', oiDominanceData.labels.length);
             
+            // Coinalyze style: overlapping filled areas on 0-55% scale
+            // Order matters for visual layering: Others (back), ETH (middle), BTC (front)
             oiDominanceChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -1709,32 +1711,35 @@
                         {
                             label: 'Others',
                             data: oiDominanceData.others,
-                            backgroundColor: 'rgba(237, 137, 92, 0.85)',
+                            backgroundColor: 'rgba(237, 137, 92, 0.7)',
                             borderColor: 'rgba(237, 137, 92, 1)',
-                            borderWidth: 0,
-                            fill: true,
+                            borderWidth: 1,
+                            fill: 'origin',
                             tension: 0.1,
-                            pointRadius: 0
+                            pointRadius: 0,
+                            order: 3
                         },
                         {
                             label: 'ETH',
                             data: oiDominanceData.eth,
-                            backgroundColor: 'rgba(72, 187, 168, 0.85)',
+                            backgroundColor: 'rgba(72, 187, 168, 0.7)',
                             borderColor: 'rgba(72, 187, 168, 1)',
-                            borderWidth: 0,
-                            fill: true,
+                            borderWidth: 1,
+                            fill: 'origin',
                             tension: 0.1,
-                            pointRadius: 0
+                            pointRadius: 0,
+                            order: 2
                         },
                         {
                             label: 'BTC',
                             data: oiDominanceData.btc,
-                            backgroundColor: 'rgba(59, 130, 246, 0.85)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
                             borderColor: 'rgba(59, 130, 246, 1)',
-                            borderWidth: 0,
-                            fill: true,
+                            borderWidth: 1,
+                            fill: 'origin',
                             tension: 0.1,
-                            pointRadius: 0
+                            pointRadius: 0,
+                            order: 1
                         }
                     ]
                 },
@@ -1761,8 +1766,8 @@
                             titleColor: '#fff',
                             bodyColor: '#a0aec0',
                             callbacks: {
-                                title: ctx => new Date(ctx[0].parsed.x).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }),
-                                label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%'
+                                title: ctx => new Date(ctx[0].parsed.x).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase(),
+                                label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(0) + '%'
                             }
                         }
                     },
@@ -1777,9 +1782,9 @@
                             ticks: { color: '#718096', font: { size: 10 }, maxTicksLimit: 12 }
                         },
                         y: {
-                            stacked: true,
+                            stacked: false,
                             min: 0,
-                            max: 100,
+                            max: 55,
                             grid: { 
                                 color: 'rgba(255,255,255,0.05)',
                                 drawBorder: false
@@ -1788,7 +1793,7 @@
                                 color: '#718096', 
                                 font: { size: 10 },
                                 callback: v => v + '%',
-                                stepSize: 25
+                                stepSize: 17
                             }
                         }
                     }
@@ -3513,7 +3518,7 @@
                     fetchMarketData(),
                     fetchFundingHistory(100),
                     fetchStablecoinData(),
-                    fetchStablecoinHistory('365')
+                    fetchStablecoinHistory('all')
                 ]);
                 
                 setStatus('', new Date().toLocaleTimeString());
@@ -3535,7 +3540,7 @@
             setTimeout(initTradingViewCharts, 500);
             
             // Initialize Global Liquidity vs BTC chart
-            setTimeout(() => renderLiquidityBTCChart('1y'), 800);
+            setTimeout(() => renderLiquidityBTCChart('all'), 800);
             
             // Auto refresh every 60 seconds
             setInterval(refreshAllData, 60000);
