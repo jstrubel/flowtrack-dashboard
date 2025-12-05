@@ -1245,85 +1245,70 @@
         
         // ==================== GLOBAL LIQUIDITY VS BITCOIN CHART ====================
         // Net Liquidity = Fed (WALCL) - RRP - TGA
-        // Data sourced from FRED, updated weekly
+        // Using FRED API for real data
+        const FRED_API_KEY = '00f384a64211e63e9cf2fee255cdebb2';
         let liquidityBtcChart = null;
         
-        // Historical Net Liquidity Data (WALCL - RRPONTSYD - WTREGEN) in Trillions USD
-        // Updated weekly - last update: Dec 2024
-        const netLiquidityData = [
-            // 2020
-            { date: '2020-01-01', liquidity: 3.72 }, { date: '2020-02-01', liquidity: 3.78 },
-            { date: '2020-03-01', liquidity: 4.24 }, { date: '2020-04-01', liquidity: 5.21 },
-            { date: '2020-05-01', liquidity: 5.89 }, { date: '2020-06-01', liquidity: 5.42 },
-            { date: '2020-07-01', liquidity: 5.18 }, { date: '2020-08-01', liquidity: 5.36 },
-            { date: '2020-09-01', liquidity: 5.52 }, { date: '2020-10-01', liquidity: 5.48 },
-            { date: '2020-11-01', liquidity: 5.42 }, { date: '2020-12-01', liquidity: 5.58 },
-            // 2021
-            { date: '2021-01-01', liquidity: 5.24 }, { date: '2021-02-01', liquidity: 5.38 },
-            { date: '2021-03-01', liquidity: 5.52 }, { date: '2021-04-01', liquidity: 5.68 },
-            { date: '2021-05-01', liquidity: 5.72 }, { date: '2021-06-01', liquidity: 5.45 },
-            { date: '2021-07-01', liquidity: 5.28 }, { date: '2021-08-01', liquidity: 5.42 },
-            { date: '2021-09-01', liquidity: 5.56 }, { date: '2021-10-01', liquidity: 5.62 },
-            { date: '2021-11-01', liquidity: 5.48 }, { date: '2021-12-01', liquidity: 5.21 },
-            // 2022
-            { date: '2022-01-01', liquidity: 5.38 }, { date: '2022-02-01', liquidity: 5.52 },
-            { date: '2022-03-01', liquidity: 5.64 }, { date: '2022-04-01', liquidity: 5.48 },
-            { date: '2022-05-01', liquidity: 5.32 }, { date: '2022-06-01', liquidity: 5.18 },
-            { date: '2022-07-01', liquidity: 5.08 }, { date: '2022-08-01', liquidity: 5.02 },
-            { date: '2022-09-01', liquidity: 4.92 }, { date: '2022-10-01', liquidity: 4.78 },
-            { date: '2022-11-01', liquidity: 4.62 }, { date: '2022-12-01', liquidity: 4.38 },
-            // 2023
-            { date: '2023-01-01', liquidity: 4.52 }, { date: '2023-02-01', liquidity: 4.68 },
-            { date: '2023-03-01', liquidity: 5.12 }, { date: '2023-04-01', liquidity: 5.28 },
-            { date: '2023-05-01', liquidity: 5.18 }, { date: '2023-06-01', liquidity: 5.42 },
-            { date: '2023-07-01', liquidity: 5.56 }, { date: '2023-08-01', liquidity: 5.68 },
-            { date: '2023-09-01', liquidity: 5.72 }, { date: '2023-10-01', liquidity: 5.82 },
-            { date: '2023-11-01', liquidity: 5.92 }, { date: '2023-12-01', liquidity: 6.08 },
-            // 2024
-            { date: '2024-01-01', liquidity: 6.12 }, { date: '2024-02-01', liquidity: 6.18 },
-            { date: '2024-03-01', liquidity: 6.22 }, { date: '2024-04-01', liquidity: 6.15 },
-            { date: '2024-05-01', liquidity: 6.08 }, { date: '2024-06-01', liquidity: 6.02 },
-            { date: '2024-07-01', liquidity: 5.98 }, { date: '2024-08-01', liquidity: 5.95 },
-            { date: '2024-09-01', liquidity: 5.92 }, { date: '2024-10-01', liquidity: 5.88 },
-            { date: '2024-11-01', liquidity: 5.85 }, { date: '2024-12-01', liquidity: 5.82 }
-        ];
-        
-        async function fetchBTCHistoricalForLiquidity() {
+        async function fetchFREDSeries(seriesId, startDate = '2020-01-01') {
             try {
-                // Fetch BTC price history from CoinGecko (max range)
-                const response = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=max&interval=daily');
+                const url = `https://api.stlouisfed.org/fred/series/observations?series_id=${seriesId}&api_key=${FRED_API_KEY}&file_type=json&observation_start=${startDate}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                return data.observations || [];
+            } catch (error) {
+                console.error(`Error fetching FRED ${seriesId}:`, error);
+                return [];
+            }
+        }
+        
+        async function fetchBTCPricesForLiquidity() {
+            try {
+                // Use CoinGecko market_chart/range for specific date range (more reliable)
+                const endDate = Math.floor(Date.now() / 1000);
+                const startDate = Math.floor(new Date('2020-01-01').getTime() / 1000);
+                const response = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart/range?vs_currency=usd&from=${startDate}&to=${endDate}`);
                 const data = await response.json();
                 
-                // Convert to monthly averages to match liquidity data frequency
-                const monthlyBTC = {};
+                if (!data.prices) return null;
+                
+                // Convert to weekly data points (to match FRED weekly data)
+                const weeklyBTC = {};
                 data.prices.forEach(([timestamp, price]) => {
                     const date = new Date(timestamp);
-                    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01`;
-                    if (!monthlyBTC[monthKey]) {
-                        monthlyBTC[monthKey] = { sum: 0, count: 0 };
+                    // Get Wednesday of each week (FRED releases on Wednesday)
+                    const day = date.getDay();
+                    const diff = date.getDate() - day + (day === 0 ? -6 : 3); // Adjust to Wednesday
+                    const wednesday = new Date(date.setDate(diff));
+                    const weekKey = wednesday.toISOString().split('T')[0];
+                    
+                    if (!weeklyBTC[weekKey] || timestamp > weeklyBTC[weekKey].timestamp) {
+                        weeklyBTC[weekKey] = { price, timestamp };
                     }
-                    monthlyBTC[monthKey].sum += price;
-                    monthlyBTC[monthKey].count++;
                 });
                 
-                // Calculate monthly averages
                 const result = {};
-                Object.keys(monthlyBTC).forEach(key => {
-                    result[key] = monthlyBTC[key].sum / monthlyBTC[key].count;
+                Object.keys(weeklyBTC).forEach(key => {
+                    result[key] = weeklyBTC[key].price;
                 });
                 
                 return result;
             } catch (error) {
-                console.error('Error fetching BTC historical data:', error);
+                console.error('Error fetching BTC data:', error);
                 return null;
             }
         }
         
         async function renderLiquidityBTCChart(period = '1y') {
-            const btcPrices = await fetchBTCHistoricalForLiquidity();
-            if (!btcPrices) return;
+            const chartContainer = document.getElementById('liquidity-btc-chart');
+            if (!chartContainer) return;
             
-            // Filter data based on period
+            // Show loading state
+            const ctx = chartContainer.getContext('2d');
+            if (liquidityBtcChart) {
+                liquidityBtcChart.destroy();
+            }
+            
+            // Determine start date based on period
             const now = new Date();
             let startDate;
             switch (period) {
@@ -1333,26 +1318,91 @@
                 case 'all': startDate = new Date(2020, 0, 1); break;
                 default: startDate = new Date(now.getFullYear() - 1, now.getMonth(), 1);
             }
+            const startDateStr = startDate.toISOString().split('T')[0];
             
-            const filteredLiquidity = netLiquidityData.filter(d => new Date(d.date) >= startDate);
+            // Fetch all FRED data in parallel
+            const [walclData, rrpData, tgaData, btcPrices] = await Promise.all([
+                fetchFREDSeries('WALCL', startDateStr),
+                fetchFREDSeries('RRPONTSYD', startDateStr),
+                fetchFREDSeries('WTREGEN', startDateStr),
+                fetchBTCPricesForLiquidity()
+            ]);
             
-            // Build aligned datasets
+            if (!walclData.length || !btcPrices) {
+                console.error('Failed to fetch data');
+                return;
+            }
+            
+            // Build a map of RRP and TGA by date for quick lookup
+            const rrpMap = {};
+            rrpData.forEach(obs => {
+                if (obs.value !== '.') rrpMap[obs.date] = parseFloat(obs.value);
+            });
+            
+            const tgaMap = {};
+            tgaData.forEach(obs => {
+                if (obs.value !== '.') tgaMap[obs.date] = parseFloat(obs.value);
+            });
+            
+            // Calculate Net Liquidity = WALCL - RRP - TGA (all in millions, convert to trillions)
             const labels = [];
             const liquidityValues = [];
             const btcValues = [];
             
-            filteredLiquidity.forEach(item => {
-                if (btcPrices[item.date]) {
-                    labels.push(item.date);
-                    liquidityValues.push(item.liquidity);
-                    btcValues.push(btcPrices[item.date]);
+            // Use weekly WALCL data as the base timeline
+            walclData.forEach(obs => {
+                if (obs.value === '.') return;
+                
+                const date = obs.date;
+                const walcl = parseFloat(obs.value); // In millions
+                
+                // Find closest RRP value (daily data, find closest date)
+                let rrp = 0;
+                const obsDate = new Date(date);
+                for (let i = 0; i < 7; i++) {
+                    const checkDate = new Date(obsDate);
+                    checkDate.setDate(checkDate.getDate() - i);
+                    const checkKey = checkDate.toISOString().split('T')[0];
+                    if (rrpMap[checkKey]) {
+                        rrp = rrpMap[checkKey]; // In millions
+                        break;
+                    }
+                }
+                
+                // Get TGA value (weekly, should match)
+                const tga = tgaMap[date] || 0; // In millions
+                
+                // Calculate net liquidity in trillions
+                const netLiquidity = (walcl - rrp - tga) / 1000000; // Convert millions to trillions
+                
+                // Find BTC price for this date (look for closest match within a week)
+                let btcPrice = null;
+                for (let i = 0; i < 7; i++) {
+                    const checkDate = new Date(obsDate);
+                    checkDate.setDate(checkDate.getDate() - i);
+                    const checkKey = checkDate.toISOString().split('T')[0];
+                    if (btcPrices[checkKey]) {
+                        btcPrice = btcPrices[checkKey];
+                        break;
+                    }
+                    checkDate.setDate(checkDate.getDate() + i * 2);
+                    const checkKey2 = checkDate.toISOString().split('T')[0];
+                    if (btcPrices[checkKey2]) {
+                        btcPrice = btcPrices[checkKey2];
+                        break;
+                    }
+                }
+                
+                if (btcPrice && netLiquidity > 0) {
+                    labels.push(date);
+                    liquidityValues.push(netLiquidity);
+                    btcValues.push(btcPrice);
                 }
             });
             
-            const ctx = document.getElementById('liquidity-btc-chart').getContext('2d');
-            
-            if (liquidityBtcChart) {
-                liquidityBtcChart.destroy();
+            if (labels.length === 0) {
+                console.error('No matching data points');
+                return;
             }
             
             liquidityBtcChart = new Chart(ctx, {
@@ -1428,7 +1478,11 @@
                     scales: {
                         x: {
                             grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                            ticks: { color: '#6b7280', font: { size: 10 } }
+                            ticks: { 
+                                color: '#6b7280', 
+                                font: { size: 10 },
+                                maxTicksLimit: 12
+                            }
                         },
                         y: {
                             type: 'linear',
@@ -1461,7 +1515,10 @@
                             ticks: { 
                                 color: '#f7931a', 
                                 font: { size: 10 },
-                                callback: function(value) { return '$' + (value / 1000).toFixed(0) + 'K'; }
+                                callback: function(value) { 
+                                    if (value >= 1000) return '$' + (value / 1000).toFixed(0) + 'K';
+                                    return '$' + value;
+                                }
                             }
                         }
                     }
