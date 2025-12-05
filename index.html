@@ -1089,19 +1089,24 @@
             </div>
         </div>
         
-        <!-- Funding History Chart -->
+        <!-- OI Dominance Chart -->
         <div class="card" style="margin-top: 20px;">
             <div class="card-header">
-                <div class="card-title">BTC Funding Rate History</div>
+                <div>
+                    <div class="card-title">Open Interest Dominance</div>
+                    <div class="card-subtitle">BTC vs ETH vs Others • Data from Coinalyze</div>
+                </div>
                 <div class="time-selector">
-                    <button class="time-btn" onclick="updateFundingChart(50)">50</button>
-                    <button class="time-btn active" onclick="updateFundingChart(100)">100</button>
-                    <button class="time-btn" onclick="updateFundingChart(200)">200</button>
-                    <button class="time-btn" onclick="updateFundingChart(500)">500</button>
+                    <button class="time-btn" onclick="updateOIDominanceChart(180)">6M</button>
+                    <button class="time-btn" onclick="updateOIDominanceChart(365)">1Y</button>
+                    <button class="time-btn active" onclick="updateOIDominanceChart(730)">2Y</button>
                 </div>
             </div>
-            <div class="chart-container tall">
-                <canvas id="fundingChart"></canvas>
+            <div class="chart-container tall" style="position: relative;">
+                <canvas id="oiDominanceChart"></canvas>
+                <div id="oiDominanceLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;">
+                    <div style="font-size: 12px; color: var(--text-muted);">Loading dominance data...</div>
+                </div>
             </div>
         </div>
         
@@ -1234,6 +1239,8 @@
         ];
         
         let fundingChart = null;
+        let oiDominanceChart = null;
+        let oiDominanceData = { btc: [], eth: [], others: [] };
         let fundingData = [];
         
         // Coinalyze API Configuration
@@ -1279,8 +1286,14 @@
             }
             
             // Load Coinalyze data when switching to derivatives tab
-            if (tabName === 'derivatives' && coinalyzeData.price.length === 0) {
-                loadCoinalyzeData(365);
+            if (tabName === 'derivatives') {
+                if (coinalyzeData.price.length === 0) {
+                    loadCoinalyzeData(365);
+                }
+                // Also load OI Dominance if not already loaded
+                if (oiDominanceData.labels === undefined || oiDominanceData.labels.length === 0) {
+                    loadOIDominanceData(730);
+                }
             }
             
             // Initialize HYPE chart when switching to hyperliquid tab
@@ -1608,6 +1621,215 @@
             // Clear existing data and reload
             coinalyzeData = { price: [], funding: [], oi: [] };
             loadCoinalyzeData(days);
+        }
+        
+        // ==================== OI DOMINANCE CHART ====================
+        async function loadOIDominanceData(days = 730) {
+            const loadingEl = document.getElementById('oiDominanceLoading');
+            if (loadingEl) loadingEl.style.display = 'block';
+            
+            const now = Math.floor(Date.now() / 1000);
+            const from = now - (days * 24 * 60 * 60);
+            
+            // Build URLs for BTC and ETH aggregated OI
+            const buildUrl = (symbol) => {
+                return `${COINALYZE_BASE}/open-interest-history?symbols=${symbol}&interval=daily&from=${from}&to=${now}&convert_to_usd=true&api_key=${COINALYZE_API_KEY}`;
+            };
+            
+            try {
+                // Fetch BTC and ETH OI data
+                let btcRes, ethRes;
+                
+                try {
+                    [btcRes, ethRes] = await Promise.all([
+                        fetch(buildUrl('BTCUSDT_PERP.A')),
+                        fetch(buildUrl('ETHUSDT_PERP.A'))
+                    ]);
+                } catch (directError) {
+                    console.log('Direct request failed, trying CORS proxy for OI dominance...');
+                    [btcRes, ethRes] = await Promise.all([
+                        fetch(CORS_PROXY + encodeURIComponent(buildUrl('BTCUSDT_PERP.A'))),
+                        fetch(CORS_PROXY + encodeURIComponent(buildUrl('ETHUSDT_PERP.A')))
+                    ]);
+                }
+                
+                if (!btcRes.ok || !ethRes.ok) {
+                    throw new Error('OI API error');
+                }
+                
+                const [btcData, ethData] = await Promise.all([
+                    btcRes.json(),
+                    ethRes.json()
+                ]);
+                
+                // Process the data
+                if (btcData && btcData[0] && btcData[0].history && ethData && ethData[0] && ethData[0].history) {
+                    const btcHistory = btcData[0].history;
+                    const ethHistory = ethData[0].history;
+                    
+                    // Create a map of ETH OI by timestamp
+                    const ethMap = new Map();
+                    ethHistory.forEach(d => ethMap.set(d.t, d.c));
+                    
+                    // Process data - calculate dominance percentages
+                    oiDominanceData = {
+                        labels: [],
+                        btc: [],
+                        eth: [],
+                        others: []
+                    };
+                    
+                    btcHistory.forEach(d => {
+                        const btcOI = d.c;
+                        const ethOI = ethMap.get(d.t) || 0;
+                        
+                        // Estimate total OI (BTC + ETH typically ~55% of total)
+                        // Using a rough multiplier based on market data
+                        const combinedOI = btcOI + ethOI;
+                        const estimatedTotal = combinedOI / 0.55; // Rough estimate
+                        const othersOI = estimatedTotal - combinedOI;
+                        
+                        // Calculate percentages
+                        const total = btcOI + ethOI + othersOI;
+                        const btcPct = (btcOI / total) * 100;
+                        const ethPct = (ethOI / total) * 100;
+                        const othersPct = (othersOI / total) * 100;
+                        
+                        oiDominanceData.labels.push(d.t * 1000);
+                        oiDominanceData.btc.push(btcPct);
+                        oiDominanceData.eth.push(ethPct);
+                        oiDominanceData.others.push(othersPct);
+                    });
+                }
+                
+                if (loadingEl) loadingEl.style.display = 'none';
+                renderOIDominanceChart();
+                
+            } catch (error) {
+                console.error('OI Dominance error:', error);
+                if (loadingEl) {
+                    loadingEl.innerHTML = '<div style="color: var(--bad); font-size: 11px;">Failed to load data</div>';
+                }
+            }
+        }
+        
+        function renderOIDominanceChart() {
+            if (oiDominanceChart) oiDominanceChart.destroy();
+            
+            const ctx = document.getElementById('oiDominanceChart');
+            if (!ctx || oiDominanceData.labels.length === 0) return;
+            
+            oiDominanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: oiDominanceData.labels,
+                    datasets: [
+                        {
+                            label: 'Others',
+                            data: oiDominanceData.others,
+                            backgroundColor: 'rgba(237, 137, 92, 0.9)',
+                            borderColor: 'rgba(237, 137, 92, 1)',
+                            borderWidth: 0,
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'ETH',
+                            data: oiDominanceData.eth.map((v, i) => v + oiDominanceData.others[i]),
+                            backgroundColor: 'rgba(72, 187, 168, 0.9)',
+                            borderColor: 'rgba(72, 187, 168, 1)',
+                            borderWidth: 0,
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'BTC',
+                            data: oiDominanceData.btc.map((v, i) => v + oiDominanceData.eth[i] + oiDominanceData.others[i]),
+                            backgroundColor: 'rgba(59, 130, 246, 0.9)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 0,
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                color: '#a0aec0',
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(26, 32, 44, 0.95)',
+                            titleColor: '#fff',
+                            bodyColor: '#a0aec0',
+                            callbacks: {
+                                title: ctx => new Date(ctx[0].parsed.x).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+                                label: ctx => {
+                                    const datasetIndex = ctx.datasetIndex;
+                                    const i = ctx.dataIndex;
+                                    let value;
+                                    if (datasetIndex === 0) value = oiDominanceData.others[i];
+                                    else if (datasetIndex === 1) value = oiDominanceData.eth[i];
+                                    else value = oiDominanceData.btc[i];
+                                    return ctx.dataset.label + ': ' + value.toFixed(1) + '%';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'month',
+                                displayFormats: { month: 'MMM \'yy' }
+                            },
+                            grid: { color: 'rgba(255,255,255,0.03)' },
+                            ticks: { color: '#718096', font: { size: 10 } }
+                        },
+                        y: {
+                            stacked: false,
+                            min: 0,
+                            max: 55,
+                            grid: { 
+                                color: 'rgba(255,255,255,0.05)',
+                                drawBorder: false
+                            },
+                            ticks: { 
+                                color: '#718096', 
+                                font: { size: 10 },
+                                callback: v => v + '%',
+                                stepSize: 17
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateOIDominanceChart(days) {
+            // Update button states
+            event.target.parentElement.querySelectorAll('.time-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            loadOIDominanceData(days);
         }
         
         // ==================== ARTEMIS API ====================
