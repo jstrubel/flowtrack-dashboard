@@ -709,71 +709,93 @@
             <div class="section-header">
                 <div class="section-title">Global Liquidity</div>
             </div>
-            <div class="grid-2">
-                <!-- Global Net Liquidity Chart -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">Global Net Liquidity Index</div>
-                        <div class="card-subtitle">Fed + BOJ + PBOC + ECB − RRP − TGA (Weekly)</div>
+            
+            <!-- Liquidity Explainer -->
+            <div class="card" style="margin-bottom: 16px;">
+                <div style="padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
+                    <div style="font-size: 13px; color: var(--text);">
+                        <strong>Net Liquidity = Fed Balance Sheet − RRP − TGA + Foreign CBs</strong>
                     </div>
-                    <div class="tradingview-widget-container" style="height: 400px;">
-                        <div id="global-liquidity-chart" style="height: 100%;"></div>
-                    </div>
-                </div>
-                
-                <!-- Fed Balance Sheet -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">Fed Balance Sheet (WALCL)</div>
-                        <div class="card-subtitle">US Federal Reserve Total Assets</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 400px;">
-                        <div id="fed-balance-sheet-chart" style="height: 100%;"></div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">
+                        Rising liquidity → Bullish for risk assets (crypto, tech stocks). Falling liquidity → Defensive positioning. 
+                        Watch for RRP drawdowns (adds liquidity) and TGA buildups (drains liquidity).
                     </div>
                 </div>
             </div>
             
-            <!-- Liquidity Components -->
+            <div class="grid-2">
+                <!-- Fed Balance Sheet -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">Fed Balance Sheet (WALCL)</div>
+                        <div class="card-subtitle">US Federal Reserve Total Assets • Weekly</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 350px;">
+                        <div id="fed-balance-sheet-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+                
+                <!-- Treasury General Account -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">Treasury General Account (TGA)</div>
+                        <div class="card-subtitle">US Treasury Cash Balance • Drains Liquidity When Rising</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 350px;">
+                        <div id="tga-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-2" style="margin-top: 16px;">
+                <!-- Reverse Repo -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">Reverse Repo Facility (RRP)</div>
+                        <div class="card-subtitle">Overnight Reverse Repurchases • Adds Liquidity When Falling</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 350px;">
+                        <div id="rrp-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+                
+                <!-- US M2 Money Supply -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">M2 Money Supply</div>
+                        <div class="card-subtitle">Broad US Money Supply • Monthly</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 350px;">
+                        <div id="m2-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Liquidity Components Summary -->
             <div class="card" style="margin-top: 16px;">
                 <div class="card-header">
-                    <div class="card-title">Key Liquidity Components</div>
+                    <div class="card-title">Liquidity Components Reference</div>
                 </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-top: 12px;">
-                    <div style="text-align: center; padding: 12px; background: var(--bg-secondary); border-radius: 10px;">
-                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">Fed (WALCL)</div>
-                        <div style="font-size: 16px; font-weight: 700; color: var(--accent);">~$6.9T</div>
-                        <div style="font-size: 10px; color: var(--text-dim);">Balance Sheet</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 12px;">
+                    <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid var(--accent);">
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Fed Balance Sheet</div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">WALCL</div>
+                        <div style="font-size: 11px; color: var(--good); margin-top: 4px;">↑ Adds Liquidity</div>
                     </div>
-                    <div style="text-align: center; padding: 12px; background: var(--bg-secondary); border-radius: 10px;">
-                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">RRP</div>
-                        <div style="font-size: 16px; font-weight: 700; color: var(--bad);">~$150B</div>
-                        <div style="font-size: 10px; color: var(--text-dim);">Drains Liquidity</div>
+                    <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid var(--bad);">
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Reverse Repo (RRP)</div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">RRPONTSYD</div>
+                        <div style="font-size: 11px; color: var(--bad); margin-top: 4px;">↑ Drains Liquidity</div>
                     </div>
-                    <div style="text-align: center; padding: 12px; background: var(--bg-secondary); border-radius: 10px;">
-                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">TGA</div>
-                        <div style="font-size: 16px; font-weight: 700; color: var(--bad);">~$800B</div>
-                        <div style="font-size: 10px; color: var(--text-dim);">Treasury Account</div>
+                    <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid var(--bad);">
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Treasury Account (TGA)</div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">WTREGEN</div>
+                        <div style="font-size: 11px; color: var(--bad); margin-top: 4px;">↑ Drains Liquidity</div>
                     </div>
-                    <div style="text-align: center; padding: 12px; background: var(--bg-secondary); border-radius: 10px;">
-                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">BOJ</div>
-                        <div style="font-size: 16px; font-weight: 700; color: var(--cyan);">~$4.8T</div>
-                        <div style="font-size: 10px; color: var(--text-dim);">Japan CB</div>
-                    </div>
-                    <div style="text-align: center; padding: 12px; background: var(--bg-secondary); border-radius: 10px;">
-                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">PBOC</div>
-                        <div style="font-size: 16px; font-weight: 700; color: var(--orange);">~$6.2T</div>
-                        <div style="font-size: 10px; color: var(--text-dim);">China CB</div>
-                    </div>
-                    <div style="text-align: center; padding: 12px; background: var(--bg-secondary); border-radius: 10px;">
-                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">ECB</div>
-                        <div style="font-size: 16px; font-weight: 700; color: var(--purple);">~$6.5T</div>
-                        <div style="font-size: 10px; color: var(--text-dim);">Europe CB</div>
-                    </div>
-                </div>
-                <div style="margin-top: 16px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
-                    <div style="font-size: 12px; color: var(--text-muted);">
-                        <strong style="color: var(--text);">Formula:</strong> Net Liquidity = Fed + BOJ + PBOC + ECB − RRP − TGA<br>
-                        <strong style="color: var(--text);">Interpretation:</strong> Rising liquidity → Bullish for risk assets. Falling liquidity → Defensive positioning.
+                    <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid var(--cyan);">
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">M2 Money Supply</div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">M2SL</div>
+                        <div style="font-size: 11px; color: var(--good); margin-top: 4px;">↑ Adds Liquidity</div>
                     </div>
                 </div>
             </div>
@@ -1126,28 +1148,7 @@
                 ]
             });
             
-            // Global Net Liquidity Chart
-            // Formula: Fed + BOJ + PBOC + ECB - RRP - TGA (all converted to USD)
-            new TradingView.widget({
-                "autosize": true,
-                "symbol": "FRED:WALCL+FRED:JPNASSETS*FX_IDC:JPYUSD+ECONOMICS:CNCBBS*FX_IDC:CNYUSD+FRED:ECBASSETSW*FX:EURUSD-FRED:RRPONTSYD-FRED:WTREGEN",
-                "interval": "W",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "3",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "rgba(10, 14, 23, 1)",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "container_id": "global-liquidity-chart",
-                "hide_volume": true
-            });
-            
-            // Fed Balance Sheet Chart
+            // Fed Balance Sheet Chart (WALCL)
             new TradingView.widget({
                 "autosize": true,
                 "symbol": "FRED:WALCL",
@@ -1164,6 +1165,66 @@
                 "backgroundColor": "rgba(10, 14, 23, 1)",
                 "gridColor": "rgba(255, 255, 255, 0.05)",
                 "container_id": "fed-balance-sheet-chart",
+                "hide_volume": true
+            });
+            
+            // Treasury General Account (TGA)
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "FRED:WTREGEN",
+                "interval": "W",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "3",
+                "locale": "en",
+                "toolbar_bg": "#0a0e17",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "backgroundColor": "rgba(10, 14, 23, 1)",
+                "gridColor": "rgba(255, 255, 255, 0.05)",
+                "container_id": "tga-chart",
+                "hide_volume": true
+            });
+            
+            // Reverse Repo Facility (RRP)
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "FRED:RRPONTSYD",
+                "interval": "D",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "3",
+                "locale": "en",
+                "toolbar_bg": "#0a0e17",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "backgroundColor": "rgba(10, 14, 23, 1)",
+                "gridColor": "rgba(255, 255, 255, 0.05)",
+                "container_id": "rrp-chart",
+                "hide_volume": true
+            });
+            
+            // M2 Money Supply
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "FRED:M2SL",
+                "interval": "M",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "3",
+                "locale": "en",
+                "toolbar_bg": "#0a0e17",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "backgroundColor": "rgba(10, 14, 23, 1)",
+                "gridColor": "rgba(255, 255, 255, 0.05)",
+                "container_id": "m2-chart",
                 "hide_volume": true
             });
         }
