@@ -599,35 +599,6 @@
             </div>
         </div>
 
-        <!-- Summary Row -->
-        <div class="summary-row">
-            <div class="summary-card">
-                <div class="summary-label">BTC Funding (8hr)</div>
-                <div class="summary-value" id="summaryFunding">--</div>
-                <div class="summary-change" id="summaryFundingSignal">Loading...</div>
-            </div>
-            <div class="summary-card">
-                <div class="summary-label">BTC Open Interest</div>
-                <div class="summary-value" id="summaryOI">--</div>
-                <div class="summary-change" id="summaryOISymbol">BTCUSDT Perp</div>
-            </div>
-            <div class="summary-card">
-                <div class="summary-label">Long/Short Ratio</div>
-                <div class="summary-value" id="summaryLS">--</div>
-                <div class="summary-change" id="summaryLSSignal">--</div>
-            </div>
-            <div class="summary-card">
-                <div class="summary-label">Fear & Greed</div>
-                <div class="summary-value" id="summaryFG">--</div>
-                <div class="summary-change" id="summaryFGLabel">--</div>
-            </div>
-            <div class="summary-card">
-                <div class="summary-label">BTC Dominance</div>
-                <div class="summary-value" id="summaryDom">--</div>
-                <div class="summary-change" id="summaryDomChange">--</div>
-            </div>
-        </div>
-
         <!-- Price Charts Section - BTC/ETH -->
         <div class="section">
             <div class="section-header">
@@ -638,7 +609,7 @@
                 <div class="card" style="padding: 0; overflow: hidden;">
                     <div style="padding: 16px 18px 8px 18px;">
                         <div class="card-title">Bitcoin (BTC/USD)</div>
-                        <div class="card-subtitle">Weekly Timeframe • Binance</div>
+                        <div class="card-subtitle">Weekly Timeframe • INDEX (Full History)</div>
                     </div>
                     <div class="tradingview-widget-container" style="height: 400px;">
                         <div id="btc-usd-chart" style="height: 100%;"></div>
@@ -649,7 +620,7 @@
                 <div class="card" style="padding: 0; overflow: hidden;">
                     <div style="padding: 16px 18px 8px 18px;">
                         <div class="card-title">Ethereum (ETH/USD)</div>
-                        <div class="card-subtitle">Weekly Timeframe • Binance</div>
+                        <div class="card-subtitle">Weekly Timeframe • INDEX (Full History)</div>
                     </div>
                     <div class="tradingview-widget-container" style="height: 400px;">
                         <div id="eth-usd-chart" style="height: 100%;"></div>
@@ -1120,19 +1091,19 @@
                 "interval": "W"
             });
             
-            // BTC/USD Chart
+            // BTC/USD Chart - Using INDEX for full price history
             new TradingView.widget({
                 ...chartConfig,
                 "container_id": "btc-usd-chart",
-                "symbol": "BINANCE:BTCUSDT",
+                "symbol": "INDEX:BTCUSD",
                 "interval": "W"
             });
             
-            // ETH/USD Chart
+            // ETH/USD Chart - Using INDEX for full price history
             new TradingView.widget({
                 ...chartConfig,
                 "container_id": "eth-usd-chart",
-                "symbol": "BINANCE:ETHUSDT",
+                "symbol": "INDEX:ETHUSD",
                 "interval": "W"
             });
             
@@ -1330,15 +1301,30 @@
                 liquidityBtcChart.destroy();
             }
             
-            // Determine start date based on period
-            const now = new Date();
+            // Get the most recent data point date as reference
+            const latestDataDate = new Date(netLiquidityData[netLiquidityData.length - 1].date);
             let startDate;
+            
+            // Calculate start date based on period relative to latest data
             switch (period) {
-                case '1y': startDate = new Date(now.getFullYear() - 1, now.getMonth(), 1); break;
-                case '2y': startDate = new Date(now.getFullYear() - 2, now.getMonth(), 1); break;
-                case '3y': startDate = new Date(now.getFullYear() - 3, now.getMonth(), 1); break;
-                case 'all': startDate = new Date(2020, 0, 1); break;
-                default: startDate = new Date(now.getFullYear() - 1, now.getMonth(), 1);
+                case '1y': 
+                    startDate = new Date(latestDataDate);
+                    startDate.setFullYear(startDate.getFullYear() - 1);
+                    break;
+                case '2y': 
+                    startDate = new Date(latestDataDate);
+                    startDate.setFullYear(startDate.getFullYear() - 2);
+                    break;
+                case '3y': 
+                    startDate = new Date(latestDataDate);
+                    startDate.setFullYear(startDate.getFullYear() - 3);
+                    break;
+                case 'all': 
+                    startDate = new Date(2020, 0, 1); 
+                    break;
+                default: 
+                    startDate = new Date(latestDataDate);
+                    startDate.setFullYear(startDate.getFullYear() - 1);
             }
             
             // Filter data by period
