@@ -1122,50 +1122,85 @@
                     <div class="card-title">HYPE/USDT Price</div>
                     <div class="card-subtitle">Daily Timeframe • Bybit Perpetual</div>
                 </div>
-                <div class="tradingview-widget-container" style="height: 450px;">
+                <div class="tradingview-widget-container" style="height: 400px;">
                     <div id="hype-chart" style="height: 100%;"></div>
+                </div>
+            </div>
+            
+            <!-- Artemis Perp Protocol Comparison -->
+            <div class="grid-2" style="margin-bottom: 20px;">
+                <!-- Perp Volume Comparison -->
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Perp Volume Comparison</div>
+                            <div class="card-subtitle">24H volume across protocols • Data from Artemis</div>
+                        </div>
+                    </div>
+                    <div class="chart-container tall" style="position: relative;">
+                        <canvas id="artemisVolumeChart"></canvas>
+                        <div id="artemisVolumeLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                            <div style="font-size: 12px; color: var(--text-muted);">Loading Artemis data...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Open Interest Comparison -->
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Open Interest Comparison</div>
+                            <div class="card-subtitle">Current OI across protocols • Data from Artemis</div>
+                        </div>
+                    </div>
+                    <div class="chart-container tall" style="position: relative;">
+                        <canvas id="artemisOIChart"></canvas>
+                        <div id="artemisOILoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                            <div style="font-size: 12px; color: var(--text-muted);">Loading Artemis data...</div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
             <!-- Coming Soon Features -->
             <div class="grid-2">
-                <div class="card" style="text-align: center; padding: 40px 20px;">
-                    <div style="font-size: 32px; margin-bottom: 12px;">📊</div>
-                    <div style="font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px;">
+                <div class="card" style="text-align: center; padding: 30px 20px;">
+                    <div style="font-size: 28px; margin-bottom: 10px;">📊</div>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px;">
                         HL Funding Rates
                     </div>
-                    <div style="font-size: 12px; color: var(--text-muted);">
-                        Coming soon - Track Hyperliquid perpetual funding rates
+                    <div style="font-size: 11px; color: var(--text-muted);">
+                        Coming soon
                     </div>
                 </div>
                 
-                <div class="card" style="text-align: center; padding: 40px 20px;">
-                    <div style="font-size: 32px; margin-bottom: 12px;">🏦</div>
-                    <div style="font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px;">
+                <div class="card" style="text-align: center; padding: 30px 20px;">
+                    <div style="font-size: 28px; margin-bottom: 10px;">🏦</div>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px;">
                         Vault Analytics
                     </div>
-                    <div style="font-size: 12px; color: var(--text-muted);">
-                        Coming soon - Track vault TVL, performance, and deposits
+                    <div style="font-size: 11px; color: var(--text-muted);">
+                        Coming soon
                     </div>
                 </div>
                 
-                <div class="card" style="text-align: center; padding: 40px 20px;">
-                    <div style="font-size: 32px; margin-bottom: 12px;">💧</div>
-                    <div style="font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px;">
+                <div class="card" style="text-align: center; padding: 30px 20px;">
+                    <div style="font-size: 28px; margin-bottom: 10px;">💧</div>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px;">
                         Liquidation Tracker
                     </div>
-                    <div style="font-size: 12px; color: var(--text-muted);">
-                        Coming soon - Monitor liquidation events and heatmaps
+                    <div style="font-size: 11px; color: var(--text-muted);">
+                        Coming soon
                     </div>
                 </div>
                 
-                <div class="card" style="text-align: center; padding: 40px 20px;">
-                    <div style="font-size: 32px; margin-bottom: 12px;">🤖</div>
-                    <div style="font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px;">
+                <div class="card" style="text-align: center; padding: 30px 20px;">
+                    <div style="font-size: 28px; margin-bottom: 10px;">🤖</div>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px;">
                         Market Making Stats
                     </div>
-                    <div style="font-size: 12px; color: var(--text-muted);">
-                        Coming soon - Your maker volume and performance metrics
+                    <div style="font-size: 11px; color: var(--text-muted);">
+                        Coming soon
                     </div>
                 </div>
             </div>
@@ -1204,10 +1239,18 @@
         // Coinalyze API Configuration
         const COINALYZE_API_KEY = '206ab6db-6464-46b6-84da-782d2a74a807';
         const COINALYZE_BASE = 'https://api.coinalyze.net/v1';
+        // CORS proxy for browser-based requests (Coinalyze doesn't support CORS)
+        const CORS_PROXY = 'https://corsproxy.io/?';
         let coinalyzePriceChart = null;
         let coinalyzeFundingChart = null;
         let coinalyzeOIChart = null;
         let coinalyzeData = { price: [], funding: [], oi: [] };
+        
+        // Artemis API Configuration
+        const ARTEMIS_API_KEY = '1w424NZfFc9brLOexLvSQR6Iq9N50I--TrwAi9ARyuM';
+        const ARTEMIS_BASE = 'https://api.artemis.xyz';
+        let artemisVolumeChart = null;
+        let artemisOIChart = null;
         
         // ==================== TAB NAVIGATION ====================
         function switchTab(tabName) {
@@ -1263,6 +1306,10 @@
                             "interval": "D"
                         });
                     }
+                    // Load Artemis data for perp comparison
+                    if (!artemisVolumeChart) {
+                        loadArtemisData();
+                    }
                 }, 100);
             }
         }
@@ -1281,13 +1328,30 @@
             // Using BTCUSDT_PERP.A for aggregated data (all exchanges)
             const symbol = 'BTCUSDT_PERP.A';
             
+            // Build URLs - try direct first, then CORS proxy
+            const buildUrl = (endpoint, params) => {
+                return `${COINALYZE_BASE}/${endpoint}?symbols=${symbol}&interval=daily&from=${from}&to=${now}${params}&api_key=${COINALYZE_API_KEY}`;
+            };
+            
             try {
-                // Fetch all data in parallel
-                const [priceRes, fundingRes, oiRes] = await Promise.all([
-                    fetch(`${COINALYZE_BASE}/ohlcv-history?symbols=${symbol}&interval=daily&from=${from}&to=${now}&api_key=${COINALYZE_API_KEY}`),
-                    fetch(`${COINALYZE_BASE}/funding-rate-history?symbols=${symbol}&interval=daily&from=${from}&to=${now}&api_key=${COINALYZE_API_KEY}`),
-                    fetch(`${COINALYZE_BASE}/open-interest-history?symbols=${symbol}&interval=daily&from=${from}&to=${now}&convert_to_usd=true&api_key=${COINALYZE_API_KEY}`)
-                ]);
+                // Try direct request first
+                let priceRes, fundingRes, oiRes;
+                
+                try {
+                    [priceRes, fundingRes, oiRes] = await Promise.all([
+                        fetch(buildUrl('ohlcv-history', '')),
+                        fetch(buildUrl('funding-rate-history', '')),
+                        fetch(buildUrl('open-interest-history', '&convert_to_usd=true'))
+                    ]);
+                } catch (directError) {
+                    console.log('Direct request failed, trying CORS proxy...');
+                    // Fall back to CORS proxy
+                    [priceRes, fundingRes, oiRes] = await Promise.all([
+                        fetch(CORS_PROXY + encodeURIComponent(buildUrl('ohlcv-history', ''))),
+                        fetch(CORS_PROXY + encodeURIComponent(buildUrl('funding-rate-history', ''))),
+                        fetch(CORS_PROXY + encodeURIComponent(buildUrl('open-interest-history', '&convert_to_usd=true')))
+                    ]);
+                }
                 
                 // Check for HTTP errors
                 if (!priceRes.ok || !fundingRes.ok || !oiRes.ok) {
@@ -1296,7 +1360,7 @@
                         funding: fundingRes.status,
                         oi: oiRes.status
                     });
-                    throw new Error('API returned error status');
+                    throw new Error(`API error: ${priceRes.status}`);
                 }
                 
                 const [priceData, fundingData, oiData] = await Promise.all([
@@ -1544,6 +1608,164 @@
             // Clear existing data and reload
             coinalyzeData = { price: [], funding: [], oi: [] };
             loadCoinalyzeData(days);
+        }
+        
+        // ==================== ARTEMIS API ====================
+        // Perp protocol list for comparison (matching Artemis screenshot)
+        const PERP_PROTOCOLS = [
+            'hyperliquid', 'lighter', 'aster', 'edgex', 'apex', 
+            'dydx', 'paradex', 'jupiter', 'gmx', 'aevo',
+            'gains-network', 'drift-protocol', 'vertex-protocol'
+        ];
+        
+        // Protocol display names and colors
+        const PROTOCOL_META = {
+            'hyperliquid': { name: 'Hyperliquid', color: '#4ade80' },
+            'lighter': { name: 'Lighter', color: '#a78bfa' },
+            'aster': { name: 'Aster', color: '#60a5fa' },
+            'edgex': { name: 'edgeX', color: '#f472b6' },
+            'apex': { name: 'ApeX', color: '#facc15' },
+            'dydx': { name: 'dYdX', color: '#f97316' },
+            'paradex': { name: 'Paradex', color: '#818cf8' },
+            'jupiter': { name: 'Jupiter', color: '#22d3ee' },
+            'gmx': { name: 'GMX', color: '#3b82f6' },
+            'aevo': { name: 'Aevo', color: '#ec4899' },
+            'gains-network': { name: 'Gains', color: '#10b981' },
+            'drift-protocol': { name: 'Drift', color: '#8b5cf6' },
+            'vertex-protocol': { name: 'Vertex', color: '#f59e0b' }
+        };
+        
+        async function loadArtemisData() {
+            const volumeLoading = document.getElementById('artemisVolumeLoading');
+            const oiLoading = document.getElementById('artemisOILoading');
+            
+            try {
+                // Fetch data for all protocols
+                // Artemis API endpoint pattern: /asset/{asset_id}/metric/{metric}
+                const volumePromises = PERP_PROTOCOLS.map(async (protocol) => {
+                    try {
+                        const res = await fetch(`${ARTEMIS_BASE}/asset/${protocol}/metric/perp_volume?api_key=${ARTEMIS_API_KEY}`);
+                        if (!res.ok) return { protocol, volume: 0 };
+                        const data = await res.json();
+                        // Get latest value
+                        const latestValue = data.data && data.data.length > 0 
+                            ? data.data[data.data.length - 1].val 
+                            : 0;
+                        return { protocol, volume: latestValue || 0 };
+                    } catch (e) {
+                        return { protocol, volume: 0 };
+                    }
+                });
+                
+                const oiPromises = PERP_PROTOCOLS.map(async (protocol) => {
+                    try {
+                        const res = await fetch(`${ARTEMIS_BASE}/asset/${protocol}/metric/open_interest?api_key=${ARTEMIS_API_KEY}`);
+                        if (!res.ok) return { protocol, oi: 0 };
+                        const data = await res.json();
+                        const latestValue = data.data && data.data.length > 0 
+                            ? data.data[data.data.length - 1].val 
+                            : 0;
+                        return { protocol, oi: latestValue || 0 };
+                    } catch (e) {
+                        return { protocol, oi: 0 };
+                    }
+                });
+                
+                const [volumeResults, oiResults] = await Promise.all([
+                    Promise.all(volumePromises),
+                    Promise.all(oiPromises)
+                ]);
+                
+                // Sort by volume/OI descending
+                volumeResults.sort((a, b) => b.volume - a.volume);
+                oiResults.sort((a, b) => b.oi - a.oi);
+                
+                // Filter out zeros and take top 10
+                const topVolume = volumeResults.filter(v => v.volume > 0).slice(0, 10);
+                const topOI = oiResults.filter(v => v.oi > 0).slice(0, 10);
+                
+                if (volumeLoading) volumeLoading.style.display = 'none';
+                if (oiLoading) oiLoading.style.display = 'none';
+                
+                renderArtemisCharts(topVolume, topOI);
+                
+            } catch (error) {
+                console.error('Artemis API error:', error);
+                if (volumeLoading) volumeLoading.innerHTML = '<div style="color: var(--bad); font-size: 11px;">Failed to load data</div>';
+                if (oiLoading) oiLoading.innerHTML = '<div style="color: var(--bad); font-size: 11px;">Failed to load data</div>';
+            }
+        }
+        
+        function renderArtemisCharts(volumeData, oiData) {
+            // Destroy existing charts
+            if (artemisVolumeChart) artemisVolumeChart.destroy();
+            if (artemisOIChart) artemisOIChart.destroy();
+            
+            const volumeCtx = document.getElementById('artemisVolumeChart');
+            const oiCtx = document.getElementById('artemisOIChart');
+            
+            if (!volumeCtx || !oiCtx) return;
+            
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(26, 32, 44, 0.95)',
+                        titleColor: '#fff',
+                        bodyColor: '#a0aec0',
+                        callbacks: {
+                            label: ctx => '$' + (ctx.parsed.x / 1e9).toFixed(2) + 'B'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255,255,255,0.03)' },
+                        ticks: { 
+                            color: '#718096', 
+                            font: { size: 10 },
+                            callback: v => '$' + (v / 1e9).toFixed(1) + 'B'
+                        }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { color: '#e2e8f0', font: { size: 11 } }
+                    }
+                }
+            };
+            
+            // Volume Chart
+            artemisVolumeChart = new Chart(volumeCtx, {
+                type: 'bar',
+                data: {
+                    labels: volumeData.map(d => PROTOCOL_META[d.protocol]?.name || d.protocol),
+                    datasets: [{
+                        data: volumeData.map(d => d.volume),
+                        backgroundColor: volumeData.map(d => PROTOCOL_META[d.protocol]?.color || '#6366f1'),
+                        borderRadius: 4,
+                        barThickness: 18
+                    }]
+                },
+                options: chartOptions
+            });
+            
+            // OI Chart
+            artemisOIChart = new Chart(oiCtx, {
+                type: 'bar',
+                data: {
+                    labels: oiData.map(d => PROTOCOL_META[d.protocol]?.name || d.protocol),
+                    datasets: [{
+                        data: oiData.map(d => d.oi),
+                        backgroundColor: oiData.map(d => PROTOCOL_META[d.protocol]?.color || '#6366f1'),
+                        borderRadius: 4,
+                        barThickness: 18
+                    }]
+                },
+                options: chartOptions
+            });
         }
         
         // ==================== UTILITIES ====================
