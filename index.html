@@ -979,124 +979,32 @@
                 </div>
             </div>
 
-        <!-- Main Content -->
-        <div class="grid-2">
-            <!-- Funding Rates Section -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">Funding Rates (Binance Perps)</div>
-                    <div class="card-badge" id="fundingBadge">--</div>
+        <!-- BTC Price vs Fear & Greed Historical Chart -->
+        <div class="card" style="margin-bottom: 20px;">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">BTC Price vs Fear & Greed Index</div>
+                    <div class="card-subtitle">Historical sentiment correlation • Data from Alternative.me</div>
                 </div>
-                <div class="card-value" id="avgFunding">--</div>
-                <div class="card-subtitle">Weighted Average Funding Rate (8hr)</div>
-                
-                <div class="funding-meter">
-                    <div class="funding-pointer" id="fundingPointer" style="left: 50%;"></div>
-                </div>
-                <div class="funding-labels">
-                    <span>-0.05% (Shorts Pay)</span>
-                    <span>0%</span>
-                    <span>+0.05% (Longs Pay)</span>
-                </div>
-                
-                <div class="signal-box" id="fundingSignal">
-                    <div class="signal-icon">⏳</div>
-                    <div class="signal-text">
-                        <div class="signal-title">Loading funding data...</div>
-                        <div class="signal-desc">Fetching from Binance Futures API</div>
-                    </div>
+                <div class="time-selector">
+                    <button class="time-btn" onclick="updateFearGreedChart(90)">3M</button>
+                    <button class="time-btn active" onclick="updateFearGreedChart(365)">1Y</button>
+                    <button class="time-btn" onclick="updateFearGreedChart(730)">2Y</button>
                 </div>
             </div>
-            
-            <!-- Open Interest -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">Open Interest Distribution</div>
-                    <div class="card-badge badge-neutral">BINANCE</div>
-                </div>
-                <div class="card-value" id="totalOI">--</div>
-                <div class="card-subtitle">Total OI (Top 3 Perps)</div>
-                
-                <div class="oi-bar" id="oiBar">
-                    <div class="oi-segment btc" id="oiBTC" style="width: 50%;">BTC 50%</div>
-                    <div class="oi-segment eth" id="oiETH" style="width: 30%;">ETH 30%</div>
-                    <div class="oi-segment others" id="oiOthers" style="width: 20%;">SOL 20%</div>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px;">
-                    <div style="text-align: center;">
-                        <div style="font-size: 18px; font-weight: 800; color: var(--accent);" id="btcOI">--</div>
-                        <div style="font-size: 11px; color: var(--text-muted);">BTC</div>
-                    </div>
-                    <div style="text-align: center;">
-                        <div style="font-size: 18px; font-weight: 800; color: var(--cyan);" id="ethOI">--</div>
-                        <div style="font-size: 11px; color: var(--text-muted);">ETH</div>
-                    </div>
-                    <div style="text-align: center;">
-                        <div style="font-size: 18px; font-weight: 800; color: var(--orange);" id="solOI">--</div>
-                        <div style="font-size: 11px; color: var(--text-muted);">SOL</div>
-                    </div>
+            <div class="chart-container tall" style="position: relative;">
+                <canvas id="fearGreedHistoryChart"></canvas>
+                <div id="fearGreedLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                    <div style="font-size: 12px; color: var(--text-muted);">Loading Fear & Greed data...</div>
                 </div>
             </div>
-        </div>
-        
-        <div class="grid-2" style="margin-top: 16px;">
-            <!-- Long/Short Ratio -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">Global Long/Short Ratio</div>
-                    <div class="card-badge" id="lsBadge">--</div>
+            <div style="margin-top: 12px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
+                <div style="font-size: 12px; color: var(--text-muted);">
+                    <strong style="color: var(--text);">Key Insight:</strong> Extreme Fear (0-25) often signals buying opportunities. 
+                    Extreme Greed (75-100) may indicate overheated conditions. 
+                    <span style="color: #f7931a;">●</span> BTC Price &nbsp;
+                    <span style="color: #4ade80;">●</span> Fear & Greed Index
                 </div>
-                <div class="card-value" id="lsRatio">--</div>
-                <div class="card-subtitle">Top Trader Accounts (BTCUSDT)</div>
-                
-                <div class="ls-bar">
-                    <div class="ls-long" id="lsLong" style="width: 50%;"></div>
-                    <div class="ls-short" id="lsShort" style="width: 50%;"></div>
-                </div>
-                <div class="ls-labels">
-                    <span style="color: var(--good);" id="lsLongPct">Longs: 50%</span>
-                    <span style="color: var(--bad);" id="lsShortPct">Shorts: 50%</span>
-                </div>
-                
-                <div class="signal-box" id="lsSignal">
-                    <div class="signal-icon">⏳</div>
-                    <div class="signal-text">
-                        <div class="signal-title">Loading...</div>
-                        <div class="signal-desc">Fetching positioning data</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Fear & Greed -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">Fear & Greed Index</div>
-                    <div class="card-badge" id="fgBadge">--</div>
-                </div>
-                <div class="card-value lg" id="fgValue">--</div>
-                <div class="card-subtitle" id="fgLabel">--</div>
-                
-                <div class="fg-meter">
-                    <div class="fg-pointer" id="fgPointer" style="left: 50%;"></div>
-                </div>
-                <div class="fg-labels">
-                    <span>Extreme Fear</span>
-                    <span>Fear</span>
-                    <span>Neutral</span>
-                    <span>Greed</span>
-                    <span>Extreme Greed</span>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Funding Heatmap -->
-        <div class="section" style="margin-top: 20px;">
-            <div class="section-header">
-                <div class="section-title">Funding Rate Heatmap</div>
-            </div>
-            <div class="funding-grid" id="fundingHeatmap">
-                <div class="loading-text">Loading funding rates...</div>
             </div>
         </div>
         
@@ -1178,46 +1086,80 @@
                 </div>
             </div>
             
-            <!-- Coming Soon Features -->
+            <!-- HYPE Token Analytics -->
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">HYPE Price vs Protocol Fees (30D Rolling)</div>
+                        <div class="card-subtitle">Revenue correlation with token price • Data from DefiLlama</div>
+                    </div>
+                    <div class="time-selector">
+                        <button class="time-btn" onclick="updateHypeFeesChart(90)">3M</button>
+                        <button class="time-btn active" onclick="updateHypeFeesChart(180)">6M</button>
+                        <button class="time-btn" onclick="updateHypeFeesChart(365)">1Y</button>
+                    </div>
+                </div>
+                <div class="chart-container tall" style="position: relative;">
+                    <canvas id="hypeFeesChart"></canvas>
+                    <div id="hypeFeesLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                        <div style="font-size: 12px; color: var(--text-muted);">Loading fees data...</div>
+                    </div>
+                </div>
+                <div style="margin-top: 12px; padding: 12px; background: rgba(74, 222, 128, 0.1); border-radius: 8px; border-left: 3px solid var(--good);">
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        <strong style="color: var(--text);">Interpretation:</strong> Rising fees with flat/falling price = potential value opportunity. 
+                        <span style="color: #4ade80;">●</span> HYPE Price &nbsp;
+                        <span style="color: #f59e0b;">●</span> 30D Rolling Fees
+                    </div>
+                </div>
+            </div>
+            
+            <!-- P/S Ratio Chart -->
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">HYPE Price-to-Sales Ratio</div>
+                        <div class="card-subtitle">FDV / Annualized Fees • Lower = Cheaper valuation</div>
+                    </div>
+                </div>
+                <div class="chart-container tall" style="position: relative;">
+                    <canvas id="hypePSChart"></canvas>
+                    <div id="hypePSLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                        <div style="font-size: 12px; color: var(--text-muted);">Loading P/S data...</div>
+                    </div>
+                </div>
+                <div style="margin-top: 12px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        <strong style="color: var(--text);">Interpretation:</strong> P/S below 20 generally considered cheap for DeFi protocols. 
+                        Compare to dYdX (~30-50), GMX (~15-25). Lower P/S = more revenue per $ of valuation.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Stats Row -->
             <div class="grid-2">
-                <div class="card" style="text-align: center; padding: 30px 20px;">
-                    <div style="font-size: 28px; margin-bottom: 10px;">📊</div>
-                    <div style="font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px;">
-                        HL Funding Rates
-                    </div>
-                    <div style="font-size: 11px; color: var(--text-muted);">
-                        Coming soon
-                    </div>
+                <div class="card" style="text-align: center; padding: 20px;">
+                    <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Current P/S Ratio</div>
+                    <div style="font-size: 28px; font-weight: 800; color: var(--cyan);" id="currentPS">--</div>
+                    <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">FDV / Ann. Fees</div>
                 </div>
                 
-                <div class="card" style="text-align: center; padding: 30px 20px;">
-                    <div style="font-size: 28px; margin-bottom: 10px;">🏦</div>
-                    <div style="font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px;">
-                        Vault Analytics
-                    </div>
-                    <div style="font-size: 11px; color: var(--text-muted);">
-                        Coming soon
-                    </div>
+                <div class="card" style="text-align: center; padding: 20px;">
+                    <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">30D Fees</div>
+                    <div style="font-size: 28px; font-weight: 800; color: var(--orange);" id="thirtyDayFees">--</div>
+                    <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Protocol Revenue</div>
                 </div>
                 
-                <div class="card" style="text-align: center; padding: 30px 20px;">
-                    <div style="font-size: 28px; margin-bottom: 10px;">💧</div>
-                    <div style="font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px;">
-                        Liquidation Tracker
-                    </div>
-                    <div style="font-size: 11px; color: var(--text-muted);">
-                        Coming soon
-                    </div>
+                <div class="card" style="text-align: center; padding: 20px;">
+                    <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Annualized Fees</div>
+                    <div style="font-size: 28px; font-weight: 800; color: var(--good);" id="annualizedFees">--</div>
+                    <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">30D × 12</div>
                 </div>
                 
-                <div class="card" style="text-align: center; padding: 30px 20px;">
-                    <div style="font-size: 28px; margin-bottom: 10px;">🤖</div>
-                    <div style="font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px;">
-                        Market Making Stats
-                    </div>
-                    <div style="font-size: 11px; color: var(--text-muted);">
-                        Coming soon
-                    </div>
+                <div class="card" style="text-align: center; padding: 20px;">
+                    <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Market Cap (FDV)</div>
+                    <div style="font-size: 28px; font-weight: 800; color: var(--accent);" id="hypeFDV">--</div>
+                    <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Fully Diluted</div>
                 </div>
             </div>
         </div>
@@ -1303,6 +1245,10 @@
                 if (oiDominanceData.labels === undefined || oiDominanceData.labels.length === 0) {
                     loadOIDominanceData(730);
                 }
+                // Load Fear & Greed history
+                if (fearGreedData.labels.length === 0) {
+                    loadFearGreedHistory(365);
+                }
             }
             
             // Initialize HYPE chart when switching to hyperliquid tab
@@ -1331,6 +1277,10 @@
                     // Load Artemis data for perp comparison
                     if (!artemisVolumeChart) {
                         loadArtemisData();
+                    }
+                    // Load HYPE analytics
+                    if (hypeAnalyticsData.labels.length === 0) {
+                        loadHypeAnalytics(180);
                     }
                 }, 100);
             }
@@ -2047,6 +1997,410 @@
                     options: chartOptions
                 });
             }
+        }
+        
+        // ==================== FEAR & GREED HISTORY CHART ====================
+        let fearGreedHistoryChart = null;
+        let fearGreedData = { labels: [], fg: [], btcPrice: [] };
+        
+        async function loadFearGreedHistory(days = 365) {
+            const loadingEl = document.getElementById('fearGreedLoading');
+            if (loadingEl) loadingEl.style.display = 'block';
+            
+            try {
+                // Fetch Fear & Greed data from Alternative.me
+                const fgRes = await fetch(`https://api.alternative.me/fng/?limit=${days}&format=json`);
+                const fgData = await fgRes.json();
+                
+                // Fetch BTC price history from CoinGecko
+                const btcRes = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}&interval=daily`);
+                const btcData = await btcRes.json();
+                
+                console.log('Fear & Greed data:', fgData);
+                console.log('BTC price data points:', btcData.prices?.length);
+                
+                if (fgData.data && btcData.prices) {
+                    // Process F&G data (comes in reverse chronological order)
+                    const fgProcessed = fgData.data.reverse();
+                    
+                    // Create date-indexed map for BTC prices
+                    const btcMap = new Map();
+                    btcData.prices.forEach(([ts, price]) => {
+                        const dateStr = new Date(ts).toISOString().split('T')[0];
+                        btcMap.set(dateStr, price);
+                    });
+                    
+                    // Align data
+                    fearGreedData = { labels: [], fg: [], btcPrice: [] };
+                    
+                    fgProcessed.forEach(d => {
+                        const dateStr = new Date(d.timestamp * 1000).toISOString().split('T')[0];
+                        const btcPrice = btcMap.get(dateStr);
+                        
+                        if (btcPrice) {
+                            fearGreedData.labels.push(d.timestamp * 1000);
+                            fearGreedData.fg.push(parseInt(d.value));
+                            fearGreedData.btcPrice.push(btcPrice);
+                        }
+                    });
+                }
+                
+                if (loadingEl) loadingEl.style.display = 'none';
+                renderFearGreedChart();
+                
+            } catch (error) {
+                console.error('Fear & Greed history error:', error);
+                if (loadingEl) {
+                    loadingEl.innerHTML = '<div style="color: var(--bad); font-size: 11px;">Failed to load data</div>';
+                }
+            }
+        }
+        
+        function renderFearGreedChart() {
+            if (fearGreedHistoryChart) fearGreedHistoryChart.destroy();
+            
+            const ctx = document.getElementById('fearGreedHistoryChart');
+            if (!ctx || fearGreedData.labels.length === 0) return;
+            
+            fearGreedHistoryChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: fearGreedData.labels,
+                    datasets: [
+                        {
+                            label: 'BTC Price',
+                            data: fearGreedData.btcPrice,
+                            borderColor: '#f7931a',
+                            backgroundColor: 'rgba(247, 147, 26, 0.1)',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.2,
+                            pointRadius: 0,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Fear & Greed',
+                            data: fearGreedData.fg,
+                            borderColor: '#4ade80',
+                            backgroundColor: 'rgba(74, 222, 128, 0.2)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.2,
+                            pointRadius: 0,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: { color: '#a0aec0', usePointStyle: true, pointStyle: 'circle', padding: 15 }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(26, 32, 44, 0.95)',
+                            titleColor: '#fff',
+                            bodyColor: '#a0aec0',
+                            callbacks: {
+                                title: ctx => new Date(ctx[0].parsed.x).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }),
+                                label: ctx => {
+                                    if (ctx.datasetIndex === 0) return 'BTC: $' + ctx.parsed.y.toLocaleString();
+                                    const val = ctx.parsed.y;
+                                    let label = val <= 25 ? 'Extreme Fear' : val <= 45 ? 'Fear' : val <= 55 ? 'Neutral' : val <= 75 ? 'Greed' : 'Extreme Greed';
+                                    return `F&G: ${val} (${label})`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: { unit: 'month', displayFormats: { month: 'MMM \'yy' } },
+                            grid: { color: 'rgba(255,255,255,0.03)' },
+                            ticks: { color: '#718096', font: { size: 10 }, maxTicksLimit: 12 }
+                        },
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { 
+                                color: '#f7931a', 
+                                font: { size: 10 },
+                                callback: v => '$' + (v / 1000).toFixed(0) + 'K'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            min: 0,
+                            max: 100,
+                            grid: { display: false },
+                            ticks: { color: '#4ade80', font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateFearGreedChart(days) {
+            document.querySelectorAll('#fearGreedHistoryChart').closest('.card').querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            loadFearGreedHistory(days);
+        }
+        
+        // ==================== HYPE ANALYTICS ====================
+        let hypeFeesChart = null;
+        let hypePSChart = null;
+        let hypeAnalyticsData = { labels: [], price: [], fees30d: [], ps: [] };
+        
+        async function loadHypeAnalytics(days = 180) {
+            const feesLoading = document.getElementById('hypeFeesLoading');
+            const psLoading = document.getElementById('hypePSLoading');
+            if (feesLoading) feesLoading.style.display = 'block';
+            if (psLoading) psLoading.style.display = 'block';
+            
+            try {
+                // Fetch Hyperliquid fees from DefiLlama
+                const feesRes = await fetch('https://api.llama.fi/summary/fees/hyperliquid?dataType=dailyFees');
+                const feesData = await feesRes.json();
+                
+                // Fetch HYPE price history from CoinGecko
+                const priceRes = await fetch(`https://api.coingecko.com/api/v3/coins/hyperliquid/market_chart?vs_currency=usd&days=${days}&interval=daily`);
+                const priceData = await priceRes.json();
+                
+                // Get current market data for FDV
+                const marketRes = await fetch('https://api.coingecko.com/api/v3/coins/hyperliquid?localization=false&tickers=false&community_data=false&developer_data=false');
+                const marketData = await marketRes.json();
+                
+                console.log('HYPE fees data:', feesData);
+                console.log('HYPE price data points:', priceData.prices?.length);
+                console.log('HYPE market data:', marketData);
+                
+                const fdv = marketData.market_data?.fully_diluted_valuation?.usd || 0;
+                
+                if (feesData.totalDataChart && priceData.prices) {
+                    // Create date-indexed map for prices
+                    const priceMap = new Map();
+                    priceData.prices.forEach(([ts, price]) => {
+                        const dateStr = new Date(ts).toISOString().split('T')[0];
+                        priceMap.set(dateStr, price);
+                    });
+                    
+                    // Calculate 30-day rolling fees
+                    const dailyFees = feesData.totalDataChart;
+                    
+                    hypeAnalyticsData = { labels: [], price: [], fees30d: [], ps: [] };
+                    
+                    // Process data with 30-day rolling window
+                    for (let i = 29; i < dailyFees.length; i++) {
+                        const dateTs = dailyFees[i][0] * 1000;
+                        const dateStr = new Date(dateTs).toISOString().split('T')[0];
+                        const price = priceMap.get(dateStr);
+                        
+                        if (price) {
+                            // Calculate 30-day rolling sum
+                            let rolling30d = 0;
+                            for (let j = i - 29; j <= i; j++) {
+                                rolling30d += dailyFees[j][1] || 0;
+                            }
+                            
+                            // Annualized fees = 30d * 12
+                            const annualizedFees = rolling30d * 12;
+                            
+                            // P/S ratio = FDV / Annualized Fees
+                            // Use estimated FDV based on price (1B tokens supply)
+                            const estimatedFDV = price * 1000000000; // 1B supply
+                            const psRatio = annualizedFees > 0 ? estimatedFDV / annualizedFees : 0;
+                            
+                            hypeAnalyticsData.labels.push(dateTs);
+                            hypeAnalyticsData.price.push(price);
+                            hypeAnalyticsData.fees30d.push(rolling30d);
+                            hypeAnalyticsData.ps.push(psRatio);
+                        }
+                    }
+                    
+                    // Update current stats
+                    const lastIdx = hypeAnalyticsData.fees30d.length - 1;
+                    if (lastIdx >= 0) {
+                        const currentFees30d = hypeAnalyticsData.fees30d[lastIdx];
+                        const currentPS = hypeAnalyticsData.ps[lastIdx];
+                        const annualized = currentFees30d * 12;
+                        
+                        document.getElementById('currentPS').textContent = currentPS.toFixed(1) + 'x';
+                        document.getElementById('thirtyDayFees').textContent = '$' + (currentFees30d / 1e6).toFixed(1) + 'M';
+                        document.getElementById('annualizedFees').textContent = '$' + (annualized / 1e6).toFixed(0) + 'M';
+                        document.getElementById('hypeFDV').textContent = '$' + (fdv / 1e9).toFixed(2) + 'B';
+                    }
+                }
+                
+                if (feesLoading) feesLoading.style.display = 'none';
+                if (psLoading) psLoading.style.display = 'none';
+                
+                renderHypeFeesChart();
+                renderHypePSChart();
+                
+            } catch (error) {
+                console.error('HYPE analytics error:', error);
+                if (feesLoading) feesLoading.innerHTML = '<div style="color: var(--bad); font-size: 11px;">Failed to load data</div>';
+                if (psLoading) psLoading.innerHTML = '<div style="color: var(--bad); font-size: 11px;">Failed to load data</div>';
+            }
+        }
+        
+        function renderHypeFeesChart() {
+            if (hypeFeesChart) hypeFeesChart.destroy();
+            
+            const ctx = document.getElementById('hypeFeesChart');
+            if (!ctx || hypeAnalyticsData.labels.length === 0) return;
+            
+            hypeFeesChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: hypeAnalyticsData.labels,
+                    datasets: [
+                        {
+                            label: 'HYPE Price',
+                            data: hypeAnalyticsData.price,
+                            borderColor: '#4ade80',
+                            backgroundColor: 'rgba(74, 222, 128, 0.1)',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.2,
+                            pointRadius: 0,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '30D Fees',
+                            data: hypeAnalyticsData.fees30d,
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.2,
+                            pointRadius: 0,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: { color: '#a0aec0', usePointStyle: true, pointStyle: 'circle', padding: 15 }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(26, 32, 44, 0.95)',
+                            titleColor: '#fff',
+                            bodyColor: '#a0aec0',
+                            callbacks: {
+                                title: ctx => new Date(ctx[0].parsed.x).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }),
+                                label: ctx => {
+                                    if (ctx.datasetIndex === 0) return 'Price: $' + ctx.parsed.y.toFixed(2);
+                                    return '30D Fees: $' + (ctx.parsed.y / 1e6).toFixed(2) + 'M';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: { unit: 'month', displayFormats: { month: 'MMM \'yy' } },
+                            grid: { color: 'rgba(255,255,255,0.03)' },
+                            ticks: { color: '#718096', font: { size: 10 }, maxTicksLimit: 8 }
+                        },
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { 
+                                color: '#4ade80', 
+                                font: { size: 10 },
+                                callback: v => '$' + v.toFixed(0)
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            grid: { display: false },
+                            ticks: { 
+                                color: '#f59e0b', 
+                                font: { size: 10 },
+                                callback: v => '$' + (v / 1e6).toFixed(0) + 'M'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderHypePSChart() {
+            if (hypePSChart) hypePSChart.destroy();
+            
+            const ctx = document.getElementById('hypePSChart');
+            if (!ctx || hypeAnalyticsData.labels.length === 0) return;
+            
+            hypePSChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: hypeAnalyticsData.labels,
+                    datasets: [{
+                        label: 'P/S Ratio',
+                        data: hypeAnalyticsData.ps,
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.2,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(26, 32, 44, 0.95)',
+                            titleColor: '#fff',
+                            bodyColor: '#a0aec0',
+                            callbacks: {
+                                title: ctx => new Date(ctx[0].parsed.x).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }),
+                                label: ctx => 'P/S: ' + ctx.parsed.y.toFixed(1) + 'x'
+                            }
+                        },
+                        // Add reference lines as annotation plugin would
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: { unit: 'month', displayFormats: { month: 'MMM \'yy' } },
+                            grid: { color: 'rgba(255,255,255,0.03)' },
+                            ticks: { color: '#718096', font: { size: 10 }, maxTicksLimit: 8 }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { 
+                                color: '#8b5cf6', 
+                                font: { size: 10 },
+                                callback: v => v.toFixed(0) + 'x'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateHypeFeesChart(days) {
+            document.querySelectorAll('#hypeFeesChart').closest('.card').querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            loadHypeAnalytics(days);
         }
         
         // ==================== UTILITIES ====================
