@@ -1116,31 +1116,56 @@
                 <div class="section-title">Hyperliquid Analytics</div>
             </div>
             
-            <div class="card" style="text-align: center; padding: 60px 40px;">
-                <div style="font-size: 48px; margin-bottom: 16px;">🚀</div>
-                <div style="font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 12px;">
-                    Hyperliquid Data Coming Soon
+            <!-- HYPE Price Chart -->
+            <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 20px;">
+                <div style="padding: 16px 18px 8px 18px;">
+                    <div class="card-title">HYPE/USDT Price</div>
+                    <div class="card-subtitle">Daily Timeframe • Bybit Perpetual</div>
                 </div>
-                <div style="font-size: 14px; color: var(--text-muted); max-width: 500px; margin: 0 auto; line-height: 1.6;">
-                    This section will include Hyperliquid-specific metrics: vault performance, 
-                    funding rates, open interest, liquidations, and market making analytics.
+                <div class="tradingview-widget-container" style="height: 450px;">
+                    <div id="hype-chart" style="height: 100%;"></div>
                 </div>
-                <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-                    <div style="padding: 10px 16px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border);">
-                        <div style="font-size: 11px; color: var(--text-muted);">Planned Features</div>
-                        <div style="font-size: 13px; color: var(--text); margin-top: 4px;">HL Funding Rates</div>
+            </div>
+            
+            <!-- Coming Soon Features -->
+            <div class="grid-2">
+                <div class="card" style="text-align: center; padding: 40px 20px;">
+                    <div style="font-size: 32px; margin-bottom: 12px;">📊</div>
+                    <div style="font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px;">
+                        HL Funding Rates
                     </div>
-                    <div style="padding: 10px 16px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border);">
-                        <div style="font-size: 11px; color: var(--text-muted);">Planned Features</div>
-                        <div style="font-size: 13px; color: var(--text); margin-top: 4px;">Vault Analytics</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        Coming soon - Track Hyperliquid perpetual funding rates
                     </div>
-                    <div style="padding: 10px 16px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border);">
-                        <div style="font-size: 11px; color: var(--text-muted);">Planned Features</div>
-                        <div style="font-size: 13px; color: var(--text); margin-top: 4px;">Liquidation Tracker</div>
+                </div>
+                
+                <div class="card" style="text-align: center; padding: 40px 20px;">
+                    <div style="font-size: 32px; margin-bottom: 12px;">🏦</div>
+                    <div style="font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px;">
+                        Vault Analytics
                     </div>
-                    <div style="padding: 10px 16px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border);">
-                        <div style="font-size: 11px; color: var(--text-muted);">Planned Features</div>
-                        <div style="font-size: 13px; color: var(--text); margin-top: 4px;">Market Making Stats</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        Coming soon - Track vault TVL, performance, and deposits
+                    </div>
+                </div>
+                
+                <div class="card" style="text-align: center; padding: 40px 20px;">
+                    <div style="font-size: 32px; margin-bottom: 12px;">💧</div>
+                    <div style="font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px;">
+                        Liquidation Tracker
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        Coming soon - Monitor liquidation events and heatmaps
+                    </div>
+                </div>
+                
+                <div class="card" style="text-align: center; padding: 40px 20px;">
+                    <div style="font-size: 32px; margin-bottom: 12px;">🤖</div>
+                    <div style="font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px;">
+                        Market Making Stats
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        Coming soon - Your maker volume and performance metrics
                     </div>
                 </div>
             </div>
@@ -1214,6 +1239,32 @@
             if (tabName === 'derivatives' && coinalyzeData.price.length === 0) {
                 loadCoinalyzeData(365);
             }
+            
+            // Initialize HYPE chart when switching to hyperliquid tab
+            if (tabName === 'hyperliquid') {
+                setTimeout(() => {
+                    if (document.getElementById('hype-chart') && !document.getElementById('hype-chart').hasChildNodes()) {
+                        new TradingView.widget({
+                            "autosize": true,
+                            "timezone": "Etc/UTC",
+                            "theme": "dark",
+                            "style": "1",
+                            "locale": "en",
+                            "toolbar_bg": "#0a0e17",
+                            "enable_publishing": false,
+                            "hide_top_toolbar": false,
+                            "hide_legend": false,
+                            "save_image": false,
+                            "backgroundColor": "rgba(10, 14, 23, 1)",
+                            "gridColor": "rgba(255, 255, 255, 0.05)",
+                            "hide_volume": false,
+                            "container_id": "hype-chart",
+                            "symbol": "BYBIT:HYPEUSDT.P",
+                            "interval": "D"
+                        });
+                    }
+                }, 100);
+            }
         }
         
         // ==================== COINALYZE API ====================
@@ -1227,20 +1278,34 @@
             const now = Math.floor(Date.now() / 1000);
             const from = now - (days * 24 * 60 * 60);
             
+            // Using BTCUSDT_PERP.A for aggregated data (all exchanges)
+            const symbol = 'BTCUSDT_PERP.A';
+            
             try {
                 // Fetch all data in parallel
-                // Using BTC_PERP.A for aggregated data (all exchanges)
                 const [priceRes, fundingRes, oiRes] = await Promise.all([
-                    fetch(`${COINALYZE_BASE}/ohlcv-history?symbols=BTCUSD_PERP.A&interval=daily&from=${from}&to=${now}&api_key=${COINALYZE_API_KEY}`),
-                    fetch(`${COINALYZE_BASE}/funding-rate-history?symbols=BTCUSD_PERP.A&interval=daily&from=${from}&to=${now}&api_key=${COINALYZE_API_KEY}`),
-                    fetch(`${COINALYZE_BASE}/open-interest-history?symbols=BTCUSD_PERP.A&interval=daily&from=${from}&to=${now}&convert_to_usd=true&api_key=${COINALYZE_API_KEY}`)
+                    fetch(`${COINALYZE_BASE}/ohlcv-history?symbols=${symbol}&interval=daily&from=${from}&to=${now}&api_key=${COINALYZE_API_KEY}`),
+                    fetch(`${COINALYZE_BASE}/funding-rate-history?symbols=${symbol}&interval=daily&from=${from}&to=${now}&api_key=${COINALYZE_API_KEY}`),
+                    fetch(`${COINALYZE_BASE}/open-interest-history?symbols=${symbol}&interval=daily&from=${from}&to=${now}&convert_to_usd=true&api_key=${COINALYZE_API_KEY}`)
                 ]);
+                
+                // Check for HTTP errors
+                if (!priceRes.ok || !fundingRes.ok || !oiRes.ok) {
+                    console.error('Coinalyze API HTTP error:', {
+                        price: priceRes.status,
+                        funding: fundingRes.status,
+                        oi: oiRes.status
+                    });
+                    throw new Error('API returned error status');
+                }
                 
                 const [priceData, fundingData, oiData] = await Promise.all([
                     priceRes.json(),
                     fundingRes.json(),
                     oiRes.json()
                 ]);
+                
+                console.log('Coinalyze responses:', { priceData, fundingData, oiData });
                 
                 // Process price data (OHLCV)
                 if (priceData && priceData[0] && priceData[0].history) {
@@ -1270,12 +1335,30 @@
                 }
                 
                 if (loadingEl) loadingEl.style.display = 'none';
+                
+                // Check if we got data
+                if (coinalyzeData.price.length === 0) {
+                    throw new Error('No price data returned');
+                }
+                
                 renderCoinalyzeCharts();
                 
             } catch (error) {
                 console.error('Coinalyze API error:', error);
                 if (loadingEl) loadingEl.style.display = 'none';
-                if (errorEl) errorEl.style.display = 'block';
+                if (errorEl) {
+                    errorEl.style.display = 'block';
+                    // Update error message with more details
+                    errorEl.innerHTML = `
+                        <div style="color: var(--bad); font-size: 13px;">Failed to load Coinalyze data</div>
+                        <div style="color: var(--text-muted); font-size: 11px; margin-top: 4px;">
+                            ${error.message || 'CORS may be blocking the request'}
+                        </div>
+                        <div style="color: var(--text-dim); font-size: 10px; margin-top: 8px;">
+                            Check browser console for details
+                        </div>
+                    `;
+                }
             }
         }
         
@@ -1543,6 +1626,16 @@
                 "symbol": "INDEX:ETHUSD",
                 "interval": "W"
             });
+            
+            // HYPE/USDT Chart - Bybit Perpetual (for Hyperliquid tab)
+            if (document.getElementById('hype-chart')) {
+                new TradingView.widget({
+                    ...chartConfig,
+                    "container_id": "hype-chart",
+                    "symbol": "BYBIT:HYPEUSDT.P",
+                    "interval": "D"
+                });
+            }
             
             // Cross-Asset Comparison Chart (BTC vs ETH vs S&P500 vs NASDAQ)
             // Using line style (2) with area fills for better visibility
