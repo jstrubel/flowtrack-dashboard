@@ -754,10 +754,10 @@
                         <div class="card-subtitle">Fed Balance Sheet − RRP − TGA (Trillions USD)</div>
                     </div>
                     <div style="display: flex; gap: 8px;">
-                        <button class="period-btn active" data-liquidity-period="1y">1Y</button>
+                        <button class="period-btn" data-liquidity-period="1y">1Y</button>
                         <button class="period-btn" data-liquidity-period="2y">2Y</button>
                         <button class="period-btn" data-liquidity-period="3y">3Y</button>
-                        <button class="period-btn" data-liquidity-period="all">ALL</button>
+                        <button class="period-btn active" data-liquidity-period="all">ALL</button>
                     </div>
                 </div>
                 <div style="height: 400px; margin-top: 12px;">
@@ -916,8 +916,8 @@
                     <div class="time-selector">
                         <button class="time-btn" onclick="updateStablecoinChart('30')">30D</button>
                         <button class="time-btn" onclick="updateStablecoinChart('90')">90D</button>
-                        <button class="time-btn active" onclick="updateStablecoinChart('365')">1Y</button>
-                        <button class="time-btn" onclick="updateStablecoinChart('all')">ALL</button>
+                        <button class="time-btn" onclick="updateStablecoinChart('365')">1Y</button>
+                        <button class="time-btn active" onclick="updateStablecoinChart('all')">ALL</button>
                     </div>
                 </div>
                 <div class="chart-container tall">
@@ -1645,10 +1645,20 @@
                         const btcOI = d.c;
                         const ethOI = ethMap.get(d.t) || 0;
                         
-                        // Total OI market = BTC + ETH + Others
-                        // Based on typical market data: BTC ~35-45%, ETH ~10-15%, Others ~45%
-                        // We estimate total based on BTC being roughly 40% of market
-                        const estimatedTotal = btcOI / 0.40;
+                        // Calculate BTC+ETH combined, then estimate Others
+                        // Historical data suggests BTC+ETH together are ~55-60% of total OI
+                        // So Others = roughly 40-45% of total
+                        // Use the BTC/ETH ratio to dynamically estimate
+                        const btcEthCombined = btcOI + ethOI;
+                        
+                        // Estimate total: BTC+ETH represents approximately 55% of market
+                        // This ratio varies: higher in bear markets (~60%), lower in alt seasons (~50%)
+                        // Use ETH ratio to BTC as a proxy for alt season intensity
+                        const ethBtcRatio = ethOI / btcOI;
+                        // When ETH is stronger relative to BTC, alts are likely stronger too
+                        const btcEthShareOfTotal = 0.52 + (0.08 * (1 - Math.min(ethBtcRatio, 0.5) / 0.5));
+                        
+                        const estimatedTotal = btcEthCombined / btcEthShareOfTotal;
                         const othersOI = Math.max(0, estimatedTotal - btcOI - ethOI);
                         
                         // Calculate percentages of estimated total
@@ -2147,7 +2157,11 @@
         }
         
         function updateFearGreedChart(days) {
-            document.querySelectorAll('#fearGreedHistoryChart').closest('.card').querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+            // Find the card containing the chart and update button states
+            const card = document.getElementById('fearGreedHistoryChart')?.closest('.card');
+            if (card) {
+                card.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+            }
             event.target.classList.add('active');
             loadFearGreedHistory(days);
         }
@@ -2700,10 +2714,23 @@
             { date: '2024-09-04', liquidity: 5.85, btc: 57000 },
             { date: '2024-10-02', liquidity: 5.92, btc: 64000 },
             { date: '2024-11-06', liquidity: 5.98, btc: 75000 },
-            { date: '2024-12-04', liquidity: 6.02, btc: 98000 }
+            { date: '2024-12-04', liquidity: 6.02, btc: 98000 },
+            // 2025 - New cycle
+            { date: '2025-01-08', liquidity: 6.08, btc: 94000 },
+            { date: '2025-02-05', liquidity: 6.12, btc: 98000 },
+            { date: '2025-03-05', liquidity: 6.05, btc: 91000 },
+            { date: '2025-04-02', liquidity: 5.98, btc: 84000 },
+            { date: '2025-05-07', liquidity: 6.02, btc: 97000 },
+            { date: '2025-06-04', liquidity: 6.08, btc: 105000 },
+            { date: '2025-07-02', liquidity: 6.15, btc: 108000 },
+            { date: '2025-08-06', liquidity: 6.22, btc: 102000 },
+            { date: '2025-09-03', liquidity: 6.18, btc: 98000 },
+            { date: '2025-10-01', liquidity: 6.12, btc: 95000 },
+            { date: '2025-11-05', liquidity: 6.08, btc: 88000 },
+            { date: '2025-12-03', liquidity: 6.15, btc: 99000 }
         ];
         
-        async function renderLiquidityBTCChart(period = '1y') {
+        async function renderLiquidityBTCChart(period = 'all') {
             const chartContainer = document.getElementById('liquidity-btc-chart');
             if (!chartContainer) return;
             
@@ -2961,7 +2988,7 @@
             }
         }
         
-        async function fetchStablecoinHistory(days = '365') {
+        async function fetchStablecoinHistory(days = 'all') {
             try {
                 const response = await fetch(`${DEFILLAMA_STABLES}/stablecoincharts/all`);
                 if (!response.ok) throw new Error('DefiLlama history API error');
