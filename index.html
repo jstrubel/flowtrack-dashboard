@@ -515,6 +515,50 @@
             text-decoration: none;
         }
         
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-secondary);
+            padding: 4px;
+            border-radius: 10px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border: none;
+            background: none;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        
+        .tab-btn:hover { 
+            color: var(--text); 
+            background: rgba(255,255,255,0.03);
+        }
+        
+        .tab-btn.active { 
+            background: var(--accent); 
+            color: white;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
         /* Time Selector */
         .time-selector {
             display: flex;
@@ -598,6 +642,16 @@
                 </div>
             </div>
         </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+            <button class="tab-btn" onclick="switchTab('derivatives')">Derivatives Data</button>
+            <button class="tab-btn" onclick="switchTab('hyperliquid')">Hyperliquid</button>
+        </div>
+
+        <!-- DASHBOARD TAB -->
+        <div id="tab-dashboard" class="tab-content active">
 
         <!-- Price Charts Section - BTC/ETH -->
         <div class="section">
@@ -685,8 +739,8 @@
             <div class="card">
                 <div class="card-header">
                     <div>
-                        <div class="card-title">Global Net Liquidity vs Bitcoin</div>
-                        <div class="card-subtitle">Fed − RRP − TGA = Net Liquidity (Trillions USD) • BTC correlation tracking</div>
+                        <div class="card-title">US Net Liquidity vs Bitcoin</div>
+                        <div class="card-subtitle">Fed Balance Sheet − RRP − TGA (Trillions USD)</div>
                     </div>
                     <div style="display: flex; gap: 8px;">
                         <button class="period-btn active" data-liquidity-period="1y">1Y</button>
@@ -861,6 +915,16 @@
             </div>
         </div>
 
+        </div><!-- END DASHBOARD TAB -->
+
+        <!-- DERIVATIVES DATA TAB -->
+        <div id="tab-derivatives" class="tab-content">
+        
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">Derivatives Market Data</div>
+            </div>
+
         <!-- Main Content -->
         <div class="grid-2">
             <!-- Funding Rates Section -->
@@ -998,6 +1062,49 @@
             </div>
         </div>
         
+        </div><!-- Close section -->
+        </div><!-- END DERIVATIVES TAB -->
+
+        <!-- HYPERLIQUID TAB -->
+        <div id="tab-hyperliquid" class="tab-content">
+        
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">Hyperliquid Analytics</div>
+            </div>
+            
+            <div class="card" style="text-align: center; padding: 60px 40px;">
+                <div style="font-size: 48px; margin-bottom: 16px;">🚀</div>
+                <div style="font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 12px;">
+                    Hyperliquid Data Coming Soon
+                </div>
+                <div style="font-size: 14px; color: var(--text-muted); max-width: 500px; margin: 0 auto; line-height: 1.6;">
+                    This section will include Hyperliquid-specific metrics: vault performance, 
+                    funding rates, open interest, liquidations, and market making analytics.
+                </div>
+                <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                    <div style="padding: 10px 16px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border);">
+                        <div style="font-size: 11px; color: var(--text-muted);">Planned Features</div>
+                        <div style="font-size: 13px; color: var(--text); margin-top: 4px;">HL Funding Rates</div>
+                    </div>
+                    <div style="padding: 10px 16px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border);">
+                        <div style="font-size: 11px; color: var(--text-muted);">Planned Features</div>
+                        <div style="font-size: 13px; color: var(--text); margin-top: 4px;">Vault Analytics</div>
+                    </div>
+                    <div style="padding: 10px 16px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border);">
+                        <div style="font-size: 11px; color: var(--text-muted);">Planned Features</div>
+                        <div style="font-size: 13px; color: var(--text); margin-top: 4px;">Liquidation Tracker</div>
+                    </div>
+                    <div style="padding: 10px 16px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border);">
+                        <div style="font-size: 11px; color: var(--text-muted);">Planned Features</div>
+                        <div style="font-size: 13px; color: var(--text); margin-top: 4px;">Market Making Stats</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        </div><!-- END HYPERLIQUID TAB -->
+
     </div>
 
     <footer>
@@ -1025,6 +1132,33 @@
         
         let fundingChart = null;
         let fundingData = [];
+        
+        // ==================== TAB NAVIGATION ====================
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            const selectedTab = document.getElementById('tab-' + tabName);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+            
+            // Re-initialize TradingView charts if switching to dashboard (they may not render when hidden)
+            if (tabName === 'dashboard') {
+                setTimeout(initTradingViewCharts, 100);
+            }
+        }
         
         // ==================== UTILITIES ====================
         function formatNumber(num, decimals = 2) {
