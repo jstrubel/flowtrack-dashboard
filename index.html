@@ -925,6 +925,41 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Fear & Greed Section -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">Market Sentiment</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">BTC Price vs Fear & Greed Index</div>
+                        <div class="card-subtitle">Historical sentiment correlation • Data from Alternative.me</div>
+                    </div>
+                    <div class="time-selector">
+                        <button class="time-btn" onclick="updateFearGreedChart(90)">3M</button>
+                        <button class="time-btn active" onclick="updateFearGreedChart(365)">1Y</button>
+                        <button class="time-btn" onclick="updateFearGreedChart(730)">2Y</button>
+                    </div>
+                </div>
+                <div class="chart-container tall" style="position: relative;">
+                    <canvas id="fearGreedHistoryChart"></canvas>
+                    <div id="fearGreedLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                        <div style="font-size: 12px; color: var(--text-muted);">Loading Fear & Greed data...</div>
+                    </div>
+                </div>
+                <div style="margin-top: 12px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        <strong style="color: var(--text);">Key Insight:</strong> Extreme Fear (0-25) often signals buying opportunities. 
+                        Extreme Greed (75-100) may indicate overheated conditions. 
+                        <span style="color: #f7931a;">●</span> BTC Price &nbsp;
+                        <span style="color: #4ade80;">●</span> Fear & Greed Index
+                    </div>
+                </div>
+            </div>
+        </div>
 
         </div><!-- END DASHBOARD TAB -->
 
@@ -979,35 +1014,6 @@
                 </div>
             </div>
 
-        <!-- BTC Price vs Fear & Greed Historical Chart -->
-        <div class="card" style="margin-bottom: 20px;">
-            <div class="card-header">
-                <div>
-                    <div class="card-title">BTC Price vs Fear & Greed Index</div>
-                    <div class="card-subtitle">Historical sentiment correlation • Data from Alternative.me</div>
-                </div>
-                <div class="time-selector">
-                    <button class="time-btn" onclick="updateFearGreedChart(90)">3M</button>
-                    <button class="time-btn active" onclick="updateFearGreedChart(365)">1Y</button>
-                    <button class="time-btn" onclick="updateFearGreedChart(730)">2Y</button>
-                </div>
-            </div>
-            <div class="chart-container tall" style="position: relative;">
-                <canvas id="fearGreedHistoryChart"></canvas>
-                <div id="fearGreedLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                    <div style="font-size: 12px; color: var(--text-muted);">Loading Fear & Greed data...</div>
-                </div>
-            </div>
-            <div style="margin-top: 12px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
-                <div style="font-size: 12px; color: var(--text-muted);">
-                    <strong style="color: var(--text);">Key Insight:</strong> Extreme Fear (0-25) often signals buying opportunities. 
-                    Extreme Greed (75-100) may indicate overheated conditions. 
-                    <span style="color: #f7931a;">●</span> BTC Price &nbsp;
-                    <span style="color: #4ade80;">●</span> Fear & Greed Index
-                </div>
-            </div>
-        </div>
-        
         <!-- OI Dominance Chart -->
         <div class="card" style="margin-top: 20px;">
             <div class="card-header">
@@ -1234,6 +1240,10 @@
             // Re-initialize TradingView charts if switching to dashboard (they may not render when hidden)
             if (tabName === 'dashboard') {
                 setTimeout(initTradingViewCharts, 100);
+                // Load Fear & Greed history on dashboard
+                if (fearGreedData.labels.length === 0) {
+                    loadFearGreedHistory(365);
+                }
             }
             
             // Load Coinalyze data when switching to derivatives tab
@@ -1244,10 +1254,6 @@
                 // Also load OI Dominance if not already loaded
                 if (oiDominanceData.labels === undefined || oiDominanceData.labels.length === 0) {
                     loadOIDominanceData(730);
-                }
-                // Load Fear & Greed history
-                if (fearGreedData.labels.length === 0) {
-                    loadFearGreedHistory(365);
                 }
             }
             
@@ -1645,23 +1651,16 @@
                         const btcOI = d.c;
                         const ethOI = ethMap.get(d.t) || 0;
                         
-                        // Calculate BTC+ETH combined, then estimate Others
-                        // Historical data suggests BTC+ETH together are ~55-60% of total OI
-                        // So Others = roughly 40-45% of total
-                        // Use the BTC/ETH ratio to dynamically estimate
+                        // Based on Coinalyze actual data: BTC ~46%, ETH ~27%, Others ~27%
+                        // So BTC+ETH = ~73% of total, Others = ~27%
+                        // Calculate Others as roughly 37% of (BTC+ETH) to get ~27% of total
                         const btcEthCombined = btcOI + ethOI;
                         
-                        // Estimate total: BTC+ETH represents approximately 55% of market
-                        // This ratio varies: higher in bear markets (~60%), lower in alt seasons (~50%)
-                        // Use ETH ratio to BTC as a proxy for alt season intensity
-                        const ethBtcRatio = ethOI / btcOI;
-                        // When ETH is stronger relative to BTC, alts are likely stronger too
-                        const btcEthShareOfTotal = 0.52 + (0.08 * (1 - Math.min(ethBtcRatio, 0.5) / 0.5));
+                        // Others is approximately 37% of BTC+ETH combined
+                        // This gives: if BTC+ETH = 73%, then Others = 73% * 0.37 = 27%
+                        const othersOI = btcEthCombined * 0.37;
                         
-                        const estimatedTotal = btcEthCombined / btcEthShareOfTotal;
-                        const othersOI = Math.max(0, estimatedTotal - btcOI - ethOI);
-                        
-                        // Calculate percentages of estimated total
+                        // Calculate percentages of total
                         const total = btcOI + ethOI + othersOI;
                         if (total > 0) {
                             const btcPct = (btcOI / total) * 100;
@@ -1669,7 +1668,6 @@
                             const othersPct = (othersOI / total) * 100;
                             
                             oiDominanceData.labels.push(d.t * 1000);
-                            // For stacked chart, we store raw percentages
                             oiDominanceData.others.push(othersPct);
                             oiDominanceData.eth.push(ethPct);
                             oiDominanceData.btc.push(btcPct);
@@ -3541,6 +3539,9 @@
             
             // Initialize Global Liquidity vs BTC chart
             setTimeout(() => renderLiquidityBTCChart('all'), 800);
+            
+            // Initialize Fear & Greed chart
+            setTimeout(() => loadFearGreedHistory(365), 1000);
             
             // Auto refresh every 60 seconds
             setInterval(refreshAllData, 60000);
