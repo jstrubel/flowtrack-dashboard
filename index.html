@@ -960,6 +960,36 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Altcoin Breadth Section -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">Market Breadth</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Altcoin Breadth: % Above 200 DMA</div>
+                        <div class="card-subtitle">Percentage of top 50 altcoins trading above their 200-day moving average</div>
+                    </div>
+                    <div id="breadthValue" style="font-size: 24px; font-weight: 700; color: var(--accent);">--</div>
+                </div>
+                <div class="chart-container tall" style="position: relative;">
+                    <canvas id="altcoinBreadthChart"></canvas>
+                    <div id="breadthLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                        <div style="font-size: 12px; color: var(--text-muted);">Calculating altcoin breadth...</div>
+                    </div>
+                </div>
+                <div style="margin-top: 12px; padding: 12px; background: rgba(74, 222, 128, 0.1); border-radius: 8px; border-left: 3px solid #4ade80;">
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        <strong style="color: var(--text);">Interpretation:</strong> High breadth (>75%) = broad participation, bullish conditions. 
+                        Low breadth (<25%) = narrow market, potential capitulation or early recovery.
+                        Currently analyzing top 50 altcoins by market cap.
+                    </div>
+                </div>
+            </div>
+        </div>
 
         </div><!-- END DASHBOARD TAB -->
 
@@ -1652,12 +1682,8 @@
                         const ethOI = ethMap.get(d.t) || 0;
                         
                         // Based on Coinalyze actual data: BTC ~46%, ETH ~27%, Others ~27%
-                        // So BTC+ETH = ~73% of total, Others = ~27%
                         // Calculate Others as roughly 37% of (BTC+ETH) to get ~27% of total
                         const btcEthCombined = btcOI + ethOI;
-                        
-                        // Others is approximately 37% of BTC+ETH combined
-                        // This gives: if BTC+ETH = 73%, then Others = 73% * 0.37 = 27%
                         const othersOI = btcEthCombined * 0.37;
                         
                         // Calculate percentages of total
@@ -1668,9 +1694,13 @@
                             const othersPct = (othersOI / total) * 100;
                             
                             oiDominanceData.labels.push(d.t * 1000);
+                            // Store cumulative values for stacking:
+                            // Others is at bottom (just its value)
+                            // ETH stacks on Others (others + eth)
+                            // BTC stacks on ETH (others + eth + btc = 100%)
                             oiDominanceData.others.push(othersPct);
-                            oiDominanceData.eth.push(ethPct);
-                            oiDominanceData.btc.push(btcPct);
+                            oiDominanceData.eth.push(othersPct + ethPct);
+                            oiDominanceData.btc.push(othersPct + ethPct + btcPct);
                         }
                     });
                     
@@ -1699,8 +1729,8 @@
             
             console.log('Rendering OI dominance with data points:', oiDominanceData.labels.length);
             
-            // Coinalyze style: overlapping filled areas on 0-55% scale
-            // Order matters for visual layering: Others (back), ETH (middle), BTC (front)
+            // Coinalyze style: stacked area chart
+            // Order from bottom to top: Others (orange), ETH (green), BTC (blue)
             oiDominanceChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -1709,35 +1739,32 @@
                         {
                             label: 'Others',
                             data: oiDominanceData.others,
-                            backgroundColor: 'rgba(237, 137, 92, 0.7)',
+                            backgroundColor: 'rgba(237, 137, 92, 0.85)',
                             borderColor: 'rgba(237, 137, 92, 1)',
-                            borderWidth: 1,
+                            borderWidth: 0.5,
                             fill: 'origin',
                             tension: 0.1,
-                            pointRadius: 0,
-                            order: 3
+                            pointRadius: 0
                         },
                         {
                             label: 'ETH',
                             data: oiDominanceData.eth,
-                            backgroundColor: 'rgba(72, 187, 168, 0.7)',
+                            backgroundColor: 'rgba(72, 187, 168, 0.85)',
                             borderColor: 'rgba(72, 187, 168, 1)',
-                            borderWidth: 1,
-                            fill: 'origin',
+                            borderWidth: 0.5,
+                            fill: '-1',
                             tension: 0.1,
-                            pointRadius: 0,
-                            order: 2
+                            pointRadius: 0
                         },
                         {
                             label: 'BTC',
                             data: oiDominanceData.btc,
-                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.85)',
                             borderColor: 'rgba(59, 130, 246, 1)',
-                            borderWidth: 1,
-                            fill: 'origin',
+                            borderWidth: 0.5,
+                            fill: '-1',
                             tension: 0.1,
-                            pointRadius: 0,
-                            order: 1
+                            pointRadius: 0
                         }
                     ]
                 },
@@ -1765,7 +1792,21 @@
                             bodyColor: '#a0aec0',
                             callbacks: {
                                 title: ctx => new Date(ctx[0].parsed.x).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase(),
-                                label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(0) + '%'
+                                label: function(ctx) {
+                                    // Calculate actual percentage from cumulative values
+                                    const idx = ctx.dataIndex;
+                                    const chart = ctx.chart;
+                                    const others = chart.data.datasets[0].data[idx];
+                                    const ethCum = chart.data.datasets[1].data[idx];
+                                    const btcCum = chart.data.datasets[2].data[idx];
+                                    
+                                    let pct;
+                                    if (ctx.datasetIndex === 0) pct = others;
+                                    else if (ctx.datasetIndex === 1) pct = ethCum - others;
+                                    else pct = btcCum - ethCum;
+                                    
+                                    return ctx.dataset.label + ': ' + pct.toFixed(0) + '%';
+                                }
                             }
                         }
                     },
@@ -1782,7 +1823,7 @@
                         y: {
                             stacked: false,
                             min: 0,
-                            max: 55,
+                            max: 100,
                             grid: { 
                                 color: 'rgba(255,255,255,0.05)',
                                 drawBorder: false
@@ -1791,7 +1832,7 @@
                                 color: '#718096', 
                                 font: { size: 10 },
                                 callback: v => v + '%',
-                                stepSize: 17
+                                stepSize: 25
                             }
                         }
                     }
@@ -2167,6 +2208,139 @@
             }
             event.target.classList.add('active');
             loadFearGreedHistory(days);
+        }
+        
+        // ==================== ALTCOIN BREADTH ====================
+        let altcoinBreadthChart = null;
+        let breadthData = { labels: [], values: [] };
+        
+        async function loadAltcoinBreadth() {
+            const loadingEl = document.getElementById('breadthLoading');
+            const valueEl = document.getElementById('breadthValue');
+            if (loadingEl) loadingEl.style.display = 'block';
+            
+            try {
+                // Get top 50 coins by market cap from CoinGecko (excluding BTC, ETH, stablecoins)
+                const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false');
+                const coins = await res.json();
+                
+                // Filter to altcoins (exclude BTC, ETH, stablecoins, wrapped tokens)
+                const stablecoins = ['usdt', 'usdc', 'dai', 'tusd', 'busd', 'usdp', 'frax', 'usdd', 'fdusd', 'pyusd', 'eurc'];
+                const wrapped = ['wbtc', 'weth', 'steth', 'wsteth', 'cbeth', 'reth'];
+                const exclude = ['bitcoin', 'ethereum', ...stablecoins, ...wrapped];
+                
+                const altcoins = coins.filter(c => !exclude.includes(c.id)).slice(0, 50);
+                console.log('Analyzing', altcoins.length, 'altcoins for breadth');
+                
+                // For each altcoin, fetch 200-day price history and check if current > 200 DMA
+                let above200DMA = 0;
+                let analyzed = 0;
+                
+                // Process in batches to avoid rate limits
+                const batchSize = 10;
+                for (let i = 0; i < altcoins.length; i += batchSize) {
+                    const batch = altcoins.slice(i, i + batchSize);
+                    
+                    await Promise.all(batch.map(async (coin) => {
+                        try {
+                            const histRes = await fetch(`https://api.coingecko.com/api/v3/coins/${coin.id}/market_chart?vs_currency=usd&days=200&interval=daily`);
+                            const histData = await histRes.json();
+                            
+                            if (histData.prices && histData.prices.length >= 200) {
+                                // Calculate 200 DMA
+                                const prices = histData.prices.map(p => p[1]);
+                                const sum = prices.reduce((a, b) => a + b, 0);
+                                const dma200 = sum / prices.length;
+                                const currentPrice = prices[prices.length - 1];
+                                
+                                if (currentPrice > dma200) {
+                                    above200DMA++;
+                                }
+                                analyzed++;
+                            }
+                        } catch (e) {
+                            console.log('Failed to fetch', coin.id);
+                        }
+                    }));
+                    
+                    // Small delay between batches
+                    if (i + batchSize < altcoins.length) {
+                        await new Promise(r => setTimeout(r, 1000));
+                    }
+                }
+                
+                // Calculate breadth percentage
+                const breadthPct = analyzed > 0 ? (above200DMA / analyzed) * 100 : 0;
+                console.log(`Breadth: ${above200DMA}/${analyzed} = ${breadthPct.toFixed(1)}%`);
+                
+                // Update display
+                if (valueEl) {
+                    valueEl.textContent = breadthPct.toFixed(1) + '%';
+                    valueEl.style.color = breadthPct > 50 ? '#4ade80' : breadthPct > 25 ? '#fbbf24' : '#f87171';
+                }
+                
+                // Store current value for potential historical display
+                breadthData.current = breadthPct;
+                breadthData.above = above200DMA;
+                breadthData.total = analyzed;
+                
+                if (loadingEl) loadingEl.style.display = 'none';
+                renderBreadthGauge();
+                
+            } catch (error) {
+                console.error('Altcoin breadth error:', error);
+                if (loadingEl) {
+                    loadingEl.innerHTML = '<div style="color: var(--bad); font-size: 11px;">Failed to calculate breadth</div>';
+                }
+            }
+        }
+        
+        function renderBreadthGauge() {
+            if (altcoinBreadthChart) altcoinBreadthChart.destroy();
+            
+            const ctx = document.getElementById('altcoinBreadthChart');
+            if (!ctx || breadthData.current === undefined) return;
+            
+            const pct = breadthData.current;
+            
+            // Create a simple gauge-style visualization
+            altcoinBreadthChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Above 200 DMA', 'Below 200 DMA'],
+                    datasets: [{
+                        data: [breadthData.above, breadthData.total - breadthData.above],
+                        backgroundColor: ['rgba(74, 222, 128, 0.8)', 'rgba(248, 113, 113, 0.4)'],
+                        borderColor: ['#4ade80', '#f87171'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ctx.raw + ' altcoins'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#718096' }
+                        },
+                        y: {
+                            stacked: true,
+                            grid: { display: false },
+                            ticks: { color: '#a0aec0', font: { size: 12 } }
+                        }
+                    }
+                }
+            });
         }
         
         // ==================== HYPE ANALYTICS ====================
@@ -3542,6 +3716,9 @@
             
             // Initialize Fear & Greed chart
             setTimeout(() => loadFearGreedHistory(365), 1000);
+            
+            // Initialize Altcoin Breadth (delay to avoid rate limits)
+            setTimeout(() => loadAltcoinBreadth(), 2000);
             
             // Auto refresh every 60 seconds
             setInterval(refreshAllData, 60000);
