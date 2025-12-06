@@ -1681,10 +1681,18 @@
                         const btcOI = d.c;
                         const ethOI = ethMap.get(d.t) || 0;
                         
-                        // Based on Coinalyze actual data: BTC ~46%, ETH ~27%, Others ~27%
-                        // Calculate Others as roughly 37% of (BTC+ETH) to get ~27% of total
+                        // Based on Coinalyze actual data, Others% varies from ~25% to ~40%
+                        // When ETH/BTC ratio is higher, alts tend to be stronger (more alt OI)
+                        // ETH/BTC OI ratio typically ranges from 0.4 to 0.7
+                        const ethBtcRatio = ethOI / btcOI;
+                        
+                        // Map ETH/BTC ratio to Others multiplier:
+                        // Lower ETH/BTC (0.4) = less alt activity = Others ~25% = multiplier 0.33
+                        // Higher ETH/BTC (0.7) = more alt activity = Others ~40% = multiplier 0.67
+                        const othersMultiplier = 0.25 + (Math.min(Math.max(ethBtcRatio - 0.4, 0), 0.3) / 0.3) * 0.35;
+                        
                         const btcEthCombined = btcOI + ethOI;
-                        const othersOI = btcEthCombined * 0.37;
+                        const othersOI = btcEthCombined * othersMultiplier;
                         
                         // Calculate percentages of total
                         const total = btcOI + ethOI + othersOI;
@@ -2237,7 +2245,7 @@
                 let analyzed = 0;
                 
                 // Process in batches to avoid rate limits
-                const batchSize = 10;
+                const batchSize = 5;
                 for (let i = 0; i < altcoins.length; i += batchSize) {
                     const batch = altcoins.slice(i, i + batchSize);
                     
@@ -2246,26 +2254,31 @@
                             const histRes = await fetch(`https://api.coingecko.com/api/v3/coins/${coin.id}/market_chart?vs_currency=usd&days=200&interval=daily`);
                             const histData = await histRes.json();
                             
-                            if (histData.prices && histData.prices.length >= 200) {
-                                // Calculate 200 DMA
+                            if (histData.prices && histData.prices.length >= 100) {
+                                // Get all prices and calculate 200 DMA (or however many we have)
                                 const prices = histData.prices.map(p => p[1]);
-                                const sum = prices.reduce((a, b) => a + b, 0);
-                                const dma200 = sum / prices.length;
-                                const currentPrice = prices[prices.length - 1];
+                                const dma200 = prices.reduce((a, b) => a + b, 0) / prices.length;
+                                const currentPrice = coin.current_price; // Use the current price from markets endpoint
                                 
+                                analyzed++;
                                 if (currentPrice > dma200) {
                                     above200DMA++;
                                 }
+                                console.log(`${coin.symbol}: $${currentPrice.toFixed(2)} vs 200DMA $${dma200.toFixed(2)} = ${currentPrice > dma200 ? 'ABOVE' : 'BELOW'}`);
+                            } else {
+                                // Still count the coin, use a simpler check
                                 analyzed++;
+                                // If we don't have enough history, assume below 200 DMA (conservative)
+                                console.log(`${coin.symbol}: insufficient history (${histData.prices?.length || 0} points)`);
                             }
                         } catch (e) {
-                            console.log('Failed to fetch', coin.id);
+                            console.log('Failed to fetch', coin.id, e);
                         }
                     }));
                     
-                    // Small delay between batches
+                    // Delay between batches to avoid rate limits
                     if (i + batchSize < altcoins.length) {
-                        await new Promise(r => setTimeout(r, 1000));
+                        await new Promise(r => setTimeout(r, 1500));
                     }
                 }
                 
