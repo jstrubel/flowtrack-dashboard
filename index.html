@@ -668,7 +668,7 @@
                 <div class="card" style="padding: 0; overflow: hidden;">
                     <div style="padding: 16px 18px 8px 18px;">
                         <div class="card-title">Bitcoin (BTC/USD)</div>
-                        <div class="card-subtitle">Weekly Timeframe • INDEX (Full History)</div>
+                        <div class="card-subtitle">1 Week • Hourly • Binance</div>
                     </div>
                     <div class="tradingview-widget-container" style="height: 400px;">
                         <div id="btc-usd-chart" style="height: 100%;"></div>
@@ -679,7 +679,7 @@
                 <div class="card" style="padding: 0; overflow: hidden;">
                     <div style="padding: 16px 18px 8px 18px;">
                         <div class="card-title">Ethereum (ETH/USD)</div>
-                        <div class="card-subtitle">Weekly Timeframe • INDEX (Full History)</div>
+                        <div class="card-subtitle">1 Week • Hourly • Binance</div>
                     </div>
                     <div class="tradingview-widget-container" style="height: 400px;">
                         <div id="eth-usd-chart" style="height: 100%;"></div>
@@ -726,7 +726,7 @@
             <div class="card" style="padding: 0; overflow: hidden;">
                 <div style="padding: 16px 18px 8px 18px;">
                     <div class="card-title">BTC vs ETH vs S&P 500 vs NASDAQ (% Change)</div>
-                    <div class="card-subtitle">Hourly Timeframe • Percentage Scale Comparison</div>
+                    <div class="card-subtitle">1 Week • Hourly • Percentage Scale</div>
                 </div>
                 <div class="tradingview-widget-container" style="height: 500px;">
                     <div id="cross-asset-chart" style="height: 100%;"></div>
@@ -737,7 +737,7 @@
             <div class="card" style="padding: 0; overflow: hidden; margin-top: 16px;">
                 <div style="padding: 16px 18px 8px 18px;">
                     <div class="card-title">Crypto Leaders (% Change)</div>
-                    <div class="card-subtitle">BTC • ETH • SOL • HYPE • Hourly Timeframe</div>
+                    <div class="card-subtitle">BTC • ETH • SOL • HYPE • 1 Week Hourly</div>
                 </div>
                 <div class="tradingview-widget-container" style="height: 500px;">
                     <div id="crypto-leaders-chart" style="height: 100%;"></div>
@@ -2627,38 +2627,42 @@
                 "interval": "W"
             });
             
-            // BTC/USD Chart - Using INDEX for full price history
+            // BTC/USD Chart - 1 Week with hourly intervals
             new TradingView.widget({
                 ...chartConfig,
                 "container_id": "btc-usd-chart",
-                "symbol": "INDEX:BTCUSD",
-                "interval": "W"
+                "symbol": "BINANCE:BTCUSDT",
+                "interval": "60",
+                "range": "5D"
             });
             
-            // ETH/USD Chart - Using INDEX for full price history
+            // ETH/USD Chart - 1 Week with hourly intervals
             new TradingView.widget({
                 ...chartConfig,
                 "container_id": "eth-usd-chart",
-                "symbol": "INDEX:ETHUSD",
-                "interval": "W"
+                "symbol": "BINANCE:ETHUSDT",
+                "interval": "60",
+                "range": "5D"
             });
             
-            // HYPE/USDT Chart - Bybit Perpetual (for Hyperliquid tab)
+            // HYPE/USDT Chart - 1 Week with hourly intervals
             if (document.getElementById('hype-chart')) {
                 new TradingView.widget({
                     ...chartConfig,
                     "container_id": "hype-chart",
                     "symbol": "BYBIT:HYPEUSDT.P",
-                    "interval": "D"
+                    "interval": "60",
+                    "range": "5D"
                 });
             }
             
             // Cross-Asset Comparison Chart (BTC vs ETH vs S&P500 vs NASDAQ)
-            // Using line style (2) with area fills for better visibility
+            // 1 Week with hourly intervals
             new TradingView.widget({
                 "autosize": true,
                 "symbol": "BINANCE:BTCUSDT",
                 "interval": "60",
+                "range": "5D",
                 "timezone": "Etc/UTC",
                 "theme": "dark",
                 "style": "2",
@@ -2680,10 +2684,12 @@
             });
             
             // Crypto Leaders Chart (BTC vs ETH vs SOL vs HYPE)
+            // 1 Week with hourly intervals
             new TradingView.widget({
                 "autosize": true,
                 "symbol": "BINANCE:BTCUSDT",
                 "interval": "60",
+                "range": "5D",
                 "timezone": "Etc/UTC",
                 "theme": "dark",
                 "style": "2",
