@@ -1705,21 +1705,6 @@
                             oiDominanceData.btc.push(100); // Always 100% total
                         }
                     });
-                        if (total > 0) {
-                            const btcPct = (btcOI / total) * 100;
-                            const ethPct = (ethOI / total) * 100;
-                            const othersPct = (othersOI / total) * 100;
-                            
-                            oiDominanceData.labels.push(d.t * 1000);
-                            // Store cumulative values for stacking:
-                            // Others is at bottom (just its value)
-                            // ETH stacks on Others (others + eth)
-                            // BTC stacks on ETH (others + eth + btc = 100%)
-                            oiDominanceData.others.push(othersPct);
-                            oiDominanceData.eth.push(othersPct + ethPct);
-                            oiDominanceData.btc.push(othersPct + ethPct + btcPct);
-                        }
-                    });
                     
                     console.log('OI Dominance processed:', oiDominanceData);
                 }
