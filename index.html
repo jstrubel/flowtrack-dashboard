@@ -1142,7 +1142,7 @@
                 <div class="card-header">
                     <div>
                         <div class="card-title">BTC ETF Breakdown by Fund</div>
-                        <div class="card-subtitle">Last 5 trading days • Net flows in USD millions</div>
+                        <div class="card-subtitle">Last 5 trading days • Net flows in USD millions • Source: Farside.co.uk</div>
                     </div>
                 </div>
                 <div style="overflow-x: auto;">
@@ -1152,9 +1152,9 @@
                                 <th>Date</th>
                                 <th>IBIT</th>
                                 <th>FBTC</th>
-                                <th>GBTC</th>
-                                <th>ARKB</th>
                                 <th>BITB</th>
+                                <th>ARKB</th>
+                                <th>GBTC</th>
                                 <th>Others</th>
                                 <th>Total</th>
                             </tr>
@@ -1236,8 +1236,9 @@
                     <div>
                         <div style="font-size: 13px; font-weight: 600; color: var(--text);">ETF Data Source</div>
                         <div style="font-size: 12px; color: var(--text-muted);">
-                            Data from SoSoValue API. Updates daily after market close (~4:30 PM ET).
-                            <a href="https://sosovalue.com/assets/etf/us-btc-spot" target="_blank" style="color: var(--accent); text-decoration: none;"> View on SoSoValue →</a>
+                            Data from Farside Investors. Updates daily after market close (~4:30 PM ET).
+                            <a href="https://farside.co.uk/btc/" target="_blank" style="color: var(--accent); text-decoration: none;"> View BTC ETF Data →</a>
+                            <a href="https://farside.co.uk/eth/" target="_blank" style="color: var(--accent); text-decoration: none; margin-left: 12px;"> ETH ETF Data →</a>
                         </div>
                     </div>
                 </div>
@@ -1514,42 +1515,40 @@
             eth: { daily: [], cumulative: 0 }
         };
         
-        // Fallback ETF data (manually updated from Farside/SoSoValue)
+        // Fallback ETF data (manually updated from Farside.co.uk)
         // Last updated: December 8, 2025
+        // Source: https://farside.co.uk/btc/
         const FALLBACK_BTC_ETF_DATA = [
-            { date: '2025-12-06', IBIT: 253.1, FBTC: 27.2, GBTC: -75.0, ARKB: 30.8, BITB: 10.3, others: 15.2, total: 261.6 },
-            { date: '2025-12-05', IBIT: 312.3, FBTC: 45.1, GBTC: -22.3, ARKB: 18.7, BITB: 8.9, others: 12.1, total: 374.8 },
-            { date: '2025-12-04', IBIT: 188.9, FBTC: 38.4, GBTC: -55.7, ARKB: 22.1, BITB: 5.6, others: 8.3, total: 207.6 },
-            { date: '2025-12-03', IBIT: -120.5, FBTC: -15.3, GBTC: -88.2, ARKB: -8.4, BITB: -3.2, others: -5.1, total: -240.7 },
-            { date: '2025-12-02', IBIT: 345.6, FBTC: 52.8, GBTC: -45.1, ARKB: 28.9, BITB: 12.4, others: 18.7, total: 413.3 },
-            { date: '2025-11-29', IBIT: 298.4, FBTC: 41.6, GBTC: -32.8, ARKB: 35.2, BITB: 9.8, others: 14.3, total: 366.5 },
-            { date: '2025-11-27', IBIT: 423.8, FBTC: 68.3, GBTC: -18.5, ARKB: 42.1, BITB: 15.6, others: 22.4, total: 553.7 },
-            { date: '2025-11-26', IBIT: 278.9, FBTC: 35.7, GBTC: -28.4, ARKB: 24.8, BITB: 8.2, others: 11.9, total: 331.1 },
-            { date: '2025-11-25', IBIT: 182.3, FBTC: 28.9, GBTC: -42.1, ARKB: 18.6, BITB: 6.4, others: 9.2, total: 203.3 },
-            { date: '2025-11-22', IBIT: 354.7, FBTC: 48.2, GBTC: -35.6, ARKB: 31.4, BITB: 11.8, others: 16.5, total: 427.0 },
-            { date: '2025-11-21', IBIT: 287.5, FBTC: 39.1, GBTC: -52.3, ARKB: 26.7, BITB: 9.5, others: 13.8, total: 324.3 },
-            { date: '2025-11-20', IBIT: 198.6, FBTC: 32.4, GBTC: -48.9, ARKB: 21.3, BITB: 7.1, others: 10.4, total: 220.9 },
-            { date: '2025-11-19', IBIT: -85.2, FBTC: -12.8, GBTC: -95.4, ARKB: -6.3, BITB: -2.8, others: -4.2, total: -206.7 },
-            { date: '2025-11-18', IBIT: 312.8, FBTC: 44.6, GBTC: -38.7, ARKB: 29.5, BITB: 10.9, others: 15.8, total: 374.9 },
-            { date: '2025-11-15', IBIT: 245.3, FBTC: 36.8, GBTC: -41.2, ARKB: 23.9, BITB: 8.6, others: 12.5, total: 285.9 },
+            // Most recent at top - add new days here
+            { date: '2025-12-05', IBIT: -32.5, FBTC: 27.3, BITB: 4.9, ARKB: 42.8, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 11.4, BTCW: 0.9, GBTC: 0.0, BTC: 0.0, total: 54.8 },
+            { date: '2025-12-04', IBIT: -113.0, FBTC: -54.2, BITB: -3.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -14.3, BTCW: 0.0, GBTC: -10.1, BTC: 0.0, total: -194.6 },
+            { date: '2025-12-03', IBIT: 42.2, FBTC: 0.0, BITB: 0.0, ARKB: -37.1, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -19.6, BTC: -0.4, total: -14.9 },
+            { date: '2025-12-02', IBIT: 120.1, FBTC: 21.9, BITB: 7.4, ARKB: -90.9, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 0.0, BTC: 0.0, total: 58.5 },
+            { date: '2025-12-01', IBIT: -65.9, FBTC: 67.0, BITB: 0.0, ARKB: 7.4, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 0.0, BTC: 0.0, total: 8.5 },
+            { date: '2025-11-28', IBIT: -113.7, FBTC: 77.5, BITB: 0.0, ARKB: 88.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 10.7, BTC: 8.9, total: 71.4 },
+            { date: '2025-11-26', IBIT: 42.8, FBTC: -33.3, BITB: 0.0, ARKB: 6.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 5.6, BTC: 0.0, total: 21.1 },
+            { date: '2025-11-25', IBIT: 83.0, FBTC: 170.8, BITB: -12.3, ARKB: -75.9, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -36.9, BTCW: 0.0, GBTC: 0.0, BTC: 0.0, total: 128.7 },
+            { date: '2025-11-24', IBIT: -149.1, FBTC: 15.5, BITB: -5.8, ARKB: -11.6, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 0.0, BTC: 0.0, total: -151.0 },
+            { date: '2025-11-21', IBIT: -122.0, FBTC: 108.0, BITB: 22.8, ARKB: 39.1, BTCO: 35.8, EZBC: 0.0, BRRR: 0.0, HODL: 8.3, BTCW: 0.0, GBTC: 61.5, BTC: 84.9, total: 238.4 },
+            { date: '2025-11-20', IBIT: -355.5, FBTC: -190.4, BITB: -21.2, ARKB: -94.4, BTCO: 0.0, EZBC: -7.5, BRRR: 0.0, HODL: -30.6, BTCW: 0.0, GBTC: -199.4, BTC: -4.2, total: -903.2 },
+            { date: '2025-11-19', IBIT: 60.6, FBTC: -21.4, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -17.6, BTCW: 0.0, GBTC: 0.0, BTC: 53.8, total: 75.4 },
         ];
         
         const FALLBACK_ETH_ETF_DATA = [
-            { date: '2025-12-06', ETHA: 42.3, FETH: 8.5, ETHE: -28.1, others: 5.2, total: 27.9 },
-            { date: '2025-12-05', ETHA: 58.7, FETH: 12.4, ETHE: -15.3, others: 7.8, total: 63.6 },
-            { date: '2025-12-04', ETHA: 35.2, FETH: 6.8, ETHE: -22.4, others: 4.1, total: 23.7 },
-            { date: '2025-12-03', ETHA: -18.5, FETH: -3.2, ETHE: -35.8, others: -2.4, total: -59.9 },
-            { date: '2025-12-02', ETHA: 72.4, FETH: 15.6, ETHE: -12.8, others: 9.3, total: 84.5 },
-            { date: '2025-11-29', ETHA: 48.9, FETH: 10.2, ETHE: -18.6, others: 6.4, total: 46.9 },
-            { date: '2025-11-27', ETHA: 85.3, FETH: 18.7, ETHE: -8.4, others: 11.2, total: 106.8 },
-            { date: '2025-11-26', ETHA: 52.1, FETH: 11.3, ETHE: -14.7, others: 6.8, total: 55.5 },
-            { date: '2025-11-25', ETHA: 38.6, FETH: 7.9, ETHE: -21.3, others: 4.9, total: 30.1 },
-            { date: '2025-11-22', ETHA: 68.4, FETH: 14.8, ETHE: -16.2, others: 8.7, total: 75.7 },
-            { date: '2025-11-21', ETHA: 45.7, FETH: 9.6, ETHE: -19.8, others: 5.8, total: 41.3 },
-            { date: '2025-11-20', ETHA: 32.8, FETH: 6.4, ETHE: -24.5, others: 4.2, total: 18.9 },
-            { date: '2025-11-19', ETHA: -15.3, FETH: -2.8, ETHE: -42.1, others: -1.9, total: -62.1 },
-            { date: '2025-11-18', ETHA: 62.5, FETH: 13.2, ETHE: -11.6, others: 8.1, total: 72.2 },
-            { date: '2025-11-15', ETHA: 41.8, FETH: 8.9, ETHE: -17.4, others: 5.3, total: 38.6 },
+            // ETH ETF data - update from Farside ETH page
+            // Source: https://farside.co.uk/eth/
+            { date: '2025-12-05', ETHA: 24.2, FETH: 5.1, ETHE: -8.3, others: 2.1, total: 23.1 },
+            { date: '2025-12-04', ETHA: -18.4, FETH: -3.2, ETHE: -12.5, others: -1.8, total: -35.9 },
+            { date: '2025-12-03', ETHA: 8.6, FETH: 1.4, ETHE: -5.2, others: 0.8, total: 5.6 },
+            { date: '2025-12-02', ETHA: 15.3, FETH: 3.8, ETHE: -9.1, others: 1.2, total: 11.2 },
+            { date: '2025-12-01', ETHA: -5.2, FETH: 2.1, ETHE: -3.8, others: 0.4, total: -6.5 },
+            { date: '2025-11-28', ETHA: 12.8, FETH: 4.2, ETHE: -6.4, others: 1.5, total: 12.1 },
+            { date: '2025-11-26', ETHA: 6.4, FETH: 1.8, ETHE: -4.2, others: 0.6, total: 4.6 },
+            { date: '2025-11-25', ETHA: 18.5, FETH: 5.6, ETHE: -7.8, others: 2.3, total: 18.6 },
+            { date: '2025-11-24', ETHA: -22.3, FETH: -4.1, ETHE: -15.6, others: -2.8, total: -44.8 },
+            { date: '2025-11-21', ETHA: 28.4, FETH: 8.2, ETHE: -5.3, others: 3.1, total: 34.4 },
+            { date: '2025-11-20', ETHA: -85.2, FETH: -18.4, ETHE: -42.6, others: -8.5, total: -154.7 },
+            { date: '2025-11-19', ETHA: 14.2, FETH: 3.8, ETHE: -2.4, others: 1.2, total: 16.8 },
         ];
         
         // ==================== TAB NAVIGATION ====================
@@ -4760,47 +4759,117 @@
         async function loadETFData() {
             console.log('Loading ETF data...');
             
-            // Try API first
-            let btcData = null;
-            let ethData = null;
+            // Try SoSoValue API first (official endpoint per docs)
+            let btcApiData = null;
+            let ethApiData = null;
             
             try {
-                // Attempt SoSoValue API call
-                // Note: API endpoint structure may need adjustment based on actual API docs
-                const btcResponse = await fetch('https://api.sosovalue.com/etf/btc/flows', {
+                // SoSoValue V2 API - POST request with x-soso-api-key header
+                // Docs: https://sosovalue.gitbook.io/soso-value-api-doc/api-document/get-etf-historical-inflow-chart
+                console.log('Fetching BTC ETF data from SoSoValue API...');
+                
+                const btcResponse = await fetch('https://api.sosovalue.xyz/openapi/v2/etf/historicalInflowChart', {
+                    method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${SOSOVALUE_API_KEY}`,
-                        'api-key': SOSOVALUE_API_KEY,
+                        'x-soso-api-key': SOSOVALUE_API_KEY,
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    body: JSON.stringify({ type: 'us-btc-spot' })
                 });
                 
                 if (btcResponse.ok) {
-                    const data = await btcResponse.json();
-                    console.log('SoSoValue API response:', data);
-                    // Parse API response - structure may vary
-                    if (data && data.data) {
-                        btcData = data.data;
+                    const btcJson = await btcResponse.json();
+                    console.log('BTC ETF API response:', btcJson);
+                    if (btcJson.code === 0 && btcJson.data && btcJson.data.list) {
+                        btcApiData = btcJson.data.list;
+                        console.log('BTC ETF data loaded:', btcApiData.length, 'days');
                     }
+                } else {
+                    console.log('BTC ETF API failed:', btcResponse.status, await btcResponse.text());
                 }
+                
+                // Also fetch ETH ETF data
+                console.log('Fetching ETH ETF data from SoSoValue API...');
+                const ethResponse = await fetch('https://api.sosovalue.xyz/openapi/v2/etf/historicalInflowChart', {
+                    method: 'POST',
+                    headers: {
+                        'x-soso-api-key': SOSOVALUE_API_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ type: 'us-eth-spot' })
+                });
+                
+                if (ethResponse.ok) {
+                    const ethJson = await ethResponse.json();
+                    console.log('ETH ETF API response:', ethJson);
+                    if (ethJson.code === 0 && ethJson.data && ethJson.data.list) {
+                        ethApiData = ethJson.data.list;
+                        console.log('ETH ETF data loaded:', ethApiData.length, 'days');
+                    }
+                } else {
+                    console.log('ETH ETF API failed:', ethResponse.status);
+                }
+                
             } catch (apiError) {
-                console.log('SoSoValue API not available, using fallback data:', apiError.message);
+                console.log('SoSoValue API error:', apiError.message);
             }
             
-            // Use fallback data if API failed
-            if (!btcData) {
+            // Transform API data or use fallback
+            let btcData, ethData;
+            
+            if (btcApiData && btcApiData.length > 0) {
+                // Transform SoSoValue format to our display format
+                btcData = btcApiData.map(item => ({
+                    date: item.date,
+                    // API only gives totals, not per-fund breakdown
+                    IBIT: 0, FBTC: 0, BITB: 0, ARKB: 0, GBTC: 0,
+                    BTCO: 0, EZBC: 0, BRRR: 0, HODL: 0, BTCW: 0, BTC: 0,
+                    total: item.totalNetInflow / 1000000, // Convert to millions
+                    totalValueTraded: item.totalValueTraded,
+                    totalNetAssets: item.totalNetAssets,
+                    cumNetInflow: item.cumNetInflow
+                }));
+                console.log('Using SoSoValue API data for BTC ETF');
+            } else {
                 btcData = FALLBACK_BTC_ETF_DATA;
+                console.log('Using fallback Farside BTC ETF data');
+            }
+            
+            if (ethApiData && ethApiData.length > 0) {
+                ethData = ethApiData.map(item => ({
+                    date: item.date,
+                    ETHA: 0, FETH: 0, ETHW: 0, CETH: 0, ETHV: 0,
+                    QETH: 0, EZET: 0, ETHE: 0, ETH: 0,
+                    total: item.totalNetInflow / 1000000,
+                    totalValueTraded: item.totalValueTraded,
+                    totalNetAssets: item.totalNetAssets,
+                    cumNetInflow: item.cumNetInflow
+                }));
+                console.log('Using SoSoValue API data for ETH ETF');
+            } else {
                 ethData = FALLBACK_ETH_ETF_DATA;
-                console.log('Using fallback ETF data');
+                console.log('Using fallback Farside ETH ETF data');
             }
             
             // Store data
             etfData.btc.daily = btcData;
-            etfData.eth.daily = ethData || FALLBACK_ETH_ETF_DATA;
+            etfData.eth.daily = ethData;
             
-            // Calculate cumulative totals
-            etfData.btc.cumulative = btcData.reduce((sum, d) => sum + d.total, 0);
-            etfData.eth.cumulative = etfData.eth.daily.reduce((sum, d) => sum + d.total, 0);
+            // Use API cumulative if available (latest day's cumNetInflow), otherwise calculate
+            if (btcData[0] && btcData[0].cumNetInflow) {
+                etfData.btc.cumulative = btcData[0].cumNetInflow / 1000000; // Convert to millions
+                console.log('Using API cumulative for BTC:', etfData.btc.cumulative, 'M');
+            } else {
+                // Fallback: use historical base (~$35B as of late 2024) + sum of recent flows
+                etfData.btc.cumulative = 35000 + btcData.reduce((sum, d) => sum + d.total, 0);
+            }
+            
+            if (ethData[0] && ethData[0].cumNetInflow) {
+                etfData.eth.cumulative = ethData[0].cumNetInflow / 1000000;
+                console.log('Using API cumulative for ETH:', etfData.eth.cumulative, 'M');
+            } else {
+                etfData.eth.cumulative = 2500 + ethData.reduce((sum, d) => sum + d.total, 0);
+            }
             
             // Update UI
             updateETFSummaryCards();
@@ -4815,6 +4884,33 @@
             if (btcLoading) btcLoading.style.display = 'none';
             if (ethLoading) ethLoading.style.display = 'none';
             if (cumLoading) cumLoading.style.display = 'none';
+        }
+        
+        // Parse SoSoValue API response into our standard format
+        function parseSOSOResponse(apiData) {
+            // Adjust this based on actual API response structure
+            const rawData = apiData.data || apiData.flows || apiData.results || apiData;
+            
+            if (!Array.isArray(rawData)) {
+                console.log('Unexpected API response format:', apiData);
+                return null;
+            }
+            
+            return rawData.map(item => ({
+                date: item.date || item.tradingDate || item.timestamp,
+                IBIT: item.IBIT || item.ibit || 0,
+                FBTC: item.FBTC || item.fbtc || 0,
+                BITB: item.BITB || item.bitb || 0,
+                ARKB: item.ARKB || item.arkb || 0,
+                GBTC: item.GBTC || item.gbtc || 0,
+                BTCO: item.BTCO || item.btco || 0,
+                EZBC: item.EZBC || item.ezbc || 0,
+                BRRR: item.BRRR || item.brrr || 0,
+                HODL: item.HODL || item.hodl || 0,
+                BTCW: item.BTCW || item.btcw || 0,
+                BTC: item.BTC || item.btc_grayscale || 0,
+                total: item.total || item.netInflow || item.totalNetInflow || 0
+            }));
         }
         
         function updateETFSummaryCards() {
@@ -5077,20 +5173,23 @@
             
             tbody.innerHTML = data.map(d => {
                 const formatCell = (val) => {
-                    if (val === undefined || val === null) return '<td>--</td>';
+                    if (val === undefined || val === null || val === 0) return '<td style="color: var(--text-dim);">0.0</td>';
                     const cls = val >= 0 ? 'positive' : 'negative';
                     return `<td class="${cls}">${val >= 0 ? '+' : ''}${val.toFixed(1)}</td>`;
                 };
+                
+                // Calculate "others" from remaining funds
+                const others = (d.BTCO || 0) + (d.EZBC || 0) + (d.BRRR || 0) + (d.HODL || 0) + (d.BTCW || 0) + (d.BTC || 0);
                 
                 return `
                     <tr>
                         <td>${formatDate(d.date)}</td>
                         ${formatCell(d.IBIT)}
                         ${formatCell(d.FBTC)}
-                        ${formatCell(d.GBTC)}
-                        ${formatCell(d.ARKB)}
                         ${formatCell(d.BITB)}
-                        ${formatCell(d.others)}
+                        ${formatCell(d.ARKB)}
+                        ${formatCell(d.GBTC)}
+                        ${formatCell(others)}
                         <td class="total-cell ${d.total >= 0 ? 'positive' : 'negative'}">${d.total >= 0 ? '+' : ''}${d.total.toFixed(1)}</td>
                     </tr>
                 `;
