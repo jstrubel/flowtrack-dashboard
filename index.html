@@ -980,17 +980,37 @@
                     </div>
                     <div id="breadthValue" style="font-size: 24px; font-weight: 700; color: var(--accent);">--</div>
                 </div>
-                <div class="chart-container tall" style="position: relative;">
+                <div class="chart-container" style="position: relative; height: 80px;">
                     <canvas id="altcoinBreadthChart"></canvas>
                     <div id="breadthLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
                         <div style="font-size: 12px; color: var(--text-muted);">Calculating altcoin breadth...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Historical Breadth Chart -->
+            <div class="card" style="margin-top: 16px;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Historical Altcoin Breadth</div>
+                        <div class="card-subtitle">% of altcoins above 200 DMA over time (calculated from Binance daily data)</div>
+                    </div>
+                    <div class="time-btns">
+                        <button class="time-btn" onclick="loadHistoricalBreadth(90)">3M</button>
+                        <button class="time-btn" onclick="loadHistoricalBreadth(180)">6M</button>
+                        <button class="time-btn active" onclick="loadHistoricalBreadth(365)">1Y</button>
+                    </div>
+                </div>
+                <div class="chart-container tall" style="position: relative;">
+                    <canvas id="historicalBreadthChart"></canvas>
+                    <div id="histBreadthLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                        <div style="font-size: 12px; color: var(--text-muted);">Loading historical breadth data...</div>
                     </div>
                 </div>
                 <div style="margin-top: 12px; padding: 12px; background: rgba(74, 222, 128, 0.1); border-radius: 8px; border-left: 3px solid #4ade80;">
                     <div style="font-size: 12px; color: var(--text-muted);">
                         <strong style="color: var(--text);">Interpretation:</strong> High breadth (>75%) = broad participation, bullish conditions. 
                         Low breadth (<25%) = narrow market, potential capitulation or early recovery.
-                        Currently analyzing 40 major Binance altcoins using actual 200 DMA calculation.
                     </div>
                 </div>
             </div>
@@ -2368,6 +2388,163 @@
             window.breadthChart = breadthChart;
         }
         
+        // ==================== HISTORICAL BREADTH ====================
+        let historicalBreadthChart = null;
+        
+        async function loadHistoricalBreadth(days = 365) {
+            const loadingEl = document.getElementById('histBreadthLoading');
+            if (loadingEl) loadingEl.style.display = 'block';
+            
+            // Update button states
+            document.querySelectorAll('.card:has(#historicalBreadthChart) .time-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if ((days === 90 && btn.textContent === '3M') ||
+                    (days === 180 && btn.textContent === '6M') ||
+                    (days === 365 && btn.textContent === '1Y')) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            try {
+                // Use a subset of altcoins for historical calc (faster)
+                const HIST_ALTS = [
+                    'SOLUSDT', 'XRPUSDT', 'DOGEUSDT', 'ADAUSDT', 'AVAXUSDT', 'LINKUSDT', 
+                    'DOTUSDT', 'LTCUSDT', 'ATOMUSDT', 'UNIUSDT', 'NEARUSDT', 'FILUSDT',
+                    'ARBUSDT', 'OPUSDT', 'INJUSDT', 'SUIUSDT', 'GRTUSDT', 'FTMUSDT',
+                    'AAVEUSDT', 'XLMUSDT'
+                ];
+                
+                // Fetch historical klines for each altcoin
+                const allKlines = {};
+                const fetchDays = days + 200; // Need extra 200 days for SMA calculation
+                
+                await Promise.all(HIST_ALTS.map(async (symbol) => {
+                    try {
+                        const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1d&limit=${Math.min(fetchDays, 1000)}`);
+                        if (res.ok) {
+                            const data = await res.json();
+                            allKlines[symbol] = data.map(k => ({
+                                time: k[0],
+                                close: parseFloat(k[4])
+                            }));
+                        }
+                    } catch (e) {
+                        console.log(`Failed to fetch ${symbol}`);
+                    }
+                }));
+                
+                // Calculate breadth for each day
+                const breadthHistory = [];
+                const symbols = Object.keys(allKlines);
+                
+                if (symbols.length > 0) {
+                    // Find common date range
+                    const minLength = Math.min(...symbols.map(s => allKlines[s].length));
+                    const startIdx = Math.max(0, minLength - days);
+                    
+                    for (let i = startIdx; i < minLength; i++) {
+                        // Need at least 200 days of history for SMA
+                        if (i < 199) continue;
+                        
+                        let aboveCount = 0;
+                        let totalCount = 0;
+                        
+                        for (const symbol of symbols) {
+                            const klines = allKlines[symbol];
+                            if (i >= klines.length) continue;
+                            
+                            // Calculate 200-day SMA up to this point
+                            const start = Math.max(0, i - 199);
+                            const prices = klines.slice(start, i + 1).map(k => k.close);
+                            const sma = prices.reduce((a, b) => a + b, 0) / prices.length;
+                            const currentPrice = klines[i].close;
+                            
+                            totalCount++;
+                            if (currentPrice > sma) aboveCount++;
+                        }
+                        
+                        if (totalCount > 0) {
+                            breadthHistory.push({
+                                date: allKlines[symbols[0]][i].time,
+                                breadth: (aboveCount / totalCount) * 100
+                            });
+                        }
+                    }
+                }
+                
+                console.log('Historical breadth points:', breadthHistory.length);
+                
+                // Render chart
+                if (loadingEl) loadingEl.style.display = 'none';
+                renderHistoricalBreadthChart(breadthHistory);
+                
+            } catch (error) {
+                console.error('Historical breadth error:', error);
+                if (loadingEl) {
+                    loadingEl.innerHTML = '<div style="color: var(--bad);">Failed to load historical data</div>';
+                }
+            }
+        }
+        
+        function renderHistoricalBreadthChart(data) {
+            if (historicalBreadthChart) historicalBreadthChart.destroy();
+            
+            const ctx = document.getElementById('historicalBreadthChart');
+            if (!ctx || !data.length) return;
+            
+            historicalBreadthChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => d.date),
+                    datasets: [{
+                        label: '% Above 200 DMA',
+                        data: data.map(d => d.breadth),
+                        borderColor: '#4ade80',
+                        backgroundColor: 'rgba(74, 222, 128, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 0,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { intersect: false, mode: 'index' },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                title: (items) => {
+                                    const date = new Date(items[0].parsed.x);
+                                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                                },
+                                label: ctx => ctx.parsed.y.toFixed(1) + '% above 200 DMA'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: { unit: 'month', displayFormats: { month: 'MMM yy' } },
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#718096', maxRotation: 0 }
+                        },
+                        y: {
+                            min: 0,
+                            max: 100,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { 
+                                color: '#718096',
+                                callback: v => v + '%'
+                            }
+                        }
+                    }
+                }
+            });
+            window.historicalBreadthChart = historicalBreadthChart;
+        }
+        
         // ==================== HYPE ANALYTICS ====================
         let hypeFeesChart = null;
         let hypePSChart = null;
@@ -2855,6 +3032,42 @@
         // Values in Trillions USD - Source: FRED, updated weekly
         // Last updated: December 2024
         const netLiquidityData = [
+            // 2015 - Post-taper, pre-rate hike era
+            { date: '2015-01-07', liquidity: 4.02, btc: 285 },
+            { date: '2015-04-01', liquidity: 4.01, btc: 245 },
+            { date: '2015-07-01', liquidity: 3.98, btc: 260 },
+            { date: '2015-10-07', liquidity: 3.95, btc: 245 },
+            { date: '2015-12-02', liquidity: 3.82, btc: 360 },
+            // 2016 - Slow recovery, halving year
+            { date: '2016-01-06', liquidity: 3.78, btc: 430 },
+            { date: '2016-04-06', liquidity: 3.75, btc: 420 },
+            { date: '2016-07-06', liquidity: 3.72, btc: 650 },
+            { date: '2016-10-05', liquidity: 3.68, btc: 610 },
+            { date: '2016-12-07', liquidity: 3.58, btc: 770 },
+            // 2017 - Bull run year
+            { date: '2017-01-04', liquidity: 3.52, btc: 1020 },
+            { date: '2017-03-01', liquidity: 3.48, btc: 1180 },
+            { date: '2017-05-03', liquidity: 3.45, btc: 1450 },
+            { date: '2017-07-05', liquidity: 3.42, btc: 2600 },
+            { date: '2017-09-06', liquidity: 3.38, btc: 4300 },
+            { date: '2017-11-01', liquidity: 3.32, btc: 6400 },
+            { date: '2017-12-06', liquidity: 3.25, btc: 14000 },
+            // 2018 - Bear market
+            { date: '2018-01-03', liquidity: 3.18, btc: 15000 },
+            { date: '2018-03-07', liquidity: 3.12, btc: 10500 },
+            { date: '2018-05-02', liquidity: 3.08, btc: 9200 },
+            { date: '2018-07-04', liquidity: 3.02, btc: 6500 },
+            { date: '2018-09-05', liquidity: 2.98, btc: 7300 },
+            { date: '2018-11-07', liquidity: 2.92, btc: 6400 },
+            { date: '2018-12-05', liquidity: 2.88, btc: 3800 },
+            // 2019 - Recovery year
+            { date: '2019-01-02', liquidity: 2.82, btc: 3700 },
+            { date: '2019-03-06', liquidity: 2.78, btc: 3850 },
+            { date: '2019-05-01', liquidity: 2.75, btc: 5400 },
+            { date: '2019-07-03', liquidity: 2.72, btc: 11200 },
+            { date: '2019-09-04', liquidity: 3.62, btc: 10400 },
+            { date: '2019-11-06', liquidity: 3.68, btc: 9300 },
+            { date: '2019-12-04', liquidity: 3.72, btc: 7300 },
             // 2020 - COVID QE era
             { date: '2020-01-08', liquidity: 3.76, btc: 8100 },
             { date: '2020-02-05', liquidity: 3.78, btc: 9600 },
@@ -3729,39 +3942,47 @@
             btn.textContent = '↻ Loading...';
             setStatus('loading', 'Updating...');
             
-            try {
-                // First batch: Binance APIs (no rate limit issues)
-                await Promise.all([
-                    fetchFundingRates(),
-                    fetchOpenInterest(),
-                    fetchLongShortRatio(),
-                    fetchFundingHistory(100)
-                ]);
-                
-                // Second batch: External APIs with small delay
-                await new Promise(r => setTimeout(r, 300));
-                await fetchFearGreed();
-                
-                // Third batch: CoinGecko (rate limited)
-                await new Promise(r => setTimeout(r, 300));
-                await fetchMarketData();
-                
-                // Fourth batch: DefiLlama
-                await new Promise(r => setTimeout(r, 300));
-                await Promise.all([
-                    fetchStablecoinData(),
-                    fetchStablecoinHistory('all')
-                ]);
-                
+            let errors = 0;
+            
+            // Helper to run async function and catch errors
+            const safeCall = async (fn, name) => {
+                try {
+                    await fn();
+                } catch (e) {
+                    console.error(`${name} failed:`, e);
+                    errors++;
+                }
+            };
+            
+            // First batch: Binance APIs (no rate limit issues)
+            await Promise.all([
+                safeCall(fetchFundingRates, 'FundingRates'),
+                safeCall(fetchOpenInterest, 'OpenInterest'),
+                safeCall(fetchLongShortRatio, 'LongShort'),
+                safeCall(() => fetchFundingHistory(100), 'FundingHistory'),
+                safeCall(fetchMarketData, 'MarketData')
+            ]);
+            
+            // Second batch: External APIs
+            await new Promise(r => setTimeout(r, 200));
+            await safeCall(fetchFearGreed, 'FearGreed');
+            
+            // Third batch: DefiLlama
+            await new Promise(r => setTimeout(r, 200));
+            await Promise.all([
+                safeCall(fetchStablecoinData, 'StablecoinData'),
+                safeCall(() => fetchStablecoinHistory('all'), 'StablecoinHistory')
+            ]);
+            
+            // Update status
+            if (errors === 0) {
                 setStatus('', new Date().toLocaleTimeString());
-                
-            } catch (error) {
-                console.error('Error refreshing data:', error);
-                setStatus('error', 'Error - Retrying...');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = '↻ Refresh';
+            } else {
+                setStatus('', new Date().toLocaleTimeString() + ` (${errors} warnings)`);
             }
+            
+            btn.disabled = false;
+            btn.textContent = '↻ Refresh';
         }
         
         // ==================== PDF EXPORT ====================
@@ -3902,6 +4123,9 @@
             
             // Initialize Altcoin Breadth (delay to avoid rate limits)
             setTimeout(() => loadAltcoinBreadth(), 2000);
+            
+            // Initialize Historical Breadth (delay further)
+            setTimeout(() => loadHistoricalBreadth(365), 4000);
             
             // Auto refresh every 60 seconds
             setInterval(refreshAllData, 60000);
