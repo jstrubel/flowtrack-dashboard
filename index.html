@@ -1009,8 +1009,9 @@
                     </div>
                     <div class="time-selector">
                         <button class="time-btn" onclick="updateFearGreedChart(90)">3M</button>
-                        <button class="time-btn active" onclick="updateFearGreedChart(365)">1Y</button>
-                        <button class="time-btn" onclick="updateFearGreedChart(730)">2Y</button>
+                        <button class="time-btn" onclick="updateFearGreedChart(365)">1Y</button>
+                        <button class="time-btn active" onclick="updateFearGreedChart(730)">2Y</button>
+                        <button class="time-btn" onclick="updateFearGreedChart(1500)">MAX</button>
                     </div>
                 </div>
                 <div class="chart-container tall" style="position: relative;">
@@ -1626,7 +1627,7 @@
                 setTimeout(initTradingViewCharts, 100);
                 // Load Fear & Greed history on dashboard
                 if (fearGreedData.labels.length === 0) {
-                    loadFearGreedHistory(365);
+                    loadFearGreedHistory(730);
                 }
             }
             
@@ -2409,29 +2410,75 @@
         window.fearGreedHistoryChart = null;
         let fearGreedData = { labels: [], fg: [], btcPrice: [] };
         
-        async function loadFearGreedHistory(days = 365) {
+        async function loadFearGreedHistory(days = 730) {
             const loadingEl = document.getElementById('fearGreedLoading');
             if (loadingEl) loadingEl.style.display = 'block';
             
             try {
-                // Fetch Fear & Greed data from Alternative.me
+                // Fetch Fear & Greed data from Alternative.me (supports up to ~2000 days)
                 const fgRes = await fetch(`https://api.alternative.me/fng/?limit=${days}&format=json`);
                 const fgData = await fgRes.json();
                 
-                // Fetch BTC price history from CoinGecko
-                const btcRes = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}&interval=daily`);
-                const btcData = await btcRes.json();
+                console.log('Fear & Greed data points:', fgData.data?.length);
                 
-                console.log('Fear & Greed data:', fgData);
-                console.log('BTC price data points:', btcData.prices?.length);
+                // Try multiple sources for BTC price history
+                let btcPrices = null;
                 
-                if (fgData.data && btcData.prices) {
+                // Try CoinGecko first
+                try {
+                    const btcRes = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}&interval=daily`);
+                    if (btcRes.ok) {
+                        const btcData = await btcRes.json();
+                        if (btcData.prices && btcData.prices.length > 0) {
+                            btcPrices = btcData.prices;
+                            console.log('BTC prices from CoinGecko:', btcPrices.length);
+                        }
+                    }
+                } catch (e) {
+                    console.log('CoinGecko failed, trying Binance...');
+                }
+                
+                // Fallback to Binance Klines
+                if (!btcPrices) {
+                    try {
+                        // Binance limits to 1000 klines per request, so we may need multiple
+                        const endTime = Date.now();
+                        const startTime = endTime - (days * 24 * 60 * 60 * 1000);
+                        const binanceRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&startTime=${startTime}&endTime=${endTime}&limit=1000`);
+                        if (binanceRes.ok) {
+                            const binanceData = await binanceRes.json();
+                            btcPrices = binanceData.map(k => [k[0], parseFloat(k[4])]); // [timestamp, close]
+                            console.log('BTC prices from Binance:', btcPrices.length);
+                        }
+                    } catch (e) {
+                        console.log('Binance failed too');
+                    }
+                }
+                
+                // Fallback to Kraken
+                if (!btcPrices) {
+                    try {
+                        const since = Math.floor((Date.now() - days * 24 * 60 * 60 * 1000) / 1000);
+                        const krakenRes = await fetch(`https://api.kraken.com/0/public/OHLC?pair=XBTUSD&interval=1440&since=${since}`);
+                        if (krakenRes.ok) {
+                            const krakenData = await krakenRes.json();
+                            if (krakenData.result && krakenData.result.XXBTZUSD) {
+                                btcPrices = krakenData.result.XXBTZUSD.map(k => [k[0] * 1000, parseFloat(k[4])]);
+                                console.log('BTC prices from Kraken:', btcPrices.length);
+                            }
+                        }
+                    } catch (e) {
+                        console.log('Kraken failed too');
+                    }
+                }
+                
+                if (fgData.data && btcPrices && btcPrices.length > 0) {
                     // Process F&G data (comes in reverse chronological order)
                     const fgProcessed = fgData.data.reverse();
                     
                     // Create date-indexed map for BTC prices
                     const btcMap = new Map();
-                    btcData.prices.forEach(([ts, price]) => {
+                    btcPrices.forEach(([ts, price]) => {
                         const dateStr = new Date(ts).toISOString().split('T')[0];
                         btcMap.set(dateStr, price);
                     });
@@ -2449,15 +2496,22 @@
                             fearGreedData.btcPrice.push(btcPrice);
                         }
                     });
+                    
+                    console.log('Aligned F&G data points:', fearGreedData.labels.length);
                 }
                 
                 if (loadingEl) loadingEl.style.display = 'none';
-                renderFearGreedChart();
+                
+                if (fearGreedData.labels.length > 0) {
+                    renderFearGreedChart();
+                } else {
+                    throw new Error('No aligned data');
+                }
                 
             } catch (error) {
                 console.error('Fear & Greed history error:', error);
                 if (loadingEl) {
-                    loadingEl.innerHTML = '<div style="color: var(--bad); font-size: 11px;">Failed to load data</div>';
+                    loadingEl.innerHTML = '<div style="color: var(--bad); font-size: 11px;">Failed to load data - APIs may be rate limited</div>';
                 }
             }
         }
@@ -5414,7 +5468,7 @@
             setTimeout(() => renderLiquidityBTCChart('all'), 800);
             
             // Initialize Fear & Greed chart
-            setTimeout(() => loadFearGreedHistory(365), 1000);
+            setTimeout(() => loadFearGreedHistory(730), 1000);
             
             // Initialize Altcoin Breadth (delay to avoid rate limits)
             setTimeout(() => loadAltcoinBreadth(), 2000);
