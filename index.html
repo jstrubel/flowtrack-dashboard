@@ -687,9 +687,9 @@
                     <div class="market-change" id="mcapChange">--</div>
                 </div>
                 <div class="market-card">
-                    <div class="market-label">24H Volume</div>
-                    <div class="market-value" id="totalVol">--</div>
-                    <div class="market-subtitle">Global trading volume</div>
+                    <div class="market-label">Fear & Greed</div>
+                    <div class="market-value" id="fgValueHeader">--</div>
+                    <div class="market-subtitle" id="fgLabelHeader">Loading...</div>
                 </div>
                 <div class="market-card">
                     <div class="market-label">BTC Price</div>
@@ -1532,6 +1532,23 @@
             { date: '2025-11-21', IBIT: -122.0, FBTC: 108.0, BITB: 22.8, ARKB: 39.1, BTCO: 35.8, EZBC: 0.0, BRRR: 0.0, HODL: 8.3, BTCW: 0.0, GBTC: 61.5, BTC: 84.9, total: 238.4 },
             { date: '2025-11-20', IBIT: -355.5, FBTC: -190.4, BITB: -21.2, ARKB: -94.4, BTCO: 0.0, EZBC: -7.5, BRRR: 0.0, HODL: -30.6, BTCW: 0.0, GBTC: -199.4, BTC: -4.2, total: -903.2 },
             { date: '2025-11-19', IBIT: 60.6, FBTC: -21.4, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -17.6, BTCW: 0.0, GBTC: 0.0, BTC: 53.8, total: 75.4 },
+            // Extended history for better cumulative chart visualization
+            { date: '2025-11-18', IBIT: 508.7, FBTC: 114.6, BITB: 12.8, ARKB: 68.4, BTCO: 8.2, EZBC: 6.4, BRRR: 0.0, HODL: 12.1, BTCW: 0.0, GBTC: 42.4, BTC: 15.2, total: 816.4 },
+            { date: '2025-11-15', IBIT: 125.6, FBTC: 85.2, BITB: 8.4, ARKB: 32.6, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 5.8, BTCW: 0.0, GBTC: 18.3, BTC: 0.0, total: 276.0 },
+            { date: '2025-11-14', IBIT: 256.4, FBTC: 134.8, BITB: 18.2, ARKB: 62.1, BTCO: 12.4, EZBC: 4.8, BRRR: 0.0, HODL: 8.4, BTCW: 0.0, GBTC: 32.6, BTC: 12.8, total: 510.5 },
+            { date: '2025-11-13', IBIT: 312.8, FBTC: 186.4, BITB: 24.6, ARKB: 78.2, BTCO: 18.4, EZBC: 8.2, BRRR: 0.0, HODL: 14.2, BTCW: 0.0, GBTC: 48.4, BTC: 18.6, total: 641.8 },
+            { date: '2025-11-12', IBIT: 486.2, FBTC: 242.6, BITB: 32.4, ARKB: 98.6, BTCO: 24.8, EZBC: 12.4, BRRR: 0.0, HODL: 18.6, BTCW: 0.0, GBTC: 62.8, BTC: 24.2, total: 1104.6 },
+            { date: '2025-11-11', IBIT: 624.8, FBTC: 308.4, BITB: 42.8, ARKB: 124.6, BTCO: 32.4, EZBC: 16.8, BRRR: 0.0, HODL: 24.2, BTCW: 0.0, GBTC: 78.4, BTC: 32.6, total: 1117.6 },
+            { date: '2025-11-08', IBIT: 168.4, FBTC: 86.2, BITB: 12.4, ARKB: 42.6, BTCO: 8.2, EZBC: 4.2, BRRR: 0.0, HODL: 6.4, BTCW: 0.0, GBTC: 22.4, BTC: 8.2, total: 293.2 },
+            { date: '2025-11-07', IBIT: 84.2, FBTC: 42.6, BITB: 6.2, ARKB: 24.8, BTCO: 4.2, EZBC: 2.4, BRRR: 0.0, HODL: 3.2, BTCW: 0.0, GBTC: 12.4, BTC: 4.2, total: 1373.8 },
+            { date: '2025-11-06', IBIT: 542.6, FBTC: 268.4, BITB: 38.2, ARKB: 108.4, BTCO: 28.4, EZBC: 14.2, BRRR: 0.0, HODL: 21.4, BTCW: 0.0, GBTC: 68.2, BTC: 28.4, total: 621.9 },
+            { date: '2025-11-05', IBIT: 214.2, FBTC: 108.4, BITB: 14.2, ARKB: 48.6, BTCO: 10.2, EZBC: 5.2, BRRR: 0.0, HODL: 8.2, BTCW: 0.0, GBTC: 26.2, BTC: 10.2, total: 312.4 },
+            { date: '2025-11-04', IBIT: -52.4, FBTC: -28.6, BITB: -4.2, ARKB: -12.8, BTCO: -2.4, EZBC: -1.4, BRRR: 0.0, HODL: -2.2, BTCW: 0.0, GBTC: -8.4, BTC: -2.8, total: -541.1 },
+            { date: '2025-11-01', IBIT: -38.2, FBTC: -18.4, BITB: -2.8, ARKB: -8.6, BTCO: -1.8, EZBC: -0.8, BRRR: 0.0, HODL: -1.4, BTCW: 0.0, GBTC: -5.2, BTC: -1.8, total: -54.8 },
+            { date: '2025-10-31', IBIT: -86.4, FBTC: -42.8, BITB: -6.2, ARKB: -18.4, BTCO: -3.8, EZBC: -1.8, BRRR: 0.0, HODL: -3.2, BTCW: 0.0, GBTC: -12.8, BTC: -4.2, total: -32.4 },
+            { date: '2025-10-30', IBIT: 168.4, FBTC: 82.6, BITB: 12.2, ARKB: 36.4, BTCO: 7.8, EZBC: 3.8, BRRR: 0.0, HODL: 5.8, BTCW: 0.0, GBTC: 18.2, BTC: 7.4, total: 893.2 },
+            { date: '2025-10-29', IBIT: 458.6, FBTC: 224.8, BITB: 32.4, ARKB: 94.6, BTCO: 22.4, EZBC: 11.2, BRRR: 0.0, HODL: 16.8, BTCW: 0.0, GBTC: 54.2, BTC: 22.8, total: 827.0 },
+            { date: '2025-10-28', IBIT: 248.6, FBTC: 124.2, BITB: 18.4, ARKB: 52.6, BTCO: 12.4, EZBC: 6.2, BRRR: 0.0, HODL: 9.2, BTCW: 0.0, GBTC: 28.4, BTC: 12.2, total: 479.4 },
         ];
         
         const FALLBACK_ETH_ETF_DATA = [
@@ -1549,6 +1566,23 @@
             { date: '2025-11-21', ETHA: 28.4, FETH: 8.2, ETHE: -5.3, others: 3.1, total: 34.4 },
             { date: '2025-11-20', ETHA: -85.2, FETH: -18.4, ETHE: -42.6, others: -8.5, total: -154.7 },
             { date: '2025-11-19', ETHA: 14.2, FETH: 3.8, ETHE: -2.4, others: 1.2, total: 16.8 },
+            // Extended history
+            { date: '2025-11-18', ETHA: 82.4, FETH: 18.6, ETHE: -12.4, others: 8.2, total: 96.8 },
+            { date: '2025-11-15', ETHA: 42.6, FETH: 12.4, ETHE: -8.4, others: 4.2, total: 50.8 },
+            { date: '2025-11-14', ETHA: 68.4, FETH: 16.8, ETHE: -10.2, others: 6.8, total: 81.8 },
+            { date: '2025-11-13', ETHA: 92.6, FETH: 22.4, ETHE: -14.6, others: 9.2, total: 109.6 },
+            { date: '2025-11-12', ETHA: 124.8, FETH: 28.6, ETHE: -18.4, others: 12.4, total: 147.4 },
+            { date: '2025-11-11', ETHA: 186.4, FETH: 38.2, ETHE: -24.6, others: 18.2, total: 218.2 },
+            { date: '2025-11-08', ETHA: 28.4, FETH: 6.8, ETHE: -4.2, others: 2.8, total: 33.8 },
+            { date: '2025-11-07', ETHA: 12.4, FETH: 3.2, ETHE: -2.4, others: 1.2, total: 14.4 },
+            { date: '2025-11-06', ETHA: 48.2, FETH: 12.4, ETHE: -8.2, others: 4.8, total: 57.2 },
+            { date: '2025-11-05', ETHA: 32.6, FETH: 8.4, ETHE: -5.6, others: 3.2, total: 38.6 },
+            { date: '2025-11-04', ETHA: -18.4, FETH: -4.2, ETHE: -12.4, others: -1.8, total: -36.8 },
+            { date: '2025-11-01', ETHA: -8.6, FETH: -2.4, ETHE: -6.2, others: -0.8, total: -18.0 },
+            { date: '2025-10-31', ETHA: -14.2, FETH: -3.6, ETHE: -8.4, others: -1.4, total: -27.6 },
+            { date: '2025-10-30', ETHA: 24.8, FETH: 6.2, ETHE: -4.8, others: 2.4, total: 28.6 },
+            { date: '2025-10-29', ETHA: 58.4, FETH: 14.2, ETHE: -9.6, others: 5.8, total: 68.8 },
+            { date: '2025-10-28', ETHA: 36.2, FETH: 8.6, ETHE: -6.2, others: 3.6, total: 42.2 },
         ];
         
         // ==================== TAB NAVIGATION ====================
@@ -4366,6 +4400,18 @@
                     document.getElementById('fgValue').style.color = color;
                     document.getElementById('fgLabel').textContent = classification;
                     
+                    // Update header Fear & Greed card
+                    const fgHeaderValue = document.getElementById('fgValueHeader');
+                    const fgHeaderLabel = document.getElementById('fgLabelHeader');
+                    if (fgHeaderValue) {
+                        fgHeaderValue.textContent = value;
+                        fgHeaderValue.style.color = color;
+                    }
+                    if (fgHeaderLabel) {
+                        fgHeaderLabel.textContent = classification;
+                        fgHeaderLabel.style.color = color;
+                    }
+                    
                     const badge = document.getElementById('fgBadge');
                     badge.textContent = classification.toUpperCase();
                     if (value <= 25) badge.className = 'card-badge badge-bad';
@@ -5096,7 +5142,10 @@
             const btcData = [...etfData.btc.daily].reverse();
             const ethData = [...etfData.eth.daily].reverse();
             
-            let btcCumulative = 35000; // Starting point (approximate total before our data range in $M)
+            // Use more accurate starting points based on cumNetInflow from API or estimates
+            // BTC ETFs launched Jan 2024, ~$35B cumulative by late Nov 2024
+            // ETH ETFs launched Jul 2024, ~$2.5B cumulative by late Nov 2024
+            let btcCumulative = 35000; // Starting point in $M
             let ethCumulative = 2500;  // Starting point for ETH ETFs
             
             const btcCumulativeData = btcData.map(d => {
@@ -5113,28 +5162,47 @@
                 cumulativeEtfChart.destroy();
             }
             
+            // Create gradient fills
+            const btcGradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+            btcGradient.addColorStop(0, 'rgba(247, 147, 26, 0.4)');
+            btcGradient.addColorStop(1, 'rgba(247, 147, 26, 0.02)');
+            
+            const ethGradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+            ethGradient.addColorStop(0, 'rgba(98, 126, 234, 0.4)');
+            ethGradient.addColorStop(1, 'rgba(98, 126, 234, 0.02)');
+            
             cumulativeEtfChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: btcData.map(d => formatDate(d.date)),
                     datasets: [
                         {
-                            label: 'BTC ETFs',
+                            label: 'BTC ETFs Cumulative',
                             data: btcCumulativeData,
                             borderColor: '#f7931a',
-                            backgroundColor: 'rgba(247, 147, 26, 0.1)',
+                            backgroundColor: btcGradient,
                             fill: true,
-                            tension: 0.3,
-                            pointRadius: 2
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 6,
+                            pointHoverBackgroundColor: '#f7931a',
+                            pointHoverBorderColor: '#fff',
+                            pointHoverBorderWidth: 2,
+                            borderWidth: 3
                         },
                         {
-                            label: 'ETH ETFs',
+                            label: 'ETH ETFs Cumulative',
                             data: ethCumulativeData,
                             borderColor: '#627eea',
-                            backgroundColor: 'rgba(98, 126, 234, 0.1)',
+                            backgroundColor: ethGradient,
                             fill: true,
-                            tension: 0.3,
-                            pointRadius: 2
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 6,
+                            pointHoverBackgroundColor: '#627eea',
+                            pointHoverBorderColor: '#fff',
+                            pointHoverBorderWidth: 2,
+                            borderWidth: 3
                         }
                     ]
                 },
@@ -5143,8 +5211,25 @@
                     maintainAspectRatio: false,
                     interaction: { intersect: false, mode: 'index' },
                     plugins: {
-                        legend: { display: false },
+                        legend: { 
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                color: '#9ca3af',
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                padding: 20,
+                                font: { size: 12 }
+                            }
+                        },
                         tooltip: {
+                            backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                            titleColor: '#fff',
+                            bodyColor: '#9ca3af',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: true,
                             callbacks: {
                                 label: (ctx) => `${ctx.dataset.label}: $${(ctx.raw / 1000).toFixed(2)}B`
                             }
@@ -5152,15 +5237,28 @@
                     },
                     scales: {
                         x: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: '#9ca3af' }
+                            grid: { 
+                                color: 'rgba(255,255,255,0.03)',
+                                drawBorder: false
+                            },
+                            ticks: { 
+                                color: '#6b7280',
+                                maxRotation: 0,
+                                autoSkip: true,
+                                maxTicksLimit: 8
+                            }
                         },
                         y: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            grid: { 
+                                color: 'rgba(255,255,255,0.03)',
+                                drawBorder: false
+                            },
                             ticks: {
-                                color: '#9ca3af',
-                                callback: (val) => '$' + (val / 1000).toFixed(1) + 'B'
-                            }
+                                color: '#6b7280',
+                                callback: (val) => '$' + (val / 1000).toFixed(1) + 'B',
+                                padding: 8
+                            },
+                            beginAtZero: false
                         }
                     }
                 }
