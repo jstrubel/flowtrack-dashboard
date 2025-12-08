@@ -656,7 +656,10 @@
                 <img src="logo.webp" alt="Flowtrack" class="logo-img" 
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                      id="logoImg">
-                <span style="display:none; font-size: 24px; font-weight: 800; color: white;" id="logoText">Flowtrack</span>
+                <div style="display: flex; flex-direction: column; gap: 0;">
+                    <span style="font-size: 24px; font-weight: 800; color: white; line-height: 1.1;" id="logoText">Flowtrack</span>
+                    <span style="font-size: 11px; font-weight: 500; color: #6b7280; letter-spacing: 0.5px;">CRYPTO MARKET INTELLIGENCE</span>
+                </div>
             </div>
             
             <div class="nav-status">
@@ -1187,23 +1190,35 @@
                 </div>
             </div>
             
-            <!-- Cumulative Flow Chart -->
-            <div class="card" style="margin-top: 16px;">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">Cumulative ETF Flows</div>
-                        <div class="card-subtitle">Running total of net inflows since launch (USD billions)</div>
+            <!-- Cumulative Flow Charts - Split BTC and ETH -->
+            <div class="grid-2" style="margin-top: 16px;">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" style="color: #f7931a;">BTC ETF Cumulative Flows</div>
+                            <div class="card-subtitle">Total net inflows since Jan 2024 launch</div>
+                        </div>
+                    </div>
+                    <div class="chart-container" style="position: relative; height: 280px;">
+                        <canvas id="btcCumulativeChart"></canvas>
+                    </div>
+                    <div style="margin-top: 8px; text-align: center; font-size: 13px; color: #9ca3af;">
+                        Current Total: <span id="btcCumulativeTotal" style="color: #f7931a; font-weight: 600;">--</span>
                     </div>
                 </div>
-                <div class="chart-container tall" style="position: relative;">
-                    <canvas id="cumulativeEtfChart"></canvas>
-                    <div id="cumulativeEtfLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                        <div style="font-size: 12px; color: var(--text-muted);">Calculating cumulative flows...</div>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title" style="color: #627eea;">ETH ETF Cumulative Flows</div>
+                            <div class="card-subtitle">Total net inflows since Jul 2024 launch</div>
+                        </div>
                     </div>
-                </div>
-                <div style="margin-top: 12px; display: flex; gap: 20px; justify-content: center; font-size: 12px;">
-                    <div><span style="color: #f7931a;">●</span> BTC ETFs Cumulative</div>
-                    <div><span style="color: #627eea;">●</span> ETH ETFs Cumulative</div>
+                    <div class="chart-container" style="position: relative; height: 280px;">
+                        <canvas id="ethCumulativeChart"></canvas>
+                    </div>
+                    <div style="margin-top: 8px; text-align: center; font-size: 13px; color: #9ca3af;">
+                        Current Total: <span id="ethCumulativeTotal" style="color: #627eea; font-weight: 600;">--</span>
+                    </div>
                 </div>
             </div>
             
@@ -1507,7 +1522,7 @@
         // ETF Charts
         let btcEtfFlowChart = null;
         let ethEtfFlowChart = null;
-        let cumulativeEtfChart = null;
+        // Cumulative charts use window.btcCumulativeChartInstance and window.ethCumulativeChartInstance
         
         // ETF Data storage
         let etfData = {
@@ -5135,128 +5150,174 @@
         }
         
         function renderCumulativeETFChart() {
-            const ctx = document.getElementById('cumulativeEtfChart');
+            renderBTCCumulativeChart();
+            renderETHCumulativeChart();
+        }
+        
+        function renderBTCCumulativeChart() {
+            const ctx = document.getElementById('btcCumulativeChart');
             if (!ctx) return;
             
-            // Calculate cumulative data
             const btcData = [...etfData.btc.daily].reverse();
-            const ethData = [...etfData.eth.daily].reverse();
             
-            // Use more accurate starting points based on cumNetInflow from API or estimates
-            // BTC ETFs launched Jan 2024, ~$35B cumulative by late Nov 2024
-            // ETH ETFs launched Jul 2024, ~$2.5B cumulative by late Nov 2024
-            let btcCumulative = 35000; // Starting point in $M
-            let ethCumulative = 2500;  // Starting point for ETH ETFs
-            
+            // BTC ETFs launched Jan 2024, ~$35B cumulative by late Oct 2024
+            let btcCumulative = 35000;
             const btcCumulativeData = btcData.map(d => {
                 btcCumulative += d.total;
                 return btcCumulative;
             });
             
-            const ethCumulativeData = ethData.map(d => {
-                ethCumulative += d.total;
-                return ethCumulative;
-            });
-            
-            if (cumulativeEtfChart) {
-                cumulativeEtfChart.destroy();
+            // Update total display
+            const totalEl = document.getElementById('btcCumulativeTotal');
+            if (totalEl) {
+                totalEl.textContent = '$' + (btcCumulativeData[btcCumulativeData.length - 1] / 1000).toFixed(2) + 'B';
             }
             
-            // Create gradient fills
-            const btcGradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
-            btcGradient.addColorStop(0, 'rgba(247, 147, 26, 0.4)');
-            btcGradient.addColorStop(1, 'rgba(247, 147, 26, 0.02)');
+            // Destroy existing chart
+            if (window.btcCumulativeChartInstance) {
+                window.btcCumulativeChartInstance.destroy();
+            }
             
-            const ethGradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
-            ethGradient.addColorStop(0, 'rgba(98, 126, 234, 0.4)');
-            ethGradient.addColorStop(1, 'rgba(98, 126, 234, 0.02)');
+            const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 250);
+            gradient.addColorStop(0, 'rgba(247, 147, 26, 0.35)');
+            gradient.addColorStop(0.5, 'rgba(247, 147, 26, 0.15)');
+            gradient.addColorStop(1, 'rgba(247, 147, 26, 0.02)');
             
-            cumulativeEtfChart = new Chart(ctx, {
+            window.btcCumulativeChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: btcData.map(d => formatDate(d.date)),
-                    datasets: [
-                        {
-                            label: 'BTC ETFs Cumulative',
-                            data: btcCumulativeData,
-                            borderColor: '#f7931a',
-                            backgroundColor: btcGradient,
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: 0,
-                            pointHoverRadius: 6,
-                            pointHoverBackgroundColor: '#f7931a',
-                            pointHoverBorderColor: '#fff',
-                            pointHoverBorderWidth: 2,
-                            borderWidth: 3
-                        },
-                        {
-                            label: 'ETH ETFs Cumulative',
-                            data: ethCumulativeData,
-                            borderColor: '#627eea',
-                            backgroundColor: ethGradient,
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: 0,
-                            pointHoverRadius: 6,
-                            pointHoverBackgroundColor: '#627eea',
-                            pointHoverBorderColor: '#fff',
-                            pointHoverBorderWidth: 2,
-                            borderWidth: 3
-                        }
-                    ]
+                    datasets: [{
+                        label: 'BTC ETF Cumulative',
+                        data: btcCumulativeData,
+                        borderColor: '#f7931a',
+                        backgroundColor: gradient,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        pointHoverBackgroundColor: '#f7931a',
+                        pointHoverBorderColor: '#fff',
+                        pointHoverBorderWidth: 2,
+                        borderWidth: 2.5
+                    }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     interaction: { intersect: false, mode: 'index' },
                     plugins: {
-                        legend: { 
-                            display: true,
-                            position: 'bottom',
-                            labels: {
-                                color: '#9ca3af',
-                                usePointStyle: true,
-                                pointStyle: 'circle',
-                                padding: 20,
-                                font: { size: 12 }
-                            }
-                        },
+                        legend: { display: false },
                         tooltip: {
                             backgroundColor: 'rgba(17, 24, 39, 0.95)',
                             titleColor: '#fff',
-                            bodyColor: '#9ca3af',
-                            borderColor: 'rgba(255,255,255,0.1)',
+                            bodyColor: '#f7931a',
+                            borderColor: 'rgba(247, 147, 26, 0.3)',
                             borderWidth: 1,
-                            padding: 12,
-                            displayColors: true,
+                            padding: 10,
+                            displayColors: false,
                             callbacks: {
-                                label: (ctx) => `${ctx.dataset.label}: $${(ctx.raw / 1000).toFixed(2)}B`
+                                label: (ctx) => '$' + (ctx.raw / 1000).toFixed(2) + 'B'
                             }
                         }
                     },
                     scales: {
                         x: {
-                            grid: { 
-                                color: 'rgba(255,255,255,0.03)',
-                                drawBorder: false
-                            },
-                            ticks: { 
-                                color: '#6b7280',
-                                maxRotation: 0,
-                                autoSkip: true,
-                                maxTicksLimit: 8
-                            }
+                            grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+                            ticks: { color: '#6b7280', maxRotation: 0, autoSkip: true, maxTicksLimit: 6, font: { size: 10 } }
                         },
                         y: {
-                            grid: { 
-                                color: 'rgba(255,255,255,0.03)',
-                                drawBorder: false
+                            grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+                            ticks: {
+                                color: '#6b7280',
+                                callback: (val) => '$' + (val / 1000).toFixed(0) + 'B',
+                                font: { size: 10 }
                             },
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderETHCumulativeChart() {
+            const ctx = document.getElementById('ethCumulativeChart');
+            if (!ctx) return;
+            
+            const ethData = [...etfData.eth.daily].reverse();
+            
+            // ETH ETFs launched Jul 2024, ~$2.5B cumulative by late Oct 2024
+            let ethCumulative = 2500;
+            const ethCumulativeData = ethData.map(d => {
+                ethCumulative += d.total;
+                return ethCumulative;
+            });
+            
+            // Update total display
+            const totalEl = document.getElementById('ethCumulativeTotal');
+            if (totalEl) {
+                totalEl.textContent = '$' + (ethCumulativeData[ethCumulativeData.length - 1] / 1000).toFixed(2) + 'B';
+            }
+            
+            // Destroy existing chart
+            if (window.ethCumulativeChartInstance) {
+                window.ethCumulativeChartInstance.destroy();
+            }
+            
+            const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 250);
+            gradient.addColorStop(0, 'rgba(98, 126, 234, 0.35)');
+            gradient.addColorStop(0.5, 'rgba(98, 126, 234, 0.15)');
+            gradient.addColorStop(1, 'rgba(98, 126, 234, 0.02)');
+            
+            window.ethCumulativeChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ethData.map(d => formatDate(d.date)),
+                    datasets: [{
+                        label: 'ETH ETF Cumulative',
+                        data: ethCumulativeData,
+                        borderColor: '#627eea',
+                        backgroundColor: gradient,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        pointHoverBackgroundColor: '#627eea',
+                        pointHoverBorderColor: '#fff',
+                        pointHoverBorderWidth: 2,
+                        borderWidth: 2.5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { intersect: false, mode: 'index' },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                            titleColor: '#fff',
+                            bodyColor: '#627eea',
+                            borderColor: 'rgba(98, 126, 234, 0.3)',
+                            borderWidth: 1,
+                            padding: 10,
+                            displayColors: false,
+                            callbacks: {
+                                label: (ctx) => '$' + (ctx.raw / 1000).toFixed(2) + 'B'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+                            ticks: { color: '#6b7280', maxRotation: 0, autoSkip: true, maxTicksLimit: 6, font: { size: 10 } }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
                             ticks: {
                                 color: '#6b7280',
                                 callback: (val) => '$' + (val / 1000).toFixed(1) + 'B',
-                                padding: 8
+                                font: { size: 10 }
                             },
                             beginAtZero: false
                         }
