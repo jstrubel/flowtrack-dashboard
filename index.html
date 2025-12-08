@@ -980,13 +980,14 @@
                 <div class="section-title">Market Breadth</div>
             </div>
             
+            <!-- Current Breadth Reading -->
             <div class="card">
                 <div class="card-header">
                     <div>
                         <div class="card-title">Altcoin Breadth: % Above 200 DMA</div>
-                        <div class="card-subtitle">Percentage of top 100 Binance altcoins trading above their 200-day moving average</div>
+                        <div class="card-subtitle">Real-time calculation from top 100 Binance altcoins</div>
                     </div>
-                    <div id="breadthValue" style="font-size: 24px; font-weight: 700; color: var(--accent);">--</div>
+                    <div id="breadthValue" style="font-size: 24px; font-weight: 700; color: var(--bad);">--</div>
                 </div>
                 <div class="chart-container" style="position: relative; height: 80px;">
                     <canvas id="altcoinBreadthChart"></canvas>
@@ -1000,21 +1001,21 @@
             <div class="card" style="margin-top: 16px;">
                 <div class="card-header">
                     <div>
-                        <div class="card-title">Historical Altcoin Breadth (100 coins)</div>
-                        <div class="card-subtitle">% of altcoins above 200 DMA over time (calculated from Binance daily data)</div>
+                        <div class="card-title">Historical Altcoin Breadth</div>
+                        <div class="card-subtitle">% of top 100 Binance altcoins above their 200-day moving average</div>
                     </div>
                     <div class="time-btns">
                         <button class="time-btn" onclick="loadHistoricalBreadth(90)">3M</button>
                         <button class="time-btn" onclick="loadHistoricalBreadth(180)">6M</button>
-                        <button class="time-btn" onclick="loadHistoricalBreadth(365)">1Y</button>
-                        <button class="time-btn active" onclick="loadHistoricalBreadth(730)">2Y</button>
-                        <button class="time-btn" onclick="loadHistoricalBreadth(1000)">MAX</button>
+                        <button class="time-btn active" onclick="loadHistoricalBreadth(365)">1Y</button>
+                        <button class="time-btn" onclick="loadHistoricalBreadth(600)">MAX</button>
                     </div>
                 </div>
                 <div class="chart-container tall" style="position: relative;">
                     <canvas id="historicalBreadthChart"></canvas>
                     <div id="histBreadthLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                        <div style="font-size: 12px; color: var(--text-muted);">Loading historical breadth data (~100 coins)...</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">Loading historical data for ~100 altcoins...</div>
+                        <div id="histBreadthProgress" style="font-size: 11px; color: var(--text-dim); margin-top: 4px;"></div>
                     </div>
                 </div>
                 <div style="margin-top: 12px; padding: 12px; background: rgba(74, 222, 128, 0.1); border-radius: 8px; border-left: 3px solid #4ade80;">
@@ -2340,8 +2341,8 @@
                                 if (!res.ok) return null;
                                 const klines = await res.json();
                                 
-                                if (klines.length >= 50) { // Need at least 50 days
-                                    // Calculate SMA of closing prices
+                                if (klines.length >= 200) { // Need full 200 days for accurate SMA
+                                    // Calculate 200-day SMA of closing prices
                                     const closes = klines.map(k => parseFloat(k[4]));
                                     const sma200 = closes.reduce((a, b) => a + b, 0) / closes.length;
                                     const currentPrice = closes[closes.length - 1];
@@ -2351,7 +2352,8 @@
                                         symbol: symbol.replace('USDT', ''),
                                         price: currentPrice,
                                         sma200: sma200,
-                                        above: isAbove
+                                        above: isAbove,
+                                        pctFromSMA: ((currentPrice - sma200) / sma200 * 100).toFixed(1)
                                     };
                                 }
                                 return null;
@@ -2391,7 +2393,8 @@
                 
                 const breadthPct = analyzed > 0 ? (above200DMA / analyzed) * 100 : 0;
                 console.log(`Breadth (${apiSource}): ${above200DMA}/${analyzed} = ${breadthPct.toFixed(1)}%`);
-                console.log('Above 200 DMA:', results.filter(r => r.above).map(r => r.symbol).join(', '));
+                console.log('Above 200 DMA:', results.filter(r => r.above).map(r => `${r.symbol}(${r.pctFromSMA}%)`).join(', ') || 'None');
+                console.log('Sample below:', results.filter(r => !r.above).slice(0, 5).map(r => `${r.symbol}(${r.pctFromSMA}%)`).join(', '));
                 
                 breadthData = { current: breadthPct, above: above200DMA, total: analyzed, results };
                 
@@ -2475,9 +2478,11 @@
         // ==================== HISTORICAL BREADTH ====================
         let historicalBreadthChart = null;
         
-        async function loadHistoricalBreadth(days = 730) {
+        async function loadHistoricalBreadth(days = 365) {
             const loadingEl = document.getElementById('histBreadthLoading');
-            if (loadingEl) loadingEl.style.display = 'block';
+            const progressEl = document.getElementById('histBreadthProgress');
+            if (loadingEl) loadingEl.style.display = 'flex';
+            if (progressEl) progressEl.textContent = 'Connecting to exchange...';
             
             // Update button states
             document.querySelectorAll('.card:has(#historicalBreadthChart) .time-btn').forEach(btn => {
@@ -2485,14 +2490,13 @@
                 if ((days === 90 && btn.textContent === '3M') ||
                     (days === 180 && btn.textContent === '6M') ||
                     (days === 365 && btn.textContent === '1Y') ||
-                    (days === 730 && btn.textContent === '2Y') ||
-                    (days === 1000 && btn.textContent === 'MAX')) {
+                    (days === 600 && btn.textContent === 'MAX')) {
                     btn.classList.add('active');
                 }
             });
             
             // Helper function to fetch with timeout
-            const fetchWithTimeout = async (url, timeout = 10000) => {
+            const fetchWithTimeout = async (url, timeout = 15000) => {
                 const controller = new AbortController();
                 const id = setTimeout(() => controller.abort(), timeout);
                 try {
@@ -2506,28 +2510,25 @@
             };
             
             try {
-                // Top 100 Binance altcoins for comprehensive breadth measurement
+                // Top 100 Binance altcoins
                 const HIST_ALTS = [
-                    // Top 25 by market cap
                     'SOLUSDT', 'XRPUSDT', 'DOGEUSDT', 'ADAUSDT', 'AVAXUSDT', 'LINKUSDT', 
                     'DOTUSDT', 'SHIBUSDT', 'LTCUSDT', 'BCHUSDT', 'ATOMUSDT', 'UNIUSDT',
                     'NEARUSDT', 'APTUSDT', 'FILUSDT', 'ARBUSDT', 'OPUSDT', 'INJUSDT',
                     'SUIUSDT', 'SEIUSDT', 'TIAUSDT', 'IMXUSDT', 'GRTUSDT', 'RNDRUSDT', 'FTMUSDT',
-                    // Mid-large cap (26-50)
                     'ALGOUSDT', 'FLOWUSDT', 'AXSUSDT', 'SANDUSDT', 'MANAUSDT', 'AAVEUSDT', 
                     'MKRUSDT', 'SNXUSDT', 'CRVUSDT', 'LDOUSDT', 'COMPUSDT', 'XLMUSDT', 
                     'VETUSDT', 'ICPUSDT', 'HBARUSDT', 'EGLDUSDT', 'QNTUSDT', 'ARUSDT', 
                     'MINAUSDT', 'APEUSDT', 'CHZUSDT', 'ENJUSDT', 'LRCUSDT', 'ONEUSDT', 'ZILUSDT',
-                    // Mid cap (51-75)
                     'KAVAUSDT', 'RUNEUSDT', 'ZECUSDT', 'DASHUSDT', 'ETCUSDT', 
                     'NEOUSDT', 'IOSTUSDT', 'ONTUSDT', 'THETAUSDT', 'ZENUSDT', 'WAVESUSDT',
                     'IOTAUSDT', 'SKLUSDT', 'ANKRUSDT', 'STXUSDT', 'WOOUSDT', 'GMXUSDT',
                     'SSVUSDT', 'PENDLEUSDT', 'PYTHUSDT', 'WLDUSDT', 'JUPUSDT', 'STRKUSDT', 'ZETAUSDT',
-                    // Smaller cap (76-100)
-                    'BLURUSDT', 'ORCAUSDT', 'MAGICUSDT', 'GALAUSDT', 'ILVUSDT', 'YFIUSDT',
+                    'BLURUSDT', 'MAGICUSDT', 'GALAUSDT', 'ILVUSDT', 'YFIUSDT',
                     'DYDXUSDT', '1INCHUSDT', 'ENSUSDT', 'MASKUSDT', 'CELRUSDT', 'CKBUSDT',
                     'COTIUSDT', 'BANDUSDT', 'STORJUSDT', 'BALUSDT', 'RSRUSDT', 'RLCUSDT',
-                    'NMRUSDT', 'REQUSDT', 'OXTUSDT', 'TRUUSDT', 'RADUSDT', 'API3USDT'
+                    'NMRUSDT', 'REQUSDT', 'OXTUSDT', 'TRUUSDT', 'RADUSDT', 'API3USDT',
+                    'TRBUSDT', 'OMGUSDT', 'KSMUSDT', 'CELOUSDT', 'OCEANUSDT', 'FETUSDT'
                 ];
                 
                 // Test which API works
@@ -2535,106 +2536,148 @@
                 try {
                     const testRes = await fetchWithTimeout('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=5', 5000);
                     if (testRes.ok) baseUrl = 'https://api.binance.com';
-                } catch (e) {}
+                } catch (e) {
+                    console.log('Binance.com blocked');
+                }
                 
                 if (!baseUrl) {
                     try {
                         const testRes = await fetchWithTimeout('https://api.binance.us/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=5', 5000);
                         if (testRes.ok) baseUrl = 'https://api.binance.us';
-                    } catch (e) {}
+                    } catch (e) {
+                        console.log('Binance.us also blocked');
+                    }
                 }
                 
                 if (!baseUrl) {
                     if (loadingEl) {
-                        loadingEl.innerHTML = '<div style="color: var(--warn); font-size: 11px;">Exchange API blocked</div>';
+                        loadingEl.innerHTML = '<div style="color: var(--warn); font-size: 12px;">Exchange API not accessible</div>';
                     }
                     return;
                 }
                 
-                console.log(`Historical breadth using: ${baseUrl}`);
+                if (progressEl) progressEl.textContent = `Using ${baseUrl.includes('.us') ? 'Binance US' : 'Binance'}...`;
                 
-                // Fetch historical klines for each altcoin (max 1000 days from Binance)
+                // We need 200 extra days for the SMA calculation
+                const fetchDays = Math.min(days + 200, 1000);
                 const allKlines = {};
-                const fetchDays = Math.min(days + 200, 1000); // Binance max is 1000
+                let fetchedCount = 0;
                 
-                // Process in smaller batches to avoid overwhelming
-                const batchSize = 15;
+                // Fetch in batches
+                const batchSize = 10;
                 for (let i = 0; i < HIST_ALTS.length; i += batchSize) {
                     const batch = HIST_ALTS.slice(i, i + batchSize);
                     
                     await Promise.all(batch.map(async (symbol) => {
                         try {
-                            const res = await fetchWithTimeout(`${baseUrl}/api/v3/klines?symbol=${symbol}&interval=1d&limit=${Math.min(fetchDays, 1000)}`);
+                            const res = await fetchWithTimeout(
+                                `${baseUrl}/api/v3/klines?symbol=${symbol}&interval=1d&limit=${fetchDays}`
+                            );
                             if (res.ok) {
                                 const data = await res.json();
-                                if (data.length >= 200) { // Need at least 200 days for SMA
+                                // Binance returns oldest first, newest last
+                                if (data.length >= 250) {
                                     allKlines[symbol] = data.map(k => ({
-                                        time: k[0],
+                                        time: k[0], // Open time in ms
                                         close: parseFloat(k[4])
                                     }));
+                                    fetchedCount++;
                                 }
                             }
                         } catch (e) {
-                            // Skip this symbol
+                            // Skip failed symbols
                         }
                     }));
                     
-                    // Small delay between batches
-                    if (i + batchSize < HIST_ALTS.length) {
-                        await new Promise(r => setTimeout(r, 150));
-                    }
-                }
-                
-                console.log(`Fetched klines for ${Object.keys(allKlines).length} coins`);
-                
-                // Calculate breadth for each day
-                const breadthHistory = [];
-                const symbols = Object.keys(allKlines);
-                
-                if (symbols.length > 0) {
-                    // Find common date range
-                    const minLength = Math.min(...symbols.map(s => allKlines[s].length));
-                    const startIdx = Math.max(199, minLength - days); // Start after 200 days needed for SMA
+                    if (progressEl) progressEl.textContent = `Fetched ${fetchedCount}/${HIST_ALTS.length} coins...`;
                     
-                    for (let i = startIdx; i < minLength; i++) {
-                        let aboveCount = 0;
-                        let totalCount = 0;
-                        
-                        for (const symbol of symbols) {
-                            const klines = allKlines[symbol];
-                            if (i >= klines.length) continue;
-                            
-                            // Calculate 200-day SMA up to this point
-                            const start = Math.max(0, i - 199);
-                            const prices = klines.slice(start, i + 1).map(k => k.close);
-                            if (prices.length < 200) continue; // Skip if not enough data
-                            
-                            const sma = prices.reduce((a, b) => a + b, 0) / prices.length;
-                            const currentPrice = klines[i].close;
-                            
-                            totalCount++;
-                            if (currentPrice > sma) aboveCount++;
-                        }
-                        
-                        if (totalCount >= 20) { // Need at least 20 coins for meaningful breadth
-                            breadthHistory.push({
-                                date: allKlines[symbols[0]][i].time,
-                                breadth: (aboveCount / totalCount) * 100,
-                                coins: totalCount
-                            });
-                        }
+                    // Rate limit protection
+                    if (i + batchSize < HIST_ALTS.length) {
+                        await new Promise(r => setTimeout(r, 100));
                     }
                 }
                 
-                console.log('Historical breadth points:', breadthHistory.length, 'using', symbols.length, 'coins');
+                const symbols = Object.keys(allKlines);
+                console.log(`Historical breadth: fetched ${symbols.length} coins with sufficient data`);
                 
-                // Render chart
+                if (symbols.length < 20) {
+                    if (loadingEl) {
+                        loadingEl.innerHTML = '<div style="color: var(--warn); font-size: 12px;">Not enough coins with data</div>';
+                    }
+                    return;
+                }
+                
+                if (progressEl) progressEl.textContent = 'Calculating breadth...';
+                
+                // Find the shortest data array length
+                const lengths = symbols.map(s => allKlines[s].length);
+                const minLen = Math.min(...lengths);
+                
+                // Calculate breadth for each day (starting from day 200 onwards)
+                const breadthHistory = [];
+                
+                // We iterate from day index 199 (after 200 days of history) to the end
+                // The last index is minLen - 1 (most recent day)
+                const startDay = 199; // First day we can calculate 200-day SMA
+                const endDay = minLen - 1;
+                
+                // Only calculate for requested days range
+                const calcStartDay = Math.max(startDay, endDay - days);
+                
+                for (let dayIdx = calcStartDay; dayIdx <= endDay; dayIdx++) {
+                    let aboveCount = 0;
+                    let totalCount = 0;
+                    
+                    for (const symbol of symbols) {
+                        const klines = allKlines[symbol];
+                        if (dayIdx >= klines.length) continue;
+                        
+                        // Get the 200 closing prices ending at dayIdx (inclusive)
+                        // dayIdx - 199 to dayIdx gives us exactly 200 prices
+                        const smaStart = dayIdx - 199;
+                        if (smaStart < 0) continue;
+                        
+                        let sum = 0;
+                        for (let j = smaStart; j <= dayIdx; j++) {
+                            sum += klines[j].close;
+                        }
+                        const sma200 = sum / 200;
+                        const currentPrice = klines[dayIdx].close;
+                        
+                        totalCount++;
+                        if (currentPrice > sma200) {
+                            aboveCount++;
+                        }
+                    }
+                    
+                    if (totalCount >= 20) {
+                        // Use the timestamp from the first symbol's data
+                        const timestamp = allKlines[symbols[0]][dayIdx].time;
+                        breadthHistory.push({
+                            date: timestamp,
+                            breadth: (aboveCount / totalCount) * 100,
+                            above: aboveCount,
+                            total: totalCount
+                        });
+                    }
+                }
+                
+                console.log(`Calculated ${breadthHistory.length} days of breadth`);
+                
+                // Debug: log first and last few values
+                if (breadthHistory.length > 0) {
+                    const first = breadthHistory[0];
+                    const last = breadthHistory[breadthHistory.length - 1];
+                    console.log('First day:', new Date(first.date).toLocaleDateString(), `${first.breadth.toFixed(1)}% (${first.above}/${first.total})`);
+                    console.log('Last day:', new Date(last.date).toLocaleDateString(), `${last.breadth.toFixed(1)}% (${last.above}/${last.total})`);
+                }
+                
                 if (loadingEl) loadingEl.style.display = 'none';
                 
                 if (breadthHistory.length === 0) {
                     if (loadingEl) {
-                        loadingEl.innerHTML = '<div style="color: var(--warn); font-size: 11px;">Not enough historical data</div>';
-                        loadingEl.style.display = 'block';
+                        loadingEl.innerHTML = '<div style="color: var(--warn); font-size: 12px;">No data available for selected period</div>';
+                        loadingEl.style.display = 'flex';
                     }
                     return;
                 }
@@ -2644,8 +2687,8 @@
             } catch (error) {
                 console.error('Historical breadth error:', error);
                 if (loadingEl) {
-                    loadingEl.innerHTML = '<div style="color: var(--bad);">Failed to load historical data</div>';
-                    loadingEl.style.display = 'block';
+                    loadingEl.innerHTML = `<div style="color: var(--bad); font-size: 12px;">Error: ${error.message}</div>`;
+                    loadingEl.style.display = 'flex';
                 }
             }
         }
@@ -4438,8 +4481,8 @@
             // Initialize Altcoin Breadth (delay to avoid rate limits)
             setTimeout(() => loadAltcoinBreadth(), 2000);
             
-            // Initialize Historical Breadth (delay further)
-            setTimeout(() => loadHistoricalBreadth(730), 4000);
+            // Initialize Historical Breadth
+            setTimeout(() => loadHistoricalBreadth(365), 4000);
             
             // Auto refresh every 60 seconds
             setInterval(refreshAllData, 60000);
