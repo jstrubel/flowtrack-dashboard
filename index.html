@@ -668,7 +668,7 @@
                 <div class="card" style="padding: 0; overflow: hidden;">
                     <div style="padding: 16px 18px 8px 18px;">
                         <div class="card-title">Bitcoin (BTC/USD)</div>
-                        <div class="card-subtitle">1 Week • Hourly • Binance</div>
+                        <div class="card-subtitle">Weekly • Full History • INDEX</div>
                     </div>
                     <div class="tradingview-widget-container" style="height: 400px;">
                         <div id="btc-usd-chart" style="height: 100%;"></div>
@@ -679,7 +679,7 @@
                 <div class="card" style="padding: 0; overflow: hidden;">
                     <div style="padding: 16px 18px 8px 18px;">
                         <div class="card-title">Ethereum (ETH/USD)</div>
-                        <div class="card-subtitle">1 Week • Hourly • Binance</div>
+                        <div class="card-subtitle">Weekly • Full History • INDEX</div>
                     </div>
                     <div class="tradingview-widget-container" style="height: 400px;">
                         <div id="eth-usd-chart" style="height: 100%;"></div>
@@ -726,7 +726,7 @@
             <div class="card" style="padding: 0; overflow: hidden;">
                 <div style="padding: 16px 18px 8px 18px;">
                     <div class="card-title">BTC vs ETH vs S&P 500 vs NASDAQ (% Change)</div>
-                    <div class="card-subtitle">1 Week • Hourly • Percentage Scale</div>
+                    <div class="card-subtitle">7 Days • Hourly • Percentage Scale</div>
                 </div>
                 <div class="tradingview-widget-container" style="height: 500px;">
                     <div id="cross-asset-chart" style="height: 100%;"></div>
@@ -737,7 +737,7 @@
             <div class="card" style="padding: 0; overflow: hidden; margin-top: 16px;">
                 <div style="padding: 16px 18px 8px 18px;">
                     <div class="card-title">Crypto Leaders (% Change)</div>
-                    <div class="card-subtitle">BTC • ETH • SOL • HYPE • 1 Week Hourly</div>
+                    <div class="card-subtitle">BTC • ETH • SOL • HYPE • 7 Days Hourly</div>
                 </div>
                 <div class="tradingview-widget-container" style="height: 500px;">
                     <div id="crypto-leaders-chart" style="height: 100%;"></div>
@@ -2627,42 +2627,39 @@
                 "interval": "W"
             });
             
-            // BTC/USD Chart - 1 Week with hourly intervals
+            // BTC/USD Chart - Full history, weekly timeframe
             new TradingView.widget({
                 ...chartConfig,
                 "container_id": "btc-usd-chart",
-                "symbol": "BINANCE:BTCUSDT",
-                "interval": "60",
-                "range": "5D"
+                "symbol": "INDEX:BTCUSD",
+                "interval": "W"
             });
             
-            // ETH/USD Chart - 1 Week with hourly intervals
+            // ETH/USD Chart - Full history, weekly timeframe
             new TradingView.widget({
                 ...chartConfig,
                 "container_id": "eth-usd-chart",
-                "symbol": "BINANCE:ETHUSDT",
-                "interval": "60",
-                "range": "5D"
+                "symbol": "INDEX:ETHUSD",
+                "interval": "W"
             });
             
-            // HYPE/USDT Chart - 1 Week with hourly intervals
+            // HYPE/USDT Chart - Daily, full history
             if (document.getElementById('hype-chart')) {
                 new TradingView.widget({
                     ...chartConfig,
                     "container_id": "hype-chart",
                     "symbol": "BYBIT:HYPEUSDT.P",
-                    "interval": "60",
-                    "range": "5D"
+                    "interval": "D"
                 });
             }
             
             // Cross-Asset Comparison Chart (BTC vs ETH vs S&P500 vs NASDAQ)
-            // 1 Week with hourly intervals
+            // 7 Days with hourly intervals
             new TradingView.widget({
                 "autosize": true,
                 "symbol": "BINANCE:BTCUSDT",
                 "interval": "60",
-                "range": "5D",
+                "range": "7D",
                 "timezone": "Etc/UTC",
                 "theme": "dark",
                 "style": "2",
@@ -2684,12 +2681,12 @@
             });
             
             // Crypto Leaders Chart (BTC vs ETH vs SOL vs HYPE)
-            // 1 Week with hourly intervals
+            // 7 Days with hourly intervals
             new TradingView.widget({
                 "autosize": true,
                 "symbol": "BINANCE:BTCUSDT",
                 "interval": "60",
-                "range": "5D",
+                "range": "7D",
                 "timezone": "Etc/UTC",
                 "theme": "dark",
                 "style": "2",
@@ -3619,12 +3616,28 @@
         }
         
         // ==================== COINGECKO ====================
+        async function fetchWithRetry(url, retries = 3, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url);
+                    if (response.ok) return await response.json();
+                    if (response.status === 429) {
+                        // Rate limited, wait longer
+                        await new Promise(r => setTimeout(r, delay * (i + 2)));
+                        continue;
+                    }
+                    throw new Error(`HTTP ${response.status}`);
+                } catch (e) {
+                    if (i === retries - 1) throw e;
+                    await new Promise(r => setTimeout(r, delay * (i + 1)));
+                }
+            }
+        }
+        
         async function fetchMarketData() {
             try {
-                const globalResponse = await fetch(`${COINGECKO_API}/global`);
-                if (!globalResponse.ok) throw new Error('CoinGecko global API error');
-                const globalData = await globalResponse.json();
-                
+                // Fetch global data
+                const globalData = await fetchWithRetry(`${COINGECKO_API}/global`);
                 const g = globalData.data;
                 
                 document.getElementById('summaryDom').textContent = formatNumber(g.market_cap_percentage.btc, 1) + '%';
@@ -3635,9 +3648,11 @@
                 document.getElementById('mcapChange').className = 'market-change ' + (g.market_cap_change_percentage_24h_usd >= 0 ? 'positive' : 'negative');
                 document.getElementById('totalVol').textContent = formatCurrency(g.total_volume.usd);
                 
-                const priceResponse = await fetch(`${COINGECKO_API}/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true`);
-                if (!priceResponse.ok) throw new Error('CoinGecko price API error');
-                const priceData = await priceResponse.json();
+                // Small delay before next request to avoid rate limits
+                await new Promise(r => setTimeout(r, 500));
+                
+                // Fetch price data
+                const priceData = await fetchWithRetry(`${COINGECKO_API}/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true`);
                 
                 document.getElementById('btcPrice').textContent = '$' + formatNumber(priceData.bitcoin.usd, 0);
                 document.getElementById('btcChange').textContent = formatPercent(priceData.bitcoin.usd_24h_change, true);
@@ -3649,6 +3664,9 @@
                 
             } catch (error) {
                 console.error('Error fetching market data:', error);
+                // Show error state but don't break the page
+                document.getElementById('totalMcap').textContent = 'API Limited';
+                document.getElementById('totalVol').textContent = 'Retry in 60s';
             }
         }
         
@@ -3660,13 +3678,25 @@
             setStatus('loading', 'Updating...');
             
             try {
+                // First batch: Binance APIs (no rate limit issues)
                 await Promise.all([
                     fetchFundingRates(),
                     fetchOpenInterest(),
                     fetchLongShortRatio(),
-                    fetchFearGreed(),
-                    fetchMarketData(),
-                    fetchFundingHistory(100),
+                    fetchFundingHistory(100)
+                ]);
+                
+                // Second batch: External APIs with small delay
+                await new Promise(r => setTimeout(r, 300));
+                await fetchFearGreed();
+                
+                // Third batch: CoinGecko (rate limited)
+                await new Promise(r => setTimeout(r, 300));
+                await fetchMarketData();
+                
+                // Fourth batch: DefiLlama
+                await new Promise(r => setTimeout(r, 300));
+                await Promise.all([
                     fetchStablecoinData(),
                     fetchStablecoinHistory('all')
                 ]);
