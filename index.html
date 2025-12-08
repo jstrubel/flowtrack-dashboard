@@ -976,7 +976,7 @@
                 <div class="card-header">
                     <div>
                         <div class="card-title">Altcoin Breadth: % Above 200 DMA</div>
-                        <div class="card-subtitle">Percentage of top 40 Binance altcoins trading above their 200-day moving average</div>
+                        <div class="card-subtitle">Percentage of top 100 Binance altcoins trading above their 200-day moving average</div>
                     </div>
                     <div id="breadthValue" style="font-size: 24px; font-weight: 700; color: var(--accent);">--</div>
                 </div>
@@ -992,19 +992,21 @@
             <div class="card" style="margin-top: 16px;">
                 <div class="card-header">
                     <div>
-                        <div class="card-title">Historical Altcoin Breadth</div>
+                        <div class="card-title">Historical Altcoin Breadth (60 coins)</div>
                         <div class="card-subtitle">% of altcoins above 200 DMA over time (calculated from Binance daily data)</div>
                     </div>
                     <div class="time-btns">
                         <button class="time-btn" onclick="loadHistoricalBreadth(90)">3M</button>
                         <button class="time-btn" onclick="loadHistoricalBreadth(180)">6M</button>
-                        <button class="time-btn active" onclick="loadHistoricalBreadth(365)">1Y</button>
+                        <button class="time-btn" onclick="loadHistoricalBreadth(365)">1Y</button>
+                        <button class="time-btn active" onclick="loadHistoricalBreadth(730)">2Y</button>
+                        <button class="time-btn" onclick="loadHistoricalBreadth(800)">MAX</button>
                     </div>
                 </div>
                 <div class="chart-container tall" style="position: relative;">
                     <canvas id="historicalBreadthChart"></canvas>
                     <div id="histBreadthLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                        <div style="font-size: 12px; color: var(--text-muted);">Loading historical breadth data...</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">Loading historical breadth data (60 coins)...</div>
                     </div>
                 </div>
                 <div style="margin-top: 12px; padding: 12px; background: rgba(74, 222, 128, 0.1); border-radius: 8px; border-left: 3px solid #4ade80;">
@@ -2242,13 +2244,26 @@
         
         // Top Binance altcoins to check (matching Capriole's methodology)
         const BINANCE_ALTS = [
+            // Top 25 by market cap
             'SOLUSDT', 'XRPUSDT', 'DOGEUSDT', 'ADAUSDT', 'AVAXUSDT', 'LINKUSDT', 
             'DOTUSDT', 'SHIBUSDT', 'LTCUSDT', 'BCHUSDT', 'ATOMUSDT', 'UNIUSDT',
             'NEARUSDT', 'APTUSDT', 'FILUSDT', 'ARBUSDT', 'OPUSDT', 'INJUSDT',
-            'SUIUSDT', 'SEIUSDT', 'TIAUSDT', 'IMXUSDT', 'GRTUSDT', 'RNDRUSDT',
-            'FTMUSDT', 'ALGOUSDT', 'FLOWUSDT', 'AXSUSDT', 'SANDUSDT', 'MANAUSDT',
-            'AAVEUSDT', 'MKRUSDT', 'SNXUSDT', 'CRVUSDT', 'LDOUSDT', 'COMPUSDT',
-            'XLMUSDT', 'VETUSDT', 'ICPUSDT', 'HBARUSDT'
+            'SUIUSDT', 'SEIUSDT', 'TIAUSDT', 'IMXUSDT', 'GRTUSDT', 'RNDRUSDT', 'FTMUSDT',
+            // Mid-large cap (26-50)
+            'ALGOUSDT', 'FLOWUSDT', 'AXSUSDT', 'SANDUSDT', 'MANAUSDT', 'AAVEUSDT', 
+            'MKRUSDT', 'SNXUSDT', 'CRVUSDT', 'LDOUSDT', 'COMPUSDT', 'XLMUSDT', 
+            'VETUSDT', 'ICPUSDT', 'HBARUSDT', 'EGLDUSDT', 'QNTUSDT', 'ARUSDT', 
+            'MINAUSDT', 'APEUSDT', 'CHZUSDT', 'ENJUSDT', 'LRCUSDT', 'ONEUSDT', 'ZILUSDT',
+            // Mid cap (51-75)
+            'KAVAUSDT', 'RUNEUSDT', 'ZECUSDT', 'DASHUSDT', 'ETCUSDT', 'XMRUSDT', 
+            'NEOUSDT', 'IOSTUSDT', 'ONTUSDT', 'THETAUSDT', 'ZENUSDT', 'WAVESUSDT',
+            'IOTAUSDT', 'SKLUSDT', 'ANKRUSDT', 'STXUSDT', 'WOOUSDT', 'GMXUSDT',
+            'SSVUSDT', 'PENDLEUSDT', 'PYTHUSDT', 'WLDUSDT', 'JUPUSDT', 'STRKUSDT', 'ZETAUSDT',
+            // Smaller cap (76-100)
+            'BLURUSDT', 'ORCAUSDT', 'MAGICUSDT', 'GALAUSDT', 'ILVUSDT', 'YFIUSDT',
+            'DYDXUSDT', '1INCHUSDT', 'ENSUSDT', 'MASKUSDT', 'CELRUSDT', 'CKBUSDT',
+            'COTIUSDT', 'BANDUSDT', 'STORJUSDT', 'BALUSDT', 'RSRUSDT', 'RLCUSDT',
+            'NMRUSDT', 'REQUSDT', 'OXTUSDT', 'TRUUSDT', 'ALPACAUSDT', 'RADUSDT', 'API3USDT'
         ];
         
         async function loadAltcoinBreadth() {
@@ -2391,7 +2406,7 @@
         // ==================== HISTORICAL BREADTH ====================
         let historicalBreadthChart = null;
         
-        async function loadHistoricalBreadth(days = 365) {
+        async function loadHistoricalBreadth(days = 730) {
             const loadingEl = document.getElementById('histBreadthLoading');
             if (loadingEl) loadingEl.style.display = 'block';
             
@@ -2400,23 +2415,41 @@
                 btn.classList.remove('active');
                 if ((days === 90 && btn.textContent === '3M') ||
                     (days === 180 && btn.textContent === '6M') ||
-                    (days === 365 && btn.textContent === '1Y')) {
+                    (days === 365 && btn.textContent === '1Y') ||
+                    (days === 730 && btn.textContent === '2Y') ||
+                    (days === 800 && btn.textContent === 'MAX')) {
                     btn.classList.add('active');
                 }
             });
             
             try {
-                // Use a subset of altcoins for historical calc (faster)
+                // Top 100 Binance altcoins for comprehensive breadth measurement
                 const HIST_ALTS = [
+                    // Top 25 by market cap
                     'SOLUSDT', 'XRPUSDT', 'DOGEUSDT', 'ADAUSDT', 'AVAXUSDT', 'LINKUSDT', 
-                    'DOTUSDT', 'LTCUSDT', 'ATOMUSDT', 'UNIUSDT', 'NEARUSDT', 'FILUSDT',
-                    'ARBUSDT', 'OPUSDT', 'INJUSDT', 'SUIUSDT', 'GRTUSDT', 'FTMUSDT',
-                    'AAVEUSDT', 'XLMUSDT'
+                    'DOTUSDT', 'SHIBUSDT', 'LTCUSDT', 'BCHUSDT', 'ATOMUSDT', 'UNIUSDT',
+                    'NEARUSDT', 'APTUSDT', 'FILUSDT', 'ARBUSDT', 'OPUSDT', 'INJUSDT',
+                    'SUIUSDT', 'SEIUSDT', 'TIAUSDT', 'IMXUSDT', 'GRTUSDT', 'RNDRUSDT', 'FTMUSDT',
+                    // Mid-large cap (26-50)
+                    'ALGOUSDT', 'FLOWUSDT', 'AXSUSDT', 'SANDUSDT', 'MANAUSDT', 'AAVEUSDT', 
+                    'MKRUSDT', 'SNXUSDT', 'CRVUSDT', 'LDOUSDT', 'COMPUSDT', 'XLMUSDT', 
+                    'VETUSDT', 'ICPUSDT', 'HBARUSDT', 'EGLDUSDT', 'QNTUSDT', 'ARUSDT', 
+                    'MINAUSDT', 'APEUSDT', 'CHZUSDT', 'ENJUSDT', 'LRCUSDT', 'ONEUSDT', 'ZILUSDT',
+                    // Mid cap (51-75)
+                    'KAVAUSDT', 'RUNEUSDT', 'ZECUSDT', 'DASHUSDT', 'ETCUSDT', 'XMRUSDT', 
+                    'NEOUSDT', 'IOSTUSDT', 'ONTUSDT', 'THETAUSDT', 'ZENUSDT', 'WAVESUSDT',
+                    'IOTAUSDT', 'SKLUSDT', 'ANKRUSDT', 'STXUSDT', 'WOOUSDT', 'GMXUSDT',
+                    'SSVUSDT', 'PENDLEUSDT', 'PYTHUSDT', 'WLDUSDT', 'JUPUSDT', 'STRKUSDT', 'ZETAUSDT',
+                    // Smaller cap (76-100)
+                    'BLURUSDT', 'ORCAUSDT', 'MAGICUSDT', 'GALAUSDT', 'ILVUSDT', 'YFIUSDT',
+                    'DYDXUSDT', '1INCHUSDT', 'ENSUSDT', 'MASKUSDT', 'CELRUSDT', 'CKBUSDT',
+                    'COTIUSDT', 'BANDUSDT', 'STORJUSDT', 'BALUSDT', 'RSRUSDT', 'RLCUSDT',
+                    'NMRUSDT', 'REQUSDT', 'OXTUSDT', 'TRUUSDT', 'ALPACAUSDT', 'RADUSDT', 'API3USDT'
                 ];
                 
-                // Fetch historical klines for each altcoin
+                // Fetch historical klines for each altcoin (max 1000 days from Binance)
                 const allKlines = {};
-                const fetchDays = days + 200; // Need extra 200 days for SMA calculation
+                const fetchDays = Math.min(days + 200, 1000); // Binance max is 1000
                 
                 await Promise.all(HIST_ALTS.map(async (symbol) => {
                     try {
@@ -3178,7 +3211,7 @@
                     startDate.setFullYear(startDate.getFullYear() - 3);
                     break;
                 case 'all': 
-                    startDate = new Date(2020, 0, 1); 
+                    startDate = new Date(2015, 0, 1); // All data from 2015
                     break;
                 default: 
                     startDate = new Date(latestDataDate);
@@ -3888,50 +3921,99 @@
         // ==================== MARKET DATA (Using Binance - no rate limits) ====================
         async function fetchMarketData() {
             try {
-                // Use Binance API for BTC and ETH prices - much more reliable
-                const [btcRes, ethRes] = await Promise.all([
-                    fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT'),
-                    fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT')
-                ]);
+                let btcPrice, ethPrice, btcChange, ethChange, btcVol, ethVol;
+                let success = false;
                 
-                const btcData = await btcRes.json();
-                const ethData = await ethRes.json();
+                // Try Binance first (fastest, no rate limits)
+                try {
+                    const [btcRes, ethRes] = await Promise.all([
+                        fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT'),
+                        fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT')
+                    ]);
+                    
+                    if (btcRes.ok && ethRes.ok) {
+                        const btcData = await btcRes.json();
+                        const ethData = await ethRes.json();
+                        btcPrice = parseFloat(btcData.lastPrice);
+                        ethPrice = parseFloat(ethData.lastPrice);
+                        btcChange = parseFloat(btcData.priceChangePercent);
+                        ethChange = parseFloat(ethData.priceChangePercent);
+                        btcVol = parseFloat(btcData.quoteVolume);
+                        ethVol = parseFloat(ethData.quoteVolume);
+                        success = true;
+                    }
+                } catch (e) { console.log('Binance blocked, trying alternatives...'); }
+                
+                // Try Binance US if main Binance failed
+                if (!success) {
+                    try {
+                        const [btcRes, ethRes] = await Promise.all([
+                            fetch('https://api.binance.us/api/v3/ticker/24hr?symbol=BTCUSDT'),
+                            fetch('https://api.binance.us/api/v3/ticker/24hr?symbol=ETHUSDT')
+                        ]);
+                        
+                        if (btcRes.ok && ethRes.ok) {
+                            const btcData = await btcRes.json();
+                            const ethData = await ethRes.json();
+                            btcPrice = parseFloat(btcData.lastPrice);
+                            ethPrice = parseFloat(ethData.lastPrice);
+                            btcChange = parseFloat(btcData.priceChangePercent);
+                            ethChange = parseFloat(ethData.priceChangePercent);
+                            btcVol = parseFloat(btcData.quoteVolume);
+                            ethVol = parseFloat(ethData.quoteVolume);
+                            success = true;
+                        }
+                    } catch (e) { console.log('Binance US also failed...'); }
+                }
+                
+                // Fallback to CoinGecko
+                if (!success) {
+                    try {
+                        const cgRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true');
+                        if (cgRes.ok) {
+                            const cgData = await cgRes.json();
+                            btcPrice = cgData.bitcoin?.usd || 0;
+                            ethPrice = cgData.ethereum?.usd || 0;
+                            btcChange = cgData.bitcoin?.usd_24h_change || 0;
+                            ethChange = cgData.ethereum?.usd_24h_change || 0;
+                            btcVol = cgData.bitcoin?.usd_24h_vol || 0;
+                            ethVol = cgData.ethereum?.usd_24h_vol || 0;
+                            success = true;
+                        }
+                    } catch (e) { console.log('CoinGecko also failed...'); }
+                }
+                
+                if (!success || !btcPrice) {
+                    throw new Error('All price APIs failed');
+                }
                 
                 // BTC Price
-                const btcPrice = parseFloat(btcData.lastPrice);
-                const btcChange = parseFloat(btcData.priceChangePercent);
                 document.getElementById('btcPrice').textContent = '$' + formatNumber(btcPrice, 0);
                 document.getElementById('btcChange').textContent = formatPercent(btcChange, true);
                 document.getElementById('btcChange').className = 'market-change ' + (btcChange >= 0 ? 'positive' : 'negative');
                 
                 // ETH Price
-                const ethPrice = parseFloat(ethData.lastPrice);
-                const ethChange = parseFloat(ethData.priceChangePercent);
                 document.getElementById('ethPrice').textContent = '$' + formatNumber(ethPrice, 0);
                 document.getElementById('ethChange').textContent = formatPercent(ethChange, true);
                 document.getElementById('ethChange').className = 'market-change ' + (ethChange >= 0 ? 'positive' : 'negative');
                 
                 // Calculate approximate total market cap from BTC price
-                // BTC market cap ≈ price × 19.8M (circulating supply)
-                // Total market ≈ BTC market cap / BTC dominance (~57%)
                 const btcMarketCap = btcPrice * 19800000;
-                const estTotalMcap = btcMarketCap / 0.57; // Assuming ~57% BTC dominance
-                const totalVol24h = parseFloat(btcData.quoteVolume) + parseFloat(ethData.quoteVolume);
+                const estTotalMcap = btcMarketCap / 0.57;
+                const totalVol24h = btcVol + ethVol;
                 
                 document.getElementById('totalMcap').textContent = formatCurrency(estTotalMcap);
-                document.getElementById('mcapChange').textContent = formatPercent(btcChange, true); // Use BTC change as proxy
+                document.getElementById('mcapChange').textContent = formatPercent(btcChange, true);
                 document.getElementById('mcapChange').className = 'market-change ' + (btcChange >= 0 ? 'positive' : 'negative');
                 document.getElementById('totalVol').textContent = '$' + formatNumber(totalVol24h / 1e9, 1) + 'B+';
                 
-                // BTC Dominance - estimate based on market conditions
-                // In reality this needs CoinGecko, but we'll show a reasonable estimate
                 document.getElementById('summaryDom').textContent = '~57%';
                 document.getElementById('summaryDomChange').textContent = 'ETH: ~13%';
                 
             } catch (error) {
                 console.error('Error fetching market data:', error);
-                document.getElementById('btcPrice').textContent = 'Error';
-                document.getElementById('ethPrice').textContent = 'Error';
+                document.getElementById('btcPrice').textContent = 'API Error';
+                document.getElementById('ethPrice').textContent = 'API Error';
             }
         }
         
@@ -4125,7 +4207,7 @@
             setTimeout(() => loadAltcoinBreadth(), 2000);
             
             // Initialize Historical Breadth (delay further)
-            setTimeout(() => loadHistoricalBreadth(365), 4000);
+            setTimeout(() => loadHistoricalBreadth(730), 4000);
             
             // Auto refresh every 60 seconds
             setInterval(refreshAllData, 60000);
