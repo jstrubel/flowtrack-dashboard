@@ -1000,7 +1000,7 @@
             <div class="card" style="margin-top: 16px;">
                 <div class="card-header">
                     <div>
-                        <div class="card-title">Historical Altcoin Breadth (60 coins)</div>
+                        <div class="card-title">Historical Altcoin Breadth (100 coins)</div>
                         <div class="card-subtitle">% of altcoins above 200 DMA over time (calculated from Binance daily data)</div>
                     </div>
                     <div class="time-btns">
@@ -1008,13 +1008,13 @@
                         <button class="time-btn" onclick="loadHistoricalBreadth(180)">6M</button>
                         <button class="time-btn" onclick="loadHistoricalBreadth(365)">1Y</button>
                         <button class="time-btn active" onclick="loadHistoricalBreadth(730)">2Y</button>
-                        <button class="time-btn" onclick="loadHistoricalBreadth(800)">MAX</button>
+                        <button class="time-btn" onclick="loadHistoricalBreadth(1000)">MAX</button>
                     </div>
                 </div>
                 <div class="chart-container tall" style="position: relative;">
                     <canvas id="historicalBreadthChart"></canvas>
                     <div id="histBreadthLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                        <div style="font-size: 12px; color: var(--text-muted);">Loading historical breadth data (60 coins)...</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">Loading historical breadth data (~100 coins)...</div>
                     </div>
                 </div>
                 <div style="margin-top: 12px; padding: 12px; background: rgba(74, 222, 128, 0.1); border-radius: 8px; border-left: 3px solid #4ade80;">
@@ -2284,53 +2284,114 @@
                 let above200DMA = 0;
                 let analyzed = 0;
                 const results = [];
+                let apiSource = 'Binance';
                 
-                // Fetch 200-day klines for each altcoin from Binance (no rate limits)
-                // Process in parallel batches
-                const batchSize = 10;
-                for (let i = 0; i < BINANCE_ALTS.length; i += batchSize) {
-                    const batch = BINANCE_ALTS.slice(i, i + batchSize);
-                    
-                    const promises = batch.map(async (symbol) => {
-                        try {
-                            // Get 200 daily candles
-                            const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1d&limit=200`);
-                            if (!res.ok) return null;
-                            const klines = await res.json();
-                            
-                            if (klines.length >= 50) { // Need at least 50 days
-                                // Calculate SMA of closing prices
-                                const closes = klines.map(k => parseFloat(k[4]));
-                                const sma200 = closes.reduce((a, b) => a + b, 0) / closes.length;
-                                const currentPrice = closes[closes.length - 1];
-                                const isAbove = currentPrice > sma200;
+                // Helper function to fetch with timeout
+                const fetchWithTimeout = async (url, timeout = 8000) => {
+                    const controller = new AbortController();
+                    const id = setTimeout(() => controller.abort(), timeout);
+                    try {
+                        const response = await fetch(url, { signal: controller.signal });
+                        clearTimeout(id);
+                        return response;
+                    } catch (e) {
+                        clearTimeout(id);
+                        throw e;
+                    }
+                };
+                
+                // Try Binance first
+                let binanceWorking = true;
+                try {
+                    const testRes = await fetchWithTimeout('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=5', 5000);
+                    if (!testRes.ok) binanceWorking = false;
+                } catch (e) {
+                    console.log('Binance API not accessible, trying Binance US...');
+                    binanceWorking = false;
+                }
+                
+                // Try Binance US if Binance is blocked
+                let binanceUSWorking = false;
+                if (!binanceWorking) {
+                    try {
+                        const testRes = await fetchWithTimeout('https://api.binance.us/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=5', 5000);
+                        if (testRes.ok) {
+                            binanceUSWorking = true;
+                            apiSource = 'Binance US';
+                        }
+                    } catch (e) {
+                        console.log('Binance US also not accessible...');
+                    }
+                }
+                
+                const baseUrl = binanceWorking ? 'https://api.binance.com' : 
+                               binanceUSWorking ? 'https://api.binance.us' : null;
+                
+                if (baseUrl) {
+                    // Process in parallel batches
+                    const batchSize = 10;
+                    for (let i = 0; i < BINANCE_ALTS.length; i += batchSize) {
+                        const batch = BINANCE_ALTS.slice(i, i + batchSize);
+                        
+                        const promises = batch.map(async (symbol) => {
+                            try {
+                                // Get 200 daily candles
+                                const res = await fetchWithTimeout(`${baseUrl}/api/v3/klines?symbol=${symbol}&interval=1d&limit=200`);
+                                if (!res.ok) return null;
+                                const klines = await res.json();
                                 
-                                return {
-                                    symbol: symbol.replace('USDT', ''),
-                                    price: currentPrice,
-                                    sma200: sma200,
-                                    above: isAbove
-                                };
+                                if (klines.length >= 50) { // Need at least 50 days
+                                    // Calculate SMA of closing prices
+                                    const closes = klines.map(k => parseFloat(k[4]));
+                                    const sma200 = closes.reduce((a, b) => a + b, 0) / closes.length;
+                                    const currentPrice = closes[closes.length - 1];
+                                    const isAbove = currentPrice > sma200;
+                                    
+                                    return {
+                                        symbol: symbol.replace('USDT', ''),
+                                        price: currentPrice,
+                                        sma200: sma200,
+                                        above: isAbove
+                                    };
+                                }
+                                return null;
+                            } catch (e) {
+                                return null;
                             }
-                            return null;
-                        } catch (e) {
-                            return null;
+                        });
+                        
+                        const batchResults = await Promise.all(promises);
+                        batchResults.forEach(r => {
+                            if (r) {
+                                results.push(r);
+                                analyzed++;
+                                if (r.above) above200DMA++;
+                            }
+                        });
+                        
+                        // Small delay between batches to avoid rate limiting
+                        if (i + batchSize < BINANCE_ALTS.length) {
+                            await new Promise(r => setTimeout(r, 100));
                         }
-                    });
-                    
-                    const batchResults = await Promise.all(promises);
-                    batchResults.forEach(r => {
-                        if (r) {
-                            results.push(r);
-                            analyzed++;
-                            if (r.above) above200DMA++;
-                        }
-                    });
+                    }
+                }
+                
+                // If we got no results from Binance APIs, show an estimate based on market conditions
+                if (analyzed === 0) {
+                    console.log('All exchange APIs blocked, cannot calculate live breadth');
+                    if (loadingEl) {
+                        loadingEl.innerHTML = '<div style="color: var(--warn); font-size: 11px;">Exchange API blocked - try refreshing</div>';
+                    }
+                    if (valueEl) {
+                        valueEl.textContent = 'N/A';
+                        valueEl.style.color = '#fbbf24';
+                    }
+                    return;
                 }
                 
                 const breadthPct = analyzed > 0 ? (above200DMA / analyzed) * 100 : 0;
-                console.log(`Breadth: ${above200DMA}/${analyzed} = ${breadthPct.toFixed(1)}%`);
-                console.log('Results:', results.filter(r => r.above).map(r => r.symbol).join(', '));
+                console.log(`Breadth (${apiSource}): ${above200DMA}/${analyzed} = ${breadthPct.toFixed(1)}%`);
+                console.log('Above 200 DMA:', results.filter(r => r.above).map(r => r.symbol).join(', '));
                 
                 breadthData = { current: breadthPct, above: above200DMA, total: analyzed, results };
                 
@@ -2345,7 +2406,7 @@
             } catch (error) {
                 console.error('Altcoin breadth error:', error);
                 if (loadingEl) {
-                    loadingEl.innerHTML = '<div style="color: var(--bad); font-size: 11px;">Failed to calculate</div>';
+                    loadingEl.innerHTML = '<div style="color: var(--bad); font-size: 11px;">Failed to calculate - API blocked</div>';
                 }
             }
         }
@@ -2425,10 +2486,24 @@
                     (days === 180 && btn.textContent === '6M') ||
                     (days === 365 && btn.textContent === '1Y') ||
                     (days === 730 && btn.textContent === '2Y') ||
-                    (days === 800 && btn.textContent === 'MAX')) {
+                    (days === 1000 && btn.textContent === 'MAX')) {
                     btn.classList.add('active');
                 }
             });
+            
+            // Helper function to fetch with timeout
+            const fetchWithTimeout = async (url, timeout = 10000) => {
+                const controller = new AbortController();
+                const id = setTimeout(() => controller.abort(), timeout);
+                try {
+                    const response = await fetch(url, { signal: controller.signal });
+                    clearTimeout(id);
+                    return response;
+                } catch (e) {
+                    clearTimeout(id);
+                    throw e;
+                }
+            };
             
             try {
                 // Top 100 Binance altcoins for comprehensive breadth measurement
@@ -2444,7 +2519,7 @@
                     'VETUSDT', 'ICPUSDT', 'HBARUSDT', 'EGLDUSDT', 'QNTUSDT', 'ARUSDT', 
                     'MINAUSDT', 'APEUSDT', 'CHZUSDT', 'ENJUSDT', 'LRCUSDT', 'ONEUSDT', 'ZILUSDT',
                     // Mid cap (51-75)
-                    'KAVAUSDT', 'RUNEUSDT', 'ZECUSDT', 'DASHUSDT', 'ETCUSDT', 'XMRUSDT', 
+                    'KAVAUSDT', 'RUNEUSDT', 'ZECUSDT', 'DASHUSDT', 'ETCUSDT', 
                     'NEOUSDT', 'IOSTUSDT', 'ONTUSDT', 'THETAUSDT', 'ZENUSDT', 'WAVESUSDT',
                     'IOTAUSDT', 'SKLUSDT', 'ANKRUSDT', 'STXUSDT', 'WOOUSDT', 'GMXUSDT',
                     'SSVUSDT', 'PENDLEUSDT', 'PYTHUSDT', 'WLDUSDT', 'JUPUSDT', 'STRKUSDT', 'ZETAUSDT',
@@ -2452,27 +2527,65 @@
                     'BLURUSDT', 'ORCAUSDT', 'MAGICUSDT', 'GALAUSDT', 'ILVUSDT', 'YFIUSDT',
                     'DYDXUSDT', '1INCHUSDT', 'ENSUSDT', 'MASKUSDT', 'CELRUSDT', 'CKBUSDT',
                     'COTIUSDT', 'BANDUSDT', 'STORJUSDT', 'BALUSDT', 'RSRUSDT', 'RLCUSDT',
-                    'NMRUSDT', 'REQUSDT', 'OXTUSDT', 'TRUUSDT', 'ALPACAUSDT', 'RADUSDT', 'API3USDT'
+                    'NMRUSDT', 'REQUSDT', 'OXTUSDT', 'TRUUSDT', 'RADUSDT', 'API3USDT'
                 ];
+                
+                // Test which API works
+                let baseUrl = null;
+                try {
+                    const testRes = await fetchWithTimeout('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=5', 5000);
+                    if (testRes.ok) baseUrl = 'https://api.binance.com';
+                } catch (e) {}
+                
+                if (!baseUrl) {
+                    try {
+                        const testRes = await fetchWithTimeout('https://api.binance.us/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=5', 5000);
+                        if (testRes.ok) baseUrl = 'https://api.binance.us';
+                    } catch (e) {}
+                }
+                
+                if (!baseUrl) {
+                    if (loadingEl) {
+                        loadingEl.innerHTML = '<div style="color: var(--warn); font-size: 11px;">Exchange API blocked</div>';
+                    }
+                    return;
+                }
+                
+                console.log(`Historical breadth using: ${baseUrl}`);
                 
                 // Fetch historical klines for each altcoin (max 1000 days from Binance)
                 const allKlines = {};
                 const fetchDays = Math.min(days + 200, 1000); // Binance max is 1000
                 
-                await Promise.all(HIST_ALTS.map(async (symbol) => {
-                    try {
-                        const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1d&limit=${Math.min(fetchDays, 1000)}`);
-                        if (res.ok) {
-                            const data = await res.json();
-                            allKlines[symbol] = data.map(k => ({
-                                time: k[0],
-                                close: parseFloat(k[4])
-                            }));
+                // Process in smaller batches to avoid overwhelming
+                const batchSize = 15;
+                for (let i = 0; i < HIST_ALTS.length; i += batchSize) {
+                    const batch = HIST_ALTS.slice(i, i + batchSize);
+                    
+                    await Promise.all(batch.map(async (symbol) => {
+                        try {
+                            const res = await fetchWithTimeout(`${baseUrl}/api/v3/klines?symbol=${symbol}&interval=1d&limit=${Math.min(fetchDays, 1000)}`);
+                            if (res.ok) {
+                                const data = await res.json();
+                                if (data.length >= 200) { // Need at least 200 days for SMA
+                                    allKlines[symbol] = data.map(k => ({
+                                        time: k[0],
+                                        close: parseFloat(k[4])
+                                    }));
+                                }
+                            }
+                        } catch (e) {
+                            // Skip this symbol
                         }
-                    } catch (e) {
-                        console.log(`Failed to fetch ${symbol}`);
+                    }));
+                    
+                    // Small delay between batches
+                    if (i + batchSize < HIST_ALTS.length) {
+                        await new Promise(r => setTimeout(r, 150));
                     }
-                }));
+                }
+                
+                console.log(`Fetched klines for ${Object.keys(allKlines).length} coins`);
                 
                 // Calculate breadth for each day
                 const breadthHistory = [];
@@ -2481,12 +2594,9 @@
                 if (symbols.length > 0) {
                     // Find common date range
                     const minLength = Math.min(...symbols.map(s => allKlines[s].length));
-                    const startIdx = Math.max(0, minLength - days);
+                    const startIdx = Math.max(199, minLength - days); // Start after 200 days needed for SMA
                     
                     for (let i = startIdx; i < minLength; i++) {
-                        // Need at least 200 days of history for SMA
-                        if (i < 199) continue;
-                        
                         let aboveCount = 0;
                         let totalCount = 0;
                         
@@ -2497,6 +2607,8 @@
                             // Calculate 200-day SMA up to this point
                             const start = Math.max(0, i - 199);
                             const prices = klines.slice(start, i + 1).map(k => k.close);
+                            if (prices.length < 200) continue; // Skip if not enough data
+                            
                             const sma = prices.reduce((a, b) => a + b, 0) / prices.length;
                             const currentPrice = klines[i].close;
                             
@@ -2504,25 +2616,36 @@
                             if (currentPrice > sma) aboveCount++;
                         }
                         
-                        if (totalCount > 0) {
+                        if (totalCount >= 20) { // Need at least 20 coins for meaningful breadth
                             breadthHistory.push({
                                 date: allKlines[symbols[0]][i].time,
-                                breadth: (aboveCount / totalCount) * 100
+                                breadth: (aboveCount / totalCount) * 100,
+                                coins: totalCount
                             });
                         }
                     }
                 }
                 
-                console.log('Historical breadth points:', breadthHistory.length);
+                console.log('Historical breadth points:', breadthHistory.length, 'using', symbols.length, 'coins');
                 
                 // Render chart
                 if (loadingEl) loadingEl.style.display = 'none';
+                
+                if (breadthHistory.length === 0) {
+                    if (loadingEl) {
+                        loadingEl.innerHTML = '<div style="color: var(--warn); font-size: 11px;">Not enough historical data</div>';
+                        loadingEl.style.display = 'block';
+                    }
+                    return;
+                }
+                
                 renderHistoricalBreadthChart(breadthHistory);
                 
             } catch (error) {
                 console.error('Historical breadth error:', error);
                 if (loadingEl) {
                     loadingEl.innerHTML = '<div style="color: var(--bad);">Failed to load historical data</div>';
+                    loadingEl.style.display = 'block';
                 }
             }
         }
@@ -3332,8 +3455,9 @@
                                 font: { size: 10 },
                                 callback: function(value) { return '$' + value.toFixed(1) + 'T'; }
                             },
-                            min: 3.5,
-                            max: 6.5
+                            // Dynamic scaling based on data range
+                            suggestedMin: Math.floor(Math.min(...liquidityValues) * 10 - 2) / 10,
+                            suggestedMax: Math.ceil(Math.max(...liquidityValues) * 10 + 2) / 10
                         },
                         y1: {
                             type: 'linear',
