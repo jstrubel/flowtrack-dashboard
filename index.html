@@ -2559,7 +2559,8 @@
                 if (progressEl) progressEl.textContent = `Using ${baseUrl.includes('.us') ? 'Binance US' : 'Binance'}...`;
                 
                 // We need 200 extra days for the SMA calculation
-                const fetchDays = Math.min(days + 200, 1000);
+                // Fetch maximum 1000 days (Binance limit) to ensure we have recent data
+                const fetchDays = 1000; // Always fetch max to ensure we get most recent
                 const allKlines = {};
                 let fetchedCount = 0;
                 
@@ -2609,40 +2610,61 @@
                 
                 if (progressEl) progressEl.textContent = 'Calculating breadth...';
                 
-                // Find the shortest data array length
+                // Find the date range - use the MAXIMUM length to get most recent data
+                // Each coin may have different amounts of data
                 const lengths = symbols.map(s => allKlines[s].length);
-                const minLen = Math.min(...lengths);
+                const maxLen = Math.max(...lengths);
                 
-                // Calculate breadth for each day (starting from day 200 onwards)
+                // Get reference dates from a coin with max data
+                const refSymbol = symbols.find(s => allKlines[s].length === maxLen);
+                const refKlines = allKlines[refSymbol];
+                
+                // Debug: show actual dates from API
+                const firstDate = new Date(refKlines[0].time);
+                const lastDate = new Date(refKlines[maxLen-1].time);
+                console.log(`Reference coin ${refSymbol}: ${maxLen} candles from ${firstDate.toLocaleDateString()} to ${lastDate.toLocaleDateString()}`);
+                
+                // Calculate breadth for each day
+                // We want to show the most recent `days` worth of breadth
                 const breadthHistory = [];
                 
-                // We iterate from day index 199 (after 200 days of history) to the end
-                // The last index is minLen - 1 (most recent day)
-                const startDay = 199; // First day we can calculate 200-day SMA
-                const endDay = minLen - 1;
+                // Start from 199 days into the longest dataset (need 200 days for SMA)
+                // End at the most recent day
+                const startDay = Math.max(199, maxLen - 1 - days);
+                const endDay = maxLen - 1;
                 
-                // Only calculate for requested days range
-                const calcStartDay = Math.max(startDay, endDay - days);
+                console.log(`Calculating breadth from index ${startDay} (${new Date(refKlines[startDay].time).toLocaleDateString()}) to ${endDay} (${new Date(refKlines[endDay].time).toLocaleDateString()})`);
                 
-                for (let dayIdx = calcStartDay; dayIdx <= endDay; dayIdx++) {
+                for (let dayIdx = startDay; dayIdx <= endDay; dayIdx++) {
                     let aboveCount = 0;
                     let totalCount = 0;
                     
+                    // Get the target timestamp for this day
+                    const targetTime = refKlines[dayIdx].time;
+                    
                     for (const symbol of symbols) {
                         const klines = allKlines[symbol];
-                        if (dayIdx >= klines.length) continue;
                         
-                        // Get the 200 closing prices ending at dayIdx (inclusive)
-                        // dayIdx - 199 to dayIdx gives us exactly 200 prices
-                        const smaStart = dayIdx - 199;
-                        if (smaStart < 0) continue;
+                        // Find the index in this coin's data that matches this timestamp
+                        // (coins may have different start dates)
+                        let coinDayIdx = -1;
+                        for (let k = klines.length - 1; k >= 0; k--) {
+                            if (Math.abs(klines[k].time - targetTime) < 86400000) { // Within 1 day
+                                coinDayIdx = k;
+                                break;
+                            }
+                        }
                         
+                        if (coinDayIdx < 199) continue; // Not enough history for SMA
+                        
+                        // Calculate 200-day SMA
+                        const smaStart = coinDayIdx - 199;
                         let sum = 0;
-                        for (let j = smaStart; j <= dayIdx; j++) {
+                        for (let j = smaStart; j <= coinDayIdx; j++) {
                             sum += klines[j].close;
                         }
                         const sma200 = sum / 200;
-                        const currentPrice = klines[dayIdx].close;
+                        const currentPrice = klines[coinDayIdx].close;
                         
                         totalCount++;
                         if (currentPrice > sma200) {
@@ -2651,10 +2673,8 @@
                     }
                     
                     if (totalCount >= 20) {
-                        // Use the timestamp from the first symbol's data
-                        const timestamp = allKlines[symbols[0]][dayIdx].time;
                         breadthHistory.push({
-                            date: timestamp,
+                            date: targetTime,
                             breadth: (aboveCount / totalCount) * 100,
                             above: aboveCount,
                             total: totalCount
