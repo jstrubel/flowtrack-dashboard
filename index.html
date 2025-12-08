@@ -140,12 +140,15 @@
         /* Market Overview Bar */
         .market-overview {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 16px;
             margin-bottom: 20px;
         }
         
-        @media (max-width: 900px) {
+        @media (max-width: 1100px) {
+            .market-overview { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 700px) {
             .market-overview { grid-template-columns: repeat(2, 1fr); }
         }
         @media (max-width: 500px) {
@@ -644,6 +647,11 @@
                     <div class="market-label">ETH Price</div>
                     <div class="market-value" id="ethPrice">--</div>
                     <div class="market-change" id="ethChange">--</div>
+                </div>
+                <div class="market-card">
+                    <div class="market-label">BTC Dominance</div>
+                    <div class="market-value" id="summaryDom">--</div>
+                    <div class="market-subtitle" id="summaryDomChange">ETH: --</div>
                 </div>
             </div>
         </div>
@@ -3918,38 +3926,63 @@
             }
         }
         
-        // ==================== MARKET DATA (Using Binance - no rate limits) ====================
+        // ==================== MARKET DATA (Multi-source with fallbacks) ====================
         async function fetchMarketData() {
             try {
                 let btcPrice, ethPrice, btcChange, ethChange, btcVol, ethVol;
+                let totalMcap, totalVol, btcDom, ethDom;
                 let success = false;
+                let source = '';
                 
-                // Try Binance first (fastest, no rate limits)
-                try {
-                    const [btcRes, ethRes] = await Promise.all([
-                        fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT'),
-                        fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT')
-                    ]);
-                    
-                    if (btcRes.ok && ethRes.ok) {
-                        const btcData = await btcRes.json();
-                        const ethData = await ethRes.json();
-                        btcPrice = parseFloat(btcData.lastPrice);
-                        ethPrice = parseFloat(ethData.lastPrice);
-                        btcChange = parseFloat(btcData.priceChangePercent);
-                        ethChange = parseFloat(ethData.priceChangePercent);
-                        btcVol = parseFloat(btcData.quoteVolume);
-                        ethVol = parseFloat(ethData.quoteVolume);
-                        success = true;
+                // Helper function to fetch with timeout
+                const fetchWithTimeout = async (url, timeout = 5000) => {
+                    const controller = new AbortController();
+                    const id = setTimeout(() => controller.abort(), timeout);
+                    try {
+                        const response = await fetch(url, { signal: controller.signal });
+                        clearTimeout(id);
+                        return response;
+                    } catch (e) {
+                        clearTimeout(id);
+                        throw e;
                     }
-                } catch (e) { console.log('Binance blocked, trying alternatives...'); }
+                };
                 
-                // Try Binance US if main Binance failed
+                // Strategy 1: Try CoinGecko Global endpoint (most comprehensive)
+                if (!success) {
+                    try {
+                        const globalRes = await fetchWithTimeout('https://api.coingecko.com/api/v3/global');
+                        if (globalRes.ok) {
+                            const globalData = await globalRes.json();
+                            const data = globalData.data;
+                            totalMcap = data.total_market_cap?.usd || 0;
+                            totalVol = data.total_volume?.usd || 0;
+                            btcDom = data.market_cap_percentage?.btc || 57;
+                            ethDom = data.market_cap_percentage?.eth || 12;
+                            
+                            // Now get individual prices
+                            const priceRes = await fetchWithTimeout('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true');
+                            if (priceRes.ok) {
+                                const priceData = await priceRes.json();
+                                btcPrice = priceData.bitcoin?.usd || 0;
+                                ethPrice = priceData.ethereum?.usd || 0;
+                                btcChange = priceData.bitcoin?.usd_24h_change || 0;
+                                ethChange = priceData.ethereum?.usd_24h_change || 0;
+                                btcVol = priceData.bitcoin?.usd_24h_vol || 0;
+                                ethVol = priceData.ethereum?.usd_24h_vol || 0;
+                                success = true;
+                                source = 'CoinGecko';
+                            }
+                        }
+                    } catch (e) { console.log('CoinGecko failed:', e.message); }
+                }
+                
+                // Strategy 2: Try Binance (fast, no rate limits for basic endpoints)
                 if (!success) {
                     try {
                         const [btcRes, ethRes] = await Promise.all([
-                            fetch('https://api.binance.us/api/v3/ticker/24hr?symbol=BTCUSDT'),
-                            fetch('https://api.binance.us/api/v3/ticker/24hr?symbol=ETHUSDT')
+                            fetchWithTimeout('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT'),
+                            fetchWithTimeout('https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT')
                         ]);
                         
                         if (btcRes.ok && ethRes.ok) {
@@ -3962,30 +3995,86 @@
                             btcVol = parseFloat(btcData.quoteVolume);
                             ethVol = parseFloat(ethData.quoteVolume);
                             success = true;
+                            source = 'Binance';
                         }
-                    } catch (e) { console.log('Binance US also failed...'); }
+                    } catch (e) { console.log('Binance failed:', e.message); }
                 }
                 
-                // Fallback to CoinGecko
+                // Strategy 3: Try Binance US
                 if (!success) {
                     try {
-                        const cgRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true');
-                        if (cgRes.ok) {
-                            const cgData = await cgRes.json();
-                            btcPrice = cgData.bitcoin?.usd || 0;
-                            ethPrice = cgData.ethereum?.usd || 0;
-                            btcChange = cgData.bitcoin?.usd_24h_change || 0;
-                            ethChange = cgData.ethereum?.usd_24h_change || 0;
-                            btcVol = cgData.bitcoin?.usd_24h_vol || 0;
-                            ethVol = cgData.ethereum?.usd_24h_vol || 0;
+                        const [btcRes, ethRes] = await Promise.all([
+                            fetchWithTimeout('https://api.binance.us/api/v3/ticker/24hr?symbol=BTCUSDT'),
+                            fetchWithTimeout('https://api.binance.us/api/v3/ticker/24hr?symbol=ETHUSDT')
+                        ]);
+                        
+                        if (btcRes.ok && ethRes.ok) {
+                            const btcData = await btcRes.json();
+                            const ethData = await ethRes.json();
+                            btcPrice = parseFloat(btcData.lastPrice);
+                            ethPrice = parseFloat(ethData.lastPrice);
+                            btcChange = parseFloat(btcData.priceChangePercent);
+                            ethChange = parseFloat(ethData.priceChangePercent);
+                            btcVol = parseFloat(btcData.quoteVolume);
+                            ethVol = parseFloat(ethData.quoteVolume);
                             success = true;
+                            source = 'Binance US';
                         }
-                    } catch (e) { console.log('CoinGecko also failed...'); }
+                    } catch (e) { console.log('Binance US failed:', e.message); }
+                }
+                
+                // Strategy 4: Try Kraken (different geo, good CORS support)
+                if (!success) {
+                    try {
+                        const krakenRes = await fetchWithTimeout('https://api.kraken.com/0/public/Ticker?pair=XBTUSD,ETHUSD');
+                        if (krakenRes.ok) {
+                            const krakenData = await krakenRes.json();
+                            if (krakenData.result) {
+                                const btcData = krakenData.result['XXBTZUSD'] || krakenData.result['XBTUSD'];
+                                const ethData = krakenData.result['XETHZUSD'] || krakenData.result['ETHUSD'];
+                                if (btcData && ethData) {
+                                    btcPrice = parseFloat(btcData.c[0]);
+                                    ethPrice = parseFloat(ethData.c[0]);
+                                    // Kraken provides opening price, calculate change
+                                    const btcOpen = parseFloat(btcData.o);
+                                    const ethOpen = parseFloat(ethData.o);
+                                    btcChange = ((btcPrice - btcOpen) / btcOpen) * 100;
+                                    ethChange = ((ethPrice - ethOpen) / ethOpen) * 100;
+                                    btcVol = parseFloat(btcData.v[1]) * btcPrice;
+                                    ethVol = parseFloat(ethData.v[1]) * ethPrice;
+                                    success = true;
+                                    source = 'Kraken';
+                                }
+                            }
+                        }
+                    } catch (e) { console.log('Kraken failed:', e.message); }
+                }
+                
+                // Strategy 5: CryptoCompare (good CORS, reliable)
+                if (!success) {
+                    try {
+                        const ccRes = await fetchWithTimeout('https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BTC,ETH&tsyms=USD');
+                        if (ccRes.ok) {
+                            const ccData = await ccRes.json();
+                            if (ccData.RAW) {
+                                btcPrice = ccData.RAW.BTC.USD.PRICE;
+                                ethPrice = ccData.RAW.ETH.USD.PRICE;
+                                btcChange = ccData.RAW.BTC.USD.CHANGEPCT24HOUR;
+                                ethChange = ccData.RAW.ETH.USD.CHANGEPCT24HOUR;
+                                btcVol = ccData.RAW.BTC.USD.TOTALVOLUME24HTO;
+                                ethVol = ccData.RAW.ETH.USD.TOTALVOLUME24HTO;
+                                success = true;
+                                source = 'CryptoCompare';
+                            }
+                        }
+                    } catch (e) { console.log('CryptoCompare failed:', e.message); }
                 }
                 
                 if (!success || !btcPrice) {
                     throw new Error('All price APIs failed');
                 }
+                
+                console.log(`Market data loaded from ${source}`);
                 
                 // BTC Price
                 document.getElementById('btcPrice').textContent = '$' + formatNumber(btcPrice, 0);
@@ -3997,23 +4086,42 @@
                 document.getElementById('ethChange').textContent = formatPercent(ethChange, true);
                 document.getElementById('ethChange').className = 'market-change ' + (ethChange >= 0 ? 'positive' : 'negative');
                 
-                // Calculate approximate total market cap from BTC price
-                const btcMarketCap = btcPrice * 19800000;
-                const estTotalMcap = btcMarketCap / 0.57;
-                const totalVol24h = btcVol + ethVol;
+                // Total market cap - use actual data if available, otherwise estimate
+                if (totalMcap && totalMcap > 0) {
+                    document.getElementById('totalMcap').textContent = formatCurrency(totalMcap);
+                } else {
+                    const btcMarketCap = btcPrice * 19800000;
+                    const estTotalMcap = btcMarketCap / 0.57;
+                    document.getElementById('totalMcap').textContent = formatCurrency(estTotalMcap);
+                }
                 
-                document.getElementById('totalMcap').textContent = formatCurrency(estTotalMcap);
+                // Market cap change (use BTC as proxy)
                 document.getElementById('mcapChange').textContent = formatPercent(btcChange, true);
                 document.getElementById('mcapChange').className = 'market-change ' + (btcChange >= 0 ? 'positive' : 'negative');
-                document.getElementById('totalVol').textContent = '$' + formatNumber(totalVol24h / 1e9, 1) + 'B+';
                 
-                document.getElementById('summaryDom').textContent = '~57%';
-                document.getElementById('summaryDomChange').textContent = 'ETH: ~13%';
+                // Volume - use actual total if available
+                if (totalVol && totalVol > 0) {
+                    document.getElementById('totalVol').textContent = '$' + formatNumber(totalVol / 1e9, 1) + 'B';
+                } else {
+                    const combinedVol = (btcVol || 0) + (ethVol || 0);
+                    document.getElementById('totalVol').textContent = '$' + formatNumber(combinedVol / 1e9, 1) + 'B+';
+                }
+                
+                // Dominance
+                if (btcDom) {
+                    document.getElementById('summaryDom').textContent = btcDom.toFixed(1) + '%';
+                    document.getElementById('summaryDomChange').textContent = 'ETH: ' + (ethDom || 12).toFixed(1) + '%';
+                } else {
+                    document.getElementById('summaryDom').textContent = '~57%';
+                    document.getElementById('summaryDomChange').textContent = 'ETH: ~12%';
+                }
                 
             } catch (error) {
                 console.error('Error fetching market data:', error);
                 document.getElementById('btcPrice').textContent = 'API Error';
                 document.getElementById('ethPrice').textContent = 'API Error';
+                document.getElementById('totalMcap').textContent = '--';
+                document.getElementById('totalVol').textContent = '--';
             }
         }
         
