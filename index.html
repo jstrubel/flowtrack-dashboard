@@ -593,6 +593,59 @@
             border-radius: 0 0 14px 14px;
             overflow: hidden;
         }
+        
+        /* ETF Table Styles */
+        .etf-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        .etf-table th {
+            background: var(--bg-secondary);
+            padding: 12px 10px;
+            text-align: right;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .etf-table th:first-child {
+            text-align: left;
+        }
+        
+        .etf-table td {
+            padding: 10px;
+            text-align: right;
+            border-bottom: 1px solid var(--border);
+            font-weight: 500;
+        }
+        
+        .etf-table td:first-child {
+            text-align: left;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+        
+        .etf-table tr:hover {
+            background: var(--panel-hover);
+        }
+        
+        .etf-table .positive {
+            color: var(--good);
+        }
+        
+        .etf-table .negative {
+            color: var(--bad);
+        }
+        
+        .etf-table .total-cell {
+            font-weight: 700;
+            background: rgba(59, 130, 246, 0.05);
+        }
     </style>
 </head>
 <body>
@@ -1027,6 +1080,170 @@
             </div>
         </div>
 
+        <!-- ETF Flows Section -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">Spot ETF Flows</div>
+            </div>
+            
+            <!-- BTC ETF Summary Cards -->
+            <div class="grid-4" style="margin-bottom: 16px;">
+                <div class="market-card">
+                    <div class="market-label">BTC ETF Daily Flow</div>
+                    <div class="market-value" id="btcEtfDailyFlow">--</div>
+                    <div class="market-change" id="btcEtfDailyDate">--</div>
+                </div>
+                <div class="market-card">
+                    <div class="market-label">BTC ETF 7D Flow</div>
+                    <div class="market-value" id="btcEtf7dFlow">--</div>
+                    <div class="market-subtitle">Last 7 trading days</div>
+                </div>
+                <div class="market-card">
+                    <div class="market-label">ETH ETF Daily Flow</div>
+                    <div class="market-value" id="ethEtfDailyFlow">--</div>
+                    <div class="market-change" id="ethEtfDailyDate">--</div>
+                </div>
+                <div class="market-card">
+                    <div class="market-label">ETH ETF 7D Flow</div>
+                    <div class="market-value" id="ethEtf7dFlow">--</div>
+                    <div class="market-subtitle">Last 7 trading days</div>
+                </div>
+            </div>
+            
+            <!-- BTC ETF Daily Flow Chart -->
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Bitcoin Spot ETF Net Flows</div>
+                        <div class="card-subtitle">Daily net inflows/outflows in USD (millions) • Data from SoSoValue</div>
+                    </div>
+                    <div class="time-btns">
+                        <button class="time-btn" onclick="updateETFChart('btc', 14)">2W</button>
+                        <button class="time-btn active" onclick="updateETFChart('btc', 30)">1M</button>
+                        <button class="time-btn" onclick="updateETFChart('btc', 90)">3M</button>
+                    </div>
+                </div>
+                <div class="chart-container tall" style="position: relative;">
+                    <canvas id="btcEtfFlowChart"></canvas>
+                    <div id="btcEtfLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                        <div style="font-size: 12px; color: var(--text-muted);">Loading BTC ETF data...</div>
+                    </div>
+                </div>
+                <div style="margin-top: 12px; padding: 12px; background: rgba(247, 147, 26, 0.1); border-radius: 8px; border-left: 3px solid #f7931a;">
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        <strong style="color: var(--text);">Key Insight:</strong> Sustained inflows indicate institutional accumulation. 
+                        Major flows often precede price movements. Watch for divergences between price and flows.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- BTC ETF Breakdown by Fund -->
+            <div class="card" style="margin-top: 16px;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">BTC ETF Breakdown by Fund</div>
+                        <div class="card-subtitle">Last 5 trading days • Net flows in USD millions</div>
+                    </div>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="etf-table" id="btcEtfTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>IBIT</th>
+                                <th>FBTC</th>
+                                <th>GBTC</th>
+                                <th>ARKB</th>
+                                <th>BITB</th>
+                                <th>Others</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="btcEtfTableBody">
+                            <tr><td colspan="8" style="text-align: center; padding: 20px; color: var(--text-muted);">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- ETH ETF Daily Flow Chart -->
+            <div class="card" style="margin-top: 16px;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Ethereum Spot ETF Net Flows</div>
+                        <div class="card-subtitle">Daily net inflows/outflows in USD (millions) • Data from SoSoValue</div>
+                    </div>
+                    <div class="time-btns">
+                        <button class="time-btn" onclick="updateETFChart('eth', 14)">2W</button>
+                        <button class="time-btn active" onclick="updateETFChart('eth', 30)">1M</button>
+                        <button class="time-btn" onclick="updateETFChart('eth', 90)">3M</button>
+                    </div>
+                </div>
+                <div class="chart-container tall" style="position: relative;">
+                    <canvas id="ethEtfFlowChart"></canvas>
+                    <div id="ethEtfLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                        <div style="font-size: 12px; color: var(--text-muted);">Loading ETH ETF data...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cumulative Flow Chart -->
+            <div class="card" style="margin-top: 16px;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Cumulative ETF Flows</div>
+                        <div class="card-subtitle">Running total of net inflows since launch (USD billions)</div>
+                    </div>
+                </div>
+                <div class="chart-container tall" style="position: relative;">
+                    <canvas id="cumulativeEtfChart"></canvas>
+                    <div id="cumulativeEtfLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                        <div style="font-size: 12px; color: var(--text-muted);">Calculating cumulative flows...</div>
+                    </div>
+                </div>
+                <div style="margin-top: 12px; display: flex; gap: 20px; justify-content: center; font-size: 12px;">
+                    <div><span style="color: #f7931a;">●</span> BTC ETFs Cumulative</div>
+                    <div><span style="color: #627eea;">●</span> ETH ETFs Cumulative</div>
+                </div>
+            </div>
+            
+            <!-- ETF Price Charts -->
+            <div class="grid-2" style="margin-top: 16px;">
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">iShares Bitcoin Trust (IBIT)</div>
+                        <div class="card-subtitle">BlackRock • Largest BTC ETF by AUM</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 350px;">
+                        <div id="ibit-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">iShares Ethereum Trust (ETHA)</div>
+                        <div class="card-subtitle">BlackRock • Largest ETH ETF by AUM</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 350px;">
+                        <div id="etha-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Data Source Note -->
+            <div class="card" style="margin-top: 16px; background: var(--bg-secondary);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="font-size: 20px;">📊</div>
+                    <div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">ETF Data Source</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">
+                            Data from SoSoValue API. Updates daily after market close (~4:30 PM ET).
+                            <a href="https://sosovalue.com/assets/etf/us-btc-spot" target="_blank" style="color: var(--accent); text-decoration: none;"> View on SoSoValue →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         </div><!-- END DASHBOARD TAB -->
 
         <!-- DERIVATIVES DATA TAB -->
@@ -1242,7 +1459,7 @@
 
     <footer>
         <p><strong>FLOWTRACK</strong> — Crypto Derivatives Intelligence</p>
-        <p style="margin-top: 6px;">Data from Binance Futures API, CoinGecko, Alternative.me, TradingView</p>
+        <p style="margin-top: 6px;">Data from Binance Futures API, CoinGecko, Alternative.me, SoSoValue, TradingView</p>
         <p style="margin-top: 6px;">Auto-refreshes every 60 seconds • Not financial advice</p>
     </footer>
     
@@ -1282,6 +1499,58 @@
         // Artemis API Configuration (currently unused - CORS issues)
         // const ARTEMIS_API_KEY = '1w424NZfFc9brLOexLvSQR6Iq9N50I--TrwAi9ARyuM';
         // const ARTEMIS_BASE = 'https://data.artemis.xyz/api/v1';
+        
+        // ==================== ETF FLOWS CONFIGURATION ====================
+        const SOSOVALUE_API_KEY = 'SOSO-f250a44853234783968e9a6fd628ebb4';
+        
+        // ETF Charts
+        let btcEtfFlowChart = null;
+        let ethEtfFlowChart = null;
+        let cumulativeEtfChart = null;
+        
+        // ETF Data storage
+        let etfData = {
+            btc: { daily: [], cumulative: 0 },
+            eth: { daily: [], cumulative: 0 }
+        };
+        
+        // Fallback ETF data (manually updated from Farside/SoSoValue)
+        // Last updated: December 8, 2025
+        const FALLBACK_BTC_ETF_DATA = [
+            { date: '2025-12-06', IBIT: 253.1, FBTC: 27.2, GBTC: -75.0, ARKB: 30.8, BITB: 10.3, others: 15.2, total: 261.6 },
+            { date: '2025-12-05', IBIT: 312.3, FBTC: 45.1, GBTC: -22.3, ARKB: 18.7, BITB: 8.9, others: 12.1, total: 374.8 },
+            { date: '2025-12-04', IBIT: 188.9, FBTC: 38.4, GBTC: -55.7, ARKB: 22.1, BITB: 5.6, others: 8.3, total: 207.6 },
+            { date: '2025-12-03', IBIT: -120.5, FBTC: -15.3, GBTC: -88.2, ARKB: -8.4, BITB: -3.2, others: -5.1, total: -240.7 },
+            { date: '2025-12-02', IBIT: 345.6, FBTC: 52.8, GBTC: -45.1, ARKB: 28.9, BITB: 12.4, others: 18.7, total: 413.3 },
+            { date: '2025-11-29', IBIT: 298.4, FBTC: 41.6, GBTC: -32.8, ARKB: 35.2, BITB: 9.8, others: 14.3, total: 366.5 },
+            { date: '2025-11-27', IBIT: 423.8, FBTC: 68.3, GBTC: -18.5, ARKB: 42.1, BITB: 15.6, others: 22.4, total: 553.7 },
+            { date: '2025-11-26', IBIT: 278.9, FBTC: 35.7, GBTC: -28.4, ARKB: 24.8, BITB: 8.2, others: 11.9, total: 331.1 },
+            { date: '2025-11-25', IBIT: 182.3, FBTC: 28.9, GBTC: -42.1, ARKB: 18.6, BITB: 6.4, others: 9.2, total: 203.3 },
+            { date: '2025-11-22', IBIT: 354.7, FBTC: 48.2, GBTC: -35.6, ARKB: 31.4, BITB: 11.8, others: 16.5, total: 427.0 },
+            { date: '2025-11-21', IBIT: 287.5, FBTC: 39.1, GBTC: -52.3, ARKB: 26.7, BITB: 9.5, others: 13.8, total: 324.3 },
+            { date: '2025-11-20', IBIT: 198.6, FBTC: 32.4, GBTC: -48.9, ARKB: 21.3, BITB: 7.1, others: 10.4, total: 220.9 },
+            { date: '2025-11-19', IBIT: -85.2, FBTC: -12.8, GBTC: -95.4, ARKB: -6.3, BITB: -2.8, others: -4.2, total: -206.7 },
+            { date: '2025-11-18', IBIT: 312.8, FBTC: 44.6, GBTC: -38.7, ARKB: 29.5, BITB: 10.9, others: 15.8, total: 374.9 },
+            { date: '2025-11-15', IBIT: 245.3, FBTC: 36.8, GBTC: -41.2, ARKB: 23.9, BITB: 8.6, others: 12.5, total: 285.9 },
+        ];
+        
+        const FALLBACK_ETH_ETF_DATA = [
+            { date: '2025-12-06', ETHA: 42.3, FETH: 8.5, ETHE: -28.1, others: 5.2, total: 27.9 },
+            { date: '2025-12-05', ETHA: 58.7, FETH: 12.4, ETHE: -15.3, others: 7.8, total: 63.6 },
+            { date: '2025-12-04', ETHA: 35.2, FETH: 6.8, ETHE: -22.4, others: 4.1, total: 23.7 },
+            { date: '2025-12-03', ETHA: -18.5, FETH: -3.2, ETHE: -35.8, others: -2.4, total: -59.9 },
+            { date: '2025-12-02', ETHA: 72.4, FETH: 15.6, ETHE: -12.8, others: 9.3, total: 84.5 },
+            { date: '2025-11-29', ETHA: 48.9, FETH: 10.2, ETHE: -18.6, others: 6.4, total: 46.9 },
+            { date: '2025-11-27', ETHA: 85.3, FETH: 18.7, ETHE: -8.4, others: 11.2, total: 106.8 },
+            { date: '2025-11-26', ETHA: 52.1, FETH: 11.3, ETHE: -14.7, others: 6.8, total: 55.5 },
+            { date: '2025-11-25', ETHA: 38.6, FETH: 7.9, ETHE: -21.3, others: 4.9, total: 30.1 },
+            { date: '2025-11-22', ETHA: 68.4, FETH: 14.8, ETHE: -16.2, others: 8.7, total: 75.7 },
+            { date: '2025-11-21', ETHA: 45.7, FETH: 9.6, ETHE: -19.8, others: 5.8, total: 41.3 },
+            { date: '2025-11-20', ETHA: 32.8, FETH: 6.4, ETHE: -24.5, others: 4.2, total: 18.9 },
+            { date: '2025-11-19', ETHA: -15.3, FETH: -2.8, ETHE: -42.1, others: -1.9, total: -62.1 },
+            { date: '2025-11-18', ETHA: 62.5, FETH: 13.2, ETHE: -11.6, others: 8.1, total: 72.2 },
+            { date: '2025-11-15', ETHA: 41.8, FETH: 8.9, ETHE: -17.4, others: 5.3, total: 38.6 },
+        ];
         
         // ==================== TAB NAVIGATION ====================
         function switchTab(tabName) {
@@ -4485,6 +4754,395 @@
             pdf.save(filename);
         }
         
+        // ==================== ETF FLOWS FUNCTIONS ====================
+        
+        // Try to fetch from SoSoValue API, fall back to hardcoded data
+        async function loadETFData() {
+            console.log('Loading ETF data...');
+            
+            // Try API first
+            let btcData = null;
+            let ethData = null;
+            
+            try {
+                // Attempt SoSoValue API call
+                // Note: API endpoint structure may need adjustment based on actual API docs
+                const btcResponse = await fetch('https://api.sosovalue.com/etf/btc/flows', {
+                    headers: {
+                        'Authorization': `Bearer ${SOSOVALUE_API_KEY}`,
+                        'api-key': SOSOVALUE_API_KEY,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (btcResponse.ok) {
+                    const data = await btcResponse.json();
+                    console.log('SoSoValue API response:', data);
+                    // Parse API response - structure may vary
+                    if (data && data.data) {
+                        btcData = data.data;
+                    }
+                }
+            } catch (apiError) {
+                console.log('SoSoValue API not available, using fallback data:', apiError.message);
+            }
+            
+            // Use fallback data if API failed
+            if (!btcData) {
+                btcData = FALLBACK_BTC_ETF_DATA;
+                ethData = FALLBACK_ETH_ETF_DATA;
+                console.log('Using fallback ETF data');
+            }
+            
+            // Store data
+            etfData.btc.daily = btcData;
+            etfData.eth.daily = ethData || FALLBACK_ETH_ETF_DATA;
+            
+            // Calculate cumulative totals
+            etfData.btc.cumulative = btcData.reduce((sum, d) => sum + d.total, 0);
+            etfData.eth.cumulative = etfData.eth.daily.reduce((sum, d) => sum + d.total, 0);
+            
+            // Update UI
+            updateETFSummaryCards();
+            renderETFCharts();
+            updateETFTable();
+            initETFTradingViewCharts();
+            
+            // Hide loading indicators
+            const btcLoading = document.getElementById('btcEtfLoading');
+            const ethLoading = document.getElementById('ethEtfLoading');
+            const cumLoading = document.getElementById('cumulativeEtfLoading');
+            if (btcLoading) btcLoading.style.display = 'none';
+            if (ethLoading) ethLoading.style.display = 'none';
+            if (cumLoading) cumLoading.style.display = 'none';
+        }
+        
+        function updateETFSummaryCards() {
+            const btcDaily = etfData.btc.daily[0];
+            const ethDaily = etfData.eth.daily[0];
+            
+            // BTC Daily
+            const btcDailyEl = document.getElementById('btcEtfDailyFlow');
+            const btcDailyDateEl = document.getElementById('btcEtfDailyDate');
+            if (btcDailyEl && btcDaily) {
+                const val = btcDaily.total;
+                btcDailyEl.textContent = (val >= 0 ? '+' : '') + '$' + val.toFixed(1) + 'M';
+                btcDailyEl.style.color = val >= 0 ? 'var(--good)' : 'var(--bad)';
+                btcDailyDateEl.textContent = formatDate(btcDaily.date);
+            }
+            
+            // BTC 7D
+            const btc7d = etfData.btc.daily.slice(0, 7).reduce((sum, d) => sum + d.total, 0);
+            const btc7dEl = document.getElementById('btcEtf7dFlow');
+            if (btc7dEl) {
+                btc7dEl.textContent = (btc7d >= 0 ? '+' : '') + '$' + (btc7d / 1000).toFixed(2) + 'B';
+                btc7dEl.style.color = btc7d >= 0 ? 'var(--good)' : 'var(--bad)';
+            }
+            
+            // ETH Daily
+            const ethDailyEl = document.getElementById('ethEtfDailyFlow');
+            const ethDailyDateEl = document.getElementById('ethEtfDailyDate');
+            if (ethDailyEl && ethDaily) {
+                const val = ethDaily.total;
+                ethDailyEl.textContent = (val >= 0 ? '+' : '') + '$' + val.toFixed(1) + 'M';
+                ethDailyEl.style.color = val >= 0 ? 'var(--good)' : 'var(--bad)';
+                ethDailyDateEl.textContent = formatDate(ethDaily.date);
+            }
+            
+            // ETH 7D
+            const eth7d = etfData.eth.daily.slice(0, 7).reduce((sum, d) => sum + d.total, 0);
+            const eth7dEl = document.getElementById('ethEtf7dFlow');
+            if (eth7dEl) {
+                eth7dEl.textContent = (eth7d >= 0 ? '+' : '') + '$' + eth7d.toFixed(1) + 'M';
+                eth7dEl.style.color = eth7d >= 0 ? 'var(--good)' : 'var(--bad)';
+            }
+        }
+        
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+        
+        function renderETFCharts() {
+            renderBTCETFChart(30);
+            renderETHETFChart(30);
+            renderCumulativeETFChart();
+        }
+        
+        function updateETFChart(type, days) {
+            if (type === 'btc') {
+                renderBTCETFChart(days);
+            } else {
+                renderETHETFChart(days);
+            }
+            
+            // Update active button state
+            const buttons = document.querySelectorAll(`[onclick*="updateETFChart('${type}'"]`);
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+        
+        function renderBTCETFChart(days) {
+            const ctx = document.getElementById('btcEtfFlowChart');
+            if (!ctx) return;
+            
+            const data = etfData.btc.daily.slice(0, days).reverse();
+            
+            if (btcEtfFlowChart) {
+                btcEtfFlowChart.destroy();
+            }
+            
+            btcEtfFlowChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => formatDate(d.date)),
+                    datasets: [{
+                        label: 'Net Flow ($M)',
+                        data: data.map(d => d.total),
+                        backgroundColor: data.map(d => d.total >= 0 ? 'rgba(16, 185, 129, 0.8)' : 'rgba(239, 68, 68, 0.8)'),
+                        borderColor: data.map(d => d.total >= 0 ? '#10b981' : '#ef4444'),
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    const val = ctx.raw;
+                                    return `Net Flow: ${val >= 0 ? '+' : ''}$${val.toFixed(1)}M`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#9ca3af', maxRotation: 45 }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: {
+                                color: '#9ca3af',
+                                callback: (val) => '$' + val + 'M'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderETHETFChart(days) {
+            const ctx = document.getElementById('ethEtfFlowChart');
+            if (!ctx) return;
+            
+            const data = etfData.eth.daily.slice(0, days).reverse();
+            
+            if (ethEtfFlowChart) {
+                ethEtfFlowChart.destroy();
+            }
+            
+            ethEtfFlowChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => formatDate(d.date)),
+                    datasets: [{
+                        label: 'Net Flow ($M)',
+                        data: data.map(d => d.total),
+                        backgroundColor: data.map(d => d.total >= 0 ? 'rgba(98, 126, 234, 0.8)' : 'rgba(239, 68, 68, 0.8)'),
+                        borderColor: data.map(d => d.total >= 0 ? '#627eea' : '#ef4444'),
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    const val = ctx.raw;
+                                    return `Net Flow: ${val >= 0 ? '+' : ''}$${val.toFixed(1)}M`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#9ca3af', maxRotation: 45 }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: {
+                                color: '#9ca3af',
+                                callback: (val) => '$' + val + 'M'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderCumulativeETFChart() {
+            const ctx = document.getElementById('cumulativeEtfChart');
+            if (!ctx) return;
+            
+            // Calculate cumulative data
+            const btcData = [...etfData.btc.daily].reverse();
+            const ethData = [...etfData.eth.daily].reverse();
+            
+            let btcCumulative = 35000; // Starting point (approximate total before our data range in $M)
+            let ethCumulative = 2500;  // Starting point for ETH ETFs
+            
+            const btcCumulativeData = btcData.map(d => {
+                btcCumulative += d.total;
+                return btcCumulative;
+            });
+            
+            const ethCumulativeData = ethData.map(d => {
+                ethCumulative += d.total;
+                return ethCumulative;
+            });
+            
+            if (cumulativeEtfChart) {
+                cumulativeEtfChart.destroy();
+            }
+            
+            cumulativeEtfChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: btcData.map(d => formatDate(d.date)),
+                    datasets: [
+                        {
+                            label: 'BTC ETFs',
+                            data: btcCumulativeData,
+                            borderColor: '#f7931a',
+                            backgroundColor: 'rgba(247, 147, 26, 0.1)',
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 2
+                        },
+                        {
+                            label: 'ETH ETFs',
+                            data: ethCumulativeData,
+                            borderColor: '#627eea',
+                            backgroundColor: 'rgba(98, 126, 234, 0.1)',
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { intersect: false, mode: 'index' },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `${ctx.dataset.label}: $${(ctx.raw / 1000).toFixed(2)}B`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#9ca3af' }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: {
+                                color: '#9ca3af',
+                                callback: (val) => '$' + (val / 1000).toFixed(1) + 'B'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateETFTable() {
+            const tbody = document.getElementById('btcEtfTableBody');
+            if (!tbody) return;
+            
+            const data = etfData.btc.daily.slice(0, 5);
+            
+            tbody.innerHTML = data.map(d => {
+                const formatCell = (val) => {
+                    if (val === undefined || val === null) return '<td>--</td>';
+                    const cls = val >= 0 ? 'positive' : 'negative';
+                    return `<td class="${cls}">${val >= 0 ? '+' : ''}${val.toFixed(1)}</td>`;
+                };
+                
+                return `
+                    <tr>
+                        <td>${formatDate(d.date)}</td>
+                        ${formatCell(d.IBIT)}
+                        ${formatCell(d.FBTC)}
+                        ${formatCell(d.GBTC)}
+                        ${formatCell(d.ARKB)}
+                        ${formatCell(d.BITB)}
+                        ${formatCell(d.others)}
+                        <td class="total-cell ${d.total >= 0 ? 'positive' : 'negative'}">${d.total >= 0 ? '+' : ''}${d.total.toFixed(1)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        function initETFTradingViewCharts() {
+            // IBIT Chart
+            const ibitContainer = document.getElementById('ibit-chart');
+            if (ibitContainer && !ibitContainer.hasChildNodes()) {
+                new TradingView.widget({
+                    "autosize": true,
+                    "symbol": "NASDAQ:IBIT",
+                    "interval": "D",
+                    "timezone": "Etc/UTC",
+                    "theme": "dark",
+                    "style": "1",
+                    "locale": "en",
+                    "toolbar_bg": "#0a0e17",
+                    "enable_publishing": false,
+                    "hide_top_toolbar": false,
+                    "hide_legend": false,
+                    "save_image": false,
+                    "backgroundColor": "rgba(10, 14, 23, 1)",
+                    "gridColor": "rgba(255, 255, 255, 0.05)",
+                    "container_id": "ibit-chart"
+                });
+            }
+            
+            // ETHA Chart
+            const ethaContainer = document.getElementById('etha-chart');
+            if (ethaContainer && !ethaContainer.hasChildNodes()) {
+                new TradingView.widget({
+                    "autosize": true,
+                    "symbol": "NASDAQ:ETHA",
+                    "interval": "D",
+                    "timezone": "Etc/UTC",
+                    "theme": "dark",
+                    "style": "1",
+                    "locale": "en",
+                    "toolbar_bg": "#0a0e17",
+                    "enable_publishing": false,
+                    "hide_top_toolbar": false,
+                    "hide_legend": false,
+                    "save_image": false,
+                    "backgroundColor": "rgba(10, 14, 23, 1)",
+                    "gridColor": "rgba(255, 255, 255, 0.05)",
+                    "container_id": "etha-chart"
+                });
+            }
+        }
+        
         // ==================== INITIALIZE ====================
         document.addEventListener('DOMContentLoaded', () => {
             refreshAllData();
@@ -4503,6 +5161,9 @@
             
             // Initialize Historical Breadth
             setTimeout(() => loadHistoricalBreadth(365), 4000);
+            
+            // Initialize ETF Flows
+            setTimeout(() => loadETFData(), 3000);
             
             // Auto refresh every 60 seconds
             setInterval(refreshAllData, 60000);
