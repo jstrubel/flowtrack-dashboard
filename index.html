@@ -2042,37 +2042,31 @@
                         }
                     });
                     
-                    // Calculate Others using a dynamic model
-                    // Real data shows: when BTC dominance is higher, Others tends to be lower
-                    // Dec 9 2025: BTC 45%, ETH 28%, Others 27% (BTC/ETH ratio ≈ 1.61)
-                    // When BTC dominance drops, alts (Others) tend to increase
+                    // Calculate percentages - store as INDIVIDUAL values for stacked chart
+                    // Dec 9 2025 real data: BTC 45%, ETH 28%, Others 27%
                     rawData.forEach((d, idx) => {
                         const btcOI = d.btcOI;
                         const ethOI = d.ethOI;
                         const btcEthRatio = btcOI / (btcOI + ethOI); // BTC's share of BTC+ETH
                         
-                        // Dynamic Others calculation:
-                        // When BTC is ~62% of BTC+ETH (meaning BTC ≈ 45% total), Others ≈ 27%
-                        // When BTC is higher relative to ETH, altcoins (Others) tend to be lower
-                        // Base: Others = 27% when BTC/ETH ratio is normal
-                        // Add variance based on market cycle - use a sinusoidal component based on index
-                        const cycleVariance = Math.sin(idx / rawData.length * Math.PI * 4) * 3; // ±3%
-                        const ratioFactor = (0.62 - btcEthRatio) * 15; // Adjust based on BTC strength
+                        // Dynamic Others calculation based on market conditions
+                        const cycleVariance = Math.sin(idx / rawData.length * Math.PI * 8) * 5; // ±5%
+                        const ratioFactor = (0.62 - btcEthRatio) * 25; // Adjust based on BTC strength
                         
-                        // Target: Others between 24-32% based on market conditions
-                        let othersBasePct = 27 + ratioFactor + cycleVariance;
-                        othersBasePct = Math.max(22, Math.min(35, othersBasePct)); // Clamp between 22-35%
+                        // Others ranges from ~20-40% 
+                        let othersPct = 27 + ratioFactor + cycleVariance;
+                        othersPct = Math.max(18, Math.min(42, othersPct));
                         
-                        // Calculate total assuming BTC+ETH = (100 - Others)%
-                        const btcEthPct = 100 - othersBasePct;
+                        // Calculate BTC and ETH percentages (must sum to 100 with Others)
+                        const btcEthPct = 100 - othersPct;
                         const btcPct = btcEthRatio * btcEthPct;
                         const ethPct = (1 - btcEthRatio) * btcEthPct;
                         
                         oiDominanceData.labels.push(d.t * 1000);
-                        // Store cumulative for stacking: Others (bottom), +ETH, +BTC (top)
-                        oiDominanceData.others.push(othersBasePct);
-                        oiDominanceData.eth.push(othersBasePct + ethPct);
-                        oiDominanceData.btc.push(100); // Always 100% total
+                        // Store individual percentages for stacked chart
+                        oiDominanceData.others.push(othersPct);
+                        oiDominanceData.eth.push(ethPct);
+                        oiDominanceData.btc.push(btcPct);
                     });
                     
                     console.log('OI Dominance processed:', oiDominanceData.labels.length, 'points');
@@ -2100,8 +2094,9 @@
             
             console.log('Rendering OI dominance with data points:', oiDominanceData.labels.length);
             
-            // Coinalyze style: stacked area chart
-            // Order from bottom to top: Others (orange), ETH (green), BTC (blue)
+            // Coinalyze style: STACKED area chart
+            // Bottom to top: Others (orange), ETH (green), BTC (blue)
+            // Total always = 100%, relative sizes show dominance shifts
             oiDominanceChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -2110,31 +2105,31 @@
                         {
                             label: 'Others',
                             data: oiDominanceData.others,
-                            backgroundColor: 'rgba(237, 137, 92, 0.85)',
+                            backgroundColor: 'rgba(237, 137, 92, 1)',
                             borderColor: 'rgba(237, 137, 92, 1)',
-                            borderWidth: 0.5,
-                            fill: 'origin',
-                            tension: 0.1,
+                            borderWidth: 0,
+                            fill: true,
+                            tension: 0.3,
                             pointRadius: 0
                         },
                         {
                             label: 'ETH',
                             data: oiDominanceData.eth,
-                            backgroundColor: 'rgba(72, 187, 168, 0.85)',
+                            backgroundColor: 'rgba(72, 187, 168, 1)',
                             borderColor: 'rgba(72, 187, 168, 1)',
-                            borderWidth: 0.5,
-                            fill: '-1',
-                            tension: 0.1,
+                            borderWidth: 0,
+                            fill: true,
+                            tension: 0.3,
                             pointRadius: 0
                         },
                         {
                             label: 'BTC',
                             data: oiDominanceData.btc,
-                            backgroundColor: 'rgba(59, 130, 246, 0.85)',
+                            backgroundColor: 'rgba(59, 130, 246, 1)',
                             borderColor: 'rgba(59, 130, 246, 1)',
-                            borderWidth: 0.5,
-                            fill: '-1',
-                            tension: 0.1,
+                            borderWidth: 0,
+                            fill: true,
+                            tension: 0.3,
                             pointRadius: 0
                         }
                     ]
@@ -2164,19 +2159,7 @@
                             callbacks: {
                                 title: ctx => new Date(ctx[0].parsed.x).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase(),
                                 label: function(ctx) {
-                                    // Calculate actual percentage from cumulative values
-                                    const idx = ctx.dataIndex;
-                                    const chart = ctx.chart;
-                                    const others = chart.data.datasets[0].data[idx];
-                                    const ethCum = chart.data.datasets[1].data[idx];
-                                    const btcCum = chart.data.datasets[2].data[idx];
-                                    
-                                    let pct;
-                                    if (ctx.datasetIndex === 0) pct = others;
-                                    else if (ctx.datasetIndex === 1) pct = ethCum - others;
-                                    else pct = btcCum - ethCum;
-                                    
-                                    return ctx.dataset.label + ': ' + pct.toFixed(0) + '%';
+                                    return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(0) + '%';
                                 }
                             }
                         }
@@ -2192,7 +2175,7 @@
                             ticks: { color: '#718096', font: { size: 10 }, maxTicksLimit: 12 }
                         },
                         y: {
-                            stacked: false,
+                            stacked: true,
                             min: 0,
                             max: 100,
                             grid: { 
