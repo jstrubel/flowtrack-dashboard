@@ -757,35 +757,31 @@
         <div class="section">
             <div class="section-header">
                 <div class="section-title">Top Performers</div>
-                <div style="display: flex; gap: 8px;">
-                    <button class="time-btn active" onclick="switchPerformersPeriod('7d')">7D</button>
-                    <button class="time-btn" onclick="switchPerformersPeriod('30d')">30D</button>
-                </div>
             </div>
             
             <div class="grid-2">
-                <!-- Top Gainers -->
+                <!-- 7D Top Gainers -->
                 <div class="card">
                     <div class="card-header">
                         <div>
-                            <div class="card-title">Top Gainers</div>
+                            <div class="card-title">7D Top Gainers</div>
                             <div class="card-subtitle">Best performing assets in top 300 by market cap</div>
                         </div>
                     </div>
-                    <div id="topGainersTable" style="margin-top: 12px;">
+                    <div id="topGainers7dTable" style="margin-top: 12px;">
                         <div style="text-align: center; padding: 40px; color: var(--text-muted);">Loading...</div>
                     </div>
                 </div>
                 
-                <!-- Top Losers -->
+                <!-- 30D Top Gainers -->
                 <div class="card">
                     <div class="card-header">
                         <div>
-                            <div class="card-title">Top Losers</div>
-                            <div class="card-subtitle">Worst performing assets in top 300 by market cap</div>
+                            <div class="card-title">30D Top Gainers</div>
+                            <div class="card-subtitle">Best performing assets in top 300 by market cap</div>
                         </div>
                     </div>
-                    <div id="topLosersTable" style="margin-top: 12px;">
+                    <div id="topGainers30dTable" style="margin-top: 12px;">
                         <div style="text-align: center; padding: 40px; color: var(--text-muted);">Loading...</div>
                     </div>
                 </div>
@@ -920,6 +916,55 @@
                 </div>
                 <div class="chart-container tall">
                     <canvas id="stablecoinChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Stablecoin Supply Rate of Change -->
+            <div class="card" style="margin-top: 16px;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Stablecoin Supply Rate of Change</div>
+                        <div class="card-subtitle">Weekly change in total stablecoin supply - Leading indicator for crypto inflows</div>
+                    </div>
+                    <div class="time-selector">
+                        <button class="time-btn" onclick="updateStablecoinROCChart('90')">90D</button>
+                        <button class="time-btn" onclick="updateStablecoinROCChart('180')">180D</button>
+                        <button class="time-btn active" onclick="updateStablecoinROCChart('365')">1Y</button>
+                    </div>
+                </div>
+                <div style="height: 300px; margin-top: 12px;">
+                    <canvas id="stablecoinROCChart"></canvas>
+                </div>
+                <div style="margin-top: 12px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        <strong style="color: var(--text);">Interpretation:</strong> 
+                        <span style="color: var(--good);">Green bars</span> = Net minting (new capital entering crypto). 
+                        <span style="color: var(--bad);">Red bars</span> = Net burning (capital exiting). 
+                        Sustained positive ROC often precedes altcoin rallies.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stablecoin Dominance Charts -->
+            <div class="grid-2" style="margin-top: 16px;">
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">USDT Dominance (USDT.D)</div>
+                        <div class="card-subtitle">Rising = Risk-off, Falling = Risk-on (capital rotating to alts)</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 350px;">
+                        <div id="usdt-dominance-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+                
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">USDC Dominance (USDC.D)</div>
+                        <div class="card-subtitle">Institutional stablecoin - Tracks US regulatory sentiment</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 350px;">
+                        <div id="usdc-dominance-chart" style="height: 100%;"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1228,6 +1273,32 @@
                 </div>
             </div>
             
+            <!-- Liquidity Rate of Change -->
+            <div class="card" style="margin-top: 16px;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Liquidity Rate of Change</div>
+                        <div class="card-subtitle">Monthly change in Net Liquidity - Acceleration/deceleration of liquidity conditions</div>
+                    </div>
+                    <div class="time-selector">
+                        <button class="time-btn" onclick="updateLiquidityROCChart('1y')">1Y</button>
+                        <button class="time-btn" onclick="updateLiquidityROCChart('2y')">2Y</button>
+                        <button class="time-btn active" onclick="updateLiquidityROCChart('all')">ALL</button>
+                    </div>
+                </div>
+                <div style="height: 300px; margin-top: 12px;">
+                    <canvas id="liquidityROCChart"></canvas>
+                </div>
+                <div style="margin-top: 12px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        <strong style="color: var(--text);">Key Signal:</strong> 
+                        <span style="color: var(--good);">Green bars</span> = Liquidity expanding (bullish). 
+                        <span style="color: var(--bad);">Red bars</span> = Liquidity contracting (bearish). 
+                        BTC tends to follow liquidity ROC with a lag. Sustained positive ROC = risk-on environment.
+                    </div>
+                </div>
+            </div>
+            
             <div class="grid-2" style="margin-top: 16px;">
                 <!-- Fed Balance Sheet -->
                 <div class="card" style="padding: 0; overflow: hidden;">
@@ -1306,92 +1377,24 @@
             </div>
         </div>
         
-        <!-- Interest Rates & Dollar Section -->
+        <!-- Key Macro Indicators Section -->
         <div class="section">
             <div class="section-header">
-                <div class="section-title">Interest Rates & Dollar</div>
+                <div class="section-title">Key Macro Indicators</div>
             </div>
             
             <div class="grid-2">
-                <!-- DXY Dollar Index -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">US Dollar Index (DXY)</div>
-                        <div class="card-subtitle">Trade-Weighted Dollar vs Major Currencies</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 350px;">
-                        <div id="dxy-chart" style="height: 100%;"></div>
-                    </div>
-                </div>
-                
-                <!-- US 10Y Treasury -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">US 10-Year Treasury Yield</div>
-                        <div class="card-subtitle">Benchmark Long-Term Interest Rate</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 350px;">
-                        <div id="us10y-chart" style="height: 100%;"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="grid-2" style="margin-top: 16px;">
-                <!-- US 2Y Treasury -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">US 2-Year Treasury Yield</div>
-                        <div class="card-subtitle">Short-Term Rate - Fed Policy Sensitive</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 350px;">
-                        <div id="us02y-chart" style="height: 100%;"></div>
-                    </div>
-                </div>
-                
                 <!-- Yield Curve 2s10s -->
                 <div class="card" style="padding: 0; overflow: hidden;">
                     <div style="padding: 16px 18px 8px 18px;">
                         <div class="card-title">Yield Curve (10Y - 2Y Spread)</div>
-                        <div class="card-subtitle">Inverted = Recession Warning</div>
+                        <div class="card-subtitle">Inverted = Recession Warning (Below 0 = Inverted)</div>
                     </div>
                     <div class="tradingview-widget-container" style="height: 350px;">
                         <div id="yield-curve-chart" style="height: 100%;"></div>
                     </div>
                 </div>
-            </div>
-        </div>
-        
-        <!-- Risk Assets & Volatility Section -->
-        <div class="section">
-            <div class="section-header">
-                <div class="section-title">Risk Assets & Volatility</div>
-            </div>
-            
-            <div class="grid-2">
-                <!-- S&P 500 -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">S&P 500 Index</div>
-                        <div class="card-subtitle">US Large Cap Equities - Risk-On Indicator</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 350px;">
-                        <div id="spx-chart" style="height: 100%;"></div>
-                    </div>
-                </div>
                 
-                <!-- VIX -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">VIX Volatility Index</div>
-                        <div class="card-subtitle">Fear Gauge - Spikes During Selloffs</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 350px;">
-                        <div id="vix-chart" style="height: 100%;"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="grid-2" style="margin-top: 16px;">
                 <!-- Gold -->
                 <div class="card" style="padding: 0; overflow: hidden;">
                     <div style="padding: 16px 18px 8px 18px;">
@@ -1400,17 +1403,6 @@
                     </div>
                     <div class="tradingview-widget-container" style="height: 350px;">
                         <div id="gold-chart" style="height: 100%;"></div>
-                    </div>
-                </div>
-                
-                <!-- Nasdaq -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">Nasdaq 100</div>
-                        <div class="card-subtitle">Tech Stocks - High Beta Correlation to BTC</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 350px;">
-                        <div id="nasdaq-chart" style="height: 100%;"></div>
                     </div>
                 </div>
             </div>
@@ -2580,51 +2572,48 @@
         }
         
         // ==================== TOP PERFORMERS ====================
-        let currentPerformersPeriod = '7d';
-        
-        async function loadTopPerformers(period = '7d') {
-            currentPerformersPeriod = period;
-            const gainersEl = document.getElementById('topGainersTable');
-            const losersEl = document.getElementById('topLosersTable');
+        async function loadTopPerformers() {
+            const gainers7dEl = document.getElementById('topGainers7dTable');
+            const gainers30dEl = document.getElementById('topGainers30dTable');
             
-            if (gainersEl) gainersEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">Loading...</div>';
-            if (losersEl) losersEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">Loading...</div>';
+            if (gainers7dEl) gainers7dEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">Loading...</div>';
+            if (gainers30dEl) gainers30dEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">Loading...</div>';
+            
+            // Load both periods
+            await Promise.all([
+                loadGainersForPeriod('7d', gainers7dEl),
+                loadGainersForPeriod('30d', gainers30dEl)
+            ]);
+        }
+        
+        async function loadGainersForPeriod(period, targetEl) {
+            if (!targetEl) return;
             
             try {
                 // Use CoinGecko top gainers/losers endpoint
-                const duration = period === '30d' ? '30d' : '7d';
-                const res = await fetch(`https://api.coingecko.com/api/v3/coins/top_gainers_losers?vs_currency=usd&duration=${duration}&top_coins=300`);
+                const res = await fetch(`https://api.coingecko.com/api/v3/coins/top_gainers_losers?vs_currency=usd&duration=${period}&top_coins=300`);
                 
                 if (!res.ok) throw new Error('API error');
                 
                 const data = await res.json();
                 
-                // Render gainers
-                if (gainersEl && data.top_gainers) {
+                if (data.top_gainers) {
                     const gainers = data.top_gainers.slice(0, 10);
-                    gainersEl.innerHTML = renderPerformersTable(gainers, period, true);
-                }
-                
-                // Render losers
-                if (losersEl && data.top_losers) {
-                    const losers = data.top_losers.slice(0, 10);
-                    losersEl.innerHTML = renderPerformersTable(losers, period, false);
+                    targetEl.innerHTML = renderPerformersTable(gainers, period);
                 }
                 
             } catch (error) {
-                console.error('Top performers error:', error);
+                console.error(`Top performers ${period} error:`, error);
                 // Fallback: use coins/markets with sorting
-                await loadTopPerformersFallback(period);
+                await loadGainersFallback(period, targetEl);
             }
         }
         
-        async function loadTopPerformersFallback(period = '7d') {
-            const gainersEl = document.getElementById('topGainersTable');
-            const losersEl = document.getElementById('topLosersTable');
+        async function loadGainersFallback(period, targetEl) {
+            if (!targetEl) return;
             
             try {
-                const priceChangeParam = period === '30d' ? '30d' : '7d';
-                const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false&price_change_percentage=${priceChangeParam}`);
+                const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false&price_change_percentage=${period}`);
                 
                 if (!res.ok) throw new Error('Fallback API error');
                 
@@ -2634,7 +2623,7 @@
                 // Filter out coins without valid change data
                 const validCoins = coins.filter(c => c[changeKey] !== null && c[changeKey] !== undefined);
                 
-                // Sort for gainers (descending) and losers (ascending)
+                // Sort for gainers (descending)
                 const sortedByGain = [...validCoins].sort((a, b) => (b[changeKey] || 0) - (a[changeKey] || 0));
                 const gainers = sortedByGain.slice(0, 10).map(c => ({
                     id: c.id,
@@ -2642,31 +2631,19 @@
                     name: c.name,
                     image: c.image,
                     usd: c.current_price,
-                    [`usd_${priceChangeParam}_change`]: c[changeKey],
+                    [`usd_${period}_change`]: c[changeKey],
                     market_cap_rank: c.market_cap_rank
                 }));
                 
-                const losers = sortedByGain.slice(-10).reverse().map(c => ({
-                    id: c.id,
-                    symbol: c.symbol,
-                    name: c.name,
-                    image: c.image,
-                    usd: c.current_price,
-                    [`usd_${priceChangeParam}_change`]: c[changeKey],
-                    market_cap_rank: c.market_cap_rank
-                }));
-                
-                if (gainersEl) gainersEl.innerHTML = renderPerformersTable(gainers, period, true);
-                if (losersEl) losersEl.innerHTML = renderPerformersTable(losers, period, false);
+                targetEl.innerHTML = renderPerformersTable(gainers, period);
                 
             } catch (error) {
-                console.error('Fallback performers error:', error);
-                if (gainersEl) gainersEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--bad);">Failed to load data</div>';
-                if (losersEl) losersEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--bad);">Failed to load data</div>';
+                console.error(`Fallback performers ${period} error:`, error);
+                targetEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--bad);">Failed to load data</div>';
             }
         }
         
-        function renderPerformersTable(coins, period, isGainers) {
+        function renderPerformersTable(coins, period) {
             const changeKey = period === '30d' ? 'usd_30d_change' : 'usd_7d_change';
             
             let html = `
@@ -2708,18 +2685,6 @@
             
             html += '</tbody></table>';
             return html;
-        }
-        
-        function switchPerformersPeriod(period) {
-            // Update button states
-            document.querySelectorAll('.section .time-btn').forEach(btn => {
-                if (btn.textContent.includes('7D') || btn.textContent.includes('30D')) {
-                    btn.classList.remove('active');
-                }
-            });
-            event.target.classList.add('active');
-            
-            loadTopPerformers(period);
         }
         
         // ==================== FEAR & GREED HISTORY CHART ====================
@@ -3798,6 +3763,26 @@
                 "interval": "W"
             });
             
+            // USDT Dominance Chart
+            if (document.getElementById('usdt-dominance-chart')) {
+                new TradingView.widget({
+                    ...chartConfig,
+                    "container_id": "usdt-dominance-chart",
+                    "symbol": "CRYPTOCAP:USDT.D",
+                    "interval": "D"
+                });
+            }
+            
+            // USDC Dominance Chart
+            if (document.getElementById('usdc-dominance-chart')) {
+                new TradingView.widget({
+                    ...chartConfig,
+                    "container_id": "usdc-dominance-chart",
+                    "symbol": "CRYPTOCAP:USDC.D",
+                    "interval": "D"
+                });
+            }
+            
             // HYPE/USDT Chart - Daily, full history
             if (document.getElementById('hype-chart')) {
                 new TradingView.widget({
@@ -3871,6 +3856,9 @@
             
             // Initialize Global Liquidity vs BTC chart
             renderLiquidityBTCChart('all');
+            
+            // Initialize Liquidity Rate of Change chart
+            setTimeout(() => renderLiquidityROCChart('all'), 300);
             
             // Fed Balance Sheet Chart (WALCL)
             new TradingView.widget({
@@ -3952,67 +3940,7 @@
                 "hide_volume": true
             });
             
-            // DXY Dollar Index
-            new TradingView.widget({
-                "autosize": true,
-                "symbol": "TVC:DXY",
-                "interval": "D",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "rgba(10, 14, 23, 1)",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "container_id": "dxy-chart",
-                "hide_volume": true
-            });
-            
-            // US 10-Year Treasury Yield
-            new TradingView.widget({
-                "autosize": true,
-                "symbol": "TVC:US10Y",
-                "interval": "D",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "rgba(10, 14, 23, 1)",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "container_id": "us10y-chart",
-                "hide_volume": true
-            });
-            
-            // US 2-Year Treasury Yield
-            new TradingView.widget({
-                "autosize": true,
-                "symbol": "TVC:US02Y",
-                "interval": "D",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "rgba(10, 14, 23, 1)",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "container_id": "us02y-chart",
-                "hide_volume": true
-            });
-            
-            // Yield Curve (10Y-2Y Spread)
+            // Yield Curve (10Y-2Y Spread) - FRED data works
             new TradingView.widget({
                 "autosize": true,
                 "symbol": "FRED:T10Y2Y",
@@ -4029,46 +3957,6 @@
                 "backgroundColor": "rgba(10, 14, 23, 1)",
                 "gridColor": "rgba(255, 255, 255, 0.05)",
                 "container_id": "yield-curve-chart",
-                "hide_volume": true
-            });
-            
-            // S&P 500
-            new TradingView.widget({
-                "autosize": true,
-                "symbol": "SP:SPX",
-                "interval": "D",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "rgba(10, 14, 23, 1)",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "container_id": "spx-chart",
-                "hide_volume": true
-            });
-            
-            // VIX Volatility Index
-            new TradingView.widget({
-                "autosize": true,
-                "symbol": "CBOE:VIX",
-                "interval": "D",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "rgba(10, 14, 23, 1)",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "container_id": "vix-chart",
                 "hide_volume": true
             });
             
@@ -4089,26 +3977,6 @@
                 "backgroundColor": "rgba(10, 14, 23, 1)",
                 "gridColor": "rgba(255, 255, 255, 0.05)",
                 "container_id": "gold-chart",
-                "hide_volume": true
-            });
-            
-            // Nasdaq 100
-            new TradingView.widget({
-                "autosize": true,
-                "symbol": "NASDAQ:NDX",
-                "interval": "D",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "rgba(10, 14, 23, 1)",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "container_id": "nasdaq-chart",
                 "hide_volume": true
             });
         }
@@ -4421,6 +4289,100 @@
             });
         });
         
+        // ==================== LIQUIDITY RATE OF CHANGE CHART ====================
+        let liquidityROCChart = null;
+        window.liquidityROCChart = null;
+        
+        function renderLiquidityROCChart(period = 'all') {
+            const ctx = document.getElementById('liquidityROCChart');
+            if (!ctx) return;
+            
+            // Sort data chronologically
+            let data = [...netLiquidityData].sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // Filter by period
+            if (period !== 'all') {
+                const years = period === '1y' ? 1 : period === '2y' ? 2 : 10;
+                const cutoff = new Date();
+                cutoff.setFullYear(cutoff.getFullYear() - years);
+                data = data.filter(d => new Date(d.date) >= cutoff);
+            }
+            
+            // Calculate monthly rate of change (using ~4 week intervals since data is weekly)
+            const rocData = [];
+            for (let i = 4; i < data.length; i++) {
+                const current = data[i].liquidity;
+                const previous = data[i - 4].liquidity;
+                const change = current - previous;
+                const changePercent = (change / previous) * 100;
+                rocData.push({
+                    date: data[i].date,
+                    change: change, // In trillions
+                    changePercent: changePercent
+                });
+            }
+            
+            if (liquidityROCChart) liquidityROCChart.destroy();
+            
+            liquidityROCChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: rocData.map(d => d.date),
+                    datasets: [{
+                        label: 'Monthly Liquidity Change ($T)',
+                        data: rocData.map(d => d.change),
+                        backgroundColor: rocData.map(d => d.change >= 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'),
+                        borderColor: rocData.map(d => d.change >= 0 ? '#22c55e' : '#ef4444'),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    const val = ctx.raw;
+                                    const sign = val >= 0 ? '+' : '';
+                                    return `${sign}$${val.toFixed(2)}T`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#6b7280', maxTicksLimit: 10 }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { 
+                                color: '#6b7280',
+                                callback: (v) => (v >= 0 ? '+' : '') + v.toFixed(2) + 'T'
+                            }
+                        }
+                    }
+                }
+            });
+            window.liquidityROCChart = liquidityROCChart;
+        }
+        
+        function updateLiquidityROCChart(period) {
+            renderLiquidityROCChart(period);
+            // Update button states
+            const container = document.getElementById('liquidityROCChart')?.closest('.card');
+            if (container) {
+                container.querySelectorAll('.time-btn').forEach(btn => {
+                    const btnPeriod = btn.textContent === 'ALL' ? 'all' : 
+                                     btn.textContent === '2Y' ? '2y' : '1y';
+                    btn.classList.toggle('active', btnPeriod === period);
+                });
+            }
+        }
+        
         // ==================== DEFILLAMA STABLECOINS API ====================
         const DEFILLAMA_STABLES = 'https://stablecoins.llama.fi';
         let stablecoinChart = null;
@@ -4510,6 +4472,17 @@
                 stablecoinHistoryData = data;
                 updateStablecoinChartDisplay(days);
                 
+                // Also render ROC chart
+                setTimeout(() => {
+                    const rocData = stablecoinHistoryData.map(d => ({
+                        date: new Date(d.date * 1000),
+                        total: d.totalCirculating?.peggedUSD || d.totalCirculatingUSD?.peggedUSD || 0
+                    }));
+                    // Store for ROC chart
+                    window.stablecoinHistoryForROC = rocData;
+                    renderStablecoinROCChart(365);
+                }, 500);
+                
             } catch (error) {
                 console.error('Error fetching stablecoin history:', error);
             }
@@ -4591,6 +4564,112 @@
                 }
             });
             window.stablecoinChart = stablecoinChart;
+        }
+        
+        // ==================== STABLECOIN RATE OF CHANGE CHART ====================
+        let stablecoinROCChart = null;
+        window.stablecoinROCChart = null;
+        
+        function renderStablecoinROCChart(days = 365) {
+            if (!stablecoinHistoryData || stablecoinHistoryData.length < 14) {
+                console.log('Not enough stablecoin data for ROC chart');
+                return;
+            }
+            
+            const ctx = document.getElementById('stablecoinROCChart');
+            if (!ctx) return;
+            
+            // Transform raw data to normalized format
+            let normalizedData = stablecoinHistoryData.map(d => ({
+                date: new Date(d.date * 1000),
+                total: d.totalCirculating?.peggedUSD || d.totalCirculatingUSD?.peggedUSD || 0
+            })).filter(d => d.total > 0);
+            
+            // Sort by date
+            normalizedData.sort((a, b) => a.date - b.date);
+            
+            // Filter data based on days
+            if (days !== 'all' && days !== 'ALL') {
+                const cutoff = new Date();
+                cutoff.setDate(cutoff.getDate() - parseInt(days));
+                normalizedData = normalizedData.filter(d => d.date >= cutoff);
+            }
+            
+            // Calculate weekly rate of change (7-day change)
+            const rocData = [];
+            for (let i = 7; i < normalizedData.length; i++) {
+                const current = normalizedData[i].total;
+                const previous = normalizedData[i - 7].total;
+                if (previous > 0) {
+                    const change = current - previous;
+                    rocData.push({
+                        date: normalizedData[i].date,
+                        change: change / 1e9 // In billions
+                    });
+                }
+            }
+            
+            if (stablecoinROCChart) stablecoinROCChart.destroy();
+            
+            stablecoinROCChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: rocData.map(d => d.date),
+                    datasets: [{
+                        label: 'Weekly Change ($B)',
+                        data: rocData.map(d => d.change),
+                        backgroundColor: rocData.map(d => d.change >= 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'),
+                        borderColor: rocData.map(d => d.change >= 0 ? '#22c55e' : '#ef4444'),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    const val = ctx.raw;
+                                    const sign = val >= 0 ? '+' : '';
+                                    return `${sign}$${val.toFixed(2)}B`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#6b7280', maxTicksLimit: 8 }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { 
+                                color: '#6b7280',
+                                callback: (v) => (v >= 0 ? '+' : '') + v.toFixed(1) + 'B'
+                            }
+                        }
+                    }
+                }
+            });
+            window.stablecoinROCChart = stablecoinROCChart;
+        }
+        
+        function updateStablecoinROCChart(days) {
+            renderStablecoinROCChart(days);
+            // Update button states
+            document.querySelectorAll('#stablecoinROCChart').forEach(chart => {
+                const container = chart.closest('.card');
+                if (container) {
+                    container.querySelectorAll('.time-btn').forEach(btn => {
+                        const btnDays = btn.textContent === '1Y' ? '365' : 
+                                       btn.textContent === '180D' ? '180' : '90';
+                        btn.classList.toggle('active', btnDays === String(days));
+                    });
+                }
+            });
         }
         
         // ==================== BINANCE FUTURES API ====================
@@ -5916,7 +5995,7 @@
             setTimeout(initTradingViewCharts, 500);
             
             // Initialize Top Performers
-            setTimeout(() => loadTopPerformers('7d'), 1200);
+            setTimeout(() => loadTopPerformers(), 1200);
             
             // Initialize Fear & Greed chart
             setTimeout(() => loadFearGreedHistory(730), 2000);
