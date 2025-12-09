@@ -690,11 +690,6 @@
                     <div class="market-change" id="mcapChange">--</div>
                 </div>
                 <div class="market-card">
-                    <div class="market-label">Fear & Greed</div>
-                    <div class="market-value" id="fgValueHeader">--</div>
-                    <div class="market-subtitle" id="fgLabelHeader">Loading...</div>
-                </div>
-                <div class="market-card">
                     <div class="market-label">BTC Price</div>
                     <div class="market-value" id="btcPrice">--</div>
                     <div class="market-change" id="btcChange">--</div>
@@ -705,9 +700,14 @@
                     <div class="market-change" id="ethChange">--</div>
                 </div>
                 <div class="market-card">
-                    <div class="market-label">BTC Dominance</div>
-                    <div class="market-value" id="summaryDom">--</div>
-                    <div class="market-subtitle" id="summaryDomChange">ETH: --</div>
+                    <div class="market-label">SOL Price</div>
+                    <div class="market-value" id="solPrice">--</div>
+                    <div class="market-change" id="solChange">--</div>
+                </div>
+                <div class="market-card">
+                    <div class="market-label">HYPE Price</div>
+                    <div class="market-value" id="hypePrice">--</div>
+                    <div class="market-change" id="hypeChange">--</div>
                 </div>
             </div>
         </div>
@@ -768,7 +768,7 @@
                 <div class="card">
                     <div class="card-header">
                         <div>
-                            <div class="card-title">🚀 Top Gainers</div>
+                            <div class="card-title">Top Gainers</div>
                             <div class="card-subtitle">Best performing assets in top 300 by market cap</div>
                         </div>
                     </div>
@@ -781,47 +781,11 @@
                 <div class="card">
                     <div class="card-header">
                         <div>
-                            <div class="card-title">📉 Top Losers</div>
+                            <div class="card-title">Top Losers</div>
                             <div class="card-subtitle">Worst performing assets in top 300 by market cap</div>
                         </div>
                     </div>
                     <div id="topLosersTable" style="margin-top: 12px;">
-                        <div style="text-align: center; padding: 40px; color: var(--text-muted);">Loading...</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Mindshare Section -->
-        <div class="section">
-            <div class="section-header">
-                <div class="section-title">Narrative Mindshare</div>
-                <div class="card-subtitle" style="margin-left: 12px;">Social attention by sector • Data from LunarCrush</div>
-            </div>
-            
-            <div class="grid-2">
-                <!-- Category Mindshare -->
-                <div class="card">
-                    <div class="card-header">
-                        <div>
-                            <div class="card-title">📊 Sector Mindshare</div>
-                            <div class="card-subtitle">Social dominance by narrative category</div>
-                        </div>
-                    </div>
-                    <div id="sectorMindshareTable" style="margin-top: 12px;">
-                        <div style="text-align: center; padding: 40px; color: var(--text-muted);">Loading...</div>
-                    </div>
-                </div>
-                
-                <!-- Top Assets by Mindshare -->
-                <div class="card">
-                    <div class="card-header">
-                        <div>
-                            <div class="card-title">🔥 Top Assets by Social Activity</div>
-                            <div class="card-subtitle">Highest engagement in last 24 hours</div>
-                        </div>
-                    </div>
-                    <div id="assetMindshareTable" style="margin-top: 12px;">
                         <div style="text-align: center; padding: 40px; color: var(--text-muted);">Loading...</div>
                     </div>
                 </div>
@@ -1213,7 +1177,7 @@
             <!-- Data Source Note -->
             <div class="card" style="margin-top: 16px; background: var(--bg-secondary);">
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="font-size: 20px;">📊</div>
+                    <div style="font-size: 20px;"></div>
                     <div>
                         <div style="font-size: 13px; font-weight: 600; color: var(--text);">ETF Data Source</div>
                         <div style="font-size: 12px; color: var(--text-muted);">
@@ -1337,6 +1301,116 @@
                         <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">M2 Money Supply</div>
                         <div style="font-size: 13px; font-weight: 600; color: var(--text);">M2SL</div>
                         <div style="font-size: 11px; color: var(--good); margin-top: 4px;">↑ Adds Liquidity</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Interest Rates & Dollar Section -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">Interest Rates & Dollar</div>
+            </div>
+            
+            <div class="grid-2">
+                <!-- DXY Dollar Index -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">US Dollar Index (DXY)</div>
+                        <div class="card-subtitle">Trade-Weighted Dollar vs Major Currencies</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 350px;">
+                        <div id="dxy-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+                
+                <!-- US 10Y Treasury -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">US 10-Year Treasury Yield</div>
+                        <div class="card-subtitle">Benchmark Long-Term Interest Rate</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 350px;">
+                        <div id="us10y-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-2" style="margin-top: 16px;">
+                <!-- US 2Y Treasury -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">US 2-Year Treasury Yield</div>
+                        <div class="card-subtitle">Short-Term Rate - Fed Policy Sensitive</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 350px;">
+                        <div id="us02y-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+                
+                <!-- Yield Curve 2s10s -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">Yield Curve (10Y - 2Y Spread)</div>
+                        <div class="card-subtitle">Inverted = Recession Warning</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 350px;">
+                        <div id="yield-curve-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Risk Assets & Volatility Section -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">Risk Assets & Volatility</div>
+            </div>
+            
+            <div class="grid-2">
+                <!-- S&P 500 -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">S&P 500 Index</div>
+                        <div class="card-subtitle">US Large Cap Equities - Risk-On Indicator</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 350px;">
+                        <div id="spx-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+                
+                <!-- VIX -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">VIX Volatility Index</div>
+                        <div class="card-subtitle">Fear Gauge - Spikes During Selloffs</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 350px;">
+                        <div id="vix-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-2" style="margin-top: 16px;">
+                <!-- Gold -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">Gold (XAU/USD)</div>
+                        <div class="card-subtitle">Safe Haven Asset - Inflation Hedge</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 350px;">
+                        <div id="gold-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+                
+                <!-- Nasdaq -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">Nasdaq 100</div>
+                        <div class="card-subtitle">Tech Stocks - High Beta Correlation to BTC</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 350px;">
+                        <div id="nasdaq-chart" style="height: 100%;"></div>
                     </div>
                 </div>
             </div>
@@ -2648,121 +2722,6 @@
             loadTopPerformers(period);
         }
         
-        // ==================== MINDSHARE / SOCIAL DATA ====================
-        async function loadMindshareData() {
-            const sectorEl = document.getElementById('sectorMindshareTable');
-            const assetEl = document.getElementById('assetMindshareTable');
-            
-            // Since LunarCrush requires API key and has CORS issues,
-            // we'll use CoinGecko trending + categories as a proxy for mindshare
-            
-            try {
-                // Fetch trending coins (proxy for high mindshare)
-                const trendingRes = await fetch('https://api.coingecko.com/api/v3/search/trending');
-                const trendingData = await trendingRes.json();
-                
-                // Fetch category data
-                const categoriesRes = await fetch('https://api.coingecko.com/api/v3/coins/categories?order=market_cap_desc');
-                const categoriesData = await categoriesRes.json();
-                
-                // Render sector mindshare (using categories as proxy)
-                if (sectorEl && categoriesData) {
-                    const topCategories = categoriesData.slice(0, 12).filter(c => 
-                        c.name && !c.name.includes('Ecosystem') && c.market_cap_change_24h !== null
-                    ).slice(0, 10);
-                    sectorEl.innerHTML = renderSectorMindshare(topCategories);
-                }
-                
-                // Render asset mindshare (using trending as proxy)
-                if (assetEl && trendingData.coins) {
-                    const trendingCoins = trendingData.coins.slice(0, 10).map(c => c.item);
-                    assetEl.innerHTML = renderAssetMindshare(trendingCoins);
-                }
-                
-            } catch (error) {
-                console.error('Mindshare data error:', error);
-                if (sectorEl) sectorEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--bad);">Failed to load data</div>';
-                if (assetEl) assetEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--bad);">Failed to load data</div>';
-            }
-        }
-        
-        function renderSectorMindshare(categories) {
-            let html = `
-                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-                    <thead>
-                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            <th style="text-align: left; padding: 8px 4px; color: var(--text-muted); font-weight: 500;">Sector</th>
-                            <th style="text-align: right; padding: 8px 4px; color: var(--text-muted); font-weight: 500;">Market Cap</th>
-                            <th style="text-align: right; padding: 8px 4px; color: var(--text-muted); font-weight: 500;">24H</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-            
-            categories.forEach(cat => {
-                const change = cat.market_cap_change_24h || 0;
-                const changeColor = change >= 0 ? 'var(--good)' : 'var(--bad)';
-                const changeSign = change >= 0 ? '+' : '';
-                const mcap = cat.market_cap ? (cat.market_cap / 1e9).toFixed(1) + 'B' : '--';
-                
-                // Map category names to more readable versions
-                let displayName = cat.name;
-                if (displayName.length > 20) displayName = displayName.substring(0, 18) + '...';
-                
-                html += `
-                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        <td style="padding: 10px 4px; color: var(--text); font-weight: 500;">${displayName}</td>
-                        <td style="padding: 10px 4px; text-align: right; color: var(--text-muted);">$${mcap}</td>
-                        <td style="padding: 10px 4px; text-align: right; color: ${changeColor}; font-weight: 600;">${changeSign}${change.toFixed(1)}%</td>
-                    </tr>
-                `;
-            });
-            
-            html += '</tbody></table>';
-            return html;
-        }
-        
-        function renderAssetMindshare(coins) {
-            let html = `
-                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-                    <thead>
-                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            <th style="text-align: left; padding: 8px 4px; color: var(--text-muted); font-weight: 500;">#</th>
-                            <th style="text-align: left; padding: 8px 4px; color: var(--text-muted); font-weight: 500;">Trending</th>
-                            <th style="text-align: right; padding: 8px 4px; color: var(--text-muted); font-weight: 500;">Rank</th>
-                            <th style="text-align: right; padding: 8px 4px; color: var(--text-muted); font-weight: 500;">24H</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-            
-            coins.forEach((coin, idx) => {
-                const change = coin.data?.price_change_percentage_24h?.usd || 0;
-                const changeColor = change >= 0 ? 'var(--good)' : 'var(--bad)';
-                const changeSign = change >= 0 ? '+' : '';
-                
-                html += `
-                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        <td style="padding: 10px 4px; color: var(--text-muted);">${idx + 1}</td>
-                        <td style="padding: 10px 4px;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <img src="${coin.thumb}" alt="${coin.symbol}" style="width: 24px; height: 24px; border-radius: 50%;" onerror="this.style.display='none'">
-                                <div>
-                                    <div style="font-weight: 600; color: var(--text);">${coin.symbol.toUpperCase()}</div>
-                                    <div style="font-size: 11px; color: var(--text-muted);">${coin.name.length > 15 ? coin.name.substring(0, 15) + '...' : coin.name}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td style="padding: 10px 4px; text-align: right; color: var(--text-muted);">#${coin.market_cap_rank || '--'}</td>
-                        <td style="padding: 10px 4px; text-align: right; color: ${changeColor}; font-weight: 600;">${changeSign}${change.toFixed(1)}%</td>
-                    </tr>
-                `;
-            });
-            
-            html += '</tbody></table>';
-            return html;
-        }
-        
         // ==================== FEAR & GREED HISTORY CHART ====================
         let fearGreedHistoryChart = null;
         window.fearGreedHistoryChart = null;
@@ -3992,6 +3951,166 @@
                 "container_id": "m2-chart",
                 "hide_volume": true
             });
+            
+            // DXY Dollar Index
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "TVC:DXY",
+                "interval": "D",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#0a0e17",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "backgroundColor": "rgba(10, 14, 23, 1)",
+                "gridColor": "rgba(255, 255, 255, 0.05)",
+                "container_id": "dxy-chart",
+                "hide_volume": true
+            });
+            
+            // US 10-Year Treasury Yield
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "TVC:US10Y",
+                "interval": "D",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#0a0e17",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "backgroundColor": "rgba(10, 14, 23, 1)",
+                "gridColor": "rgba(255, 255, 255, 0.05)",
+                "container_id": "us10y-chart",
+                "hide_volume": true
+            });
+            
+            // US 2-Year Treasury Yield
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "TVC:US02Y",
+                "interval": "D",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#0a0e17",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "backgroundColor": "rgba(10, 14, 23, 1)",
+                "gridColor": "rgba(255, 255, 255, 0.05)",
+                "container_id": "us02y-chart",
+                "hide_volume": true
+            });
+            
+            // Yield Curve (10Y-2Y Spread)
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "FRED:T10Y2Y",
+                "interval": "D",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#0a0e17",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "backgroundColor": "rgba(10, 14, 23, 1)",
+                "gridColor": "rgba(255, 255, 255, 0.05)",
+                "container_id": "yield-curve-chart",
+                "hide_volume": true
+            });
+            
+            // S&P 500
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "SP:SPX",
+                "interval": "D",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#0a0e17",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "backgroundColor": "rgba(10, 14, 23, 1)",
+                "gridColor": "rgba(255, 255, 255, 0.05)",
+                "container_id": "spx-chart",
+                "hide_volume": true
+            });
+            
+            // VIX Volatility Index
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "CBOE:VIX",
+                "interval": "D",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#0a0e17",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "backgroundColor": "rgba(10, 14, 23, 1)",
+                "gridColor": "rgba(255, 255, 255, 0.05)",
+                "container_id": "vix-chart",
+                "hide_volume": true
+            });
+            
+            // Gold
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "TVC:GOLD",
+                "interval": "D",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#0a0e17",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "backgroundColor": "rgba(10, 14, 23, 1)",
+                "gridColor": "rgba(255, 255, 255, 0.05)",
+                "container_id": "gold-chart",
+                "hide_volume": true
+            });
+            
+            // Nasdaq 100
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "NASDAQ:NDX",
+                "interval": "D",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#0a0e17",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "backgroundColor": "rgba(10, 14, 23, 1)",
+                "gridColor": "rgba(255, 255, 255, 0.05)",
+                "container_id": "nasdaq-chart",
+                "hide_volume": true
+            });
         }
         
         // ==================== GLOBAL LIQUIDITY VS BITCOIN CHART ====================
@@ -4519,7 +4638,7 @@
             
             const signalEl = document.getElementById('summaryFundingSignal');
             if (avgRate > 0.03) {
-                signalEl.textContent = '🔥 Longs Crowded';
+                signalEl.textContent = 'Longs Crowded';
                 signalEl.style.color = 'var(--bad)';
             } else if (avgRate < -0.03) {
                 signalEl.textContent = '❄️ Shorts Crowded';
@@ -4549,7 +4668,7 @@
             const signalBox = document.getElementById('fundingSignal');
             if (avgRate > 0.05) {
                 signalBox.innerHTML = `
-                    <div class="signal-icon">🔥</div>
+                    <div class="signal-icon"></div>
                     <div class="signal-text">
                         <div class="signal-title" style="color: var(--bad);">Extreme Greed</div>
                         <div class="signal-desc">Longs paying heavy premium - long squeeze risk elevated</div>
@@ -4686,7 +4805,7 @@
                         lsSignal.textContent = '📈 Long Heavy';
                         lsSignal.style.color = 'var(--warn)';
                     } else if (ratio < 0.67) {
-                        lsSignal.textContent = '📉 Short Heavy';
+                        lsSignal.textContent = 'Short Heavy';
                         lsSignal.style.color = 'var(--warn)';
                     } else {
                         lsSignal.textContent = '⚖️ Balanced';
@@ -4873,8 +4992,9 @@
         // ==================== MARKET DATA (Multi-source with fallbacks) ====================
         async function fetchMarketData() {
             try {
-                let btcPrice, ethPrice, btcChange, ethChange;
-                let totalMcap, btcDom, ethDom;
+                let btcPrice, ethPrice, solPrice, hypePrice;
+                let btcChange, ethChange, solChange, hypeChange;
+                let totalMcap;
                 let success = false;
                 let source = '';
                 
@@ -4892,95 +5012,85 @@
                     }
                 };
                 
-                // Strategy 1: Binance (most reliable, no rate limits)
+                // Strategy 1: Binance for BTC, ETH, SOL + CoinGecko for HYPE
                 if (!success) {
                     try {
-                        const [btcRes, ethRes] = await Promise.all([
+                        const [btcRes, ethRes, solRes] = await Promise.all([
                             fetchWithTimeout('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT'),
-                            fetchWithTimeout('https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT')
+                            fetchWithTimeout('https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT'),
+                            fetchWithTimeout('https://api.binance.com/api/v3/ticker/24hr?symbol=SOLUSDT')
                         ]);
                         
-                        if (btcRes.ok && ethRes.ok) {
+                        if (btcRes.ok && ethRes.ok && solRes.ok) {
                             const btcData = await btcRes.json();
                             const ethData = await ethRes.json();
+                            const solData = await solRes.json();
                             btcPrice = parseFloat(btcData.lastPrice);
                             ethPrice = parseFloat(ethData.lastPrice);
+                            solPrice = parseFloat(solData.lastPrice);
                             btcChange = parseFloat(btcData.priceChangePercent);
                             ethChange = parseFloat(ethData.priceChangePercent);
-                            // Estimate market cap and dominance
-                            const btcMcap = btcPrice * 19800000; // ~19.8M BTC supply
-                            totalMcap = btcMcap / 0.57; // BTC is ~57% of total
-                            btcDom = 57;
-                            ethDom = 12;
+                            solChange = parseFloat(solData.priceChangePercent);
+                            // Estimate market cap
+                            const btcMcap = btcPrice * 19800000;
+                            totalMcap = btcMcap / 0.57;
                             success = true;
                             source = 'Binance';
                         }
                     } catch (e) { console.log('Binance failed:', e.message); }
                 }
                 
-                // Strategy 2: CoinGecko 
+                // Fetch HYPE from CoinGecko (not on Binance)
+                try {
+                    const hypeRes = await fetchWithTimeout('https://api.coingecko.com/api/v3/simple/price?ids=hyperliquid&vs_currencies=usd&include_24hr_change=true');
+                    if (hypeRes.ok) {
+                        const hypeData = await hypeRes.json();
+                        hypePrice = hypeData.hyperliquid?.usd || 0;
+                        hypeChange = hypeData.hyperliquid?.usd_24h_change || 0;
+                    }
+                } catch (e) { 
+                    console.log('HYPE price failed:', e.message);
+                    hypePrice = 0;
+                    hypeChange = 0;
+                }
+                
+                // Strategy 2: CoinGecko for all
                 if (!success) {
                     try {
-                        const priceRes = await fetchWithTimeout('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true');
+                        const priceRes = await fetchWithTimeout('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,hyperliquid&vs_currencies=usd&include_24hr_change=true');
                         if (priceRes.ok) {
                             const priceData = await priceRes.json();
                             btcPrice = priceData.bitcoin?.usd || 0;
                             ethPrice = priceData.ethereum?.usd || 0;
+                            solPrice = priceData.solana?.usd || 0;
+                            hypePrice = priceData.hyperliquid?.usd || 0;
                             btcChange = priceData.bitcoin?.usd_24h_change || 0;
                             ethChange = priceData.ethereum?.usd_24h_change || 0;
+                            solChange = priceData.solana?.usd_24h_change || 0;
+                            hypeChange = priceData.hyperliquid?.usd_24h_change || 0;
                             const btcMcap = btcPrice * 19800000;
                             totalMcap = btcMcap / 0.57;
-                            btcDom = 57;
-                            ethDom = 12;
                             success = true;
                             source = 'CoinGecko';
                         }
                     } catch (e) { console.log('CoinGecko failed:', e.message); }
                 }
                 
-                // Strategy 3: Kraken
+                // Strategy 3: CryptoCompare
                 if (!success) {
                     try {
-                        const krakenRes = await fetchWithTimeout('https://api.kraken.com/0/public/Ticker?pair=XBTUSD,ETHUSD');
-                        if (krakenRes.ok) {
-                            const krakenData = await krakenRes.json();
-                            if (krakenData.result) {
-                                const btcData = krakenData.result['XXBTZUSD'] || krakenData.result['XBTUSD'];
-                                const ethData = krakenData.result['XETHZUSD'] || krakenData.result['ETHUSD'];
-                                if (btcData && ethData) {
-                                    btcPrice = parseFloat(btcData.c[0]);
-                                    ethPrice = parseFloat(ethData.c[0]);
-                                    const btcOpen = parseFloat(btcData.o);
-                                    const ethOpen = parseFloat(ethData.o);
-                                    btcChange = ((btcPrice - btcOpen) / btcOpen) * 100;
-                                    ethChange = ((ethPrice - ethOpen) / ethOpen) * 100;
-                                    const btcMcap = btcPrice * 19800000;
-                                    totalMcap = btcMcap / 0.57;
-                                    btcDom = 57;
-                                    ethDom = 12;
-                                    success = true;
-                                    source = 'Kraken';
-                                }
-                            }
-                        }
-                    } catch (e) { console.log('Kraken failed:', e.message); }
-                }
-                
-                // Strategy 4: CryptoCompare
-                if (!success) {
-                    try {
-                        const ccRes = await fetchWithTimeout('https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BTC,ETH&tsyms=USD');
+                        const ccRes = await fetchWithTimeout('https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BTC,ETH,SOL&tsyms=USD');
                         if (ccRes.ok) {
                             const ccData = await ccRes.json();
                             if (ccData.RAW) {
-                                btcPrice = ccData.RAW.BTC.USD.PRICE;
-                                ethPrice = ccData.RAW.ETH.USD.PRICE;
-                                btcChange = ccData.RAW.BTC.USD.CHANGEPCT24HOUR;
-                                ethChange = ccData.RAW.ETH.USD.CHANGEPCT24HOUR;
+                                btcPrice = ccData.RAW.BTC?.USD?.PRICE || 0;
+                                ethPrice = ccData.RAW.ETH?.USD?.PRICE || 0;
+                                solPrice = ccData.RAW.SOL?.USD?.PRICE || 0;
+                                btcChange = ccData.RAW.BTC?.USD?.CHANGEPCT24HOUR || 0;
+                                ethChange = ccData.RAW.ETH?.USD?.CHANGEPCT24HOUR || 0;
+                                solChange = ccData.RAW.SOL?.USD?.CHANGEPCT24HOUR || 0;
                                 const btcMcap = btcPrice * 19800000;
                                 totalMcap = btcMcap / 0.57;
-                                btcDom = 57;
-                                ethDom = 12;
                                 success = true;
                                 source = 'CryptoCompare';
                             }
@@ -4988,34 +5098,11 @@
                     } catch (e) { console.log('CryptoCompare failed:', e.message); }
                 }
                 
-                // Strategy 5: CoinCap
-                if (!success) {
-                    try {
-                        const [btcRes, ethRes] = await Promise.all([
-                            fetchWithTimeout('https://api.coincap.io/v2/assets/bitcoin'),
-                            fetchWithTimeout('https://api.coincap.io/v2/assets/ethereum')
-                        ]);
-                        if (btcRes.ok && ethRes.ok) {
-                            const btcData = (await btcRes.json()).data;
-                            const ethData = (await ethRes.json()).data;
-                            btcPrice = parseFloat(btcData.priceUsd);
-                            ethPrice = parseFloat(ethData.priceUsd);
-                            btcChange = parseFloat(btcData.changePercent24Hr);
-                            ethChange = parseFloat(ethData.changePercent24Hr);
-                            totalMcap = parseFloat(btcData.marketCapUsd) / 0.57;
-                            btcDom = 57;
-                            ethDom = 12;
-                            success = true;
-                            source = 'CoinCap';
-                        }
-                    } catch (e) { console.log('CoinCap failed:', e.message); }
-                }
-                
                 if (!success || !btcPrice) {
                     throw new Error('All price APIs failed');
                 }
                 
-                console.log(`Market data loaded from ${source}: BTC $${btcPrice.toFixed(0)}, ETH $${ethPrice.toFixed(0)}`);
+                console.log(`Market data loaded from ${source}: BTC $${btcPrice.toFixed(0)}, ETH $${ethPrice.toFixed(0)}, SOL $${solPrice?.toFixed(0) || '--'}, HYPE $${hypePrice?.toFixed(2) || '--'}`);
                 
                 // BTC Price
                 document.getElementById('btcPrice').textContent = '$' + formatNumber(btcPrice, 0);
@@ -5027,6 +5114,20 @@
                 document.getElementById('ethChange').textContent = formatPercent(ethChange, true);
                 document.getElementById('ethChange').className = 'market-change ' + (ethChange >= 0 ? 'positive' : 'negative');
                 
+                // SOL Price
+                if (solPrice) {
+                    document.getElementById('solPrice').textContent = '$' + formatNumber(solPrice, 0);
+                    document.getElementById('solChange').textContent = formatPercent(solChange, true);
+                    document.getElementById('solChange').className = 'market-change ' + (solChange >= 0 ? 'positive' : 'negative');
+                }
+                
+                // HYPE Price
+                if (hypePrice) {
+                    document.getElementById('hypePrice').textContent = '$' + formatNumber(hypePrice, 2);
+                    document.getElementById('hypeChange').textContent = formatPercent(hypeChange, true);
+                    document.getElementById('hypeChange').className = 'market-change ' + (hypeChange >= 0 ? 'positive' : 'negative');
+                }
+                
                 // Total market cap
                 document.getElementById('totalMcap').textContent = formatCurrency(totalMcap);
                 
@@ -5034,17 +5135,14 @@
                 document.getElementById('mcapChange').textContent = formatPercent(btcChange, true);
                 document.getElementById('mcapChange').className = 'market-change ' + (btcChange >= 0 ? 'positive' : 'negative');
                 
-                // Dominance
-                document.getElementById('summaryDom').textContent = btcDom.toFixed(1) + '%';
-                document.getElementById('summaryDomChange').textContent = 'ETH: ' + ethDom.toFixed(1) + '%';
-                
             } catch (error) {
                 console.error('Error fetching market data:', error);
                 // Show fallback static values instead of errors
                 document.getElementById('btcPrice').textContent = '--';
                 document.getElementById('ethPrice').textContent = '--';
+                document.getElementById('solPrice').textContent = '--';
+                document.getElementById('hypePrice').textContent = '--';
                 document.getElementById('totalMcap').textContent = '--';
-                document.getElementById('summaryDom').textContent = '--';
             }
         }
         
@@ -5819,9 +5917,6 @@
             
             // Initialize Top Performers
             setTimeout(() => loadTopPerformers('7d'), 1200);
-            
-            // Initialize Mindshare data
-            setTimeout(() => loadMindshareData(), 1500);
             
             // Initialize Fear & Greed chart
             setTimeout(() => loadFearGreedHistory(730), 2000);
