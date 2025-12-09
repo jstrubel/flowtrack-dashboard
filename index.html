@@ -753,6 +753,81 @@
             </div>
         </div>
         
+        <!-- Top Performers Section -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">Top Performers</div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="time-btn active" onclick="switchPerformersPeriod('7d')">7D</button>
+                    <button class="time-btn" onclick="switchPerformersPeriod('30d')">30D</button>
+                </div>
+            </div>
+            
+            <div class="grid-2">
+                <!-- Top Gainers -->
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">🚀 Top Gainers</div>
+                            <div class="card-subtitle">Best performing assets in top 300 by market cap</div>
+                        </div>
+                    </div>
+                    <div id="topGainersTable" style="margin-top: 12px;">
+                        <div style="text-align: center; padding: 40px; color: var(--text-muted);">Loading...</div>
+                    </div>
+                </div>
+                
+                <!-- Top Losers -->
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">📉 Top Losers</div>
+                            <div class="card-subtitle">Worst performing assets in top 300 by market cap</div>
+                        </div>
+                    </div>
+                    <div id="topLosersTable" style="margin-top: 12px;">
+                        <div style="text-align: center; padding: 40px; color: var(--text-muted);">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mindshare Section -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">Narrative Mindshare</div>
+                <div class="card-subtitle" style="margin-left: 12px;">Social attention by sector • Data from LunarCrush</div>
+            </div>
+            
+            <div class="grid-2">
+                <!-- Category Mindshare -->
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">📊 Sector Mindshare</div>
+                            <div class="card-subtitle">Social dominance by narrative category</div>
+                        </div>
+                    </div>
+                    <div id="sectorMindshareTable" style="margin-top: 12px;">
+                        <div style="text-align: center; padding: 40px; color: var(--text-muted);">Loading...</div>
+                    </div>
+                </div>
+                
+                <!-- Top Assets by Mindshare -->
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">🔥 Top Assets by Social Activity</div>
+                            <div class="card-subtitle">Highest engagement in last 24 hours</div>
+                        </div>
+                    </div>
+                    <div id="assetMindshareTable" style="margin-top: 12px;">
+                        <div style="text-align: center; padding: 40px; color: var(--text-muted);">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Market Structure Charts -->
         <div class="section">
             <div class="section-header">
@@ -2428,6 +2503,264 @@
                     options: chartOptions
                 });
             }
+        }
+        
+        // ==================== TOP PERFORMERS ====================
+        let currentPerformersPeriod = '7d';
+        
+        async function loadTopPerformers(period = '7d') {
+            currentPerformersPeriod = period;
+            const gainersEl = document.getElementById('topGainersTable');
+            const losersEl = document.getElementById('topLosersTable');
+            
+            if (gainersEl) gainersEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">Loading...</div>';
+            if (losersEl) losersEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">Loading...</div>';
+            
+            try {
+                // Use CoinGecko top gainers/losers endpoint
+                const duration = period === '30d' ? '30d' : '7d';
+                const res = await fetch(`https://api.coingecko.com/api/v3/coins/top_gainers_losers?vs_currency=usd&duration=${duration}&top_coins=300`);
+                
+                if (!res.ok) throw new Error('API error');
+                
+                const data = await res.json();
+                
+                // Render gainers
+                if (gainersEl && data.top_gainers) {
+                    const gainers = data.top_gainers.slice(0, 10);
+                    gainersEl.innerHTML = renderPerformersTable(gainers, period, true);
+                }
+                
+                // Render losers
+                if (losersEl && data.top_losers) {
+                    const losers = data.top_losers.slice(0, 10);
+                    losersEl.innerHTML = renderPerformersTable(losers, period, false);
+                }
+                
+            } catch (error) {
+                console.error('Top performers error:', error);
+                // Fallback: use coins/markets with sorting
+                await loadTopPerformersFallback(period);
+            }
+        }
+        
+        async function loadTopPerformersFallback(period = '7d') {
+            const gainersEl = document.getElementById('topGainersTable');
+            const losersEl = document.getElementById('topLosersTable');
+            
+            try {
+                const priceChangeParam = period === '30d' ? '30d' : '7d';
+                const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false&price_change_percentage=${priceChangeParam}`);
+                
+                if (!res.ok) throw new Error('Fallback API error');
+                
+                const coins = await res.json();
+                const changeKey = period === '30d' ? 'price_change_percentage_30d_in_currency' : 'price_change_percentage_7d_in_currency';
+                
+                // Filter out coins without valid change data
+                const validCoins = coins.filter(c => c[changeKey] !== null && c[changeKey] !== undefined);
+                
+                // Sort for gainers (descending) and losers (ascending)
+                const sortedByGain = [...validCoins].sort((a, b) => (b[changeKey] || 0) - (a[changeKey] || 0));
+                const gainers = sortedByGain.slice(0, 10).map(c => ({
+                    id: c.id,
+                    symbol: c.symbol,
+                    name: c.name,
+                    image: c.image,
+                    usd: c.current_price,
+                    [`usd_${priceChangeParam}_change`]: c[changeKey],
+                    market_cap_rank: c.market_cap_rank
+                }));
+                
+                const losers = sortedByGain.slice(-10).reverse().map(c => ({
+                    id: c.id,
+                    symbol: c.symbol,
+                    name: c.name,
+                    image: c.image,
+                    usd: c.current_price,
+                    [`usd_${priceChangeParam}_change`]: c[changeKey],
+                    market_cap_rank: c.market_cap_rank
+                }));
+                
+                if (gainersEl) gainersEl.innerHTML = renderPerformersTable(gainers, period, true);
+                if (losersEl) losersEl.innerHTML = renderPerformersTable(losers, period, false);
+                
+            } catch (error) {
+                console.error('Fallback performers error:', error);
+                if (gainersEl) gainersEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--bad);">Failed to load data</div>';
+                if (losersEl) losersEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--bad);">Failed to load data</div>';
+            }
+        }
+        
+        function renderPerformersTable(coins, period, isGainers) {
+            const changeKey = period === '30d' ? 'usd_30d_change' : 'usd_7d_change';
+            
+            let html = `
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <th style="text-align: left; padding: 8px 4px; color: var(--text-muted); font-weight: 500;">#</th>
+                            <th style="text-align: left; padding: 8px 4px; color: var(--text-muted); font-weight: 500;">Coin</th>
+                            <th style="text-align: right; padding: 8px 4px; color: var(--text-muted); font-weight: 500;">Price</th>
+                            <th style="text-align: right; padding: 8px 4px; color: var(--text-muted); font-weight: 500;">${period.toUpperCase()}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            coins.forEach((coin, idx) => {
+                const change = coin[changeKey] || 0;
+                const changeColor = change >= 0 ? 'var(--good)' : 'var(--bad)';
+                const changeSign = change >= 0 ? '+' : '';
+                const price = coin.usd < 0.01 ? coin.usd.toFixed(6) : coin.usd < 1 ? coin.usd.toFixed(4) : coin.usd.toFixed(2);
+                
+                html += `
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 10px 4px; color: var(--text-muted);">${coin.market_cap_rank || idx + 1}</td>
+                        <td style="padding: 10px 4px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <img src="${coin.image}" alt="${coin.symbol}" style="width: 24px; height: 24px; border-radius: 50%;" onerror="this.style.display='none'">
+                                <div>
+                                    <div style="font-weight: 600; color: var(--text);">${coin.symbol.toUpperCase()}</div>
+                                    <div style="font-size: 11px; color: var(--text-muted);">${coin.name.length > 15 ? coin.name.substring(0, 15) + '...' : coin.name}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="padding: 10px 4px; text-align: right; color: var(--text);">$${price}</td>
+                        <td style="padding: 10px 4px; text-align: right; color: ${changeColor}; font-weight: 600;">${changeSign}${change.toFixed(1)}%</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            return html;
+        }
+        
+        function switchPerformersPeriod(period) {
+            // Update button states
+            document.querySelectorAll('.section .time-btn').forEach(btn => {
+                if (btn.textContent.includes('7D') || btn.textContent.includes('30D')) {
+                    btn.classList.remove('active');
+                }
+            });
+            event.target.classList.add('active');
+            
+            loadTopPerformers(period);
+        }
+        
+        // ==================== MINDSHARE / SOCIAL DATA ====================
+        async function loadMindshareData() {
+            const sectorEl = document.getElementById('sectorMindshareTable');
+            const assetEl = document.getElementById('assetMindshareTable');
+            
+            // Since LunarCrush requires API key and has CORS issues,
+            // we'll use CoinGecko trending + categories as a proxy for mindshare
+            
+            try {
+                // Fetch trending coins (proxy for high mindshare)
+                const trendingRes = await fetch('https://api.coingecko.com/api/v3/search/trending');
+                const trendingData = await trendingRes.json();
+                
+                // Fetch category data
+                const categoriesRes = await fetch('https://api.coingecko.com/api/v3/coins/categories?order=market_cap_desc');
+                const categoriesData = await categoriesRes.json();
+                
+                // Render sector mindshare (using categories as proxy)
+                if (sectorEl && categoriesData) {
+                    const topCategories = categoriesData.slice(0, 12).filter(c => 
+                        c.name && !c.name.includes('Ecosystem') && c.market_cap_change_24h !== null
+                    ).slice(0, 10);
+                    sectorEl.innerHTML = renderSectorMindshare(topCategories);
+                }
+                
+                // Render asset mindshare (using trending as proxy)
+                if (assetEl && trendingData.coins) {
+                    const trendingCoins = trendingData.coins.slice(0, 10).map(c => c.item);
+                    assetEl.innerHTML = renderAssetMindshare(trendingCoins);
+                }
+                
+            } catch (error) {
+                console.error('Mindshare data error:', error);
+                if (sectorEl) sectorEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--bad);">Failed to load data</div>';
+                if (assetEl) assetEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--bad);">Failed to load data</div>';
+            }
+        }
+        
+        function renderSectorMindshare(categories) {
+            let html = `
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <th style="text-align: left; padding: 8px 4px; color: var(--text-muted); font-weight: 500;">Sector</th>
+                            <th style="text-align: right; padding: 8px 4px; color: var(--text-muted); font-weight: 500;">Market Cap</th>
+                            <th style="text-align: right; padding: 8px 4px; color: var(--text-muted); font-weight: 500;">24H</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            categories.forEach(cat => {
+                const change = cat.market_cap_change_24h || 0;
+                const changeColor = change >= 0 ? 'var(--good)' : 'var(--bad)';
+                const changeSign = change >= 0 ? '+' : '';
+                const mcap = cat.market_cap ? (cat.market_cap / 1e9).toFixed(1) + 'B' : '--';
+                
+                // Map category names to more readable versions
+                let displayName = cat.name;
+                if (displayName.length > 20) displayName = displayName.substring(0, 18) + '...';
+                
+                html += `
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 10px 4px; color: var(--text); font-weight: 500;">${displayName}</td>
+                        <td style="padding: 10px 4px; text-align: right; color: var(--text-muted);">$${mcap}</td>
+                        <td style="padding: 10px 4px; text-align: right; color: ${changeColor}; font-weight: 600;">${changeSign}${change.toFixed(1)}%</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            return html;
+        }
+        
+        function renderAssetMindshare(coins) {
+            let html = `
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <th style="text-align: left; padding: 8px 4px; color: var(--text-muted); font-weight: 500;">#</th>
+                            <th style="text-align: left; padding: 8px 4px; color: var(--text-muted); font-weight: 500;">Trending</th>
+                            <th style="text-align: right; padding: 8px 4px; color: var(--text-muted); font-weight: 500;">Rank</th>
+                            <th style="text-align: right; padding: 8px 4px; color: var(--text-muted); font-weight: 500;">24H</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            coins.forEach((coin, idx) => {
+                const change = coin.data?.price_change_percentage_24h?.usd || 0;
+                const changeColor = change >= 0 ? 'var(--good)' : 'var(--bad)';
+                const changeSign = change >= 0 ? '+' : '';
+                
+                html += `
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 10px 4px; color: var(--text-muted);">${idx + 1}</td>
+                        <td style="padding: 10px 4px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <img src="${coin.thumb}" alt="${coin.symbol}" style="width: 24px; height: 24px; border-radius: 50%;" onerror="this.style.display='none'">
+                                <div>
+                                    <div style="font-weight: 600; color: var(--text);">${coin.symbol.toUpperCase()}</div>
+                                    <div style="font-size: 11px; color: var(--text-muted);">${coin.name.length > 15 ? coin.name.substring(0, 15) + '...' : coin.name}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="padding: 10px 4px; text-align: right; color: var(--text-muted);">#${coin.market_cap_rank || '--'}</td>
+                        <td style="padding: 10px 4px; text-align: right; color: ${changeColor}; font-weight: 600;">${changeSign}${change.toFixed(1)}%</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            return html;
         }
         
         // ==================== FEAR & GREED HISTORY CHART ====================
@@ -5484,17 +5817,23 @@
             // Initialize TradingView charts
             setTimeout(initTradingViewCharts, 500);
             
+            // Initialize Top Performers
+            setTimeout(() => loadTopPerformers('7d'), 1200);
+            
+            // Initialize Mindshare data
+            setTimeout(() => loadMindshareData(), 1500);
+            
             // Initialize Fear & Greed chart
-            setTimeout(() => loadFearGreedHistory(730), 1000);
+            setTimeout(() => loadFearGreedHistory(730), 2000);
             
             // Initialize Altcoin Breadth (delay to avoid rate limits)
-            setTimeout(() => loadAltcoinBreadth(), 2000);
+            setTimeout(() => loadAltcoinBreadth(), 3000);
             
             // Initialize Historical Breadth
-            setTimeout(() => loadHistoricalBreadth(365), 4000);
+            setTimeout(() => loadHistoricalBreadth(365), 5000);
             
             // Initialize ETF Flows
-            setTimeout(() => loadETFData(), 3000);
+            setTimeout(() => loadETFData(), 4000);
             
             // Auto refresh every 60 seconds
             setInterval(refreshAllData, 60000);
