@@ -1425,7 +1425,7 @@
                 <div class="card-header">
                     <div>
                         <div class="card-title">HYPE Price-to-Sales Ratio</div>
-                        <div class="card-subtitle">FDV / Annualized Fees • Lower = Cheaper valuation</div>
+                        <div class="card-subtitle">Market Cap / Annualized Fees • Lower = Cheaper valuation</div>
                     </div>
                 </div>
                 <div class="chart-container tall" style="position: relative;">
@@ -1463,9 +1463,9 @@
                 </div>
                 
                 <div class="card" style="text-align: center; padding: 20px;">
-                    <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Market Cap (FDV)</div>
-                    <div style="font-size: 28px; font-weight: 800; color: var(--accent);" id="hypeFDV">--</div>
-                    <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Fully Diluted</div>
+                    <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Market Cap</div>
+                    <div style="font-size: 28px; font-weight: 800; color: var(--accent);" id="hypeMcap">--</div>
+                    <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">~333M Circulating</div>
                 </div>
             </div>
         </div>
@@ -3202,15 +3202,17 @@
                             // Annualized fees = 30d * 12
                             const annualizedFees = rolling30d * 12;
                             
-                            // P/S ratio = FDV / Annualized Fees
-                            // Use estimated FDV based on price (1B tokens supply)
-                            const estimatedFDV = price * 1000000000; // 1B supply
-                            const psRatio = annualizedFees > 0 ? estimatedFDV / annualizedFees : 0;
+                            // P/S ratio = Market Cap / Annualized Fees
+                            // Use circulating supply (~333M tokens, ~1/3 of total 1B supply)
+                            const circulatingSupply = 333000000; // ~333M circulating
+                            const marketCap = price * circulatingSupply;
+                            const psRatio = annualizedFees > 0 ? marketCap / annualizedFees : 0;
                             
                             hypeAnalyticsData.labels.push(dateTs);
                             hypeAnalyticsData.price.push(price);
                             hypeAnalyticsData.fees30d.push(rolling30d);
                             hypeAnalyticsData.ps.push(psRatio);
+                            hypeAnalyticsData.marketCap = marketCap; // Store latest for display
                         }
                     }
                     
@@ -3224,7 +3226,11 @@
                         document.getElementById('currentPS').textContent = currentPS.toFixed(1) + 'x';
                         document.getElementById('thirtyDayFees').textContent = '$' + (currentFees30d / 1e6).toFixed(1) + 'M';
                         document.getElementById('annualizedFees').textContent = '$' + (annualized / 1e6).toFixed(0) + 'M';
-                        document.getElementById('hypeFDV').textContent = '$' + (fdv / 1e9).toFixed(2) + 'B';
+                        // Calculate and display circulating market cap
+                        const circulatingSupply = 333000000;
+                        const latestPrice = hypeAnalyticsData.price[lastIdx];
+                        const marketCap = latestPrice * circulatingSupply;
+                        document.getElementById('hypeMcap').textContent = '$' + (marketCap / 1e9).toFixed(2) + 'B';
                     }
                 }
                 
