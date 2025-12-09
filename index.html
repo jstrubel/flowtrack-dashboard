@@ -2094,42 +2094,53 @@
             
             console.log('Rendering OI dominance with data points:', oiDominanceData.labels.length);
             
-            // Coinalyze style: STACKED area chart
-            // Bottom to top: Others (orange), ETH (green), BTC (blue)
-            // Total always = 100%, relative sizes show dominance shifts
+            // Coinalyze style: TRUE OVERLAPPING areas (NOT stacked)
+            // Each area fills from 0 to its own value independently
+            // Y-axis 0-55% since max individual value is ~50%
+            // Draw order matters: last drawn is on top
+            // Others drawn last so it's most visible on top
             oiDominanceChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: oiDominanceData.labels,
                     datasets: [
                         {
-                            label: 'Others',
-                            data: oiDominanceData.others,
-                            backgroundColor: 'rgba(237, 137, 92, 1)',
-                            borderColor: 'rgba(237, 137, 92, 1)',
-                            borderWidth: 0,
-                            fill: true,
-                            tension: 0.3,
+                            label: 'BTC',
+                            data: oiDominanceData.btc,
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            borderColor: 'rgba(59, 130, 246, 0.9)',
+                            borderWidth: 1,
+                            fill: {
+                                target: 'origin',
+                                above: 'rgba(59, 130, 246, 0.7)'
+                            },
+                            tension: 0.1,
                             pointRadius: 0
                         },
                         {
                             label: 'ETH',
                             data: oiDominanceData.eth,
-                            backgroundColor: 'rgba(72, 187, 168, 1)',
-                            borderColor: 'rgba(72, 187, 168, 1)',
-                            borderWidth: 0,
-                            fill: true,
-                            tension: 0.3,
+                            backgroundColor: 'rgba(72, 187, 168, 0.7)',
+                            borderColor: 'rgba(72, 187, 168, 0.9)',
+                            borderWidth: 1,
+                            fill: {
+                                target: 'origin',
+                                above: 'rgba(72, 187, 168, 0.7)'
+                            },
+                            tension: 0.1,
                             pointRadius: 0
                         },
                         {
-                            label: 'BTC',
-                            data: oiDominanceData.btc,
-                            backgroundColor: 'rgba(59, 130, 246, 1)',
-                            borderColor: 'rgba(59, 130, 246, 1)',
-                            borderWidth: 0,
-                            fill: true,
-                            tension: 0.3,
+                            label: 'Others',
+                            data: oiDominanceData.others,
+                            backgroundColor: 'rgba(237, 137, 92, 0.7)',
+                            borderColor: 'rgba(237, 137, 92, 0.9)',
+                            borderWidth: 1,
+                            fill: {
+                                target: 'origin',
+                                above: 'rgba(237, 137, 92, 0.7)'
+                            },
+                            tension: 0.1,
                             pointRadius: 0
                         }
                     ]
@@ -2175,9 +2186,9 @@
                             ticks: { color: '#718096', font: { size: 10 }, maxTicksLimit: 12 }
                         },
                         y: {
-                            stacked: true,
+                            stacked: false,
                             min: 0,
-                            max: 100,
+                            max: 55,
                             grid: { 
                                 color: 'rgba(255,255,255,0.05)',
                                 drawBorder: false
@@ -2186,7 +2197,7 @@
                                 color: '#718096', 
                                 font: { size: 10 },
                                 callback: v => v + '%',
-                                stepSize: 25
+                                stepSize: 17
                             }
                         }
                     }
