@@ -1526,13 +1526,13 @@
                 </div>
                 
                 <!-- Funding Rate Panel -->
-                <div style="height: 120px; position: relative; border-bottom: 1px solid var(--border);">
+                <div style="height: 180px; position: relative; border-bottom: 1px solid var(--border);">
                     <div style="position: absolute; top: 8px; left: 12px; font-size: 11px; color: var(--text-muted); z-index: 10;">Aggregated Funding Rate (Global AVG)</div>
                     <canvas id="coinalyzeFundingChart"></canvas>
                 </div>
                 
                 <!-- Open Interest Panel -->
-                <div style="height: 120px; position: relative;">
+                <div style="height: 180px; position: relative;">
                     <div style="position: absolute; top: 8px; left: 12px; font-size: 11px; color: var(--text-muted); z-index: 10;">Aggregated Open Interest (USD)</div>
                     <canvas id="coinalyzeOIChart"></canvas>
                 </div>
@@ -2067,12 +2067,12 @@
                     x: {
                         type: 'time',
                         time: { unit: 'month', displayFormats: { month: 'MMM yy' } },
-                        grid: { color: 'rgba(255,255,255,0.03)' },
+                        grid: { color: 'rgba(255,255,255,0.08)' },
                         ticks: { color: '#718096', font: { size: 10 }, maxTicksLimit: 12 }
                     },
                     y: {
                         position: 'right',
-                        grid: { color: 'rgba(255,255,255,0.03)' },
+                        grid: { color: 'rgba(255,255,255,0.08)' },
                         ticks: { color: '#718096', font: { size: 10 } }
                     }
                 },
@@ -2434,7 +2434,7 @@
                         y: {
                             stacked: false,
                             min: 0,
-                            max: 55,
+                            max: 70,
                             grid: { 
                                 color: 'rgba(255,255,255,0.05)',
                                 drawBorder: false
@@ -4499,7 +4499,21 @@
             { date: '2024-09-25', mlf: 300, rr: 580, btc: 64000 },
             { date: '2024-10-25', mlf: 700, rr: 490, btc: 68000 },
             { date: '2024-11-25', mlf: 900, rr: 800, btc: 97000 },
-            { date: '2024-12-09', mlf: 1000, rr: 300, btc: 97000 }
+            { date: '2024-12-15', mlf: 1000, rr: 300, btc: 101000 },
+            // 2025 - Continued easing & outright reverse repos
+            // Sources: PBOC announcements, People's Daily, Bloomberg
+            { date: '2025-01-15', mlf: 995, rr: 958, btc: 99000 },  // Near-record 958B yuan RR injection (Bloomberg)
+            { date: '2025-02-17', mlf: 500, rr: 200, btc: 96000 },
+            { date: '2025-03-17', mlf: 950, rr: 100, btc: 84000 },  // Q1 MLF: 950B yuan total (PBOC report)
+            { date: '2025-04-15', mlf: 400, rr: 150, btc: 85000 },
+            { date: '2025-05-15', mlf: 500, rr: 1000, btc: 103000 }, // RRR cut released ~1T yuan
+            { date: '2025-06-06', mlf: 200, rr: 1000, btc: 105000 }, // 1T yuan outright RR (Chinadaily)
+            { date: '2025-07-15', mlf: 300, rr: 700, btc: 98000 },
+            { date: '2025-08-15', mlf: 600, rr: 500, btc: 102000 }, // 600B MLF + 500B outright RR
+            { date: '2025-09-15', mlf: 400, rr: 400, btc: 120000 },
+            { date: '2025-10-15', mlf: 500, rr: 600, btc: 126000 },
+            { date: '2025-11-15', mlf: 1000, rr: -556, btc: 92000 }, // Net 100B MLF, -556B RR (People's Daily Dec 3)
+            { date: '2025-12-09', mlf: 800, rr: 400, btc: 97000 }
         ];
         
         let chinaLiquidityChart = null;
