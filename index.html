@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flowtrack | Crypto Derivatives Intelligence</title>
+    <title>Flowtrack | Crypto Market Intelligence</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -940,7 +940,7 @@
                         <strong style="color: var(--text);">Interpretation:</strong> 
                         <span style="color: var(--good);">Green bars</span> = Net minting (new capital entering crypto). 
                         <span style="color: var(--bad);">Red bars</span> = Net burning (capital exiting). 
-                        Sustained positive ROC often precedes altcoin rallies.
+                        <span style="color: #f7931a;">Orange line</span> = BTC price overlay. Watch for divergences between stablecoin inflows and BTC price.
                     </div>
                 </div>
             </div>
@@ -1294,7 +1294,7 @@
                         <strong style="color: var(--text);">Key Signal:</strong> 
                         <span style="color: var(--good);">Green bars</span> = Liquidity expanding (bullish). 
                         <span style="color: var(--bad);">Red bars</span> = Liquidity contracting (bearish). 
-                        BTC tends to follow liquidity ROC with a lag. Sustained positive ROC = risk-on environment.
+                        <span style="color: #f7931a;">Orange line</span> = BTC price overlay. Watch for sustained positive ROC preceding BTC rallies.
                     </div>
                 </div>
             </div>
@@ -4314,39 +4314,69 @@
                 const current = data[i].liquidity;
                 const previous = data[i - 4].liquidity;
                 const change = current - previous;
-                const changePercent = (change / previous) * 100;
                 rocData.push({
                     date: data[i].date,
                     change: change, // In trillions
-                    changePercent: changePercent
+                    btc: data[i].btc
                 });
             }
             
             if (liquidityROCChart) liquidityROCChart.destroy();
             
             liquidityROCChart = new Chart(ctx, {
-                type: 'bar',
                 data: {
                     labels: rocData.map(d => d.date),
-                    datasets: [{
-                        label: 'Monthly Liquidity Change ($T)',
-                        data: rocData.map(d => d.change),
-                        backgroundColor: rocData.map(d => d.change >= 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'),
-                        borderColor: rocData.map(d => d.change >= 0 ? '#22c55e' : '#ef4444'),
-                        borderWidth: 1
-                    }]
+                    datasets: [
+                        {
+                            type: 'bar',
+                            label: 'Liquidity ROC ($T)',
+                            data: rocData.map(d => d.change),
+                            backgroundColor: rocData.map(d => d.change >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
+                            borderColor: rocData.map(d => d.change >= 0 ? '#22c55e' : '#ef4444'),
+                            borderWidth: 1,
+                            yAxisID: 'y',
+                            order: 2
+                        },
+                        {
+                            type: 'line',
+                            label: 'Bitcoin',
+                            data: rocData.map(d => d.btc),
+                            borderColor: '#f7931a',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            tension: 0.3,
+                            yAxisID: 'y1',
+                            order: 1
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
                     plugins: {
-                        legend: { display: false },
+                        legend: { 
+                            display: true,
+                            position: 'top',
+                            labels: { 
+                                color: '#9ca3af',
+                                usePointStyle: true,
+                                padding: 15
+                            }
+                        },
                         tooltip: {
                             callbacks: {
                                 label: (ctx) => {
+                                    if (ctx.dataset.label === 'Bitcoin') {
+                                        return `BTC: $${ctx.raw.toLocaleString()}`;
+                                    }
                                     const val = ctx.raw;
                                     const sign = val >= 0 ? '+' : '';
-                                    return `${sign}$${val.toFixed(2)}T`;
+                                    return `Liquidity ROC: ${sign}$${val.toFixed(2)}T`;
                                 }
                             }
                         }
@@ -4358,10 +4388,36 @@
                             ticks: { color: '#6b7280', maxTicksLimit: 10 }
                         },
                         y: {
+                            type: 'linear',
+                            position: 'left',
                             grid: { color: 'rgba(255,255,255,0.05)' },
                             ticks: { 
                                 color: '#6b7280',
                                 callback: (v) => (v >= 0 ? '+' : '') + v.toFixed(2) + 'T'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Liquidity ROC',
+                                color: '#6b7280',
+                                font: { size: 11 }
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            grid: { drawOnChartArea: false },
+                            ticks: { 
+                                color: '#f7931a',
+                                callback: (v) => {
+                                    if (v >= 1000) return '$' + (v/1000).toFixed(0) + 'K';
+                                    return '$' + v;
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'BTC Price',
+                                color: '#f7931a',
+                                font: { size: 11 }
                             }
                         }
                     }
@@ -4569,8 +4625,32 @@
         // ==================== STABLECOIN RATE OF CHANGE CHART ====================
         let stablecoinROCChart = null;
         window.stablecoinROCChart = null;
+        let btcHistoricalData = null; // Cache for BTC historical prices
         
-        function renderStablecoinROCChart(days = 365) {
+        async function fetchBTCHistoricalData() {
+            if (btcHistoricalData) return btcHistoricalData;
+            
+            try {
+                // Fetch 2 years of BTC data from CoinGecko
+                const response = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=730&interval=daily');
+                if (!response.ok) throw new Error('CoinGecko BTC history error');
+                const data = await response.json();
+                
+                // Convert to date-keyed object for easy lookup
+                btcHistoricalData = {};
+                data.prices.forEach(([timestamp, price]) => {
+                    const dateStr = new Date(timestamp).toISOString().split('T')[0];
+                    btcHistoricalData[dateStr] = price;
+                });
+                
+                return btcHistoricalData;
+            } catch (error) {
+                console.error('Error fetching BTC historical data:', error);
+                return null;
+            }
+        }
+        
+        async function renderStablecoinROCChart(days = 365) {
             if (!stablecoinHistoryData || stablecoinHistoryData.length < 14) {
                 console.log('Not enough stablecoin data for ROC chart');
                 return;
@@ -4579,11 +4659,20 @@
             const ctx = document.getElementById('stablecoinROCChart');
             if (!ctx) return;
             
+            // Fetch BTC data if not cached
+            const btcData = await fetchBTCHistoricalData();
+            
             // Transform raw data to normalized format
-            let normalizedData = stablecoinHistoryData.map(d => ({
-                date: new Date(d.date * 1000),
-                total: d.totalCirculating?.peggedUSD || d.totalCirculatingUSD?.peggedUSD || 0
-            })).filter(d => d.total > 0);
+            let normalizedData = stablecoinHistoryData.map(d => {
+                const date = new Date(d.date * 1000);
+                const dateStr = date.toISOString().split('T')[0];
+                return {
+                    date: date,
+                    dateStr: dateStr,
+                    total: d.totalCirculating?.peggedUSD || d.totalCirculatingUSD?.peggedUSD || 0,
+                    btc: btcData ? btcData[dateStr] : null
+                };
+            }).filter(d => d.total > 0);
             
             // Sort by date
             normalizedData.sort((a, b) => a.date - b.date);
@@ -4604,36 +4693,76 @@
                     const change = current - previous;
                     rocData.push({
                         date: normalizedData[i].date,
-                        change: change / 1e9 // In billions
+                        change: change / 1e9, // In billions
+                        btc: normalizedData[i].btc
                     });
                 }
             }
             
             if (stablecoinROCChart) stablecoinROCChart.destroy();
             
+            // Check if we have BTC data
+            const hasBtcData = rocData.some(d => d.btc !== null && d.btc !== undefined);
+            
+            const datasets = [
+                {
+                    type: 'bar',
+                    label: 'Stablecoin ROC ($B)',
+                    data: rocData.map(d => d.change),
+                    backgroundColor: rocData.map(d => d.change >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
+                    borderColor: rocData.map(d => d.change >= 0 ? '#22c55e' : '#ef4444'),
+                    borderWidth: 1,
+                    yAxisID: 'y',
+                    order: 2
+                }
+            ];
+            
+            if (hasBtcData) {
+                datasets.push({
+                    type: 'line',
+                    label: 'Bitcoin',
+                    data: rocData.map(d => d.btc),
+                    borderColor: '#f7931a',
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0.3,
+                    yAxisID: 'y1',
+                    order: 1
+                });
+            }
+            
             stablecoinROCChart = new Chart(ctx, {
-                type: 'bar',
                 data: {
                     labels: rocData.map(d => d.date),
-                    datasets: [{
-                        label: 'Weekly Change ($B)',
-                        data: rocData.map(d => d.change),
-                        backgroundColor: rocData.map(d => d.change >= 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'),
-                        borderColor: rocData.map(d => d.change >= 0 ? '#22c55e' : '#ef4444'),
-                        borderWidth: 1
-                    }]
+                    datasets: datasets
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
                     plugins: {
-                        legend: { display: false },
+                        legend: { 
+                            display: hasBtcData,
+                            position: 'top',
+                            labels: { 
+                                color: '#9ca3af',
+                                usePointStyle: true,
+                                padding: 15
+                            }
+                        },
                         tooltip: {
                             callbacks: {
                                 label: (ctx) => {
+                                    if (ctx.dataset.label === 'Bitcoin') {
+                                        return ctx.raw ? `BTC: $${ctx.raw.toLocaleString(undefined, {maximumFractionDigits: 0})}` : '';
+                                    }
                                     const val = ctx.raw;
                                     const sign = val >= 0 ? '+' : '';
-                                    return `${sign}$${val.toFixed(2)}B`;
+                                    return `Stablecoin ROC: ${sign}$${val.toFixed(2)}B`;
                                 }
                             }
                         }
@@ -4645,10 +4774,37 @@
                             ticks: { color: '#6b7280', maxTicksLimit: 8 }
                         },
                         y: {
+                            type: 'linear',
+                            position: 'left',
                             grid: { color: 'rgba(255,255,255,0.05)' },
                             ticks: { 
                                 color: '#6b7280',
                                 callback: (v) => (v >= 0 ? '+' : '') + v.toFixed(1) + 'B'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Stablecoin ROC',
+                                color: '#6b7280',
+                                font: { size: 11 }
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            display: hasBtcData,
+                            grid: { drawOnChartArea: false },
+                            ticks: { 
+                                color: '#f7931a',
+                                callback: (v) => {
+                                    if (v >= 1000) return '$' + (v/1000).toFixed(0) + 'K';
+                                    return '$' + v;
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'BTC Price',
+                                color: '#f7931a',
+                                font: { size: 11 }
                             }
                         }
                     }
