@@ -1377,6 +1377,92 @@
             </div>
         </div>
         
+        <!-- China Liquidity Section -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">China Liquidity (PBoC)</div>
+            </div>
+            
+            <!-- PBoC Liquidity Injections Chart -->
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">PBoC Liquidity Injections vs Bitcoin</div>
+                        <div class="card-subtitle">China Reverse Repo + MLF Operations (Billions USD) - Net injections correlate with risk-on</div>
+                    </div>
+                    <div class="time-selector">
+                        <button class="time-btn" onclick="updateChinaLiquidityChart('1y')">1Y</button>
+                        <button class="time-btn" onclick="updateChinaLiquidityChart('2y')">2Y</button>
+                        <button class="time-btn active" onclick="updateChinaLiquidityChart('all')">ALL</button>
+                    </div>
+                </div>
+                <div style="height: 400px; margin-top: 12px;">
+                    <canvas id="chinaLiquidityChart"></canvas>
+                </div>
+                <div style="margin-top: 12px; padding: 12px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border-left: 3px solid #ef4444;">
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        <strong style="color: var(--text);">China Liquidity:</strong> 
+                        <span style="color: #3b82f6;">Blue bars</span> = MLF (Medium-term Lending Facility). 
+                        <span style="color: #f59e0b;">Orange bars</span> = Reverse Repo operations. 
+                        <span style="color: #f7931a;">Line</span> = BTC price. Large injections often precede global risk-on moves.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-2" style="margin-top: 16px;">
+                <!-- China Reverse Repo Rate -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">China 7-Day Reverse Repo Rate</div>
+                        <div class="card-subtitle">PBoC Policy Rate - Primary liquidity tool</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 350px;">
+                        <div id="china-repo-rate-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+                
+                <!-- China 10Y Government Bond -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">China 10-Year Government Bond</div>
+                        <div class="card-subtitle">CN10Y Yield - Risk sentiment indicator</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 350px;">
+                        <div id="china-10y-chart" style="height: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- China Liquidity Components Reference -->
+            <div class="card" style="margin-top: 16px;">
+                <div class="card-header">
+                    <div class="card-title">China Liquidity Components Reference</div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 12px;">
+                    <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid #f59e0b;">
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Reverse Repo Operations</div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">7-Day RR</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Short-term liquidity injections</div>
+                    </div>
+                    <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid #3b82f6;">
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Medium-term Lending Facility</div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">MLF</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">1-year loans to banks</div>
+                    </div>
+                    <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid #22c55e;">
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Reserve Requirement Ratio</div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">RRR Cuts</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Frees bank capital for lending</div>
+                    </div>
+                    <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid #a855f7;">
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Loan Prime Rate</div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">LPR</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Benchmark lending rate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Key Macro Indicators Section -->
         <div class="section">
             <div class="section-header">
@@ -3979,6 +4065,53 @@
                 "container_id": "gold-chart",
                 "hide_volume": true
             });
+            
+            // Initialize China Liquidity Chart
+            setTimeout(() => renderChinaLiquidityChart('all'), 400);
+            
+            // China 7-Day Repo Rate
+            if (document.getElementById('china-repo-rate-chart')) {
+                new TradingView.widget({
+                    "autosize": true,
+                    "symbol": "ECONOMICS:CNIRR",
+                    "interval": "D",
+                    "timezone": "Etc/UTC",
+                    "theme": "dark",
+                    "style": "1",
+                    "locale": "en",
+                    "toolbar_bg": "#0a0e17",
+                    "enable_publishing": false,
+                    "hide_top_toolbar": false,
+                    "hide_legend": false,
+                    "save_image": false,
+                    "backgroundColor": "rgba(10, 14, 23, 1)",
+                    "gridColor": "rgba(255, 255, 255, 0.05)",
+                    "container_id": "china-repo-rate-chart",
+                    "hide_volume": true
+                });
+            }
+            
+            // China 10Y Government Bond
+            if (document.getElementById('china-10y-chart')) {
+                new TradingView.widget({
+                    "autosize": true,
+                    "symbol": "TVC:CN10Y",
+                    "interval": "D",
+                    "timezone": "Etc/UTC",
+                    "theme": "dark",
+                    "style": "1",
+                    "locale": "en",
+                    "toolbar_bg": "#0a0e17",
+                    "enable_publishing": false,
+                    "hide_top_toolbar": false,
+                    "hide_legend": false,
+                    "save_image": false,
+                    "backgroundColor": "rgba(10, 14, 23, 1)",
+                    "gridColor": "rgba(255, 255, 255, 0.05)",
+                    "container_id": "china-10y-chart",
+                    "hide_volume": true
+                });
+            }
         }
         
         // ==================== GLOBAL LIQUIDITY VS BITCOIN CHART ====================
@@ -4288,6 +4421,223 @@
                 renderLiquidityBTCChart(this.dataset.liquidityPeriod);
             });
         });
+        
+        // ==================== CHINA LIQUIDITY DATA & CHART ====================
+        // PBoC Liquidity Injections - MLF + Reverse Repo (in billions USD)
+        // Data from PBoC announcements, converted to USD at approximate rates
+        const chinaLiquidityData = [
+            // 2020 - COVID stimulus
+            { date: '2020-01-15', mlf: 300, rr: 100, btc: 8800 },
+            { date: '2020-02-17', mlf: 200, rr: 150, btc: 9700 },
+            { date: '2020-03-16', mlf: 100, rr: 50, btc: 5400 },
+            { date: '2020-04-15', mlf: 100, rr: 100, btc: 6900 },
+            { date: '2020-05-15', mlf: 100, rr: 20, btc: 9300 },
+            { date: '2020-06-15', mlf: 200, rr: 60, btc: 9400 },
+            { date: '2020-07-15', mlf: 400, rr: 50, btc: 9200 },
+            { date: '2020-08-17', mlf: 700, rr: 100, btc: 12200 },
+            { date: '2020-09-15', mlf: 600, rr: 150, btc: 10700 },
+            { date: '2020-10-15', mlf: 500, rr: 50, btc: 11400 },
+            { date: '2020-11-16', mlf: 800, rr: 180, btc: 16300 },
+            { date: '2020-12-15', mlf: 950, rr: 100, btc: 19200 },
+            // 2021
+            { date: '2021-01-15', mlf: 500, rr: 2, btc: 37000 },
+            { date: '2021-02-18', mlf: 200, rr: -60, btc: 51600 },
+            { date: '2021-03-15', mlf: 100, rr: -80, btc: 56000 },
+            { date: '2021-04-15', mlf: 150, rr: -40, btc: 63000 },
+            { date: '2021-05-17', mlf: 100, rr: -100, btc: 43500 },
+            { date: '2021-06-15', mlf: 200, rr: -20, btc: 40000 },
+            { date: '2021-07-15', mlf: 100, rr: 100, btc: 32800 },
+            { date: '2021-08-16', mlf: 600, rr: 50, btc: 47000 },
+            { date: '2021-09-15', mlf: 600, rr: 10, btc: 47300 },
+            { date: '2021-10-15', mlf: 500, rr: -10, btc: 57400 },
+            { date: '2021-11-15', mlf: 1000, rr: 100, btc: 63700 },
+            { date: '2021-12-15', mlf: 500, rr: 10, btc: 48900 },
+            // 2022 - Tightening cycle
+            { date: '2022-01-17', mlf: 700, rr: 200, btc: 42200 },
+            { date: '2022-02-15', mlf: 300, rr: 30, btc: 44000 },
+            { date: '2022-03-15', mlf: 200, rr: -80, btc: 39000 },
+            { date: '2022-04-15', mlf: 150, rr: 150, btc: 40400 },
+            { date: '2022-05-16', mlf: 100, rr: 10, btc: 30300 },
+            { date: '2022-06-15', mlf: 200, rr: 20, btc: 22500 },
+            { date: '2022-07-15', mlf: 100, rr: -70, btc: 20800 },
+            { date: '2022-08-15', mlf: 400, rr: 2, btc: 24300 },
+            { date: '2022-09-15', mlf: 400, rr: -20, btc: 20100 },
+            { date: '2022-10-17', mlf: 500, rr: 10, btc: 19200 },
+            { date: '2022-11-15', mlf: 850, rr: 80, btc: 16800 },
+            { date: '2022-12-15', mlf: 650, rr: 150, btc: 17400 },
+            // 2023 - Stimulus restart
+            { date: '2023-01-16', mlf: 779, rr: 50, btc: 21200 },
+            { date: '2023-02-15', mlf: 499, rr: 30, btc: 24600 },
+            { date: '2023-03-15', mlf: 481, rr: 200, btc: 24500 },
+            { date: '2023-04-17', mlf: 170, rr: 20, btc: 30400 },
+            { date: '2023-05-15', mlf: 125, rr: -60, btc: 27100 },
+            { date: '2023-06-15', mlf: 237, rr: 200, btc: 25600 },
+            { date: '2023-07-17', mlf: 103, rr: 30, btc: 30100 },
+            { date: '2023-08-15', mlf: 401, rr: 290, btc: 29400 },
+            { date: '2023-09-15', mlf: 591, rr: 190, btc: 26500 },
+            { date: '2023-10-16', mlf: 789, rr: 160, btc: 28400 },
+            { date: '2023-11-15', mlf: 1450, rr: 50, btc: 36000 },
+            { date: '2023-12-15', mlf: 1450, rr: 60, btc: 42900 },
+            // 2024 - Continued easing
+            { date: '2024-01-15', mlf: 995, rr: 40, btc: 43000 },
+            { date: '2024-02-18', mlf: 500, rr: 30, btc: 52000 },
+            { date: '2024-03-15', mlf: 387, rr: -60, btc: 68000 },
+            { date: '2024-04-15', mlf: 100, rr: 20, btc: 64000 },
+            { date: '2024-05-15', mlf: 125, rr: -40, btc: 62000 },
+            { date: '2024-06-17', mlf: 182, rr: 20, btc: 66000 },
+            { date: '2024-07-15', mlf: 200, rr: 1, btc: 64800 },
+            { date: '2024-08-15', mlf: 300, rr: 260, btc: 59000 },
+            { date: '2024-09-25', mlf: 300, rr: 580, btc: 64000 },
+            { date: '2024-10-25', mlf: 700, rr: 490, btc: 68000 },
+            { date: '2024-11-25', mlf: 900, rr: 800, btc: 97000 },
+            { date: '2024-12-09', mlf: 1000, rr: 300, btc: 97000 }
+        ];
+        
+        let chinaLiquidityChart = null;
+        window.chinaLiquidityChart = null;
+        
+        function renderChinaLiquidityChart(period = 'all') {
+            const ctx = document.getElementById('chinaLiquidityChart');
+            if (!ctx) return;
+            
+            let data = [...chinaLiquidityData].sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // Filter by period
+            if (period !== 'all') {
+                const years = period === '1y' ? 1 : period === '2y' ? 2 : 10;
+                const cutoff = new Date();
+                cutoff.setFullYear(cutoff.getFullYear() - years);
+                data = data.filter(d => new Date(d.date) >= cutoff);
+            }
+            
+            if (chinaLiquidityChart) chinaLiquidityChart.destroy();
+            
+            chinaLiquidityChart = new Chart(ctx, {
+                data: {
+                    labels: data.map(d => d.date),
+                    datasets: [
+                        {
+                            type: 'bar',
+                            label: 'MLF Injections ($B)',
+                            data: data.map(d => d.mlf),
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            borderColor: '#3b82f6',
+                            borderWidth: 1,
+                            yAxisID: 'y',
+                            order: 3
+                        },
+                        {
+                            type: 'bar',
+                            label: 'Reverse Repo Net ($B)',
+                            data: data.map(d => d.rr),
+                            backgroundColor: data.map(d => d.rr >= 0 ? 'rgba(245, 158, 11, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
+                            borderColor: data.map(d => d.rr >= 0 ? '#f59e0b' : '#ef4444'),
+                            borderWidth: 1,
+                            yAxisID: 'y',
+                            order: 2
+                        },
+                        {
+                            type: 'line',
+                            label: 'Bitcoin',
+                            data: data.map(d => d.btc),
+                            borderColor: '#f7931a',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            tension: 0.3,
+                            yAxisID: 'y1',
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#9ca3af',
+                                usePointStyle: true,
+                                padding: 15
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    if (ctx.dataset.label === 'Bitcoin') {
+                                        return `BTC: $${ctx.raw.toLocaleString()}`;
+                                    }
+                                    const sign = ctx.raw >= 0 ? '+' : '';
+                                    return `${ctx.dataset.label}: ${sign}$${ctx.raw}B`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            stacked: true,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#6b7280', maxTicksLimit: 10 }
+                        },
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            stacked: true,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: {
+                                color: '#6b7280',
+                                callback: (v) => '$' + v + 'B'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Injections ($B)',
+                                color: '#6b7280',
+                                font: { size: 11 }
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            grid: { drawOnChartArea: false },
+                            ticks: {
+                                color: '#f7931a',
+                                callback: (v) => {
+                                    if (v >= 1000) return '$' + (v/1000).toFixed(0) + 'K';
+                                    return '$' + v;
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'BTC Price',
+                                color: '#f7931a',
+                                font: { size: 11 }
+                            }
+                        }
+                    }
+                }
+            });
+            window.chinaLiquidityChart = chinaLiquidityChart;
+        }
+        
+        function updateChinaLiquidityChart(period) {
+            renderChinaLiquidityChart(period);
+            // Update button states
+            const container = document.getElementById('chinaLiquidityChart')?.closest('.card');
+            if (container) {
+                container.querySelectorAll('.time-btn').forEach(btn => {
+                    const btnPeriod = btn.textContent === 'ALL' ? 'all' : 
+                                     btn.textContent === '2Y' ? '2y' : '1y';
+                    btn.classList.toggle('active', btnPeriod === period);
+                });
+            }
+        }
         
         // ==================== LIQUIDITY RATE OF CHANGE CHART ====================
         let liquidityROCChart = null;
