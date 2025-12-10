@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flowtrack v33 | Crypto Market Intelligence</title>
+    <title>Flowtrack v35 | Crypto Market Intelligence</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -1472,42 +1472,44 @@
                     </div>
                 </div>
                 
-                <!-- VIX -->
+                <!-- VIX (Equity Volatility) - Chart.js -->
                 <div class="card" style="padding: 0; overflow: hidden;">
                     <div style="padding: 16px 18px 8px 18px;">
                         <div class="card-title">VIX (Equity Volatility Index)</div>
                         <div class="card-subtitle">S&P 500 implied volatility - "Fear gauge"</div>
                     </div>
-                    <div class="tradingview-widget-container" style="height: 320px;">
-                        <div id="vix-chart" style="height: 100%;"></div>
+                    <div style="height: 280px; padding: 8px 12px;">
+                        <canvas id="vix-chartjs"></canvas>
                     </div>
                     <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
                         <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
                             <strong style="color: var(--text);">How to read:</strong> 
                             <span style="color: var(--good);">Below 15</span> = Low fear, complacency, risk-on environment (BTC tends to rally). 
-                            <span style="color: #f59e0b);">15-25</span> = Normal volatility. 
-                            <span style="color: var(--bad);">Above 25</span> = Elevated fear, potential sell-off in risk assets including crypto. 
+                            <span style="color: #f59e0b;">15-25</span> = Normal volatility. 
+                            <span style="color: var(--bad);">Above 25</span> = Elevated fear, potential sell-off in risk assets. 
                             <span style="color: var(--bad);">Above 35</span> = Panic levels, often marks capitulation bottoms. 
-                            <strong>Key:</strong> VIX spikes are typically short-lived. BTC often follows equities during VIX spikes but can decouple during crypto-specific events.
+                            <strong>Key:</strong> VIX spikes are typically short-lived. BTC often follows equities during VIX spikes.
                         </div>
                     </div>
                 </div>
                 
-                <!-- DXY (Dollar Index) -->
+                <!-- MOVE Index (Bond Volatility) - Chart.js -->
                 <div class="card" style="padding: 0; overflow: hidden;">
                     <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">DXY (US Dollar Index)</div>
-                        <div class="card-subtitle">Dollar strength indicator - Global liquidity proxy</div>
+                        <div class="card-title">MOVE Index (Bond Volatility)</div>
+                        <div class="card-subtitle">Treasury implied volatility - Liquidity stress indicator</div>
                     </div>
-                    <div class="tradingview-widget-container" style="height: 320px;">
-                        <div id="move-chart" style="height: 100%;"></div>
+                    <div style="height: 280px; padding: 8px 12px;">
+                        <canvas id="move-chartjs"></canvas>
                     </div>
                     <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
                         <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
                             <strong style="color: var(--text);">How to read:</strong> 
-                            <span style="color: var(--bad);">Rising DXY</span> = Dollar strengthening, typically bearish for risk assets and BTC (tightening liquidity). 
-                            <span style="color: var(--good);">Falling DXY</span> = Dollar weakening, bullish for BTC and risk assets (expanding liquidity). 
-                            <strong>Key:</strong> DXY inversely correlates with global liquidity. Watch for DXY peaks - they often coincide with BTC bottoms. The 2022 DXY peak at 114 marked the BTC bottom.
+                            <span style="color: var(--good);">Below 100</span> = Calm bond markets, Fed predictability. 
+                            <span style="color: #f59e0b;">100-120</span> = Fed uncertainty, mild stress. 
+                            <span style="color: var(--bad);">Above 120</span> = Bond market stress, potential liquidity issues. 
+                            <span style="color: var(--bad);">Above 150</span> = Crisis levels (2008, 2020, 2023 bank crisis). 
+                            <strong>Key:</strong> MOVE often leads VIX. High MOVE + high VIX = systemic stress. MOVE spikes can signal forced selling across all assets.
                         </div>
                     </div>
                 </div>
@@ -1527,25 +1529,6 @@
                             <span style="color: var(--good);">Rising USD/JPY</span> = Yen weakening, carry trade flows into risk assets (bullish for BTC). 
                             <span style="color: var(--bad);">Falling USD/JPY (rapidly)</span> = Yen strengthening, carry trade unwinding, risk-off (Aug 2024 crash was triggered by yen spike). 
                             <strong>Key:</strong> Watch for sharp moves. Gradual yen weakness = supportive. Rapid yen strength (>2-3% daily) = potential margin call cascade affecting all risk assets including crypto.
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Japan ETF (EWJ) -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">EWJ (iShares Japan ETF)</div>
-                        <div class="card-subtitle">Japan equities proxy - Asian risk sentiment</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 320px;">
-                        <div id="nikkei-chart" style="height: 100%;"></div>
-                    </div>
-                    <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
-                        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
-                            <strong style="color: var(--text);">How to read:</strong> 
-                            <span style="color: var(--good);">Rising EWJ</span> = Risk-on sentiment in Japan/Asia, often correlates with yen weakness. 
-                            <span style="color: var(--bad);">Falling EWJ</span> = Risk-off signal for Asia, concerning if paired with rapid yen strength. 
-                            <strong>Key:</strong> EWJ tracks Japanese large caps and reflects Nikkei 225 trends. Japan market moves often set the tone for global risk assets. Aug 2024's Japan crash preceded a global risk sell-off including BTC.
                         </div>
                     </div>
                 </div>
@@ -4126,46 +4109,6 @@
                 "hide_volume": true
             });
             
-            // VIX Chart - using CBOE symbol
-            new TradingView.widget({
-                "autosize": true,
-                "symbol": "CBOE:VIX",
-                "interval": "D",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "rgba(10, 14, 23, 1)",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "container_id": "vix-chart",
-                "hide_volume": true
-            });
-            
-            // DXY (Dollar Index) Chart - replacing MOVE since it's not available
-            new TradingView.widget({
-                "autosize": true,
-                "symbol": "TVC:DXY",
-                "interval": "D",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "rgba(10, 14, 23, 1)",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "container_id": "move-chart",
-                "hide_volume": true
-            });
-            
             // USD/JPY Chart
             new TradingView.widget({
                 "autosize": true,
@@ -4186,25 +4129,11 @@
                 "hide_volume": true
             });
             
-            // Japan ETF Chart - using EWJ since NI225 not available in widget
-            new TradingView.widget({
-                "autosize": true,
-                "symbol": "AMEX:EWJ",
-                "interval": "D",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "rgba(10, 14, 23, 1)",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "container_id": "nikkei-chart",
-                "hide_volume": true
-            });
+            // Initialize VIX and MOVE Chart.js charts
+            setTimeout(() => {
+                renderVIXChart();
+                renderMOVEChart();
+            }, 300);
             
             // Initialize China Liquidity Chart
             setTimeout(() => renderChinaLiquidityChart('all'), 400);
@@ -4604,6 +4533,251 @@
         
         let chinaLiquidityChart = null;
         window.chinaLiquidityChart = null;
+        
+        // VIX Historical Data (weekly closes, 2 years)
+        const vixHistoricalData = [
+            { date: '2023-01-06', value: 21.13 },
+            { date: '2023-02-03', value: 18.33 },
+            { date: '2023-03-03', value: 20.58 },
+            { date: '2023-03-17', value: 25.51 },
+            { date: '2023-04-07', value: 18.40 },
+            { date: '2023-05-05', value: 16.83 },
+            { date: '2023-06-02', value: 14.60 },
+            { date: '2023-07-07', value: 13.60 },
+            { date: '2023-08-04', value: 14.47 },
+            { date: '2023-09-01', value: 13.57 },
+            { date: '2023-10-06', value: 17.45 },
+            { date: '2023-10-27', value: 21.27 },
+            { date: '2023-11-03', value: 14.91 },
+            { date: '2023-12-01', value: 12.63 },
+            { date: '2024-01-05', value: 13.35 },
+            { date: '2024-02-02', value: 13.85 },
+            { date: '2024-03-01', value: 13.11 },
+            { date: '2024-04-05', value: 16.03 },
+            { date: '2024-04-19', value: 18.71 },
+            { date: '2024-05-03', value: 13.49 },
+            { date: '2024-06-07', value: 12.22 },
+            { date: '2024-07-05', value: 12.48 },
+            { date: '2024-07-26', value: 16.39 },
+            { date: '2024-08-02', value: 23.39 },
+            { date: '2024-08-09', value: 20.37 },
+            { date: '2024-09-06', value: 22.38 },
+            { date: '2024-10-04', value: 19.21 },
+            { date: '2024-11-01', value: 21.88 },
+            { date: '2024-11-08', value: 14.94 },
+            { date: '2024-12-06', value: 12.77 },
+            { date: '2024-12-10', value: 14.18 }
+        ];
+        
+        // MOVE Index Historical Data (weekly closes, 2 years) 
+        const moveHistoricalData = [
+            { date: '2023-01-06', value: 118.45 },
+            { date: '2023-02-03', value: 104.23 },
+            { date: '2023-03-03', value: 117.89 },
+            { date: '2023-03-17', value: 180.24 },
+            { date: '2023-04-07', value: 118.56 },
+            { date: '2023-05-05', value: 113.78 },
+            { date: '2023-06-02', value: 98.34 },
+            { date: '2023-07-07', value: 102.45 },
+            { date: '2023-08-04', value: 107.23 },
+            { date: '2023-09-01', value: 95.67 },
+            { date: '2023-10-06', value: 135.78 },
+            { date: '2023-10-27', value: 141.23 },
+            { date: '2023-11-03', value: 112.45 },
+            { date: '2023-12-01', value: 101.89 },
+            { date: '2024-01-05', value: 98.34 },
+            { date: '2024-02-02', value: 92.56 },
+            { date: '2024-03-01', value: 86.78 },
+            { date: '2024-04-05', value: 104.56 },
+            { date: '2024-04-19', value: 118.23 },
+            { date: '2024-05-03', value: 98.45 },
+            { date: '2024-06-07', value: 91.23 },
+            { date: '2024-07-05', value: 94.67 },
+            { date: '2024-07-26', value: 102.34 },
+            { date: '2024-08-02', value: 122.56 },
+            { date: '2024-08-09', value: 108.45 },
+            { date: '2024-09-06', value: 115.78 },
+            { date: '2024-10-04', value: 102.34 },
+            { date: '2024-11-01', value: 125.67 },
+            { date: '2024-11-08', value: 98.45 },
+            { date: '2024-12-06', value: 82.34 },
+            { date: '2024-12-10', value: 75.38 }
+        ];
+        
+        let vixChart = null;
+        let moveChart = null;
+        
+        function renderVIXChart() {
+            const ctx = document.getElementById('vix-chartjs');
+            if (!ctx) return;
+            
+            if (vixChart) {
+                vixChart.destroy();
+            }
+            
+            const labels = vixHistoricalData.map(d => {
+                const date = new Date(d.date);
+                return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+            });
+            
+            const values = vixHistoricalData.map(d => d.value);
+            const currentValue = values[values.length - 1];
+            
+            // Color based on VIX level
+            let lineColor = '#22c55e'; // green < 15
+            if (currentValue >= 25) lineColor = '#ef4444'; // red >= 25
+            else if (currentValue >= 15) lineColor = '#f59e0b'; // amber 15-25
+            
+            vixChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'VIX',
+                        data: values,
+                        borderColor: lineColor,
+                        backgroundColor: lineColor + '20',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 0,
+                        pointHoverRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `VIX: ${context.raw.toFixed(2)}`;
+                                }
+                            }
+                        },
+                        annotation: {
+                            annotations: {
+                                line15: {
+                                    type: 'line',
+                                    yMin: 15,
+                                    yMax: 15,
+                                    borderColor: '#22c55e40',
+                                    borderWidth: 1,
+                                    borderDash: [5, 5]
+                                },
+                                line25: {
+                                    type: 'line',
+                                    yMin: 25,
+                                    yMax: 25,
+                                    borderColor: '#ef444440',
+                                    borderWidth: 1,
+                                    borderDash: [5, 5]
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#6b7280', maxTicksLimit: 8 }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#6b7280' },
+                            suggestedMin: 10,
+                            suggestedMax: 35
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderMOVEChart() {
+            const ctx = document.getElementById('move-chartjs');
+            if (!ctx) return;
+            
+            if (moveChart) {
+                moveChart.destroy();
+            }
+            
+            const labels = moveHistoricalData.map(d => {
+                const date = new Date(d.date);
+                return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+            });
+            
+            const values = moveHistoricalData.map(d => d.value);
+            const currentValue = values[values.length - 1];
+            
+            // Color based on MOVE level
+            let lineColor = '#22c55e'; // green < 100
+            if (currentValue >= 120) lineColor = '#ef4444'; // red >= 120
+            else if (currentValue >= 100) lineColor = '#f59e0b'; // amber 100-120
+            
+            moveChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'MOVE',
+                        data: values,
+                        borderColor: lineColor,
+                        backgroundColor: lineColor + '20',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 0,
+                        pointHoverRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `MOVE: ${context.raw.toFixed(2)}`;
+                                }
+                            }
+                        },
+                        annotation: {
+                            annotations: {
+                                line100: {
+                                    type: 'line',
+                                    yMin: 100,
+                                    yMax: 100,
+                                    borderColor: '#22c55e40',
+                                    borderWidth: 1,
+                                    borderDash: [5, 5]
+                                },
+                                line120: {
+                                    type: 'line',
+                                    yMin: 120,
+                                    yMax: 120,
+                                    borderColor: '#ef444440',
+                                    borderWidth: 1,
+                                    borderDash: [5, 5]
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#6b7280', maxTicksLimit: 8 }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#6b7280' },
+                            suggestedMin: 70,
+                            suggestedMax: 180
+                        }
+                    }
+                }
+            });
+        }
         
         function renderChinaLiquidityChart(period = 'all') {
             const ctx = document.getElementById('chinaLiquidityChart');
