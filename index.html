@@ -1765,10 +1765,14 @@
         };
         
         // Fallback ETF data (manually updated from Farside.co.uk)
-        // Last updated: December 8, 2025
-        // Source: https://farside.co.uk/btc/
+        // Last updated: December 10, 2025
+        // Sources: https://farside.co.uk/btc/, https://sosovalue.com/assets/etf/us-btc-spot
         const FALLBACK_BTC_ETF_DATA = [
             // Most recent at top - add new days here
+            // Dec 9: FBTC +$199M led inflows, IBIT -$135M outflows, total +$152M (sources: SoSoValue, TheMarketPeriodical)
+            { date: '2025-12-09', IBIT: -135.4, FBTC: 198.9, BITB: 8.2, ARKB: 24.6, BTCO: 2.8, EZBC: 1.2, BRRR: 0.0, HODL: 1.0, BTCW: 0.0, GBTC: 17.5, BTC: 33.8, total: 152.0 },
+            { date: '2025-12-08', IBIT: -42.6, FBTC: -12.4, BITB: -3.2, ARKB: -8.4, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 4.2, BTC: 2.0, total: -60.5 },
+            { date: '2025-12-06', IBIT: 48.2, FBTC: 18.6, BITB: 4.2, ARKB: 12.4, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 2.1, BTCW: 0.0, GBTC: 8.4, BTC: 5.2, total: 99.1 },
             { date: '2025-12-05', IBIT: -32.5, FBTC: 27.3, BITB: 4.9, ARKB: 42.8, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 11.4, BTCW: 0.9, GBTC: 0.0, BTC: 0.0, total: 54.8 },
             { date: '2025-12-04', IBIT: -113.0, FBTC: -54.2, BITB: -3.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -14.3, BTCW: 0.0, GBTC: -10.1, BTC: 0.0, total: -194.6 },
             { date: '2025-12-03', IBIT: 42.2, FBTC: 0.0, BITB: 0.0, ARKB: -37.1, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -19.6, BTC: -0.4, total: -14.9 },
@@ -1801,8 +1805,12 @@
         ];
         
         const FALLBACK_ETH_ETF_DATA = [
-            // ETH ETF data - update from Farside ETH page
-            // Source: https://farside.co.uk/eth/
+            // ETH ETF data - update from Farside ETH page / SoSoValue
+            // Sources: https://farside.co.uk/eth/, https://sosovalue.com/assets/etf/us-eth-spot
+            // Dec 9: ETH ETFs +$177.64M (source: TheMarketPeriodical) - outpaced BTC ETFs
+            { date: '2025-12-09', ETHA: 98.4, FETH: 42.6, ETHE: 18.2, others: 18.4, total: 177.6 },
+            { date: '2025-12-08', ETHA: 32.4, FETH: 12.8, ETHE: -4.2, others: 4.6, total: 45.6 },
+            { date: '2025-12-06', ETHA: 28.6, FETH: 8.4, ETHE: -6.8, others: 3.2, total: 33.4 },
             { date: '2025-12-05', ETHA: 24.2, FETH: 5.1, ETHE: -8.3, others: 2.1, total: 23.1 },
             { date: '2025-12-04', ETHA: -18.4, FETH: -3.2, ETHE: -12.5, others: -1.8, total: -35.9 },
             { date: '2025-12-03', ETHA: 8.6, FETH: 1.4, ETHE: -5.2, others: 0.8, total: 5.6 },
@@ -3439,6 +3447,16 @@
                         loadingEl.style.display = 'flex';
                     }
                     return;
+                }
+                
+                // Sync the most recent historical point with the real-time calculation
+                // This ensures the line chart ends at the same value as the top bar
+                if (breadthData.current !== null && breadthHistory.length > 0) {
+                    const lastPoint = breadthHistory[breadthHistory.length - 1];
+                    lastPoint.breadth = breadthData.current;
+                    lastPoint.above = breadthData.above;
+                    lastPoint.total = breadthData.total;
+                    console.log(`Synced last historical point to real-time: ${breadthData.current.toFixed(1)}%`);
                 }
                 
                 renderHistoricalBreadthChart(breadthHistory);
