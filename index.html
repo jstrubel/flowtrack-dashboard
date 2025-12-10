@@ -4602,25 +4602,55 @@
             // Sort data chronologically
             let data = [...netLiquidityData].sort((a, b) => new Date(a.date) - new Date(b.date));
             
-            // Filter by period
-            if (period !== 'all') {
-                const years = period === '1y' ? 1 : period === '2y' ? 2 : 10;
-                const cutoff = new Date();
-                cutoff.setFullYear(cutoff.getFullYear() - years);
-                data = data.filter(d => new Date(d.date) >= cutoff);
+            // Get the most recent data point date as reference (same logic as main chart)
+            const latestDataDate = new Date(data[data.length - 1].date);
+            let startDate;
+            
+            // Calculate start date based on period relative to latest data (matching main chart logic)
+            switch (period) {
+                case '1y': 
+                    startDate = new Date(latestDataDate);
+                    startDate.setFullYear(startDate.getFullYear() - 1);
+                    break;
+                case '2y': 
+                    startDate = new Date(latestDataDate);
+                    startDate.setFullYear(startDate.getFullYear() - 2);
+                    break;
+                case 'all': 
+                    startDate = new Date(2015, 0, 1); // All data from 2015
+                    break;
+                default: 
+                    startDate = new Date(latestDataDate);
+                    startDate.setFullYear(startDate.getFullYear() - 1);
             }
             
             // Calculate monthly rate of change (using ~4 week intervals since data is weekly)
+            // Start from index 4 to have a reference point, but pad beginning with nulls to align timeline
             const rocData = [];
+            
+            // First, add null entries for the first few data points to align with main chart
+            for (let i = 0; i < Math.min(4, data.length); i++) {
+                if (new Date(data[i].date) >= startDate) {
+                    rocData.push({
+                        date: data[i].date,
+                        change: null, // No ROC data for first few points
+                        btc: data[i].btc
+                    });
+                }
+            }
+            
+            // Then calculate ROC for the rest
             for (let i = 4; i < data.length; i++) {
-                const current = data[i].liquidity;
-                const previous = data[i - 4].liquidity;
-                const change = current - previous;
-                rocData.push({
-                    date: data[i].date,
-                    change: change, // In trillions
-                    btc: data[i].btc
-                });
+                if (new Date(data[i].date) >= startDate) {
+                    const current = data[i].liquidity;
+                    const previous = data[i - 4].liquidity;
+                    const change = current - previous;
+                    rocData.push({
+                        date: data[i].date,
+                        change: change, // In trillions
+                        btc: data[i].btc
+                    });
+                }
             }
             
             if (liquidityROCChart) liquidityROCChart.destroy();
@@ -4945,10 +4975,16 @@
                     btcHistoricalData[dateStr] = price;
                 });
                 
+                console.log('Fetched BTC historical data:', Object.keys(btcHistoricalData).length, 'days');
                 return btcHistoricalData;
             } catch (error) {
-                console.error('Error fetching BTC historical data:', error);
-                return null;
+                console.warn('CoinGecko BTC fetch failed, using embedded data:', error);
+                // Fallback: use embedded BTC data from netLiquidityData
+                btcHistoricalData = {};
+                netLiquidityData.forEach(d => {
+                    btcHistoricalData[d.date] = d.btc;
+                });
+                return btcHistoricalData;
             }
         }
         
@@ -4968,11 +5004,37 @@
             let normalizedData = stablecoinHistoryData.map(d => {
                 const date = new Date(d.date * 1000);
                 const dateStr = date.toISOString().split('T')[0];
+                
+                // Try to find BTC price - exact match or closest date
+                let btcPrice = null;
+                if (btcData) {
+                    btcPrice = btcData[dateStr];
+                    // If no exact match, try to find closest date within 3 days
+                    if (!btcPrice) {
+                        for (let offset = 1; offset <= 3; offset++) {
+                            const prevDate = new Date(date);
+                            prevDate.setDate(prevDate.getDate() - offset);
+                            const prevDateStr = prevDate.toISOString().split('T')[0];
+                            if (btcData[prevDateStr]) {
+                                btcPrice = btcData[prevDateStr];
+                                break;
+                            }
+                            const nextDate = new Date(date);
+                            nextDate.setDate(nextDate.getDate() + offset);
+                            const nextDateStr = nextDate.toISOString().split('T')[0];
+                            if (btcData[nextDateStr]) {
+                                btcPrice = btcData[nextDateStr];
+                                break;
+                            }
+                        }
+                    }
+                }
+                
                 return {
                     date: date,
                     dateStr: dateStr,
                     total: d.totalCirculating?.peggedUSD || d.totalCirculatingUSD?.peggedUSD || 0,
-                    btc: btcData ? btcData[dateStr] : null
+                    btc: btcPrice
                 };
             }).filter(d => d.total > 0);
             
