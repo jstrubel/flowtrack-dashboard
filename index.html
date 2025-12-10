@@ -1995,7 +1995,7 @@
                 if (fundingData && fundingData[0] && fundingData[0].history) {
                     coinalyzeData.funding = fundingData[0].history.map(d => ({
                         t: d.t * 1000,
-                        value: d.c * 100 // Convert to percentage
+                        value: d.c // Already in percentage form from Coinalyze
                     }));
                 }
                 
@@ -2145,9 +2145,14 @@
                         ...chartOptions.scales,
                         y: {
                             ...chartOptions.scales.y,
+                            // Funding rates typically range from -0.1% to +0.1% (10 basis points)
+                            // Set symmetric bounds so negative rates are visible
+                            min: -0.1,
+                            max: 0.15,
                             ticks: {
                                 ...chartOptions.scales.y.ticks,
-                                callback: v => v.toFixed(3) + '%'
+                                stepSize: 0.05,
+                                callback: v => v.toFixed(2) + '%'
                             }
                         }
                     },
