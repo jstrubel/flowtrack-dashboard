@@ -1246,18 +1246,33 @@
                 <div class="section-title">Global Liquidity</div>
             </div>
             
-            <!-- Global Liquidity vs Bitcoin Chart -->
+            <!-- Unified Time Period Selector -->
+            <div class="card" style="margin-bottom: 16px; padding: 12px 16px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                    <div style="font-size: 13px; color: var(--text-muted);">
+                        <strong style="color: var(--text);">Timeframe:</strong> Synced across US & China liquidity charts
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="period-btn" data-global-liquidity-period="1y">1Y</button>
+                        <button class="period-btn" data-global-liquidity-period="2y">2Y</button>
+                        <button class="period-btn active" data-global-liquidity-period="all">ALL</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- US LIQUIDITY SUBSECTION -->
+            <div style="margin-bottom: 8px; padding: 8px 0;">
+                <div style="font-size: 14px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 16px;">🇺🇸</span> US Net Liquidity (Federal Reserve)
+                </div>
+            </div>
+            
+            <!-- US Net Liquidity vs Bitcoin Chart -->
             <div class="card">
                 <div class="card-header">
                     <div>
                         <div class="card-title">US Net Liquidity vs Bitcoin</div>
                         <div class="card-subtitle">Fed Balance Sheet − RRP − TGA (Trillions USD)</div>
-                    </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="period-btn" data-liquidity-period="1y">1Y</button>
-                        <button class="period-btn" data-liquidity-period="2y">2Y</button>
-                        <button class="period-btn" data-liquidity-period="3y">3Y</button>
-                        <button class="period-btn active" data-liquidity-period="all">ALL</button>
                     </div>
                 </div>
                 <div style="height: 400px; margin-top: 12px;">
@@ -1273,17 +1288,12 @@
                 </div>
             </div>
             
-            <!-- Liquidity Rate of Change -->
+            <!-- US Liquidity Rate of Change -->
             <div class="card" style="margin-top: 16px;">
                 <div class="card-header">
                     <div>
-                        <div class="card-title">Liquidity Rate of Change</div>
-                        <div class="card-subtitle">Monthly change in Net Liquidity - Acceleration/deceleration of liquidity conditions</div>
-                    </div>
-                    <div class="time-selector">
-                        <button class="time-btn" onclick="updateLiquidityROCChart('1y')">1Y</button>
-                        <button class="time-btn" onclick="updateLiquidityROCChart('2y')">2Y</button>
-                        <button class="time-btn active" onclick="updateLiquidityROCChart('all')">ALL</button>
+                        <div class="card-title">US Liquidity Rate of Change</div>
+                        <div class="card-subtitle">Monthly change in Net Liquidity - Acceleration/deceleration signal</div>
                     </div>
                 </div>
                 <div style="height: 300px; margin-top: 12px;">
@@ -1299,7 +1309,40 @@
                 </div>
             </div>
             
-            <div class="grid-2" style="margin-top: 16px;">
+            <!-- CHINA LIQUIDITY SUBSECTION -->
+            <div style="margin: 24px 0 8px 0; padding: 8px 0;">
+                <div style="font-size: 14px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 16px;">🇨🇳</span> China Liquidity (PBoC)
+                </div>
+            </div>
+            
+            <!-- PBoC Liquidity Injections Chart -->
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">PBoC Liquidity Injections vs Bitcoin</div>
+                        <div class="card-subtitle">Reverse Repo + MLF Operations (Billions USD)</div>
+                    </div>
+                </div>
+                <div style="height: 400px; margin-top: 12px;">
+                    <canvas id="chinaLiquidityChart"></canvas>
+                </div>
+                <div style="margin-top: 12px; padding: 12px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border-left: 3px solid #ef4444;">
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        <strong style="color: var(--text);">China Liquidity:</strong> 
+                        <span style="color: #3b82f6;">Blue bars</span> = MLF (Medium-term Lending Facility, 1-year loans). 
+                        <span style="color: #f59e0b;">Orange bars</span> = Reverse Repo (short-term injections). 
+                        <span style="color: #f7931a;">Line</span> = BTC price. Large injections often precede global risk-on moves.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- LIQUIDITY COMPONENTS GRID -->
+            <div style="margin: 24px 0 8px 0; padding: 8px 0;">
+                <div style="font-size: 14px; font-weight: 600; color: var(--text);">Liquidity Components</div>
+            </div>
+            
+            <div class="grid-2" style="margin-top: 8px;">
                 <!-- Fed Balance Sheet -->
                 <div class="card" style="padding: 0; overflow: hidden;">
                     <div style="padding: 16px 18px 8px 18px;">
@@ -1347,117 +1390,41 @@
                 </div>
             </div>
             
-            <!-- Liquidity Components Summary -->
+            <!-- Combined Liquidity Components Reference -->
             <div class="card" style="margin-top: 16px;">
                 <div class="card-header">
                     <div class="card-title">Liquidity Components Reference</div>
                 </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 12px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 12px;">
                     <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid var(--accent);">
-                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Fed Balance Sheet</div>
+                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">🇺🇸 Fed Balance Sheet</div>
                         <div style="font-size: 13px; font-weight: 600; color: var(--text);">WALCL</div>
                         <div style="font-size: 11px; color: var(--good); margin-top: 4px;">↑ Adds Liquidity</div>
                     </div>
                     <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid var(--bad);">
-                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Reverse Repo (RRP)</div>
+                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">🇺🇸 Reverse Repo (RRP)</div>
                         <div style="font-size: 13px; font-weight: 600; color: var(--text);">RRPONTSYD</div>
                         <div style="font-size: 11px; color: var(--bad); margin-top: 4px;">↑ Drains Liquidity</div>
                     </div>
                     <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid var(--bad);">
-                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Treasury Account (TGA)</div>
-                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">WTREGEN</div>
+                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">🇺🇸 Treasury Account</div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">TGA</div>
                         <div style="font-size: 11px; color: var(--bad); margin-top: 4px;">↑ Drains Liquidity</div>
                     </div>
+                    <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid #3b82f6;">
+                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">🇨🇳 MLF Operations</div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">MLF</div>
+                        <div style="font-size: 11px; color: var(--good); margin-top: 4px;">Adds Liquidity</div>
+                    </div>
+                    <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid #f59e0b;">
+                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">🇨🇳 Reverse Repo</div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">7-Day RR</div>
+                        <div style="font-size: 11px; color: var(--good); margin-top: 4px;">Adds Liquidity</div>
+                    </div>
                     <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid var(--cyan);">
-                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">M2 Money Supply</div>
+                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">🇺🇸 M2 Money Supply</div>
                         <div style="font-size: 13px; font-weight: 600; color: var(--text);">M2SL</div>
                         <div style="font-size: 11px; color: var(--good); margin-top: 4px;">↑ Adds Liquidity</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- China Liquidity Section -->
-        <div class="section">
-            <div class="section-header">
-                <div class="section-title">China Liquidity (PBoC)</div>
-            </div>
-            
-            <!-- PBoC Liquidity Injections Chart -->
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">PBoC Liquidity Injections vs Bitcoin</div>
-                        <div class="card-subtitle">China Reverse Repo + MLF Operations (Billions USD) - Net injections correlate with risk-on</div>
-                    </div>
-                    <div class="time-selector">
-                        <button class="time-btn" onclick="updateChinaLiquidityChart('1y')">1Y</button>
-                        <button class="time-btn" onclick="updateChinaLiquidityChart('2y')">2Y</button>
-                        <button class="time-btn active" onclick="updateChinaLiquidityChart('all')">ALL</button>
-                    </div>
-                </div>
-                <div style="height: 400px; margin-top: 12px;">
-                    <canvas id="chinaLiquidityChart"></canvas>
-                </div>
-                <div style="margin-top: 12px; padding: 12px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border-left: 3px solid #ef4444;">
-                    <div style="font-size: 12px; color: var(--text-muted);">
-                        <strong style="color: var(--text);">China Liquidity:</strong> 
-                        <span style="color: #3b82f6;">Blue bars</span> = MLF (Medium-term Lending Facility). 
-                        <span style="color: #f59e0b;">Orange bars</span> = Reverse Repo operations. 
-                        <span style="color: #f7931a;">Line</span> = BTC price. Large injections often precede global risk-on moves.
-                    </div>
-                </div>
-            </div>
-            
-            <div class="grid-2" style="margin-top: 16px;">
-                <!-- China Reverse Repo Rate -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">China 7-Day Reverse Repo Rate</div>
-                        <div class="card-subtitle">PBoC Policy Rate - Primary liquidity tool</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 350px;">
-                        <div id="china-repo-rate-chart" style="height: 100%;"></div>
-                    </div>
-                </div>
-                
-                <!-- China 10Y Government Bond -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">China 10-Year Government Bond</div>
-                        <div class="card-subtitle">CN10Y Yield - Risk sentiment indicator</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 350px;">
-                        <div id="china-10y-chart" style="height: 100%;"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- China Liquidity Components Reference -->
-            <div class="card" style="margin-top: 16px;">
-                <div class="card-header">
-                    <div class="card-title">China Liquidity Components Reference</div>
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 12px;">
-                    <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid #f59e0b;">
-                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Reverse Repo Operations</div>
-                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">7-Day RR</div>
-                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Short-term liquidity injections</div>
-                    </div>
-                    <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid #3b82f6;">
-                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Medium-term Lending Facility</div>
-                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">MLF</div>
-                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">1-year loans to banks</div>
-                    </div>
-                    <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid #22c55e;">
-                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Reserve Requirement Ratio</div>
-                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">RRR Cuts</div>
-                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Frees bank capital for lending</div>
-                    </div>
-                    <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid #a855f7;">
-                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Loan Prime Rate</div>
-                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">LPR</div>
-                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Benchmark lending rate</div>
                     </div>
                 </div>
             </div>
@@ -1474,10 +1441,18 @@
                 <div class="card" style="padding: 0; overflow: hidden;">
                     <div style="padding: 16px 18px 8px 18px;">
                         <div class="card-title">Yield Curve (10Y - 2Y Spread)</div>
-                        <div class="card-subtitle">Inverted = Recession Warning (Below 0 = Inverted)</div>
+                        <div class="card-subtitle">Treasury yield spread - Leading recession indicator</div>
                     </div>
-                    <div class="tradingview-widget-container" style="height: 350px;">
+                    <div class="tradingview-widget-container" style="height: 320px;">
                         <div id="yield-curve-chart" style="height: 100%;"></div>
+                    </div>
+                    <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
+                        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+                            <strong style="color: var(--text);">How to read:</strong> 
+                            <span style="color: var(--bad);">Below 0 (inverted)</span> = Short-term rates exceed long-term rates, historically precedes recessions by 12-18 months. 
+                            <span style="color: var(--good);">Above 0 (normal)</span> = Healthy economy expected. 
+                            <strong>Key:</strong> The steepening after inversion (moving back positive) often signals recession is imminent, not over. BTC typically struggles during active recessions but rallies on Fed pivot expectations.
+                        </div>
                     </div>
                 </div>
                 
@@ -1485,10 +1460,18 @@
                 <div class="card" style="padding: 0; overflow: hidden;">
                     <div style="padding: 16px 18px 8px 18px;">
                         <div class="card-title">Gold (XAU/USD)</div>
-                        <div class="card-subtitle">Safe Haven Asset - Inflation Hedge</div>
+                        <div class="card-subtitle">Safe haven asset - Inflation & uncertainty hedge</div>
                     </div>
-                    <div class="tradingview-widget-container" style="height: 350px;">
+                    <div class="tradingview-widget-container" style="height: 320px;">
                         <div id="gold-chart" style="height: 100%;"></div>
+                    </div>
+                    <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
+                        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+                            <strong style="color: var(--text);">How to read:</strong> 
+                            <span style="color: var(--good);">Rising gold</span> = Flight to safety, inflation fears, or central bank buying (bullish for BTC narrative as "digital gold"). 
+                            <span style="color: var(--bad);">Falling gold</span> = Risk-on sentiment, rising real yields, or USD strength. 
+                            <strong>Key:</strong> Gold and BTC often move together during liquidity expansions. Divergence (gold up, BTC down) may signal macro stress where BTC trades more like a risk asset.
+                        </div>
                     </div>
                 </div>
             </div>
@@ -4068,50 +4051,6 @@
             
             // Initialize China Liquidity Chart
             setTimeout(() => renderChinaLiquidityChart('all'), 400);
-            
-            // China 7-Day Repo Rate
-            if (document.getElementById('china-repo-rate-chart')) {
-                new TradingView.widget({
-                    "autosize": true,
-                    "symbol": "ECONOMICS:CNIRR",
-                    "interval": "D",
-                    "timezone": "Etc/UTC",
-                    "theme": "dark",
-                    "style": "1",
-                    "locale": "en",
-                    "toolbar_bg": "#0a0e17",
-                    "enable_publishing": false,
-                    "hide_top_toolbar": false,
-                    "hide_legend": false,
-                    "save_image": false,
-                    "backgroundColor": "rgba(10, 14, 23, 1)",
-                    "gridColor": "rgba(255, 255, 255, 0.05)",
-                    "container_id": "china-repo-rate-chart",
-                    "hide_volume": true
-                });
-            }
-            
-            // China 10Y Government Bond
-            if (document.getElementById('china-10y-chart')) {
-                new TradingView.widget({
-                    "autosize": true,
-                    "symbol": "TVC:CN10Y",
-                    "interval": "D",
-                    "timezone": "Etc/UTC",
-                    "theme": "dark",
-                    "style": "1",
-                    "locale": "en",
-                    "toolbar_bg": "#0a0e17",
-                    "enable_publishing": false,
-                    "hide_top_toolbar": false,
-                    "hide_legend": false,
-                    "save_image": false,
-                    "backgroundColor": "rgba(10, 14, 23, 1)",
-                    "gridColor": "rgba(255, 255, 255, 0.05)",
-                    "container_id": "china-10y-chart",
-                    "hide_volume": true
-                });
-            }
         }
         
         // ==================== GLOBAL LIQUIDITY VS BITCOIN CHART ====================
@@ -4413,7 +4352,20 @@
             window.liquidityBtcChart = liquidityBtcChart;
         }
         
-        // Liquidity chart period buttons
+        // Global Liquidity unified timeframe selector - syncs US and China charts
+        document.querySelectorAll('[data-global-liquidity-period]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('[data-global-liquidity-period]').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const period = this.dataset.globalLiquidityPeriod;
+                // Update all liquidity charts with same timeframe
+                renderLiquidityBTCChart(period);
+                renderLiquidityROCChart(period);
+                renderChinaLiquidityChart(period);
+            });
+        });
+        
+        // Legacy liquidity chart period buttons (keep for backwards compatibility)
         document.querySelectorAll('[data-liquidity-period]').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('[data-liquidity-period]').forEach(b => b.classList.remove('active'));
