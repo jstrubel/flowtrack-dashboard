@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flowtrack v31 | Crypto Market Intelligence</title>
+    <title>Flowtrack v33 | Crypto Market Intelligence</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -667,9 +667,6 @@
                     <span class="status-dot" id="statusDot"></span>
                     <span id="lastUpdate">Loading...</span>
                 </div>
-                <button class="refresh-btn" onclick="exportWeeklyReport()" style="background: linear-gradient(135deg, #10b981, #059669);">
-                    📄 Export Report
-                </button>
                 <button class="refresh-btn" onclick="refreshAllData()" id="refreshBtn">
                     ↻ Refresh
                 </button>
@@ -1496,11 +1493,11 @@
                     </div>
                 </div>
                 
-                <!-- MOVE -->
+                <!-- DXY (Dollar Index) -->
                 <div class="card" style="padding: 0; overflow: hidden;">
                     <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">MOVE Index (Bond Volatility)</div>
-                        <div class="card-subtitle">Treasury implied volatility - Liquidity stress indicator</div>
+                        <div class="card-title">DXY (US Dollar Index)</div>
+                        <div class="card-subtitle">Dollar strength indicator - Global liquidity proxy</div>
                     </div>
                     <div class="tradingview-widget-container" style="height: 320px;">
                         <div id="move-chart" style="height: 100%;"></div>
@@ -1508,11 +1505,9 @@
                     <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
                         <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
                             <strong style="color: var(--text);">How to read:</strong> 
-                            <span style="color: var(--good);">Below 100</span> = Calm bond market, stable rates environment, supportive for risk assets. 
-                            <span style="color: #f59e0b;">100-120</span> = Elevated uncertainty around Fed policy. 
-                            <span style="color: var(--bad);">Above 120</span> = Significant bond stress, often precedes liquidity issues. 
-                            <span style="color: var(--bad);">Above 150</span> = Crisis levels (2008, 2020, 2023 banking crisis). 
-                            <strong>Key:</strong> MOVE often leads VIX. High MOVE + high VIX = systemic stress, may force Fed intervention (bullish for liquidity).
+                            <span style="color: var(--bad);">Rising DXY</span> = Dollar strengthening, typically bearish for risk assets and BTC (tightening liquidity). 
+                            <span style="color: var(--good);">Falling DXY</span> = Dollar weakening, bullish for BTC and risk assets (expanding liquidity). 
+                            <strong>Key:</strong> DXY inversely correlates with global liquidity. Watch for DXY peaks - they often coincide with BTC bottoms. The 2022 DXY peak at 114 marked the BTC bottom.
                         </div>
                     </div>
                 </div>
@@ -1536,11 +1531,11 @@
                     </div>
                 </div>
                 
-                <!-- Nikkei 225 -->
+                <!-- Japan ETF (EWJ) -->
                 <div class="card" style="padding: 0; overflow: hidden;">
                     <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">Nikkei 225</div>
-                        <div class="card-subtitle">Japan equities - Asian session risk indicator</div>
+                        <div class="card-title">EWJ (iShares Japan ETF)</div>
+                        <div class="card-subtitle">Japan equities proxy - Asian risk sentiment</div>
                     </div>
                     <div class="tradingview-widget-container" style="height: 320px;">
                         <div id="nikkei-chart" style="height: 100%;"></div>
@@ -1548,9 +1543,9 @@
                     <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
                         <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
                             <strong style="color: var(--text);">How to read:</strong> 
-                            <span style="color: var(--good);">Rising Nikkei</span> = Risk-on in Asian session, often correlates with yen weakness and positive sentiment. 
-                            <span style="color: var(--bad);">Falling Nikkei</span> = Risk-off signal, especially concerning if paired with yen strength. 
-                            <strong>Key:</strong> Nikkei trades during Asian hours (before US/EU markets). Large Nikkei moves often set the tone for global risk assets. Aug 2024's historic -12% Nikkei crash preceded a global risk sell-off including BTC.
+                            <span style="color: var(--good);">Rising EWJ</span> = Risk-on sentiment in Japan/Asia, often correlates with yen weakness. 
+                            <span style="color: var(--bad);">Falling EWJ</span> = Risk-off signal for Asia, concerning if paired with rapid yen strength. 
+                            <strong>Key:</strong> EWJ tracks Japanese large caps and reflects Nikkei 225 trends. Japan market moves often set the tone for global risk assets. Aug 2024's Japan crash preceded a global risk sell-off including BTC.
                         </div>
                     </div>
                 </div>
@@ -4131,10 +4126,10 @@
                 "hide_volume": true
             });
             
-            // VIX Chart
+            // VIX Chart - using CBOE symbol
             new TradingView.widget({
                 "autosize": true,
-                "symbol": "TVC:VIX",
+                "symbol": "CBOE:VIX",
                 "interval": "D",
                 "timezone": "Etc/UTC",
                 "theme": "dark",
@@ -4151,10 +4146,10 @@
                 "hide_volume": true
             });
             
-            // MOVE Index Chart
+            // DXY (Dollar Index) Chart - replacing MOVE since it's not available
             new TradingView.widget({
                 "autosize": true,
-                "symbol": "TVC:MOVE",
+                "symbol": "TVC:DXY",
                 "interval": "D",
                 "timezone": "Etc/UTC",
                 "theme": "dark",
@@ -4191,10 +4186,10 @@
                 "hide_volume": true
             });
             
-            // Nikkei 225 Chart
+            // Japan ETF Chart - using EWJ since NI225 not available in widget
             new TradingView.widget({
                 "autosize": true,
-                "symbol": "TVC:NI225",
+                "symbol": "AMEX:EWJ",
                 "interval": "D",
                 "timezone": "Etc/UTC",
                 "theme": "dark",
