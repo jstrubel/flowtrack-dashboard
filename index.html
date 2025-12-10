@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flowtrack v30 | Crypto Market Intelligence</title>
+    <title>Flowtrack v31 | Crypto Market Intelligence</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -940,7 +940,7 @@
                         <strong style="color: var(--text);">Interpretation:</strong> 
                         <span style="color: var(--good);">Green bars</span> = Net minting (new capital entering crypto). 
                         <span style="color: var(--bad);">Red bars</span> = Net burning (capital exiting). 
-                        <span style="color: #f7931a;">Orange line</span> = BTC price overlay. Watch for divergences between stablecoin inflows and BTC price.
+                        Sustained green bars often precede BTC rallies. Red bars signal capital rotation out of crypto.
                     </div>
                 </div>
             </div>
@@ -1471,6 +1471,86 @@
                             <span style="color: var(--good);">Rising gold</span> = Flight to safety, inflation fears, or central bank buying (bullish for BTC narrative as "digital gold"). 
                             <span style="color: var(--bad);">Falling gold</span> = Risk-on sentiment, rising real yields, or USD strength. 
                             <strong>Key:</strong> Gold and BTC often move together during liquidity expansions. Divergence (gold up, BTC down) may signal macro stress where BTC trades more like a risk asset.
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- VIX -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">VIX (Equity Volatility Index)</div>
+                        <div class="card-subtitle">S&P 500 implied volatility - "Fear gauge"</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 320px;">
+                        <div id="vix-chart" style="height: 100%;"></div>
+                    </div>
+                    <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
+                        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+                            <strong style="color: var(--text);">How to read:</strong> 
+                            <span style="color: var(--good);">Below 15</span> = Low fear, complacency, risk-on environment (BTC tends to rally). 
+                            <span style="color: #f59e0b);">15-25</span> = Normal volatility. 
+                            <span style="color: var(--bad);">Above 25</span> = Elevated fear, potential sell-off in risk assets including crypto. 
+                            <span style="color: var(--bad);">Above 35</span> = Panic levels, often marks capitulation bottoms. 
+                            <strong>Key:</strong> VIX spikes are typically short-lived. BTC often follows equities during VIX spikes but can decouple during crypto-specific events.
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- MOVE -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">MOVE Index (Bond Volatility)</div>
+                        <div class="card-subtitle">Treasury implied volatility - Liquidity stress indicator</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 320px;">
+                        <div id="move-chart" style="height: 100%;"></div>
+                    </div>
+                    <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
+                        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+                            <strong style="color: var(--text);">How to read:</strong> 
+                            <span style="color: var(--good);">Below 100</span> = Calm bond market, stable rates environment, supportive for risk assets. 
+                            <span style="color: #f59e0b;">100-120</span> = Elevated uncertainty around Fed policy. 
+                            <span style="color: var(--bad);">Above 120</span> = Significant bond stress, often precedes liquidity issues. 
+                            <span style="color: var(--bad);">Above 150</span> = Crisis levels (2008, 2020, 2023 banking crisis). 
+                            <strong>Key:</strong> MOVE often leads VIX. High MOVE + high VIX = systemic stress, may force Fed intervention (bullish for liquidity).
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- USD/JPY -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">USD/JPY (Dollar-Yen)</div>
+                        <div class="card-subtitle">Yen carry trade indicator - Global risk sentiment</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 320px;">
+                        <div id="usdjpy-chart" style="height: 100%;"></div>
+                    </div>
+                    <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
+                        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+                            <strong style="color: var(--text);">How to read:</strong> 
+                            <span style="color: var(--good);">Rising USD/JPY</span> = Yen weakening, carry trade flows into risk assets (bullish for BTC). 
+                            <span style="color: var(--bad);">Falling USD/JPY (rapidly)</span> = Yen strengthening, carry trade unwinding, risk-off (Aug 2024 crash was triggered by yen spike). 
+                            <strong>Key:</strong> Watch for sharp moves. Gradual yen weakness = supportive. Rapid yen strength (>2-3% daily) = potential margin call cascade affecting all risk assets including crypto.
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Nikkei 225 -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">Nikkei 225</div>
+                        <div class="card-subtitle">Japan equities - Asian session risk indicator</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 320px;">
+                        <div id="nikkei-chart" style="height: 100%;"></div>
+                    </div>
+                    <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
+                        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+                            <strong style="color: var(--text);">How to read:</strong> 
+                            <span style="color: var(--good);">Rising Nikkei</span> = Risk-on in Asian session, often correlates with yen weakness and positive sentiment. 
+                            <span style="color: var(--bad);">Falling Nikkei</span> = Risk-off signal, especially concerning if paired with yen strength. 
+                            <strong>Key:</strong> Nikkei trades during Asian hours (before US/EU markets). Large Nikkei moves often set the tone for global risk assets. Aug 2024's historic -12% Nikkei crash preceded a global risk sell-off including BTC.
                         </div>
                     </div>
                 </div>
@@ -4051,6 +4131,86 @@
                 "hide_volume": true
             });
             
+            // VIX Chart
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "TVC:VIX",
+                "interval": "D",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#0a0e17",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "backgroundColor": "rgba(10, 14, 23, 1)",
+                "gridColor": "rgba(255, 255, 255, 0.05)",
+                "container_id": "vix-chart",
+                "hide_volume": true
+            });
+            
+            // MOVE Index Chart
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "TVC:MOVE",
+                "interval": "D",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#0a0e17",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "backgroundColor": "rgba(10, 14, 23, 1)",
+                "gridColor": "rgba(255, 255, 255, 0.05)",
+                "container_id": "move-chart",
+                "hide_volume": true
+            });
+            
+            // USD/JPY Chart
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "FX:USDJPY",
+                "interval": "D",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#0a0e17",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "backgroundColor": "rgba(10, 14, 23, 1)",
+                "gridColor": "rgba(255, 255, 255, 0.05)",
+                "container_id": "usdjpy-chart",
+                "hide_volume": true
+            });
+            
+            // Nikkei 225 Chart
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "TVC:NI225",
+                "interval": "D",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#0a0e17",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "backgroundColor": "rgba(10, 14, 23, 1)",
+                "gridColor": "rgba(255, 255, 255, 0.05)",
+                "container_id": "nikkei-chart",
+                "hide_volume": true
+            });
+            
             // Initialize China Liquidity Chart
             setTimeout(() => renderChinaLiquidityChart('all'), 400);
         }
@@ -4965,30 +5125,6 @@
         let stablecoinROCChart = null;
         window.stablecoinROCChart = null;
         
-        // Embedded BTC daily prices for the chart (more granular data)
-        const embeddedBTCDaily = {
-            // 2023 Q4 - 2024 full (daily samples)
-            '2023-10-01': 27500, '2023-10-05': 27600, '2023-10-10': 27400, '2023-10-15': 28500, '2023-10-20': 29800,
-            '2023-10-25': 34100, '2023-10-30': 34500, '2023-11-05': 35000, '2023-11-10': 37200, '2023-11-15': 36500,
-            '2023-11-20': 37400, '2023-11-25': 37600, '2023-11-30': 37800, '2023-12-05': 44000, '2023-12-10': 41500,
-            '2023-12-15': 42800, '2023-12-20': 43500, '2023-12-25': 43800, '2023-12-30': 42500,
-            // 2024 daily
-            '2024-01-05': 44200, '2024-01-10': 46100, '2024-01-15': 42800, '2024-01-20': 41200, '2024-01-25': 40100,
-            '2024-01-30': 43000, '2024-02-05': 42900, '2024-02-10': 47800, '2024-02-15': 52000, '2024-02-20': 51800,
-            '2024-02-25': 51500, '2024-02-29': 62400, '2024-03-05': 66900, '2024-03-10': 68400, '2024-03-15': 68200,
-            '2024-03-20': 63800, '2024-03-25': 70000, '2024-03-30': 70200, '2024-04-05': 68500, '2024-04-10': 70600,
-            '2024-04-15': 63500, '2024-04-20': 64900, '2024-04-25': 64300, '2024-04-30': 60600,
-            '2024-05-05': 63900, '2024-05-10': 60800, '2024-05-15': 66200, '2024-05-20': 67000, '2024-05-25': 68900,
-            '2024-05-30': 67500, '2024-06-05': 71000, '2024-06-10': 69600, '2024-06-15': 66100, '2024-06-20': 64800,
-            '2024-06-25': 61300, '2024-06-30': 62700, '2024-07-05': 56600, '2024-07-10': 57800, '2024-07-15': 64700,
-            '2024-07-20': 67300, '2024-07-25': 64000, '2024-07-30': 66700, '2024-08-05': 54800, '2024-08-10': 60900,
-            '2024-08-15': 58900, '2024-08-20': 60700, '2024-08-25': 64100, '2024-08-30': 59100,
-            '2024-09-05': 56500, '2024-09-10': 57400, '2024-09-15': 58900, '2024-09-20': 63400, '2024-09-25': 63800,
-            '2024-09-30': 63300, '2024-10-05': 62100, '2024-10-10': 60600, '2024-10-15': 67000, '2024-10-20': 68400,
-            '2024-10-25': 67900, '2024-10-30': 72300, '2024-11-05': 69000, '2024-11-10': 80000, '2024-11-15': 88000,
-            '2024-11-20': 92000, '2024-11-25': 97000, '2024-11-30': 97400, '2024-12-05': 98800, '2024-12-10': 97200
-        };
-        
         function renderStablecoinROCChart(days = 365) {
             if (!stablecoinHistoryData || stablecoinHistoryData.length < 14) {
                 console.log('Not enough stablecoin data for ROC chart');
@@ -4998,65 +5134,17 @@
             const ctx = document.getElementById('stablecoinROCChart');
             if (!ctx) return;
             
-            // Transform stablecoin data and attach BTC prices
+            // Transform stablecoin data
             let normalizedData = stablecoinHistoryData.map(d => {
                 const date = new Date(d.date * 1000);
-                const dateStr = date.toISOString().split('T')[0];
-                
-                // Find closest BTC price from embedded data
-                let btcPrice = embeddedBTCDaily[dateStr];
-                if (!btcPrice) {
-                    // Find closest date within 5 days
-                    const btcDates = Object.keys(embeddedBTCDaily).sort();
-                    const targetTime = date.getTime();
-                    let closestDate = null;
-                    let closestDiff = Infinity;
-                    
-                    for (const btcDateStr of btcDates) {
-                        const btcTime = new Date(btcDateStr).getTime();
-                        const diff = Math.abs(btcTime - targetTime);
-                        if (diff < closestDiff) {
-                            closestDiff = diff;
-                            closestDate = btcDateStr;
-                        }
-                    }
-                    
-                    if (closestDate && closestDiff < 5 * 24 * 60 * 60 * 1000) {
-                        btcPrice = embeddedBTCDaily[closestDate];
-                    }
-                }
-                
                 return {
                     date: date,
-                    dateStr: dateStr,
-                    total: d.totalCirculating?.peggedUSD || d.totalCirculatingUSD?.peggedUSD || 0,
-                    btc: btcPrice || null
+                    total: d.totalCirculating?.peggedUSD || d.totalCirculatingUSD?.peggedUSD || 0
                 };
             }).filter(d => d.total > 0);
             
             // Sort by date
             normalizedData.sort((a, b) => a.date - b.date);
-            
-            // Linear interpolation for missing BTC values
-            for (let i = 0; i < normalizedData.length; i++) {
-                if (normalizedData[i].btc === null) {
-                    let prevIdx = i - 1;
-                    let nextIdx = i + 1;
-                    while (prevIdx >= 0 && normalizedData[prevIdx].btc === null) prevIdx--;
-                    while (nextIdx < normalizedData.length && normalizedData[nextIdx].btc === null) nextIdx++;
-                    
-                    if (prevIdx >= 0 && nextIdx < normalizedData.length) {
-                        const prevBtc = normalizedData[prevIdx].btc;
-                        const nextBtc = normalizedData[nextIdx].btc;
-                        const ratio = (i - prevIdx) / (nextIdx - prevIdx);
-                        normalizedData[i].btc = prevBtc + (nextBtc - prevBtc) * ratio;
-                    } else if (prevIdx >= 0) {
-                        normalizedData[i].btc = normalizedData[prevIdx].btc;
-                    } else if (nextIdx < normalizedData.length) {
-                        normalizedData[i].btc = normalizedData[nextIdx].btc;
-                    }
-                }
-            }
             
             // Filter data based on days parameter
             if (days !== 'all' && days !== 'ALL') {
@@ -5074,49 +5162,24 @@
                     const change = current - previous;
                     rocData.push({
                         date: normalizedData[i].date,
-                        change: change / 1e9,
-                        btc: normalizedData[i].btc
+                        change: change / 1e9
                     });
                 }
             }
             
             if (stablecoinROCChart) stablecoinROCChart.destroy();
             
-            const hasBtcData = rocData.some(d => d.btc !== null && d.btc !== undefined);
-            
-            const datasets = [
-                {
-                    type: 'bar',
-                    label: 'Stablecoin ROC ($B)',
-                    data: rocData.map(d => d.change),
-                    backgroundColor: rocData.map(d => d.change >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
-                    borderColor: rocData.map(d => d.change >= 0 ? '#22c55e' : '#ef4444'),
-                    borderWidth: 1,
-                    yAxisID: 'y',
-                    order: 2
-                }
-            ];
-            
-            if (hasBtcData) {
-                datasets.push({
-                    type: 'line',
-                    label: 'Bitcoin',
-                    data: rocData.map(d => d.btc),
-                    borderColor: '#f7931a',
-                    backgroundColor: 'transparent',
-                    borderWidth: 2,
-                    pointRadius: 0,
-                    tension: 0.4,
-                    spanGaps: true,
-                    yAxisID: 'y1',
-                    order: 1
-                });
-            }
-            
             stablecoinROCChart = new Chart(ctx, {
+                type: 'bar',
                 data: {
                     labels: rocData.map(d => d.date),
-                    datasets: datasets
+                    datasets: [{
+                        label: 'Stablecoin ROC ($B)',
+                        data: rocData.map(d => d.change),
+                        backgroundColor: rocData.map(d => d.change >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
+                        borderColor: rocData.map(d => d.change >= 0 ? '#22c55e' : '#ef4444'),
+                        borderWidth: 1
+                    }]
                 },
                 options: {
                     responsive: true,
@@ -5126,24 +5189,13 @@
                         intersect: false
                     },
                     plugins: {
-                        legend: { 
-                            display: true,
-                            position: 'top',
-                            labels: { 
-                                color: '#9ca3af',
-                                usePointStyle: true,
-                                padding: 15
-                            }
-                        },
+                        legend: { display: false },
                         tooltip: {
                             callbacks: {
                                 label: (ctx) => {
-                                    if (ctx.dataset.label === 'Bitcoin') {
-                                        return ctx.raw ? `BTC: $${ctx.raw.toLocaleString(undefined, {maximumFractionDigits: 0})}` : '';
-                                    }
                                     const val = ctx.raw;
                                     const sign = val >= 0 ? '+' : '';
-                                    return `Stablecoin ROC: ${sign}$${val.toFixed(2)}B`;
+                                    return `Weekly Change: ${sign}$${val.toFixed(2)}B`;
                                 }
                             }
                         }
@@ -5156,36 +5208,10 @@
                         },
                         y: {
                             type: 'linear',
-                            position: 'left',
                             grid: { color: 'rgba(255,255,255,0.05)' },
                             ticks: { 
                                 color: '#6b7280',
                                 callback: (v) => (v >= 0 ? '+' : '') + v.toFixed(1) + 'B'
-                            },
-                            title: {
-                                display: true,
-                                text: 'Stablecoin ROC',
-                                color: '#6b7280',
-                                font: { size: 11 }
-                            }
-                        },
-                        y1: {
-                            type: 'linear',
-                            position: 'right',
-                            display: hasBtcData,
-                            grid: { drawOnChartArea: false },
-                            ticks: { 
-                                color: '#f7931a',
-                                callback: (v) => {
-                                    if (v >= 1000) return '$' + (v/1000).toFixed(0) + 'K';
-                                    return '$' + v;
-                                }
-                            },
-                            title: {
-                                display: true,
-                                text: 'BTC Price',
-                                color: '#f7931a',
-                                font: { size: 11 }
                             }
                         }
                     }
