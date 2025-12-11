@@ -2231,6 +2231,19 @@
             
             if (!priceCtx || !fundingCtx || !oiCtx) return;
             
+            // Create a unified timeline from price data (most complete)
+            const sharedLabels = coinalyzeData.price.map(d => new Date(d.t));
+            const sharedMin = sharedLabels[0];
+            const sharedMax = sharedLabels[sharedLabels.length - 1];
+            
+            // Create maps for quick lookup
+            const fundingMap = new Map(coinalyzeData.funding.map(d => [d.t, d.value]));
+            const oiMap = new Map(coinalyzeData.oi.map(d => [d.t, d.value]));
+            
+            // Align all data to shared timeline
+            const alignedFunding = coinalyzeData.price.map(d => fundingMap.get(d.t) ?? null);
+            const alignedOI = coinalyzeData.price.map(d => oiMap.get(d.t) ?? null);
+            
             const chartOptions = {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -2250,6 +2263,8 @@
                 scales: {
                     x: {
                         type: 'time',
+                        min: sharedMin,
+                        max: sharedMax,
                         time: { unit: 'month', displayFormats: { month: 'MMM yy' } },
                         grid: { color: 'rgba(255,255,255,0.08)' },
                         ticks: { color: '#718096', font: { size: 10 }, maxTicksLimit: 12 }
@@ -2264,13 +2279,12 @@
             };
             
             // Price Chart (Candlestick-style line with fill)
-            const priceLabels = coinalyzeData.price.map(d => new Date(d.t));
             const priceClose = coinalyzeData.price.map(d => d.c);
             
             coinalyzePriceChart = new Chart(priceCtx, {
                 type: 'line',
                 data: {
-                    labels: priceLabels,
+                    labels: sharedLabels,
                     datasets: [{
                         label: 'BTC Price',
                         data: priceClose,
@@ -2307,25 +2321,25 @@
             });
             
             // Funding Rate Chart (Bar chart - green positive, red negative)
-            const fundingLabels = coinalyzeData.funding.map(d => new Date(d.t));
-            const fundingValues = coinalyzeData.funding.map(d => d.value);
-            const fundingColors = fundingValues.map(v => v >= 0 ? 'rgba(72, 187, 120, 0.8)' : 'rgba(245, 101, 101, 0.8)');
+            // Use aligned data for consistent timeline
+            const fundingColors = alignedFunding.map(v => v === null ? 'transparent' : (v >= 0 ? 'rgba(72, 187, 120, 0.8)' : 'rgba(245, 101, 101, 0.8)'));
             
-            // Calculate dynamic Y-axis bounds based on actual data
-            const maxFunding = Math.max(...fundingValues.map(v => Math.abs(v)));
-            const fundingBound = Math.max(0.05, Math.ceil(maxFunding * 100) / 100 + 0.01);
-            console.log('Funding chart bounds:', { maxFunding, fundingBound, sampleValues: fundingValues.slice(-5) });
+            // Calculate dynamic Y-axis bounds based on actual data (filter out nulls)
+            const validFunding = alignedFunding.filter(v => v !== null);
+            const maxFunding = Math.max(...validFunding.map(v => Math.abs(v)));
+            const fundingBound = Math.max(0.02, Math.ceil(maxFunding * 1000) / 1000 + 0.005);
+            console.log('Funding chart bounds:', { maxFunding, fundingBound, sampleValues: validFunding.slice(-5) });
             
             coinalyzeFundingChart = new Chart(fundingCtx, {
                 type: 'bar',
                 data: {
-                    labels: fundingLabels,
+                    labels: sharedLabels,
                     datasets: [{
                         label: 'Funding Rate',
-                        data: fundingValues,
+                        data: alignedFunding,
                         backgroundColor: fundingColors,
                         borderWidth: 0,
-                        barPercentage: 0.9,
+                        barPercentage: 1.0,
                         categoryPercentage: 1.0
                     }]
                 },
@@ -2349,7 +2363,7 @@
                         tooltip: {
                             ...chartOptions.plugins.tooltip,
                             callbacks: {
-                                label: ctx => 'Funding: ' + ctx.parsed.y.toFixed(4) + '%'
+                                label: ctx => 'Funding: ' + (ctx.parsed.y !== null ? ctx.parsed.y.toFixed(4) + '%' : 'N/A')
                             }
                         }
                     }
@@ -2357,22 +2371,21 @@
             });
             
             // Open Interest Chart (Line with area fill)
-            const oiLabels = coinalyzeData.oi.map(d => new Date(d.t));
-            const oiValues = coinalyzeData.oi.map(d => d.value);
-            
+            // Use aligned data for consistent timeline
             coinalyzeOIChart = new Chart(oiCtx, {
                 type: 'line',
                 data: {
-                    labels: oiLabels,
+                    labels: sharedLabels,
                     datasets: [{
                         label: 'Open Interest',
-                        data: oiValues,
+                        data: alignedOI,
                         borderColor: '#a78bfa',
                         backgroundColor: 'rgba(167, 139, 250, 0.15)',
                         borderWidth: 1.5,
                         fill: true,
                         tension: 0.1,
-                        pointRadius: 0
+                        pointRadius: 0,
+                        spanGaps: true
                     }]
                 },
                 options: {
@@ -2824,19 +2837,40 @@
                 
                 if (data && data[0] && data[0].history) {
                     const history = data[0].history;
-                    // For daily interval, d.c is the close value for that day
-                    // This represents cumulative daily funding (sum of 3 x 8-hour payments)
-                    // To annualize: daily rate * 365
-                    // Log the raw values to debug
-                    console.log('Basis raw data sample:', history.slice(-5).map(d => ({
-                        date: new Date(d.t * 1000).toLocaleDateString(),
-                        o: d.o, h: d.h, l: d.l, c: d.c
-                    })));
+                    // For daily interval, we get OHLC data
+                    // The close (c) might be capped, so let's use the average or check for clipping
                     
-                    renderBasisChart(history.map(d => ({
-                        t: d.t * 1000,
-                        basis: d.c * 365 // Annualize daily funding rate
-                    })));
+                    // Debug: Check for repeated values (indicates capping)
+                    const closeValues = history.map(d => d.c);
+                    const uniqueCloses = new Set(closeValues);
+                    console.log('Basis data analysis:', {
+                        totalPoints: history.length,
+                        uniqueCloseValues: uniqueCloses.size,
+                        sampleOHLC: history.slice(-5).map(d => ({
+                            date: new Date(d.t * 1000).toLocaleDateString(),
+                            o: d.o?.toFixed(4), 
+                            h: d.h?.toFixed(4), 
+                            l: d.l?.toFixed(4), 
+                            c: d.c?.toFixed(4)
+                        })),
+                        // Check for possible capped values
+                        maxClose: Math.max(...closeValues).toFixed(4),
+                        minClose: Math.min(...closeValues).toFixed(4)
+                    });
+                    
+                    // Use the average of high and low for better representation
+                    // This avoids issues where close might be artificially capped
+                    renderBasisChart(history.map(d => {
+                        // If we have OHLC, use (h + l) / 2, otherwise use c
+                        const dailyRate = (d.h !== undefined && d.l !== undefined) 
+                            ? (d.h + d.l) / 2 
+                            : d.c;
+                        return {
+                            t: d.t * 1000,
+                            basis: dailyRate * 365, // Annualize daily funding rate
+                            raw: dailyRate
+                        };
+                    }));
                 }
                 
             } catch (error) {
@@ -2855,6 +2889,9 @@
             // Color based on positive/negative basis
             const colors = data.map(d => d.basis >= 0 ? 'rgba(245, 158, 11, 0.8)' : 'rgba(248, 113, 113, 0.8)');
             
+            // Store raw data for tooltip access
+            const rawValues = data.map(d => d.raw);
+            
             basisChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -2864,7 +2901,7 @@
                         data: data.map(d => d.basis),
                         backgroundColor: colors,
                         borderWidth: 0,
-                        barPercentage: 0.9,
+                        barPercentage: 1.0,
                         categoryPercentage: 1.0
                     }]
                 },
@@ -2879,7 +2916,13 @@
                             bodyColor: '#a0aec0',
                             callbacks: {
                                 title: ctx => new Date(ctx[0].parsed.x).toLocaleDateString(),
-                                label: ctx => `Annualized Basis: ${ctx.parsed.y.toFixed(1)}%`
+                                label: ctx => {
+                                    const idx = ctx.dataIndex;
+                                    return [
+                                        `Annualized: ${ctx.parsed.y.toFixed(1)}%`,
+                                        `Daily Rate: ${(rawValues[idx] * 100).toFixed(4)}%`
+                                    ];
+                                }
                             }
                         }
                     },
