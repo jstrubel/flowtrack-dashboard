@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flowtrack v35 | Crypto Market Intelligence</title>
+    <title>Flowtrack v42 | Crypto Market Intelligence</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -2667,7 +2667,7 @@
                         y: {
                             stacked: false,
                             min: 0,
-                            max: 70,
+                            max: 60,
                             grid: { 
                                 color: 'rgba(255,255,255,0.05)',
                                 drawBorder: false
@@ -2676,7 +2676,7 @@
                                 color: '#718096', 
                                 font: { size: 10 },
                                 callback: v => v + '%',
-                                stepSize: 17
+                                stepSize: 15
                             }
                         }
                     }
@@ -4289,7 +4289,13 @@
         }
         
         function updateHypeFeesChart(days) {
-            document.querySelectorAll('#hypeFeesChart').closest('.card').querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+            const chartEl = document.getElementById('hypeFeesChart');
+            if (chartEl) {
+                const container = chartEl.closest('.card');
+                if (container) {
+                    container.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+                }
+            }
             event.target.classList.add('active');
             loadHypeAnalytics(days);
         }
@@ -5641,8 +5647,9 @@
         function updateStablecoinROCChart(days) {
             renderStablecoinROCChart(days);
             // Update button states
-            document.querySelectorAll('#stablecoinROCChart').forEach(chart => {
-                const container = chart.closest('.card');
+            const chartEl = document.getElementById('stablecoinROCChart');
+            if (chartEl) {
+                const container = chartEl.closest('.card');
                 if (container) {
                     container.querySelectorAll('.time-btn').forEach(btn => {
                         const btnDays = btn.textContent === '1Y' ? '365' : 
@@ -5650,7 +5657,7 @@
                         btn.classList.toggle('active', btnDays === String(days));
                     });
                 }
-            });
+            }
         }
         
         // ==================== BINANCE FUTURES API ====================
