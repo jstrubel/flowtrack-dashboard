@@ -1509,7 +1509,7 @@
                 <div class="card-header">
                     <div>
                         <div class="card-title">BTC Price vs Funding Rate vs Open Interest</div>
-                        <div class="card-subtitle">Aggregated data across all exchanges • Daily timeframe • Data from Coinalyze</div>
+                        <div class="card-subtitle">Aggregated data across all exchanges • Daily timeframe • Funding Rate from Binance</div>
                     </div>
                     <div class="time-selector">
                         <button class="time-btn" onclick="updateCoinalyzeChart(90)">3M</button>
@@ -2087,48 +2087,76 @@
             // Using BTCUSDT_PERP.A for aggregated data (all exchanges)
             const symbol = 'BTCUSDT_PERP.A';
             
-            // Build URLs - try direct first, then CORS proxy
+            // Build URLs for Coinalyze - try direct first, then CORS proxy
             const buildUrl = (endpoint, params) => {
                 return `${COINALYZE_BASE}/${endpoint}?symbols=${symbol}&interval=daily&from=${from}&to=${now}${params}&api_key=${COINALYZE_API_KEY}`;
             };
             
+            // Binance public API for funding rate (no API key needed)
+            // Gets 8-hour funding rate history - more granular than Coinalyze daily
+            const binanceFundingUrl = `https://fapi.binance.com/fapi/v1/fundingRate?symbol=BTCUSDT&startTime=${from * 1000}&endTime=${now * 1000}&limit=1000`;
+            
             try {
-                // Try direct request first
-                let priceRes, fundingRes, oiRes;
+                // Fetch Coinalyze data for price and OI, Binance for funding
+                let priceRes, oiRes, fundingRes;
+                
+                // Try fetching funding from Binance (free public API)
+                try {
+                    fundingRes = await fetch(binanceFundingUrl);
+                    if (!fundingRes.ok) throw new Error('Binance funding API failed');
+                    console.log('Using Binance funding rate API');
+                } catch (binanceError) {
+                    console.log('Binance funding failed, falling back to Coinalyze:', binanceError);
+                    fundingRes = null;
+                }
                 
                 try {
-                    [priceRes, fundingRes, oiRes] = await Promise.all([
+                    [priceRes, oiRes] = await Promise.all([
                         fetch(buildUrl('ohlcv-history', '')),
-                        fetch(buildUrl('funding-rate-history', '')),
                         fetch(buildUrl('open-interest-history', '&convert_to_usd=true'))
                     ]);
+                    
+                    // If Binance failed, also get funding from Coinalyze
+                    if (!fundingRes) {
+                        const coinalyzeFundingRes = await fetch(buildUrl('funding-rate-history', ''));
+                        if (coinalyzeFundingRes.ok) {
+                            fundingRes = coinalyzeFundingRes;
+                        }
+                    }
                 } catch (directError) {
                     console.log('Direct request failed, trying CORS proxy...');
                     // Fall back to CORS proxy
-                    [priceRes, fundingRes, oiRes] = await Promise.all([
+                    [priceRes, oiRes] = await Promise.all([
                         fetch(CORS_PROXY + encodeURIComponent(buildUrl('ohlcv-history', ''))),
-                        fetch(CORS_PROXY + encodeURIComponent(buildUrl('funding-rate-history', ''))),
                         fetch(CORS_PROXY + encodeURIComponent(buildUrl('open-interest-history', '&convert_to_usd=true')))
                     ]);
+                    
+                    if (!fundingRes) {
+                        fundingRes = await fetch(CORS_PROXY + encodeURIComponent(buildUrl('funding-rate-history', '')));
+                    }
                 }
                 
-                // Check for HTTP errors
-                if (!priceRes.ok || !fundingRes.ok || !oiRes.ok) {
+                // Check for HTTP errors on price and OI
+                if (!priceRes.ok || !oiRes.ok) {
                     console.error('Coinalyze API HTTP error:', {
                         price: priceRes.status,
-                        funding: fundingRes.status,
                         oi: oiRes.status
                     });
                     throw new Error(`API error: ${priceRes.status}`);
                 }
                 
-                const [priceData, fundingData, oiData] = await Promise.all([
+                const [priceData, oiData] = await Promise.all([
                     priceRes.json(),
-                    fundingRes.json(),
                     oiRes.json()
                 ]);
                 
-                console.log('Coinalyze responses:', { priceData, fundingData, oiData });
+                // Process funding data (could be Binance or Coinalyze format)
+                let fundingData = null;
+                if (fundingRes && fundingRes.ok) {
+                    fundingData = await fundingRes.json();
+                }
+                
+                console.log('API responses:', { priceData, fundingData, oiData });
                 
                 // Process price data (OHLCV)
                 if (priceData && priceData[0] && priceData[0].history) {
@@ -2142,16 +2170,49 @@
                 }
                 
                 // Process funding rate data
-                if (fundingData && fundingData[0] && fundingData[0].history) {
-                    coinalyzeData.funding = fundingData[0].history.map(d => ({
-                        t: d.t * 1000,
-                        value: d.c // Already in percentage form from Coinalyze
-                    }));
+                // Check if it's Binance format (array of objects with fundingRate) or Coinalyze format
+                if (fundingData) {
+                    if (Array.isArray(fundingData) && fundingData.length > 0 && fundingData[0].fundingRate !== undefined) {
+                        // Binance format - aggregate 8-hour rates to daily
+                        console.log('Processing Binance funding rate format');
+                        const dailyFunding = {};
+                        fundingData.forEach(d => {
+                            const date = new Date(d.fundingTime);
+                            const dayKey = date.toISOString().split('T')[0];
+                            if (!dailyFunding[dayKey]) {
+                                dailyFunding[dayKey] = { sum: 0, count: 0, t: d.fundingTime };
+                            }
+                            // Binance returns as decimal (e.g., 0.0001 = 0.01%)
+                            dailyFunding[dayKey].sum += parseFloat(d.fundingRate) * 100; // Convert to percentage
+                            dailyFunding[dayKey].count++;
+                        });
+                        
+                        // Convert to array with daily average
+                        coinalyzeData.funding = Object.keys(dailyFunding).sort().map(key => ({
+                            t: new Date(key).getTime(),
+                            value: dailyFunding[key].sum / dailyFunding[key].count
+                        }));
+                        
+                        console.log('Binance funding processed:', coinalyzeData.funding.slice(-5).map(f => ({
+                            date: new Date(f.t).toLocaleDateString(),
+                            value: f.value.toFixed(4) + '%'
+                        })));
+                    } else if (fundingData[0] && fundingData[0].history) {
+                        // Coinalyze format
+                        console.log('Processing Coinalyze funding rate format');
+                        coinalyzeData.funding = fundingData[0].history.map(d => ({
+                            t: d.t * 1000,
+                            value: d.c // Already in percentage form from Coinalyze
+                        }));
+                    }
+                    
                     // Debug: log some sample values
-                    const sample = coinalyzeData.funding.slice(-5);
-                    console.log('Funding rate sample (last 5 days):', sample.map(s => s.value.toFixed(4) + '%'));
-                    const maxFunding = Math.max(...coinalyzeData.funding.map(f => Math.abs(f.value)));
-                    console.log('Max absolute funding rate:', maxFunding.toFixed(4) + '%');
+                    if (coinalyzeData.funding.length > 0) {
+                        const sample = coinalyzeData.funding.slice(-5);
+                        console.log('Funding rate sample (last 5 days):', sample.map(s => s.value.toFixed(4) + '%'));
+                        const maxFunding = Math.max(...coinalyzeData.funding.map(f => Math.abs(f.value)));
+                        console.log('Max absolute funding rate:', maxFunding.toFixed(4) + '%');
+                    }
                 }
                 
                 // Process open interest data
