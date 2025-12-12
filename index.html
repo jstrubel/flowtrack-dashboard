@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flowtrack v36 | Crypto Market Intelligence</title>
+    <title>Flowtrack v35 | Crypto Market Intelligence</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -668,7 +668,7 @@
                     <span id="lastUpdate">Loading...</span>
                 </div>
                 <button class="refresh-btn" onclick="refreshAllData()" id="refreshBtn">
-                    \uc0\u8635  Refresh
+                    ↻ Refresh
                 </button>
             </div>
         </div>
@@ -705,55 +705,6 @@
                     <div class="market-label">HYPE Price</div>
                     <div class="market-value" id="hypePrice">--</div>
                     <div class="market-change" id="hypeChange">--</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Market Intelligence Section -->
-        <div class="section">
-            <div class="section-header">
-                <div class="section-title">Market Intelligence</div>
-                <a href="https://t.me/aixbtfeed" target="_blank" style="font-size: 12px; color: var(--accent); text-decoration: none; display: flex; align-items: center; gap: 6px;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
-                    View on Telegram
-                </a>
-            </div>
-            <div class="card">
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
-                    <img src="https://pbs.twimg.com/profile_images/1857869626498371586/T5fVUVqA_400x400.jpg" alt="AIXBT" style="width: 40px; height: 40px; border-radius: 50%;">
-                    <div style="flex: 1;">
-                        <div style="font-weight: 700; font-size: 14px;">AIXBT Daily Report</div>
-                        <div style="font-size: 11px; color: var(--text-muted);">AI-powered market intelligence</div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div id="aixbt-date" style="font-size: 12px; font-weight: 600; color: var(--accent);">Dec 12, 2024</div>
-                        <div style="font-size: 10px; color: var(--text-dim);">Last updated</div>
-                    </div>
-                </div>
-                <div id="aixbt-content" style="font-size: 13px; line-height: 1.7; color: var(--text);">
-                    <div style="margin-bottom: 16px;">
-                        <div style="font-weight: 700; color: var(--accent); margin-bottom: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Current Meta Direction</div>
-                        <div style="margin-bottom: 10px;"><strong style="color: var(--warn);">Fed pivot paradox:</strong> Rate cut delivered but BTC dumped below $90k as traders "sell the news." Loss aversion overriding fundamentals - market priced in gains, now anchoring to losses.</div>
-                        <div style="margin-bottom: 10px;"><strong style="color: var(--bad);">Leverage liquidation spiral:</strong> $495M in 24h liquidations (83% longs) creates reflexivity loop where forced selling triggers more margin calls.</div>
-                        <div style="margin-bottom: 10px;"><strong style="color: var(--good);">Solana institutional capture:</strong> JPMorgan's $50M commercial paper on Solana + Circle's $9.5B monthly USDC minting signals belief shift.</div>
-                        <div style="margin-bottom: 10px;"><strong style="color: var(--bad);">TGE capitulation pattern:</strong> Almanak (-49% from ICO), Cysic, Cookies all dump on launch. Creates learned helplessness in retail.</div>
-                    </div>
-                    <div>
-                        <div style="font-weight: 700; color: var(--good); margin-bottom: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Opportunities & Catalysts</div>
-                        <div style="margin-bottom: 10px;"><strong style="color: var(--purple);">Contrarian ETH accumulation:</strong> Whale bought 100k ETH despite underperformance. Bitmine purchased $112M ETH in 24h. ETH/BTC at multi-year lows - mean reversion candidate.</div>
-                        <div style="margin-bottom: 10px;"><strong style="color: var(--cyan);">Prediction markets wave:</strong> Polymarket $9-10B valuation + CFTC no-action letters. Kalshi $1B raise at $11B valuation. ACTIONABLE: Layer into low-cap prediction market infrastructure before Coinbase launches Dec 17.</div>
-                        <div><strong style="color: var(--good);">Post-liquidation dip-buying:</strong> $350B unrealized crypto losses + $85B BTC specifically = maximum pain. Historically, capitulation wicks get bought. ACTIONABLE: Set limit orders 5-8% below current for quality alts.</div>
-                    </div>
-                </div>
-                <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                    <div style="font-size: 10px; color: var(--text-dim);">
-                        Source: <a href="https://aixbt.tech" target="_blank" style="color: var(--accent); text-decoration: none;">AIXBT Terminal</a> • 
-                        <a href="https://x.com/aixbt_agent" target="_blank" style="color: var(--text-muted); text-decoration: none;">@aixbt_agent</a>
-                    </div>
-                    <div style="display: flex; gap: 12px;">
-                        <a href="https://t.me/aixbtfeed" target="_blank" style="font-size: 10px; color: var(--accent); text-decoration: none;">News Feed</a>
-                        <a href="https://t.me/aixbtportal" target="_blank" style="font-size: 10px; color: var(--text-muted); text-decoration: none;">Community</a>
-                    </div>
                 </div>
             </div>
         </div>
@@ -1045,8 +996,8 @@
                     <div style="font-size: 12px; color: var(--text-muted);">
                         <strong style="color: var(--text);">Key Insight:</strong> Extreme Fear (0-25) often signals buying opportunities. 
                         Extreme Greed (75-100) may indicate overheated conditions. 
-                        <span style="color: #f7931a;">\uc0\u9679 </span> BTC Price &nbsp;
-                        <span style="color: #4ade80;">\uc0\u9679 </span> Fear & Greed Index
+                        <span style="color: #f7931a;">●</span> BTC Price &nbsp;
+                        <span style="color: #4ade80;">●</span> Fear & Greed Index
                     </div>
                 </div>
             </div>
@@ -1274,8 +1225,8 @@
                         <div style="font-size: 13px; font-weight: 600; color: var(--text);">ETF Data Source</div>
                         <div style="font-size: 12px; color: var(--text-muted);">
                             Data from Farside Investors. Updates daily after market close (~4:30 PM ET).
-                            <a href="https://farside.co.uk/btc/" target="_blank" style="color: var(--accent); text-decoration: none;"> View BTC ETF Data \uc0\u8594 </a>
-                            <a href="https://farside.co.uk/eth/" target="_blank" style="color: var(--accent); text-decoration: none; margin-left: 12px;"> ETH ETF Data \uc0\u8594 </a>
+                            <a href="https://farside.co.uk/btc/" target="_blank" style="color: var(--accent); text-decoration: none;"> View BTC ETF Data →</a>
+                            <a href="https://farside.co.uk/eth/" target="_blank" style="color: var(--accent); text-decoration: none; margin-left: 12px;"> ETH ETF Data →</a>
                         </div>
                     </div>
                 </div>
@@ -1310,7 +1261,7 @@
             <!-- US LIQUIDITY SUBSECTION -->
             <div style="margin-bottom: 8px; padding: 8px 0;">
                 <div style="font-size: 14px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 16px;">\uc0\u55356 \u56826 \u55356 \u56824 </span> US Net Liquidity (Federal Reserve)
+                    <span style="font-size: 16px;">🇺🇸</span> US Net Liquidity (Federal Reserve)
                 </div>
             </div>
             
@@ -1319,7 +1270,7 @@
                 <div class="card-header">
                     <div>
                         <div class="card-title">US Net Liquidity vs Bitcoin</div>
-                        <div class="card-subtitle">Fed Balance Sheet \uc0\u8722  RRP \u8722  TGA (Trillions USD)</div>
+                        <div class="card-subtitle">Fed Balance Sheet − RRP − TGA (Trillions USD)</div>
                     </div>
                 </div>
                 <div style="height: 400px; margin-top: 12px;">
@@ -1327,10 +1278,10 @@
                 </div>
                 <div style="margin-top: 12px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
                     <div style="font-size: 12px; color: var(--text-muted);">
-                        <strong style="color: var(--text);">Interpretation:</strong> Rising liquidity \uc0\u8594  Bullish for risk assets. 
+                        <strong style="color: var(--text);">Interpretation:</strong> Rising liquidity → Bullish for risk assets. 
                         Watch RRP drawdowns (adds liquidity) and TGA buildups (drains liquidity). 
-                        <span style="color: var(--cyan);">\uc0\u9679 </span> Net Liquidity &nbsp;
-                        <span style="color: #f7931a;">\uc0\u9679 </span> Bitcoin
+                        <span style="color: var(--cyan);">●</span> Net Liquidity &nbsp;
+                        <span style="color: #f7931a;">●</span> Bitcoin
                     </div>
                 </div>
             </div>
@@ -1359,7 +1310,7 @@
             <!-- CHINA LIQUIDITY SUBSECTION -->
             <div style="margin: 24px 0 8px 0; padding: 8px 0;">
                 <div style="font-size: 14px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 16px;">\uc0\u55356 \u56808 \u55356 \u56819 </span> China Liquidity (PBoC)
+                    <span style="font-size: 16px;">🇨🇳</span> China Liquidity (PBoC)
                 </div>
             </div>
             
@@ -1444,34 +1395,34 @@
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 12px;">
                     <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid var(--accent);">
-                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">\uc0\u55356 \u56826 \u55356 \u56824  Fed Balance Sheet</div>
+                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">🇺🇸 Fed Balance Sheet</div>
                         <div style="font-size: 13px; font-weight: 600; color: var(--text);">WALCL</div>
-                        <div style="font-size: 11px; color: var(--good); margin-top: 4px;">\uc0\u8593  Adds Liquidity</div>
+                        <div style="font-size: 11px; color: var(--good); margin-top: 4px;">↑ Adds Liquidity</div>
                     </div>
                     <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid var(--bad);">
-                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">\uc0\u55356 \u56826 \u55356 \u56824  Reverse Repo (RRP)</div>
+                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">🇺🇸 Reverse Repo (RRP)</div>
                         <div style="font-size: 13px; font-weight: 600; color: var(--text);">RRPONTSYD</div>
-                        <div style="font-size: 11px; color: var(--bad); margin-top: 4px;">\uc0\u8593  Drains Liquidity</div>
+                        <div style="font-size: 11px; color: var(--bad); margin-top: 4px;">↑ Drains Liquidity</div>
                     </div>
                     <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid var(--bad);">
-                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">\uc0\u55356 \u56826 \u55356 \u56824  Treasury Account</div>
+                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">🇺🇸 Treasury Account</div>
                         <div style="font-size: 13px; font-weight: 600; color: var(--text);">TGA</div>
-                        <div style="font-size: 11px; color: var(--bad); margin-top: 4px;">\uc0\u8593  Drains Liquidity</div>
+                        <div style="font-size: 11px; color: var(--bad); margin-top: 4px;">↑ Drains Liquidity</div>
                     </div>
                     <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid #3b82f6;">
-                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">\uc0\u55356 \u56808 \u55356 \u56819  MLF Operations</div>
+                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">🇨🇳 MLF Operations</div>
                         <div style="font-size: 13px; font-weight: 600; color: var(--text);">MLF</div>
                         <div style="font-size: 11px; color: var(--good); margin-top: 4px;">Adds Liquidity</div>
                     </div>
                     <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid #f59e0b;">
-                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">\uc0\u55356 \u56808 \u55356 \u56819  Reverse Repo</div>
+                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">🇨🇳 Reverse Repo</div>
                         <div style="font-size: 13px; font-weight: 600; color: var(--text);">7-Day RR</div>
                         <div style="font-size: 11px; color: var(--good); margin-top: 4px;">Adds Liquidity</div>
                     </div>
                     <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid var(--cyan);">
-                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">\uc0\u55356 \u56826 \u55356 \u56824  M2 Money Supply</div>
+                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">🇺🇸 M2 Money Supply</div>
                         <div style="font-size: 13px; font-weight: 600; color: var(--text);">M2SL</div>
-                        <div style="font-size: 11px; color: var(--good); margin-top: 4px;">\uc0\u8593  Adds Liquidity</div>
+                        <div style="font-size: 11px; color: var(--good); margin-top: 4px;">↑ Adds Liquidity</div>
                     </div>
                 </div>
             </div>
@@ -1639,7 +1590,7 @@
             <div style="margin-top: 12px; padding: 12px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
                 <div style="font-size: 12px; color: var(--text-muted);">
                     <strong style="color: var(--text);">Interpretation:</strong> Ratio &gt;1 = more long accounts than short. 
-                    Extreme readings often precede reversals. <span style="color: #4ade80;">\uc0\u9679 </span> = Bullish positioning, <span style="color: #f87171;">\u9679 </span> = Bearish positioning
+                    Extreme readings often precede reversals. <span style="color: #4ade80;">●</span> = Bullish positioning, <span style="color: #f87171;">●</span> = Bearish positioning
                 </div>
             </div>
         </div>
@@ -1750,8 +1701,8 @@
                 <div style="margin-top: 12px; padding: 12px; background: rgba(74, 222, 128, 0.1); border-radius: 8px; border-left: 3px solid var(--good);">
                     <div style="font-size: 12px; color: var(--text-muted);">
                         <strong style="color: var(--text);">Interpretation:</strong> Rising fees with flat/falling price = potential value opportunity. 
-                        <span style="color: #4ade80;">\uc0\u9679 </span> HYPE Price &nbsp;
-                        <span style="color: #f59e0b;">\uc0\u9679 </span> 30D Rolling Fees
+                        <span style="color: #4ade80;">●</span> HYPE Price &nbsp;
+                        <span style="color: #f59e0b;">●</span> 30D Rolling Fees
                     </div>
                 </div>
             </div>
@@ -1795,7 +1746,7 @@
                 <div class="card" style="text-align: center; padding: 20px;">
                     <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Annualized Fees</div>
                     <div style="font-size: 28px; font-weight: 800; color: var(--good);" id="annualizedFees">--</div>
-                    <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">30D \'d7 12</div>
+                    <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">30D × 12</div>
                 </div>
                 
                 <div class="card" style="text-align: center; padding: 20px;">
@@ -1907,7 +1858,7 @@
                     <!-- Vesting Schedule Warning -->
                     <div style="background: rgba(248, 113, 113, 0.1); border-radius: 8px; padding: 12px; border-left: 3px solid var(--bad);">
                         <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
-                            <strong style="color: var(--bad);">\uc0\u9888 \u65039  Key Unlock Event:</strong> Core contributor vesting began Nov 29, 2025. 
+                            <strong style="color: var(--bad);">⚠️ Key Unlock Event:</strong> Core contributor vesting began Nov 29, 2025. 
                             ~$500M/month of new supply over 24 months at current prices. Team has mostly restaked; 97% of fees go to buybacks (~$910M in 6 months).
                         </div>
                     </div>
@@ -1915,7 +1866,7 @@
                     <!-- Unique Features -->
                     <div style="margin-top: 12px; padding: 12px; background: rgba(74, 222, 128, 0.1); border-radius: 8px; border-left: 3px solid var(--good);">
                         <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
-                            <strong style="color: var(--good);">\uc0\u10003  No VC Allocation:</strong> Unlike most projects, Hyperliquid raised no venture capital. 
+                            <strong style="color: var(--good);">✓ No VC Allocation:</strong> Unlike most projects, Hyperliquid raised no venture capital. 
                             All tokens distributed to community & team only. No external investor unlocks to worry about.
                         </div>
                     </div>
@@ -1928,7 +1879,7 @@
     </div>
 
     <footer>
-        <p><strong>FLOWTRACK</strong> \'97 Crypto Derivatives Intelligence</p>
+        <p><strong>FLOWTRACK</strong> — Crypto Derivatives Intelligence</p>
         <p style="margin-top: 6px;">Data from Binance Futures API, CoinGecko, Alternative.me, SoSoValue, TradingView</p>
         <p style="margin-top: 6px;">Auto-refreshes every 60 seconds • Not financial advice</p>
     </footer>
@@ -2534,7 +2485,7 @@
                         const btcEthRatio = btcOI / (btcOI + ethOI); // BTC's share of BTC+ETH
                         
                         // Dynamic Others calculation based on market conditions
-                        const cycleVariance = Math.sin(idx / rawData.length * Math.PI * 8) * 5; // \'b15%
+                        const cycleVariance = Math.sin(idx / rawData.length * Math.PI * 8) * 5; // ±5%
                         const ratioFactor = (0.62 - btcEthRatio) * 25; // Adjust based on BTC strength
                         
                         // Others ranges from ~20-40% 
@@ -2664,7 +2615,7 @@
                             type: 'time',
                             time: {
                                 unit: 'month',
-                                displayFormats: { month: 'MMM \\'yy' }
+                                displayFormats: { month: 'MMM \'yy' }
                             },
                             grid: { color: 'rgba(255,255,255,0.03)' },
                             ticks: { color: '#718096', font: { size: 10 }, maxTicksLimit: 12 }
@@ -3461,7 +3412,7 @@
                     scales: {
                         x: {
                             type: 'time',
-                            time: { unit: 'month', displayFormats: { month: 'MMM \\'yy' } },
+                            time: { unit: 'month', displayFormats: { month: 'MMM \'yy' } },
                             grid: { color: 'rgba(255,255,255,0.03)' },
                             ticks: { color: '#718096', font: { size: 10 }, maxTicksLimit: 12 }
                         },
@@ -4200,7 +4151,7 @@
                     scales: {
                         x: {
                             type: 'time',
-                            time: { unit: 'month', displayFormats: { month: 'MMM \\'yy' } },
+                            time: { unit: 'month', displayFormats: { month: 'MMM \'yy' } },
                             grid: { color: 'rgba(255,255,255,0.03)' },
                             ticks: { color: '#718096', font: { size: 10 }, maxTicksLimit: 8 }
                         },
@@ -4269,7 +4220,7 @@
                     scales: {
                         x: {
                             type: 'time',
-                            time: { unit: 'month', displayFormats: { month: 'MMM \\'yy' } },
+                            time: { unit: 'month', displayFormats: { month: 'MMM \'yy' } },
                             grid: { color: 'rgba(255,255,255,0.03)' },
                             ticks: { color: '#718096', font: { size: 10 }, maxTicksLimit: 8 }
                         },
@@ -5699,10 +5650,10 @@
                 signalEl.textContent = 'Longs Crowded';
                 signalEl.style.color = 'var(--bad)';
             } else if (avgRate < -0.03) {
-                signalEl.textContent = '\uc0\u10052 \u65039  Shorts Crowded';
+                signalEl.textContent = '❄️ Shorts Crowded';
                 signalEl.style.color = 'var(--good)';
             } else {
-                signalEl.textContent = '\uc0\u9878 \u65039  Neutral';
+                signalEl.textContent = '⚖️ Neutral';
                 signalEl.style.color = 'var(--text-muted)';
             }
             
@@ -5734,7 +5685,7 @@
                 `;
             } else if (avgRate < -0.05) {
                 signalBox.innerHTML = `
-                    <div class="signal-icon">\uc0\u10052 \u65039 </div>
+                    <div class="signal-icon">❄️</div>
                     <div class="signal-text">
                         <div class="signal-title" style="color: var(--good);">Extreme Fear</div>
                         <div class="signal-desc">Shorts paying premium - short squeeze setup forming</div>
@@ -5742,7 +5693,7 @@
                 `;
             } else if (avgRate > 0.02) {
                 signalBox.innerHTML = `
-                    <div class="signal-icon">\uc0\u55357 \u56520 </div>
+                    <div class="signal-icon">📈</div>
                     <div class="signal-text">
                         <div class="signal-title">Bullish Bias</div>
                         <div class="signal-desc">Longs paying modest premium - market leaning bullish</div>
@@ -5750,7 +5701,7 @@
                 `;
             } else if (avgRate < -0.02) {
                 signalBox.innerHTML = `
-                    <div class="signal-icon">\uc0\u55357 \u56521 </div>
+                    <div class="signal-icon">📉</div>
                     <div class="signal-text">
                         <div class="signal-title">Bearish Bias</div>
                         <div class="signal-desc">Shorts paying modest premium - market leaning bearish</div>
@@ -5758,7 +5709,7 @@
                 `;
             } else {
                 signalBox.innerHTML = `
-                    <div class="signal-icon">\uc0\u9878 \u65039 </div>
+                    <div class="signal-icon">⚖️</div>
                     <div class="signal-text">
                         <div class="signal-title">Balanced Market</div>
                         <div class="signal-desc">No extreme positioning detected</div>
@@ -5860,13 +5811,13 @@
                     document.getElementById('summaryLS').textContent = formatNumber(ratio, 2);
                     const lsSignal = document.getElementById('summaryLSSignal');
                     if (ratio > 1.5) {
-                        lsSignal.textContent = '\uc0\u55357 \u56520  Long Heavy';
+                        lsSignal.textContent = '📈 Long Heavy';
                         lsSignal.style.color = 'var(--warn)';
                     } else if (ratio < 0.67) {
                         lsSignal.textContent = 'Short Heavy';
                         lsSignal.style.color = 'var(--warn)';
                     } else {
-                        lsSignal.textContent = '\uc0\u9878 \u65039  Balanced';
+                        lsSignal.textContent = '⚖️ Balanced';
                         lsSignal.style.color = 'var(--text-muted)';
                     }
                     
@@ -5897,7 +5848,7 @@
                     const signalBox = document.getElementById('lsSignal');
                     if (ratio > 2) {
                         signalBox.innerHTML = `
-                            <div class="signal-icon">\uc0\u9888 \u65039 </div>
+                            <div class="signal-icon">⚠️</div>
                             <div class="signal-text">
                                 <div class="signal-title" style="color: var(--bad);">Extreme Long Crowding</div>
                                 <div class="signal-desc">Contrarian bearish signal - potential long squeeze ahead</div>
@@ -5905,7 +5856,7 @@
                         `;
                     } else if (ratio < 0.5) {
                         signalBox.innerHTML = `
-                            <div class="signal-icon">\uc0\u9888 \u65039 </div>
+                            <div class="signal-icon">⚠️</div>
                             <div class="signal-text">
                                 <div class="signal-title" style="color: var(--good);">Extreme Short Crowding</div>
                                 <div class="signal-desc">Contrarian bullish signal - potential short squeeze ahead</div>
@@ -5913,7 +5864,7 @@
                         `;
                     } else {
                         signalBox.innerHTML = `
-                            <div class="signal-icon">\uc0\u9878 \u65039 </div>
+                            <div class="signal-icon">⚖️</div>
                             <div class="signal-text">
                                 <div class="signal-title">Balanced Positioning</div>
                                 <div class="signal-desc">No extreme bias detected in top trader accounts</div>
@@ -6208,7 +6159,7 @@
         async function refreshAllData() {
             const btn = document.getElementById('refreshBtn');
             btn.disabled = true;
-            btn.textContent = '\uc0\u8635  Loading...';
+            btn.textContent = '↻ Loading...';
             setStatus('loading', 'Updating...');
             
             let errors = 0;
@@ -6251,7 +6202,7 @@
             }
             
             btn.disabled = false;
-            btn.textContent = '\uc0\u8635  Refresh';
+            btn.textContent = '↻ Refresh';
         }
         
         // ==================== PDF EXPORT ====================
