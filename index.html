@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flowtrack v37 | Crypto Market Intelligence</title>
+    <title>Flowtrack v38 | Crypto Market Intelligence</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -1634,13 +1634,42 @@
             </div>
             
             <!-- HYPE Price Chart -->
-            <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 20px;">
-                <div style="padding: 16px 18px 8px 18px;">
-                    <div class="card-title">HYPE/USDT Price</div>
-                    <div class="card-subtitle">Daily Timeframe • Bybit Perpetual</div>
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">HYPE/USD Price History</div>
+                        <div class="card-subtitle">From TGE (Nov 29, 2024) • CoinGecko Data</div>
+                    </div>
+                    <div class="time-selector">
+                        <button class="time-btn" onclick="loadHypePrice(30)">1M</button>
+                        <button class="time-btn" onclick="loadHypePrice(90)">3M</button>
+                        <button class="time-btn active" onclick="loadHypePrice(365)">1Y</button>
+                        <button class="time-btn" onclick="loadHypePrice(9999)">ALL</button>
+                    </div>
                 </div>
-                <div class="tradingview-widget-container" style="height: 400px;">
-                    <div id="hype-chart" style="height: 100%;"></div>
+                <div class="chart-container tall" style="position: relative; height: 350px;">
+                    <canvas id="hypePriceChart"></canvas>
+                    <div id="hypePriceLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                        <div style="font-size: 12px; color: var(--text-muted);">Loading HYPE price history...</div>
+                    </div>
+                </div>
+                <div style="margin: 12px 16px 16px 16px; display: flex; gap: 20px; flex-wrap: wrap;">
+                    <div>
+                        <span style="font-size: 10px; color: var(--text-muted);">TGE Price:</span>
+                        <span style="font-size: 12px; color: var(--text); margin-left: 4px;">$3.57</span>
+                    </div>
+                    <div>
+                        <span style="font-size: 10px; color: var(--text-muted);">ATH:</span>
+                        <span id="hypeAthDisplay" style="font-size: 12px; color: var(--good); margin-left: 4px;">--</span>
+                    </div>
+                    <div>
+                        <span style="font-size: 10px; color: var(--text-muted);">Current:</span>
+                        <span id="hypeCurrentDisplay" style="font-size: 12px; color: var(--cyan); margin-left: 4px;">--</span>
+                    </div>
+                    <div>
+                        <span style="font-size: 10px; color: var(--text-muted);">From TGE:</span>
+                        <span id="hypeFromTgeDisplay" style="font-size: 12px; color: var(--good); margin-left: 4px;">--</span>
+                    </div>
                 </div>
             </div>
             
@@ -1760,40 +1789,46 @@
             <div class="card" style="margin-top: 20px;">
                 <div class="card-header">
                     <div>
-                        <div class="card-title">Hyperliquid vs CEX Market Share</div>
-                        <div class="card-subtitle">DEX Perps capturing share from centralized exchanges</div>
+                        <div class="card-title">Perp DEX Market Share</div>
+                        <div class="card-subtitle">Hyperliquid vs CEX perpetual volume comparison</div>
                     </div>
+                    <button onclick="loadMarketShareChart()" style="background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; cursor: pointer;">
+                        ↻ Refresh
+                    </button>
                 </div>
                 <div style="padding: 16px;">
-                    <div class="grid-2" style="gap: 16px;">
-                        <!-- Volume Share -->
-                        <div style="background: rgba(99, 102, 241, 0.1); border-radius: 12px; padding: 16px;">
-                            <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Perp Volume Share vs Binance</div>
-                            <div style="font-size: 32px; font-weight: 800; color: var(--cyan);">~11%</div>
-                            <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">Up from 9.76% in April 2025</div>
-                            <div style="margin-top: 12px; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
-                                <div style="width: 11%; height: 100%; background: linear-gradient(90deg, var(--cyan), var(--accent)); border-radius: 4px;"></div>
+                    <div class="grid-2" style="gap: 20px; align-items: center;">
+                        <!-- Pie Chart -->
+                        <div style="position: relative; height: 280px;">
+                            <canvas id="marketSharePieChart"></canvas>
+                            <div id="marketShareLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                                <div style="font-size: 12px; color: var(--text-muted);">Loading market data...</div>
                             </div>
                         </div>
                         
-                        <!-- OI Share -->
-                        <div style="background: rgba(74, 222, 128, 0.1); border-radius: 12px; padding: 16px;">
-                            <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">DEX Perp Market Dominance</div>
-                            <div style="font-size: 32px; font-weight: 800; color: var(--good);">~70%</div>
-                            <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">Of on-chain perp volume</div>
-                            <div style="margin-top: 12px; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
-                                <div style="width: 70%; height: 100%; background: linear-gradient(90deg, var(--good), #22c55e); border-radius: 4px;"></div>
+                        <!-- Stats -->
+                        <div>
+                            <div style="margin-bottom: 16px;">
+                                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Hyperliquid 24H Volume</div>
+                                <div id="hlVolumeDisplay" style="font-size: 28px; font-weight: 800; color: var(--cyan);">--</div>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-top: 16px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px;">
-                        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
-                            <strong style="color: var(--text);">Key Milestones:</strong><br>
-                            • $1.57T cumulative perp volume (June 2025)<br>
-                            • $248B monthly volume peak (May 2025)<br>
-                            • BTC perps: ~50% of Bybit, ~21% of Binance volume<br>
-                            • 97% of fees reinvested into HYPE buybacks
+                            <div style="margin-bottom: 16px;">
+                                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">vs Binance Futures</div>
+                                <div id="hlVsBinanceDisplay" style="font-size: 20px; font-weight: 700; color: var(--good);">--%</div>
+                            </div>
+                            <div style="margin-bottom: 16px;">
+                                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">DEX Perp Dominance</div>
+                                <div style="font-size: 20px; font-weight: 700; color: var(--accent);">~70%</div>
+                                <div style="font-size: 11px; color: var(--text-dim);">of on-chain perp volume</div>
+                            </div>
+                            
+                            <div style="padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-top: 12px;">
+                                <div style="font-size: 11px; color: var(--text-muted); line-height: 1.5;">
+                                    <strong style="color: var(--text);">Milestones:</strong><br>
+                                    • $1.57T cumulative volume<br>
+                                    • 97% fees → HYPE buybacks
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2128,26 +2163,6 @@
             // Initialize HYPE chart when switching to hyperliquid tab
             if (tabName === 'hyperliquid') {
                 setTimeout(() => {
-                    if (document.getElementById('hype-chart') && !document.getElementById('hype-chart').hasChildNodes()) {
-                        new TradingView.widget({
-                            "autosize": true,
-                            "timezone": "Etc/UTC",
-                            "theme": "dark",
-                            "style": "1",
-                            "locale": "en",
-                            "toolbar_bg": "#0a0e17",
-                            "enable_publishing": false,
-                            "hide_top_toolbar": false,
-                            "hide_legend": false,
-                            "save_image": false,
-                            "backgroundColor": "rgba(10, 14, 23, 1)",
-                            "gridColor": "rgba(255, 255, 255, 0.05)",
-                            "hide_volume": false,
-                            "container_id": "hype-chart",
-                            "symbol": "BYBIT:HYPEUSDT.P",
-                            "interval": "D"
-                        });
-                    }
                     // Load Artemis data for perp comparison
                     if (!artemisVolumeChart) {
                         loadArtemisData();
@@ -2158,6 +2173,14 @@
                     }
                     // Load HIP-3/XYZ volumes
                     loadHIP3Volumes();
+                    // Load HYPE price chart
+                    if (!hypePriceChartInstance) {
+                        loadHypePrice(365);
+                    }
+                    // Load market share pie chart
+                    if (!marketSharePieChartInstance) {
+                        setTimeout(() => loadMarketShareChart(), 500);
+                    }
                 }, 100);
             }
         }
@@ -4301,6 +4324,207 @@
             document.querySelectorAll('#hypeFeesChart').closest('.card').querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
             loadHypeAnalytics(days);
+        }
+        
+        // ==================== MARKET SHARE PIE CHART ====================
+        let marketSharePieChartInstance = null;
+        
+        async function loadMarketShareChart() {
+            const loadingEl = document.getElementById('marketShareLoading');
+            const canvas = document.getElementById('marketSharePieChart');
+            if (!canvas) return;
+            
+            if (loadingEl) loadingEl.style.display = 'block';
+            
+            try {
+                // Fetch 24H volumes from CoinGecko for top derivatives exchanges
+                const exchanges = [
+                    { id: 'binance_futures', name: 'Binance', color: '#f3ba2f' },
+                    { id: 'bybit', name: 'Bybit', color: '#f97316' },
+                    { id: 'okex_swap', name: 'OKX', color: '#ffffff' },
+                    { id: 'hyperliquid', name: 'Hyperliquid', color: '#06b6d4' },
+                    { id: 'dydx', name: 'dYdX', color: '#6366f1' }
+                ];
+                
+                const volumes = {};
+                
+                for (const exchange of exchanges) {
+                    try {
+                        await new Promise(r => setTimeout(r, 200)); // Rate limit
+                        const res = await fetch(`https://api.coingecko.com/api/v3/exchanges/${exchange.id}`);
+                        if (res.ok) {
+                            const data = await res.json();
+                            // trade_volume_24h_btc * ~100000 for rough USD estimate
+                            const btcVol = parseFloat(data.trade_volume_24h_btc || 0);
+                            volumes[exchange.id] = btcVol * 100000; // Rough BTC→USD conversion
+                        }
+                    } catch (e) {
+                        console.log(`Failed to fetch ${exchange.name}`);
+                    }
+                }
+                
+                const totalVol = Object.values(volumes).reduce((a, b) => a + b, 0);
+                const hlVol = volumes.hyperliquid || 0;
+                const binanceVol = volumes.binance_futures || 1;
+                
+                // Update stats
+                document.getElementById('hlVolumeDisplay').textContent = formatCurrency(hlVol);
+                document.getElementById('hlVsBinanceDisplay').textContent = ((hlVol / binanceVol) * 100).toFixed(1) + '%';
+                
+                // Prepare chart data
+                const chartData = exchanges.map(e => ({
+                    name: e.name,
+                    value: volumes[e.id] || 0,
+                    color: e.color
+                })).filter(d => d.value > 0).sort((a, b) => b.value - a.value);
+                
+                if (marketSharePieChartInstance) {
+                    marketSharePieChartInstance.destroy();
+                }
+                
+                if (loadingEl) loadingEl.style.display = 'none';
+                
+                marketSharePieChartInstance = new Chart(canvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: chartData.map(d => d.name),
+                        datasets: [{
+                            data: chartData.map(d => d.value),
+                            backgroundColor: chartData.map(d => d.color + 'cc'),
+                            borderColor: chartData.map(d => d.color),
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '55%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#a0aec0',
+                                    padding: 12,
+                                    font: { size: 11 },
+                                    usePointStyle: true
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                                titleColor: '#fff',
+                                bodyColor: '#a0aec0',
+                                callbacks: {
+                                    label: (ctx) => {
+                                        const pct = ((ctx.parsed / totalVol) * 100).toFixed(1);
+                                        return `${ctx.label}: ${formatCurrency(ctx.parsed)} (${pct}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error loading market share chart:', error);
+                if (loadingEl) loadingEl.innerHTML = '<div style="color: var(--text-muted);">Failed to load</div>';
+            }
+        }
+        
+        // ==================== HYPE PRICE CHART ====================
+        let hypePriceChartInstance = null;
+        
+        async function loadHypePrice(days = 365) {
+            const loadingEl = document.getElementById('hypePriceLoading');
+            const canvas = document.getElementById('hypePriceChart');
+            if (!canvas) return;
+            
+            if (loadingEl) loadingEl.style.display = 'block';
+            
+            try {
+                // Use 'max' for all time data from TGE
+                const daysParam = days === 9999 ? 'max' : days;
+                const res = await fetch(`https://api.coingecko.com/api/v3/coins/hyperliquid/market_chart?vs_currency=usd&days=${daysParam}`);
+                
+                if (!res.ok) throw new Error('CoinGecko API failed');
+                
+                const data = await res.json();
+                const prices = data.prices; // [[timestamp, price], ...]
+                
+                if (!prices || prices.length === 0) throw new Error('No price data');
+                
+                // Calculate stats
+                const allPrices = prices.map(p => p[1]);
+                const currentPrice = allPrices[allPrices.length - 1];
+                const athPrice = Math.max(...allPrices);
+                const tgePrice = 3.57;
+                const fromTge = ((currentPrice - tgePrice) / tgePrice) * 100;
+                
+                // Update displays
+                document.getElementById('hypeAthDisplay').textContent = '$' + athPrice.toFixed(2);
+                document.getElementById('hypeCurrentDisplay').textContent = '$' + currentPrice.toFixed(2);
+                document.getElementById('hypeFromTgeDisplay').textContent = (fromTge >= 0 ? '+' : '') + fromTge.toFixed(0) + '%';
+                
+                if (hypePriceChartInstance) {
+                    hypePriceChartInstance.destroy();
+                }
+                
+                if (loadingEl) loadingEl.style.display = 'none';
+                
+                hypePriceChartInstance = new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: prices.map(p => new Date(p[0])),
+                        datasets: [{
+                            label: 'HYPE Price',
+                            data: prices.map(p => ({ x: p[0], y: p[1] })),
+                            borderColor: '#06b6d4',
+                            backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.1,
+                            pointRadius: 0,
+                            pointHoverRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { intersect: false, mode: 'index' },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                                titleColor: '#fff',
+                                bodyColor: '#a0aec0',
+                                callbacks: {
+                                    title: (ctx) => new Date(ctx[0].parsed.x).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                                    label: (ctx) => 'HYPE: $' + ctx.parsed.y.toFixed(2)
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: { unit: days <= 30 ? 'day' : 'month', displayFormats: { day: 'MMM d', month: 'MMM yy' } },
+                                grid: { color: 'rgba(255,255,255,0.03)' },
+                                ticks: { color: '#6b7280', maxTicksLimit: 8, font: { size: 10 } }
+                            },
+                            y: {
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                ticks: { 
+                                    color: '#06b6d4',
+                                    font: { size: 10 },
+                                    callback: v => '$' + v.toFixed(0)
+                                }
+                            }
+                        }
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error loading HYPE price:', error);
+                if (loadingEl) loadingEl.innerHTML = '<div style="color: var(--text-muted);">Failed to load price data</div>';
+            }
         }
         
         // ==================== HIP-3 / XYZ VOLUME TRACKER ====================
