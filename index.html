@@ -1684,8 +1684,8 @@
                     <div class="time-selector">
                         <button class="time-btn" onclick="loadHypePrice(30)">1M</button>
                         <button class="time-btn" onclick="loadHypePrice(90)">3M</button>
-                        <button class="time-btn active" onclick="loadHypePrice(365)">1Y</button>
-                        <button class="time-btn" onclick="loadHypePrice(9999)">ALL</button>
+                        <button class="time-btn" onclick="loadHypePrice(365)">1Y</button>
+                        <button class="time-btn active" onclick="loadHypePrice(9999)">ALL</button>
                     </div>
                 </div>
                 <div class="chart-container tall" style="position: relative; height: 350px;">
@@ -1710,6 +1710,83 @@
                     <div>
                         <span style="font-size: 10px; color: var(--text-muted);">From TGE:</span>
                         <span id="hypeFromTgeDisplay" style="font-size: 12px; color: var(--good); margin-left: 4px;">--</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- HYPE Emissions Schedule Chart -->
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">HYPE Token Emissions Schedule</div>
+                        <div class="card-subtitle">Projected circulating supply over time • ~10M HYPE/month to core contributors</div>
+                    </div>
+                </div>
+                <div style="padding: 16px;">
+                    <!-- Token Distribution Summary -->
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+                        <div style="background: rgba(74, 222, 128, 0.15); border-radius: 8px; padding: 12px; text-align: center;">
+                            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Future Emissions</div>
+                            <div style="font-size: 20px; font-weight: 700; color: var(--good); margin-top: 4px;">38.89%</div>
+                            <div style="font-size: 10px; color: var(--text-dim);">Community Rewards</div>
+                        </div>
+                        <div style="background: rgba(99, 102, 241, 0.15); border-radius: 8px; padding: 12px; text-align: center;">
+                            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Genesis Airdrop</div>
+                            <div style="font-size: 20px; font-weight: 700; color: var(--accent); margin-top: 4px;">31.00%</div>
+                            <div style="font-size: 10px; color: var(--text-dim);">310M HYPE</div>
+                        </div>
+                        <div style="background: rgba(245, 158, 11, 0.15); border-radius: 8px; padding: 12px; text-align: center;">
+                            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Core Contributors</div>
+                            <div style="font-size: 20px; font-weight: 700; color: var(--orange); margin-top: 4px;">23.80%</div>
+                            <div style="font-size: 10px; color: var(--text-dim);">1yr cliff, 24mo vest</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Emissions Chart -->
+                    <div style="height: 280px; margin-bottom: 16px;">
+                        <canvas id="hypeEmissionsChart"></canvas>
+                    </div>
+                    
+                    <!-- Supply Stats -->
+                    <div class="grid-2" style="gap: 12px; margin-bottom: 16px;">
+                        <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 11px; color: var(--text-muted);">Total Supply</span>
+                                <span style="font-size: 14px; font-weight: 600; color: var(--text);">1,000,000,000</span>
+                            </div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 11px; color: var(--text-muted);">Circulating</span>
+                                <span style="font-size: 14px; font-weight: 600; color: var(--text);">~333M (33.3%)</span>
+                            </div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 11px; color: var(--text-muted);">Unlocked</span>
+                                <span style="font-size: 14px; font-weight: 600; color: var(--good);">~312M (31.2%)</span>
+                            </div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 11px; color: var(--text-muted);">Still Locked</span>
+                                <span style="font-size: 14px; font-weight: 600; color: var(--bad);">~236M (23.6%)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Key Notes -->
+                    <div style="background: rgba(248, 113, 113, 0.1); border-radius: 8px; padding: 12px; border-left: 3px solid var(--bad); margin-bottom: 12px;">
+                        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+                            <strong style="color: var(--bad);">⚠️Key Unlock Event:</strong> Core contributor vesting began Nov 29, 2025. 
+                            ~10M HYPE/month (~$280M at current prices) over 24 months. Team has mostly restaked; 97% of fees go to buybacks.
+                        </div>
+                    </div>
+                    <div style="padding: 12px; background: rgba(74, 222, 128, 0.1); border-radius: 8px; border-left: 3px solid var(--good);">
+                        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+                            <strong style="color: var(--good);">✓No VC Allocation:</strong> Unlike most projects, Hyperliquid raised no venture capital. 
+                            All tokens distributed to community & team only. No external investor unlocks to worry about.
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1830,7 +1907,7 @@
             <div class="card" style="margin-top: 20px;">
                 <div class="card-header">
                     <div>
-                        <div class="card-title">Perp DEX Market Share</div>
+                        <div class="card-title">Perps Market Share</div>
                         <div class="card-subtitle">Hyperliquid vs CEX perpetual volume comparison</div>
                     </div>
                     <button onclick="loadMarketShareChart()" style="background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; cursor: pointer;">
@@ -1945,80 +2022,6 @@
                     <div style="font-size: 12px; color: var(--text-muted);">
                         <strong style="color: var(--text);">About HIP-3:</strong> Builder-deployed perpetuals allow anyone with 500k HYPE staked to launch their own perp markets. 
                         XYZ is the largest HIP-3 deployer, featuring stock perps like TSLA, NVDA, GOOGL and crypto index perps like XYZ100.
-                    </div>
-                </div>
-            </div>
-            
-            <!-- HYPE Tokenomics Section -->
-            <div class="card" style="margin-top: 20px;">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">HYPE Tokenomics</div>
-                        <div class="card-subtitle">Supply Distribution & Vesting Schedule</div>
-                    </div>
-                </div>
-                <div style="padding: 16px;">
-                    <!-- Token Distribution -->
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
-                        <div style="background: rgba(74, 222, 128, 0.15); border-radius: 8px; padding: 12px; text-align: center;">
-                            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Future Emissions</div>
-                            <div style="font-size: 20px; font-weight: 700; color: var(--good); margin-top: 4px;">38.89%</div>
-                            <div style="font-size: 10px; color: var(--text-dim);">Community Rewards</div>
-                        </div>
-                        <div style="background: rgba(99, 102, 241, 0.15); border-radius: 8px; padding: 12px; text-align: center;">
-                            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Genesis Airdrop</div>
-                            <div style="font-size: 20px; font-weight: 700; color: var(--accent); margin-top: 4px;">31.00%</div>
-                            <div style="font-size: 10px; color: var(--text-dim);">310M HYPE</div>
-                        </div>
-                        <div style="background: rgba(245, 158, 11, 0.15); border-radius: 8px; padding: 12px; text-align: center;">
-                            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Core Contributors</div>
-                            <div style="font-size: 20px; font-weight: 700; color: var(--orange); margin-top: 4px;">23.80%</div>
-                            <div style="font-size: 10px; color: var(--text-dim);">1yr cliff, 24mo vest</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Supply Stats -->
-                    <div class="grid-2" style="gap: 12px; margin-bottom: 16px;">
-                        <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 12px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 11px; color: var(--text-muted);">Total Supply</span>
-                                <span style="font-size: 14px; font-weight: 600; color: var(--text);">1,000,000,000</span>
-                            </div>
-                        </div>
-                        <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 12px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 11px; color: var(--text-muted);">Circulating</span>
-                                <span style="font-size: 14px; font-weight: 600; color: var(--text);">~333M (33.3%)</span>
-                            </div>
-                        </div>
-                        <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 12px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 11px; color: var(--text-muted);">Unlocked</span>
-                                <span style="font-size: 14px; font-weight: 600; color: var(--good);">~312M (31.2%)</span>
-                            </div>
-                        </div>
-                        <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 12px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 11px; color: var(--text-muted);">Still Locked</span>
-                                <span style="font-size: 14px; font-weight: 600; color: var(--bad);">~236M (23.6%)</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Vesting Schedule Warning -->
-                    <div style="background: rgba(248, 113, 113, 0.1); border-radius: 8px; padding: 12px; border-left: 3px solid var(--bad);">
-                        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
-                            <strong style="color: var(--bad);">⚠️Key Unlock Event:</strong> Core contributor vesting began Nov 29, 2025. 
-                            ~$500M/month of new supply over 24 months at current prices. Team has mostly restaked; 97% of fees go to buybacks (~$910M in 6 months).
-                        </div>
-                    </div>
-                    
-                    <!-- Unique Features -->
-                    <div style="margin-top: 12px; padding: 12px; background: rgba(74, 222, 128, 0.1); border-radius: 8px; border-left: 3px solid var(--good);">
-                        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
-                            <strong style="color: var(--good);">✓No VC Allocation:</strong> Unlike most projects, Hyperliquid raised no venture capital. 
-                            All tokens distributed to community & team only. No external investor unlocks to worry about.
-                        </div>
                     </div>
                 </div>
             </div>
@@ -2232,7 +2235,11 @@
                     loadHIP3Volumes();
                     // Load HYPE price chart
                     if (!hypePriceChartInstance) {
-                        loadHypePrice(365);
+                        loadHypePrice(9999);
+                    }
+                    // Load HYPE emissions schedule chart
+                    if (!hypeEmissionsChartInstance) {
+                        loadHypeEmissionsChart();
                     }
                     // Load market share pie chart
                     if (!marketSharePieChartInstance) {
@@ -4583,6 +4590,159 @@
                 console.error('Error loading HYPE price:', error);
                 if (loadingEl) loadingEl.innerHTML = '<div style="color: var(--text-muted);">Failed to load price data</div>';
             }
+        }
+        
+        // ==================== HYPE EMISSIONS SCHEDULE CHART ====================
+        let hypeEmissionsChartInstance = null;
+        
+        function loadHypeEmissionsChart() {
+            const canvas = document.getElementById('hypeEmissionsChart');
+            if (!canvas) return;
+            
+            if (hypeEmissionsChartInstance) {
+                hypeEmissionsChartInstance.destroy();
+            }
+            
+            // Emissions schedule data based on tokenomics:
+            // - TGE Nov 29, 2024: 310M genesis airdrop (31%)
+            // - Nov 29, 2025: Core contributor vesting begins (~10M/month for 24 months)
+            // - Future emissions (38.89%) released over time for community rewards
+            
+            const months = [];
+            const circulatingSupply = [];
+            const genesisLine = [];
+            const coreContributorLine = [];
+            
+            // Start from TGE (Nov 2024)
+            const startDate = new Date(2024, 10, 1); // Nov 2024
+            let cumulative = 310; // Genesis airdrop in millions
+            let coreUnlocked = 0;
+            
+            for (let i = 0; i < 42; i++) { // 3.5 years projection
+                const date = new Date(startDate);
+                date.setMonth(date.getMonth() + i);
+                months.push(date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }));
+                
+                // Core contributor vesting starts Nov 2025 (month 12)
+                if (i >= 12 && coreUnlocked < 238) { // 23.8% = 238M
+                    coreUnlocked += 9.9; // ~10M per month
+                    if (coreUnlocked > 238) coreUnlocked = 238;
+                }
+                
+                cumulative = 310 + coreUnlocked;
+                circulatingSupply.push(cumulative);
+                genesisLine.push(310);
+                coreContributorLine.push(coreUnlocked);
+            }
+            
+            hypeEmissionsChartInstance = new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Total Circulating',
+                            data: circulatingSupply,
+                            borderColor: '#06b6d4',
+                            backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.2,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Genesis Airdrop',
+                            data: genesisLine,
+                            borderColor: '#6366f1',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Core Contributors Unlocked',
+                            data: coreContributorLine,
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.2,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { intersect: false, mode: 'index' },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#a0aec0',
+                                font: { size: 10 },
+                                usePointStyle: true,
+                                padding: 15
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                            titleColor: '#fff',
+                            bodyColor: '#a0aec0',
+                            callbacks: {
+                                label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(0)}M HYPE`
+                            }
+                        },
+                        annotation: {
+                            annotations: {
+                                vestingStart: {
+                                    type: 'line',
+                                    xMin: 12,
+                                    xMax: 12,
+                                    borderColor: '#ef4444',
+                                    borderWidth: 2,
+                                    borderDash: [6, 6],
+                                    label: {
+                                        display: true,
+                                        content: 'Vesting Starts',
+                                        position: 'start',
+                                        backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                                        color: '#fff',
+                                        font: { size: 9 }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.03)' },
+                            ticks: { 
+                                color: '#6b7280', 
+                                font: { size: 9 },
+                                maxTicksLimit: 12
+                            }
+                        },
+                        y: {
+                            min: 0,
+                            max: 600,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { 
+                                color: '#06b6d4',
+                                font: { size: 10 },
+                                callback: v => v + 'M'
+                            },
+                            title: {
+                                display: true,
+                                text: 'HYPE (Millions)',
+                                color: '#6b7280',
+                                font: { size: 10 }
+                            }
+                        }
+                    }
+                }
+            });
         }
         
         // ==================== HIP-3 / XYZ VOLUME TRACKER ====================
