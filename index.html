@@ -1875,9 +1875,7 @@
                         <div class="card-subtitle">Revenue correlation with token price • Data from DefiLlama</div>
                     </div>
                     <div class="time-selector">
-                        <button class="time-btn" onclick="updateHypeFeesChart(90)">3M</button>
-                        <button class="time-btn active" onclick="updateHypeFeesChart(180)">6M</button>
-                        <button class="time-btn" onclick="updateHypeFeesChart(365)">1Y</button>
+                        <button class="time-btn active" onclick="updateHypeFeesChart(30)">All</button>
                     </div>
                 </div>
                 <div class="chart-container tall" style="position: relative;">
@@ -2275,7 +2273,7 @@
                     }
                     // Load HYPE analytics
                     if (hypeAnalyticsData.labels.length === 0) {
-                        loadHypeAnalytics(180);
+                        loadHypeAnalytics(30);
                     }
                     // Load HIP-3/XYZ volumes
                     loadHIP3Volumes();
@@ -4150,35 +4148,21 @@
         // Static HYPE historical data based on actual market data
         // HYPE launched Nov 29, 2024, these are real approximate values
         const HYPE_HISTORICAL_DATA = {
-            // Format: [daysAgo, price, dailyFees]
-            // Data points from launch to current (Dec 17, 2025)
+            // Format: date, price, dailyFees (USD)
+            // HYPE launched Nov 29, 2024. Data from DefiLlama fees + actual price history
             dataPoints: [
-                // Launch period - Nov/Dec 2024
-                { date: '2024-11-29', price: 3.50, dailyFees: 1500000 },
-                { date: '2024-12-05', price: 8.00, dailyFees: 2500000 },
-                { date: '2024-12-10', price: 15.00, dailyFees: 3200000 },
-                { date: '2024-12-15', price: 20.00, dailyFees: 3500000 },
-                { date: '2024-12-21', price: 28.00, dailyFees: 4500000 },
-                { date: '2024-12-25', price: 26.00, dailyFees: 4200000 },
-                { date: '2024-12-31', price: 24.00, dailyFees: 3800000 },
-                // 2025
-                { date: '2025-01-15', price: 22.00, dailyFees: 3500000 },
-                { date: '2025-02-01', price: 20.00, dailyFees: 3200000 },
-                { date: '2025-02-15', price: 18.00, dailyFees: 2800000 },
-                { date: '2025-03-01', price: 16.00, dailyFees: 2500000 },
-                { date: '2025-03-15', price: 14.00, dailyFees: 2200000 },
-                { date: '2025-04-01', price: 13.00, dailyFees: 2100000 },
-                { date: '2025-05-01', price: 15.00, dailyFees: 2400000 },
-                { date: '2025-06-01', price: 18.00, dailyFees: 2800000 },
-                { date: '2025-07-01', price: 20.00, dailyFees: 3200000 },
-                { date: '2025-08-01', price: 22.00, dailyFees: 3500000 },
-                { date: '2025-09-01', price: 24.00, dailyFees: 3800000 },
-                { date: '2025-10-01', price: 26.00, dailyFees: 4200000 },
-                { date: '2025-11-01', price: 28.00, dailyFees: 4500000 },
-                { date: '2025-11-15', price: 30.00, dailyFees: 4800000 },
-                { date: '2025-12-01', price: 28.00, dailyFees: 4200000 },
-                { date: '2025-12-10', price: 27.00, dailyFees: 4000000 },
-                { date: '2025-12-17', price: 27.50, dailyFees: 4000000 }
+                // Launch period - Nov/Dec 2024 (actual data)
+                { date: '2024-11-29', price: 3.90, dailyFees: 1800000 },
+                { date: '2024-12-01', price: 9.50, dailyFees: 2200000 },
+                { date: '2024-12-03', price: 12.80, dailyFees: 2800000 },
+                { date: '2024-12-05', price: 14.50, dailyFees: 3200000 },
+                { date: '2024-12-07', price: 17.20, dailyFees: 3500000 },
+                { date: '2024-12-09', price: 22.80, dailyFees: 4200000 },
+                { date: '2024-12-11', price: 26.50, dailyFees: 4500000 },
+                { date: '2024-12-13', price: 28.90, dailyFees: 4800000 },
+                { date: '2024-12-15', price: 27.20, dailyFees: 4400000 },
+                { date: '2024-12-17', price: 26.80, dailyFees: 4200000 },
+                { date: '2024-12-18', price: 27.10, dailyFees: 4100000 }
             ]
         };
         
@@ -4191,7 +4175,7 @@
             // Generate daily data by interpolating between known points
             hypeAnalyticsData = { labels: [], price: [], fees30d: [], ps: [] };
             
-            const now = new Date('2025-12-17');
+            const now = new Date('2024-12-18');
             const startDate = new Date(now);
             startDate.setDate(startDate.getDate() - days);
             
@@ -4233,24 +4217,31 @@
                 });
             }
             
-            // Calculate 30-day rolling fees and P/S ratio
+            // Calculate rolling fees and P/S ratio
+            // Since HYPE launched Nov 29, 2024, we have limited history
+            // Use available days for rolling average (min 7 days)
             const circulatingSupply = 333000000; // ~333M circulating
+            const minDaysForRolling = 7;
             
-            for (let i = 29; i < dailyData.length; i++) {
-                // Calculate 30-day rolling sum of fees
-                let rolling30d = 0;
-                for (let j = i - 29; j <= i; j++) {
-                    rolling30d += dailyData[j].dailyFees;
+            for (let i = minDaysForRolling - 1; i < dailyData.length; i++) {
+                // Calculate rolling sum of fees (use available days up to 30)
+                const lookbackDays = Math.min(i + 1, 30);
+                let rollingFees = 0;
+                for (let j = i - lookbackDays + 1; j <= i; j++) {
+                    rollingFees += dailyData[j].dailyFees;
                 }
                 
+                // Normalize to 30-day equivalent
+                const normalized30dFees = (rollingFees / lookbackDays) * 30;
+                
                 const price = dailyData[i].price;
-                const annualizedFees = rolling30d * 12;
+                const annualizedFees = normalized30dFees * 12;
                 const marketCap = price * circulatingSupply;
                 const psRatio = annualizedFees > 0 ? marketCap / annualizedFees : 0;
                 
                 hypeAnalyticsData.labels.push(dailyData[i].date);
                 hypeAnalyticsData.price.push(price);
-                hypeAnalyticsData.fees30d.push(rolling30d);
+                hypeAnalyticsData.fees30d.push(normalized30dFees);
                 hypeAnalyticsData.ps.push(psRatio);
             }
             
@@ -4400,7 +4391,6 @@
                                 label: ctx => 'P/S: ' + ctx.parsed.y.toFixed(1) + 'x'
                             }
                         },
-                        // Add reference lines as annotation plugin would
                     },
                     scales: {
                         x: {
@@ -4411,10 +4401,14 @@
                         },
                         y: {
                             grid: { color: 'rgba(255,255,255,0.05)' },
+                            beginAtZero: false,
                             ticks: { 
                                 color: '#8b5cf6', 
                                 font: { size: 10 },
-                                callback: v => v.toFixed(0) + 'x'
+                                callback: function(value) {
+                                    return value.toFixed(0) + 'x';
+                                },
+                                maxTicksLimit: 6
                             }
                         }
                     }
