@@ -1555,11 +1555,11 @@
                     </div>
                 </div>
                 
-                <!-- US 10Y Treasury Yield -->
+                <!-- TLT Treasury Bond ETF -->
                 <div class="card" style="padding: 0; overflow: hidden;">
                     <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">10-Year Treasury Yield (TNX)</div>
-                        <div class="card-subtitle">Benchmark interest rate - Cost of capital indicator</div>
+                        <div class="card-title">TLT (20+ Year Treasury Bond ETF)</div>
+                        <div class="card-subtitle">Long-term bonds - Inverse of yields, flight to safety indicator</div>
                     </div>
                     <div class="tradingview-widget-container" style="height: 280px;">
                         <div id="us10y-chart" style="height: 100%;"></div>
@@ -1567,9 +1567,9 @@
                     <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
                         <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
                             <strong style="color: var(--text);">How to read:</strong> 
-                            <span style="color: var(--bad);">Rising yields</span> = Tighter financial conditions, bearish for risk assets. 
-                            <span style="color: var(--good);">Falling yields</span> = Easier conditions, bullish for BTC. 
-                            <strong>Key:</strong> Above 5% = significant headwind. Rapid moves matter more than levels.
+                            <span style="color: var(--good);">Rising TLT</span> = Falling yields, easier financial conditions, bullish for risk assets. 
+                            <span style="color: var(--bad);">Falling TLT</span> = Rising yields, tighter conditions, bearish for BTC. 
+                            <strong>Key:</strong> TLT moves inverse to yields. Sharp TLT rallies often signal flight to safety.
                         </div>
                     </div>
                 </div>
@@ -5391,10 +5391,10 @@
                 "hide_volume": true
             });
             
-            // US 10-Year Treasury Yield - Using CBOE TNX
+            // Treasury Bonds - TLT ETF (inverse of yields)
             new TradingView.widget({
                 "autosize": true,
-                "symbol": "CBOE:TNX",
+                "symbol": "NASDAQ:TLT",
                 "interval": "D",
                 "timezone": "Etc/UTC",
                 "theme": "dark",
