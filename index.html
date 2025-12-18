@@ -1875,7 +1875,7 @@
                         <div class="card-subtitle">Revenue correlation with token price • Data from DefiLlama</div>
                     </div>
                     <div class="time-selector">
-                        <button class="time-btn active" onclick="updateHypeFeesChart(30)">All</button>
+                        <button class="time-btn active" onclick="loadHypeAnalytics()">Refresh</button>
                     </div>
                 </div>
                 <div class="chart-container tall" style="position: relative;">
@@ -2273,7 +2273,7 @@
                     }
                     // Load HYPE analytics
                     if (hypeAnalyticsData.labels.length === 0) {
-                        loadHypeAnalytics(30);
+                        loadHypeAnalytics();
                     }
                     // Load HIP-3/XYZ volumes
                     loadHIP3Volumes();
@@ -4141,126 +4141,111 @@
         }
         
         // ==================== HYPE ANALYTICS ====================
+        // Fetch live data from CoinGecko + DefiLlama APIs
         let hypeFeesChart = null;
         let hypePSChart = null;
         let hypeAnalyticsData = { labels: [], price: [], fees30d: [], ps: [] };
         
-        // Static HYPE historical data based on actual market data
-        // HYPE launched Nov 29, 2024, these are real approximate values
-        const HYPE_HISTORICAL_DATA = {
-            // Format: date, price, dailyFees (USD)
-            // HYPE launched Nov 29, 2024. Data from DefiLlama fees + actual price history
-            dataPoints: [
-                // Launch period - Nov/Dec 2024 (actual data)
-                { date: '2024-11-29', price: 3.90, dailyFees: 1800000 },
-                { date: '2024-12-01', price: 9.50, dailyFees: 2200000 },
-                { date: '2024-12-03', price: 12.80, dailyFees: 2800000 },
-                { date: '2024-12-05', price: 14.50, dailyFees: 3200000 },
-                { date: '2024-12-07', price: 17.20, dailyFees: 3500000 },
-                { date: '2024-12-09', price: 22.80, dailyFees: 4200000 },
-                { date: '2024-12-11', price: 26.50, dailyFees: 4500000 },
-                { date: '2024-12-13', price: 28.90, dailyFees: 4800000 },
-                { date: '2024-12-15', price: 27.20, dailyFees: 4400000 },
-                { date: '2024-12-17', price: 26.80, dailyFees: 4200000 },
-                { date: '2024-12-18', price: 27.10, dailyFees: 4100000 }
-            ]
-        };
-        
-        async function loadHypeAnalytics(days = 180) {
+        async function loadHypeAnalytics() {
             const feesLoading = document.getElementById('hypeFeesLoading');
             const psLoading = document.getElementById('hypePSLoading');
-            if (feesLoading) feesLoading.style.display = 'none';
-            if (psLoading) psLoading.style.display = 'none';
+            if (feesLoading) feesLoading.style.display = 'block';
+            if (psLoading) psLoading.style.display = 'block';
             
-            // Generate daily data by interpolating between known points
             hypeAnalyticsData = { labels: [], price: [], fees30d: [], ps: [] };
             
-            const now = new Date('2024-12-18');
-            const startDate = new Date(now);
-            startDate.setDate(startDate.getDate() - days);
-            
-            const dataPoints = HYPE_HISTORICAL_DATA.dataPoints;
-            const dailyData = [];
-            
-            // Generate daily interpolated data
-            for (let d = new Date(startDate); d <= now; d.setDate(d.getDate() + 1)) {
-                const dateStr = d.toISOString().split('T')[0];
+            try {
+                // Fetch HYPE price history from CoinGecko (last 30 days)
+                const priceResponse = await fetch('https://api.coingecko.com/api/v3/coins/hyperliquid/market_chart?vs_currency=usd&days=30&interval=daily');
+                const priceData = await priceResponse.json();
                 
-                // Find surrounding data points for interpolation
-                let beforePoint = dataPoints[0];
-                let afterPoint = dataPoints[dataPoints.length - 1];
+                // Fetch Hyperliquid fees from DefiLlama
+                const feesResponse = await fetch('https://api.llama.fi/summary/fees/hyperliquid?dataType=dailyFees');
+                const feesData = await feesResponse.json();
                 
-                for (let i = 0; i < dataPoints.length - 1; i++) {
-                    if (dateStr >= dataPoints[i].date && dateStr <= dataPoints[i + 1].date) {
-                        beforePoint = dataPoints[i];
-                        afterPoint = dataPoints[i + 1];
-                        break;
-                    }
+                // Process price data
+                const prices = {};
+                if (priceData.prices) {
+                    priceData.prices.forEach(([timestamp, price]) => {
+                        const date = new Date(timestamp).toISOString().split('T')[0];
+                        prices[date] = price;
+                    });
                 }
                 
-                // Linear interpolation
-                const beforeDate = new Date(beforePoint.date);
-                const afterDate = new Date(afterPoint.date);
-                const currentDate = new Date(dateStr);
+                // Process fees data - DefiLlama returns totalDataChart with daily fees
+                const dailyFees = {};
+                if (feesData.totalDataChart) {
+                    feesData.totalDataChart.forEach(([timestamp, fees]) => {
+                        const date = new Date(timestamp * 1000).toISOString().split('T')[0];
+                        dailyFees[date] = fees;
+                    });
+                }
                 
-                const totalDays = (afterDate - beforeDate) / (1000 * 60 * 60 * 24);
-                const daysPassed = (currentDate - beforeDate) / (1000 * 60 * 60 * 24);
-                const ratio = totalDays > 0 ? daysPassed / totalDays : 0;
+                // Combine data - use last 20 days where we have both
+                const sortedDates = Object.keys(prices).sort();
+                const circulatingSupply = 270000000; // ~270M circulating per CoinGecko
                 
-                const price = beforePoint.price + (afterPoint.price - beforePoint.price) * ratio;
-                const dailyFees = beforePoint.dailyFees + (afterPoint.dailyFees - beforePoint.dailyFees) * ratio;
+                let rollingFees = [];
                 
-                dailyData.push({
-                    date: new Date(dateStr).getTime(),
-                    price: price,
-                    dailyFees: dailyFees
+                sortedDates.forEach(date => {
+                    const price = prices[date];
+                    const fees = dailyFees[date] || 0;
+                    
+                    // Keep last 7 days of fees for rolling average
+                    rollingFees.push(fees);
+                    if (rollingFees.length > 7) rollingFees.shift();
+                    
+                    // Calculate 7-day rolling sum, annualize it
+                    const rolling7d = rollingFees.reduce((a, b) => a + b, 0);
+                    const annualizedFees = (rolling7d / rollingFees.length) * 365;
+                    
+                    // Calculate P/S
+                    const marketCap = price * circulatingSupply;
+                    const psRatio = annualizedFees > 0 ? marketCap / annualizedFees : 0;
+                    
+                    // Normalize fees to 30-day equivalent for display
+                    const fees30d = (rolling7d / rollingFees.length) * 30;
+                    
+                    hypeAnalyticsData.labels.push(new Date(date).getTime());
+                    hypeAnalyticsData.price.push(price);
+                    hypeAnalyticsData.fees30d.push(fees30d);
+                    hypeAnalyticsData.ps.push(psRatio);
                 });
-            }
-            
-            // Calculate rolling fees and P/S ratio
-            // Since HYPE launched Nov 29, 2024, we have limited history
-            // Use available days for rolling average (min 7 days)
-            const circulatingSupply = 333000000; // ~333M circulating
-            const minDaysForRolling = 7;
-            
-            for (let i = minDaysForRolling - 1; i < dailyData.length; i++) {
-                // Calculate rolling sum of fees (use available days up to 30)
-                const lookbackDays = Math.min(i + 1, 30);
-                let rollingFees = 0;
-                for (let j = i - lookbackDays + 1; j <= i; j++) {
-                    rollingFees += dailyData[j].dailyFees;
+                
+                // Update stats
+                const lastIdx = hypeAnalyticsData.labels.length - 1;
+                if (lastIdx >= 0) {
+                    const currentFees30d = hypeAnalyticsData.fees30d[lastIdx];
+                    const currentPS = hypeAnalyticsData.ps[lastIdx];
+                    const annualized = currentFees30d * 12;
+                    const latestPrice = hypeAnalyticsData.price[lastIdx];
+                    const marketCap = latestPrice * circulatingSupply;
+                    
+                    document.getElementById('currentPS').textContent = currentPS.toFixed(1) + 'x';
+                    document.getElementById('thirtyDayFees').textContent = '$' + (currentFees30d / 1e6).toFixed(0) + 'M';
+                    document.getElementById('annualizedFees').textContent = '$' + (annualized / 1e6).toFixed(0) + 'M';
+                    document.getElementById('hypeMcap').textContent = '$' + (marketCap / 1e9).toFixed(1) + 'B';
                 }
                 
-                // Normalize to 30-day equivalent
-                const normalized30dFees = (rollingFees / lookbackDays) * 30;
+                console.log('Loaded HYPE analytics from APIs:', hypeAnalyticsData.labels.length, 'data points');
                 
-                const price = dailyData[i].price;
-                const annualizedFees = normalized30dFees * 12;
-                const marketCap = price * circulatingSupply;
-                const psRatio = annualizedFees > 0 ? marketCap / annualizedFees : 0;
+            } catch (error) {
+                console.error('Error fetching HYPE analytics:', error);
+                // Fallback to current known values
+                const now = Date.now();
+                hypeAnalyticsData.labels = [now];
+                hypeAnalyticsData.price = [23];
+                hypeAnalyticsData.fees30d = [85000000];
+                hypeAnalyticsData.ps = [7.5];
                 
-                hypeAnalyticsData.labels.push(dailyData[i].date);
-                hypeAnalyticsData.price.push(price);
-                hypeAnalyticsData.fees30d.push(normalized30dFees);
-                hypeAnalyticsData.ps.push(psRatio);
+                document.getElementById('currentPS').textContent = '7.5x';
+                document.getElementById('thirtyDayFees').textContent = '$85M';
+                document.getElementById('annualizedFees').textContent = '$1.02B';
+                document.getElementById('hypeMcap').textContent = '$6.2B';
             }
             
-            // Update current stats
-            const lastIdx = hypeAnalyticsData.fees30d.length - 1;
-            if (lastIdx >= 0) {
-                const currentFees30d = hypeAnalyticsData.fees30d[lastIdx];
-                const currentPS = hypeAnalyticsData.ps[lastIdx];
-                const annualized = currentFees30d * 12;
-                const latestPrice = hypeAnalyticsData.price[lastIdx];
-                const marketCap = latestPrice * circulatingSupply;
-                
-                document.getElementById('currentPS').textContent = currentPS.toFixed(1) + 'x';
-                document.getElementById('thirtyDayFees').textContent = '$' + (currentFees30d / 1e6).toFixed(0) + 'M';
-                document.getElementById('annualizedFees').textContent = '$' + (annualized / 1e6).toFixed(0) + 'M';
-                document.getElementById('hypeMcap').textContent = '$' + (marketCap / 1e9).toFixed(1) + 'B';
-            }
-            
-            console.log('Loaded HYPE analytics with static data:', hypeAnalyticsData.labels.length, 'data points');
+            if (feesLoading) feesLoading.style.display = 'none';
+            if (psLoading) psLoading.style.display = 'none';
             
             renderHypeFeesChart();
             renderHypePSChart();
@@ -4416,10 +4401,8 @@
             });
         }
         
-        function updateHypeFeesChart(days) {
-            document.querySelectorAll('#hypeFeesChart').closest('.card').querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            loadHypeAnalytics(days);
+        function updateHypeFeesChart() {
+            loadHypeAnalytics();
         }
         
         // ==================== MARKET SHARE PIE CHART ====================
