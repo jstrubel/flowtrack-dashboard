@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flowtrack v39 | Crypto Market Intelligence</title>
+    <title>Flowtrack | Crypto Market Intelligence</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -1517,11 +1517,11 @@
                     </div>
                 </div>
                 
-                <!-- DXY Dollar Index -->
+                <!-- EUR/USD as Dollar Strength Proxy -->
                 <div class="card" style="padding: 0; overflow: hidden;">
                     <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">DXY (US Dollar Index)</div>
-                        <div class="card-subtitle">Dollar strength vs major currencies - Risk appetite gauge</div>
+                        <div class="card-title">EUR/USD (Dollar Strength Proxy)</div>
+                        <div class="card-subtitle">Inverse correlation to DXY - When EUR/USD falls, dollar strengthens</div>
                     </div>
                     <div class="tradingview-widget-container" style="height: 280px;">
                         <div id="dxy-chart" style="height: 100%;"></div>
@@ -1529,9 +1529,9 @@
                     <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
                         <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
                             <strong style="color: var(--text);">How to read:</strong> 
-                            <span style="color: var(--bad);">Rising DXY</span> = Dollar strengthening, typically bearish for BTC and risk assets. 
-                            <span style="color: var(--good);">Falling DXY</span> = Dollar weakening, supportive for crypto. 
-                            <strong>Key:</strong> DXY above 105 = headwind for risk. Below 100 = tailwind.
+                            <span style="color: var(--bad);">Falling EUR/USD</span> = Dollar strengthening, typically bearish for BTC and risk assets. 
+                            <span style="color: var(--good);">Rising EUR/USD</span> = Dollar weakening, supportive for crypto. 
+                            <strong>Key:</strong> EUR is 57% of DXY, so EUR/USD is strong proxy for dollar direction.
                         </div>
                     </div>
                 </div>
@@ -1558,7 +1558,7 @@
                 <!-- US 10Y Treasury Yield -->
                 <div class="card" style="padding: 0; overflow: hidden;">
                     <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">US 10-Year Treasury Yield</div>
+                        <div class="card-title">10-Year Treasury Yield (TNX)</div>
                         <div class="card-subtitle">Benchmark interest rate - Cost of capital indicator</div>
                     </div>
                     <div class="tradingview-widget-container" style="height: 280px;">
@@ -5329,11 +5329,12 @@
                 "hide_volume": true
             });
             
-            // Gold
+            // Gold - Weekly chart with full history
             new TradingView.widget({
                 "autosize": true,
                 "symbol": "TVC:GOLD",
-                "interval": "D",
+                "interval": "W",
+                "range": "ALL",
                 "timezone": "Etc/UTC",
                 "theme": "dark",
                 "style": "1",
@@ -5369,10 +5370,11 @@
                 "hide_volume": true
             });
             
-            // DXY (US Dollar Index) Chart
+            // DXY Alternative - Using EURUSD inverted as proxy (strong correlation)
+            // UUP ETF or other DXY symbols often restricted in free widget
             new TradingView.widget({
                 "autosize": true,
-                "symbol": "TVC:DXY",
+                "symbol": "FX:EURUSD",
                 "interval": "D",
                 "timezone": "Etc/UTC",
                 "theme": "dark",
@@ -5389,10 +5391,10 @@
                 "hide_volume": true
             });
             
-            // US 10-Year Treasury Yield Chart
+            // US 10-Year Treasury Yield - Using CBOE TNX
             new TradingView.widget({
                 "autosize": true,
-                "symbol": "TVC:US10Y",
+                "symbol": "CBOE:TNX",
                 "interval": "D",
                 "timezone": "Etc/UTC",
                 "theme": "dark",
