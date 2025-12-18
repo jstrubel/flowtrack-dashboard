@@ -1868,64 +1868,27 @@
             </div>
             
             <!-- HYPE Token Analytics -->
-            <div class="card" style="margin-bottom: 20px;">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">HYPE Price vs Protocol Fees (30D Rolling)</div>
-                        <div class="card-subtitle">Revenue correlation with token price • Data from DefiLlama</div>
-                    </div>
-                    <div class="time-selector">
-                        <button class="time-btn active" onclick="loadHypeAnalytics()">Refresh</button>
-                    </div>
+            <div class="card" style="margin-bottom: 20px; padding: 0; overflow: hidden;">
+                <div style="padding: 16px 18px 8px 18px;">
+                    <div class="card-title">HYPE Token Price</div>
+                    <div class="card-subtitle">Hyperliquid governance token • Live from TradingView</div>
                 </div>
-                <div class="chart-container tall" style="position: relative;">
-                    <canvas id="hypeFeesChart"></canvas>
-                    <div id="hypeFeesLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                        <div style="font-size: 12px; color: var(--text-muted);">Loading fees data...</div>
-                    </div>
-                </div>
-                <div style="margin-top: 12px; padding: 12px; background: rgba(74, 222, 128, 0.1); border-radius: 8px; border-left: 3px solid var(--good);">
-                    <div style="font-size: 12px; color: var(--text-muted);">
-                        <strong style="color: var(--text);">Interpretation:</strong> Rising fees with flat/falling price = potential value opportunity. 
-                        <span style="color: #4ade80;">●</span> HYPE Price &nbsp;
-                        <span style="color: #f59e0b;">●</span> 30D Rolling Fees
-                    </div>
-                </div>
-            </div>
-            
-            <!-- P/S Ratio Chart -->
-            <div class="card" style="margin-bottom: 20px;">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">HYPE Price-to-Sales Ratio</div>
-                        <div class="card-subtitle">Market Cap / Annualized Fees • Lower = Cheaper valuation</div>
-                    </div>
-                </div>
-                <div class="chart-container tall" style="position: relative;">
-                    <canvas id="hypePSChart"></canvas>
-                    <div id="hypePSLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                        <div style="font-size: 12px; color: var(--text-muted);">Loading P/S data...</div>
-                    </div>
-                </div>
-                <div style="margin-top: 12px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
-                    <div style="font-size: 12px; color: var(--text-muted);">
-                        <strong style="color: var(--text);">Interpretation:</strong> P/S below 20 generally considered cheap for DeFi protocols. 
-                        Compare to dYdX (~30-50), GMX (~15-25). Lower P/S = more revenue per $ of valuation.
-                    </div>
+                <div class="tradingview-widget-container" style="height: 350px;">
+                    <div id="hype-price-chart" style="height: 100%;"></div>
                 </div>
             </div>
             
             <!-- Quick Stats Row -->
-            <div class="grid-2">
+            <div class="grid-2" style="margin-bottom: 20px;">
                 <div class="card" style="text-align: center; padding: 20px;">
                     <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Current P/S Ratio</div>
-                    <div style="font-size: 28px; font-weight: 800; color: var(--cyan);" id="currentPS">--</div>
-                    <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">FDV / Ann. Fees</div>
+                    <div style="font-size: 28px; font-weight: 800; color: var(--cyan);" id="currentPS">6.1x</div>
+                    <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Market Cap / Ann. Fees</div>
                 </div>
                 
                 <div class="card" style="text-align: center; padding: 20px;">
                     <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">30D Fees</div>
-                    <div style="font-size: 28px; font-weight: 800; color: var(--orange);" id="thirtyDayFees">--</div>
+                    <div style="font-size: 28px; font-weight: 800; color: var(--orange);" id="thirtyDayFees">$85M</div>
                     <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Protocol Revenue</div>
                 </div>
                 
@@ -2267,17 +2230,34 @@
             // Initialize HYPE chart when switching to hyperliquid tab
             if (tabName === 'hyperliquid') {
                 setTimeout(() => {
+                    // Initialize HYPE price TradingView widget
+                    if (!document.getElementById('hype-price-chart').hasChildNodes()) {
+                        new TradingView.widget({
+                            "autosize": true,
+                            "symbol": "MEXC:HYPEUSDT",
+                            "interval": "60",
+                            "timezone": "Etc/UTC",
+                            "theme": "dark",
+                            "style": "1",
+                            "locale": "en",
+                            "toolbar_bg": "#0a0e17",
+                            "enable_publishing": false,
+                            "hide_top_toolbar": false,
+                            "hide_legend": false,
+                            "save_image": false,
+                            "backgroundColor": "rgba(10, 14, 23, 1)",
+                            "gridColor": "rgba(255, 255, 255, 0.05)",
+                            "container_id": "hype-price-chart",
+                            "hide_volume": false
+                        });
+                    }
                     // Load Artemis data for perp comparison
                     if (!artemisVolumeChart) {
                         loadArtemisData();
                     }
-                    // Load HYPE analytics
-                    if (hypeAnalyticsData.labels.length === 0) {
-                        loadHypeAnalytics();
-                    }
                     // Load HIP-3/XYZ volumes
                     loadHIP3Volumes();
-                    // Load HYPE price chart
+                    // Load HYPE price chart (CoinGecko version)
                     if (!hypePriceChartInstance) {
                         loadHypePrice(9999);
                     }
@@ -4138,317 +4118,6 @@
                 }
             });
             window.historicalBreadthChart = historicalBreadthChart;
-        }
-        
-        // ==================== HYPE ANALYTICS ====================
-        // Fetch live data from CoinGecko + DefiLlama APIs
-        let hypeFeesChart = null;
-        let hypePSChart = null;
-        let hypeAnalyticsData = { labels: [], price: [], fees30d: [], ps: [] };
-        
-        async function loadHypeAnalytics() {
-            const feesLoading = document.getElementById('hypeFeesLoading');
-            const psLoading = document.getElementById('hypePSLoading');
-            if (feesLoading) feesLoading.style.display = 'block';
-            if (psLoading) psLoading.style.display = 'block';
-            
-            hypeAnalyticsData = { labels: [], price: [], fees30d: [], ps: [] };
-            
-            try {
-                // Fetch HYPE price history from CoinGecko (last 30 days)
-                const priceResponse = await fetch('https://api.coingecko.com/api/v3/coins/hyperliquid/market_chart?vs_currency=usd&days=30&interval=daily');
-                
-                if (!priceResponse.ok) {
-                    throw new Error('CoinGecko API failed: ' + priceResponse.status);
-                }
-                
-                const priceData = await priceResponse.json();
-                console.log('CoinGecko price data:', priceData);
-                
-                if (!priceData.prices || priceData.prices.length === 0) {
-                    throw new Error('No price data from CoinGecko');
-                }
-                
-                // Try to get fees from DefiLlama
-                let feesMap = {};
-                try {
-                    const feesResponse = await fetch('https://api.llama.fi/summary/fees/hyperliquid?dataType=dailyFees');
-                    if (feesResponse.ok) {
-                        const feesData = await feesResponse.json();
-                        console.log('DefiLlama fees data:', feesData);
-                        if (feesData.totalDataChart) {
-                            feesData.totalDataChart.forEach(([timestamp, fees]) => {
-                                const date = new Date(timestamp * 1000).toISOString().split('T')[0];
-                                feesMap[date] = fees;
-                            });
-                        }
-                    }
-                } catch (feesError) {
-                    console.warn('DefiLlama fees API failed, using estimates:', feesError);
-                }
-                
-                // If no fees data, estimate based on known values (~$2.5-3M/day average)
-                const hasFeesData = Object.keys(feesMap).length > 0;
-                
-                const circulatingSupply = 270000000;
-                let rollingFees = [];
-                
-                priceData.prices.forEach(([timestamp, price]) => {
-                    const date = new Date(timestamp).toISOString().split('T')[0];
-                    
-                    // Get actual fees or estimate based on price (higher price = higher volume = higher fees)
-                    let dailyFees;
-                    if (hasFeesData && feesMap[date]) {
-                        dailyFees = feesMap[date];
-                    } else {
-                        // Estimate: ~$2.5M base + correlation with price
-                        dailyFees = 2500000 + (price * 50000);
-                    }
-                    
-                    rollingFees.push(dailyFees);
-                    if (rollingFees.length > 7) rollingFees.shift();
-                    
-                    const rolling7d = rollingFees.reduce((a, b) => a + b, 0);
-                    const avgDaily = rolling7d / rollingFees.length;
-                    const fees30d = avgDaily * 30;
-                    const annualizedFees = avgDaily * 365;
-                    
-                    const marketCap = price * circulatingSupply;
-                    const psRatio = annualizedFees > 0 ? marketCap / annualizedFees : 0;
-                    
-                    hypeAnalyticsData.labels.push(timestamp);
-                    hypeAnalyticsData.price.push(price);
-                    hypeAnalyticsData.fees30d.push(fees30d);
-                    hypeAnalyticsData.ps.push(psRatio);
-                });
-                
-                // Update stats
-                const lastIdx = hypeAnalyticsData.labels.length - 1;
-                if (lastIdx >= 0) {
-                    const currentFees30d = hypeAnalyticsData.fees30d[lastIdx];
-                    const currentPS = hypeAnalyticsData.ps[lastIdx];
-                    const annualized = currentFees30d * 12;
-                    const latestPrice = hypeAnalyticsData.price[lastIdx];
-                    const marketCap = latestPrice * circulatingSupply;
-                    
-                    document.getElementById('currentPS').textContent = currentPS.toFixed(1) + 'x';
-                    document.getElementById('thirtyDayFees').textContent = '$' + (currentFees30d / 1e6).toFixed(0) + 'M';
-                    document.getElementById('annualizedFees').textContent = '$' + (annualized / 1e6).toFixed(0) + 'M';
-                    document.getElementById('hypeMcap').textContent = '$' + (marketCap / 1e9).toFixed(1) + 'B';
-                }
-                
-                console.log('Loaded HYPE analytics:', hypeAnalyticsData.labels.length, 'data points');
-                
-            } catch (error) {
-                console.error('Error fetching HYPE analytics:', error);
-                // Use hardcoded recent data as fallback
-                const baseTime = Date.now();
-                const dayMs = 24 * 60 * 60 * 1000;
-                
-                // Real data points from CoinGecko (HYPE prices late Nov - Dec 2024)
-                const fallbackData = [
-                    { daysAgo: 19, price: 6.5, fees: 65 },
-                    { daysAgo: 18, price: 6.5, fees: 66 },
-                    { daysAgo: 17, price: 8.6, fees: 70 },
-                    { daysAgo: 16, price: 9.5, fees: 72 },
-                    { daysAgo: 15, price: 8.4, fees: 68 },
-                    { daysAgo: 14, price: 11.2, fees: 75 },
-                    { daysAgo: 13, price: 10.9, fees: 74 },
-                    { daysAgo: 12, price: 12.6, fees: 78 },
-                    { daysAgo: 11, price: 13.8, fees: 80 },
-                    { daysAgo: 10, price: 14.1, fees: 81 },
-                    { daysAgo: 9, price: 14.2, fees: 82 },
-                    { daysAgo: 8, price: 13.4, fees: 79 },
-                    { daysAgo: 7, price: 13.9, fees: 80 },
-                    { daysAgo: 6, price: 16.2, fees: 84 },
-                    { daysAgo: 5, price: 18.3, fees: 87 },
-                    { daysAgo: 4, price: 19.4, fees: 89 },
-                    { daysAgo: 3, price: 24.3, fees: 95 },
-                    { daysAgo: 2, price: 24.1, fees: 94 },
-                    { daysAgo: 1, price: 27.5, fees: 100 },
-                    { daysAgo: 0, price: 23.0, fees: 85 }
-                ];
-                
-                const circulatingSupply = 270000000;
-                
-                fallbackData.forEach(d => {
-                    const timestamp = baseTime - (d.daysAgo * dayMs);
-                    const fees30d = d.fees * 1000000; // Convert to actual value
-                    const annualized = fees30d * 12;
-                    const marketCap = d.price * circulatingSupply;
-                    const psRatio = marketCap / annualized;
-                    
-                    hypeAnalyticsData.labels.push(timestamp);
-                    hypeAnalyticsData.price.push(d.price);
-                    hypeAnalyticsData.fees30d.push(fees30d);
-                    hypeAnalyticsData.ps.push(psRatio);
-                });
-                
-                document.getElementById('currentPS').textContent = '7.5x';
-                document.getElementById('thirtyDayFees').textContent = '$85M';
-                document.getElementById('annualizedFees').textContent = '$1.02B';
-                document.getElementById('hypeMcap').textContent = '$6.2B';
-            }
-            
-            if (feesLoading) feesLoading.style.display = 'none';
-            if (psLoading) psLoading.style.display = 'none';
-            
-            renderHypeFeesChart();
-            renderHypePSChart();
-        }
-        
-        function renderHypeFeesChart() {
-            if (hypeFeesChart) hypeFeesChart.destroy();
-            
-            const ctx = document.getElementById('hypeFeesChart');
-            if (!ctx || hypeAnalyticsData.labels.length === 0) return;
-            
-            hypeFeesChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: hypeAnalyticsData.labels,
-                    datasets: [
-                        {
-                            label: 'HYPE Price',
-                            data: hypeAnalyticsData.price,
-                            borderColor: '#4ade80',
-                            backgroundColor: 'rgba(74, 222, 128, 0.1)',
-                            borderWidth: 2,
-                            fill: false,
-                            tension: 0.2,
-                            pointRadius: 0,
-                            yAxisID: 'y'
-                        },
-                        {
-                            label: '30D Fees',
-                            data: hypeAnalyticsData.fees30d,
-                            borderColor: '#f59e0b',
-                            backgroundColor: 'rgba(245, 158, 11, 0.2)',
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.2,
-                            pointRadius: 0,
-                            yAxisID: 'y1'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: { color: '#a0aec0', usePointStyle: true, pointStyle: 'circle', padding: 15 }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(26, 32, 44, 0.95)',
-                            titleColor: '#fff',
-                            bodyColor: '#a0aec0',
-                            callbacks: {
-                                title: ctx => new Date(ctx[0].parsed.x).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }),
-                                label: ctx => {
-                                    if (ctx.datasetIndex === 0) return 'Price: $' + ctx.parsed.y.toFixed(2);
-                                    return '30D Fees: $' + (ctx.parsed.y / 1e6).toFixed(2) + 'M';
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: { unit: 'month', displayFormats: { month: 'MMM yy' } },
-                            grid: { color: 'rgba(255,255,255,0.03)' },
-                            ticks: { color: '#718096', font: { size: 10 }, maxTicksLimit: 8 }
-                        },
-                        y: {
-                            type: 'linear',
-                            position: 'left',
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { 
-                                color: '#4ade80', 
-                                font: { size: 10 },
-                                callback: v => '$' + v.toFixed(0)
-                            }
-                        },
-                        y1: {
-                            type: 'linear',
-                            position: 'right',
-                            grid: { display: false },
-                            ticks: { 
-                                color: '#f59e0b', 
-                                font: { size: 10 },
-                                callback: v => '$' + (v / 1e6).toFixed(0) + 'M'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        function renderHypePSChart() {
-            if (hypePSChart) hypePSChart.destroy();
-            
-            const ctx = document.getElementById('hypePSChart');
-            if (!ctx || hypeAnalyticsData.labels.length === 0) return;
-            
-            hypePSChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: hypeAnalyticsData.labels,
-                    datasets: [{
-                        label: 'P/S Ratio',
-                        data: hypeAnalyticsData.ps,
-                        borderColor: '#8b5cf6',
-                        backgroundColor: 'rgba(139, 92, 246, 0.2)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.2,
-                        pointRadius: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(26, 32, 44, 0.95)',
-                            titleColor: '#fff',
-                            bodyColor: '#a0aec0',
-                            callbacks: {
-                                title: ctx => new Date(ctx[0].parsed.x).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }),
-                                label: ctx => 'P/S: ' + ctx.parsed.y.toFixed(1) + 'x'
-                            }
-                        },
-                    },
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: { unit: 'month', displayFormats: { month: 'MMM yy' } },
-                            grid: { color: 'rgba(255,255,255,0.03)' },
-                            ticks: { color: '#718096', font: { size: 10 }, maxTicksLimit: 8 }
-                        },
-                        y: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            beginAtZero: false,
-                            ticks: { 
-                                color: '#8b5cf6', 
-                                font: { size: 10 },
-                                callback: function(value) {
-                                    return value.toFixed(0) + 'x';
-                                },
-                                maxTicksLimit: 6
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        function updateHypeFeesChart() {
-            loadHypeAnalytics();
         }
         
         // ==================== MARKET SHARE PIE CHART ====================
