@@ -1477,6 +1477,26 @@
                 <div class="section-title">Key Macro Indicators</div>
             </div>
             
+            <!-- Gold - Featured Large Chart -->
+            <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 16px;">
+                <div style="padding: 16px 18px 8px 18px;">
+                    <div class="card-title">Gold (XAU/USD)</div>
+                    <div class="card-subtitle">Safe haven asset - Inflation & uncertainty hedge</div>
+                </div>
+                <div class="tradingview-widget-container" style="height: 400px;">
+                    <div id="gold-chart" style="height: 100%;"></div>
+                </div>
+                <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
+                    <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+                        <strong style="color: var(--text);">How to read:</strong> 
+                        <span style="color: var(--good);">Rising gold</span> = Flight to safety, inflation fears, or central bank buying (bullish for BTC narrative as "digital gold"). 
+                        <span style="color: var(--bad);">Falling gold</span> = Risk-on sentiment, rising real yields, or USD strength. 
+                        <strong>Key:</strong> Gold and BTC often move together during liquidity expansions. Divergence (gold up, BTC down) may signal macro stress where BTC trades more like a risk asset.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 2x2 Grid for other macro indicators -->
             <div class="grid-2">
                 <!-- Yield Curve 2s10s -->
                 <div class="card" style="padding: 0; overflow: hidden;">
@@ -1484,34 +1504,34 @@
                         <div class="card-title">Yield Curve (10Y - 2Y Spread)</div>
                         <div class="card-subtitle">Treasury yield spread - Leading recession indicator</div>
                     </div>
-                    <div class="tradingview-widget-container" style="height: 320px;">
+                    <div class="tradingview-widget-container" style="height: 280px;">
                         <div id="yield-curve-chart" style="height: 100%;"></div>
                     </div>
                     <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
                         <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
                             <strong style="color: var(--text);">How to read:</strong> 
-                            <span style="color: var(--bad);">Below 0 (inverted)</span> = Short-term rates exceed long-term rates, historically precedes recessions by 12-18 months. 
-                            <span style="color: var(--good);">Above 0 (normal)</span> = Healthy economy expected. 
-                            <strong>Key:</strong> The steepening after inversion (moving back positive) often signals recession is imminent, not over. BTC typically struggles during active recessions but rallies on Fed pivot expectations.
+                            <span style="color: var(--bad);">Below 0 (inverted)</span> = Recession signal (12-18 month lead). 
+                            <span style="color: var(--good);">Above 0</span> = Healthy economy. 
+                            <strong>Key:</strong> Steepening after inversion often signals recession is imminent.
                         </div>
                     </div>
                 </div>
                 
-                <!-- Gold -->
+                <!-- DXY Dollar Index -->
                 <div class="card" style="padding: 0; overflow: hidden;">
                     <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">Gold (XAU/USD)</div>
-                        <div class="card-subtitle">Safe haven asset - Inflation & uncertainty hedge</div>
+                        <div class="card-title">DXY (US Dollar Index)</div>
+                        <div class="card-subtitle">Dollar strength vs major currencies - Risk appetite gauge</div>
                     </div>
-                    <div class="tradingview-widget-container" style="height: 320px;">
-                        <div id="gold-chart" style="height: 100%;"></div>
+                    <div class="tradingview-widget-container" style="height: 280px;">
+                        <div id="dxy-chart" style="height: 100%;"></div>
                     </div>
                     <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
                         <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
                             <strong style="color: var(--text);">How to read:</strong> 
-                            <span style="color: var(--good);">Rising gold</span> = Flight to safety, inflation fears, or central bank buying (bullish for BTC narrative as "digital gold"). 
-                            <span style="color: var(--bad);">Falling gold</span> = Risk-on sentiment, rising real yields, or USD strength. 
-                            <strong>Key:</strong> Gold and BTC often move together during liquidity expansions. Divergence (gold up, BTC down) may signal macro stress where BTC trades more like a risk asset.
+                            <span style="color: var(--bad);">Rising DXY</span> = Dollar strengthening, typically bearish for BTC and risk assets. 
+                            <span style="color: var(--good);">Falling DXY</span> = Dollar weakening, supportive for crypto. 
+                            <strong>Key:</strong> DXY above 105 = headwind for risk. Below 100 = tailwind.
                         </div>
                     </div>
                 </div>
@@ -1522,15 +1542,34 @@
                         <div class="card-title">USD/JPY (Dollar-Yen)</div>
                         <div class="card-subtitle">Yen carry trade indicator - Global risk sentiment</div>
                     </div>
-                    <div class="tradingview-widget-container" style="height: 320px;">
+                    <div class="tradingview-widget-container" style="height: 280px;">
                         <div id="usdjpy-chart" style="height: 100%;"></div>
                     </div>
                     <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
                         <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
                             <strong style="color: var(--text);">How to read:</strong> 
-                            <span style="color: var(--good);">Rising USD/JPY</span> = Yen weakening, carry trade flows into risk assets (bullish for BTC). 
-                            <span style="color: var(--bad);">Falling USD/JPY (rapidly)</span> = Yen strengthening, carry trade unwinding, risk-off (Aug 2024 crash was triggered by yen spike). 
-                            <strong>Key:</strong> Watch for sharp moves. Gradual yen weakness = supportive. Rapid yen strength (>2-3% daily) = potential margin call cascade affecting all risk assets including crypto.
+                            <span style="color: var(--good);">Rising USD/JPY</span> = Yen weakening, carry trade flows into risk (bullish BTC). 
+                            <span style="color: var(--bad);">Falling USD/JPY (rapidly)</span> = Carry trade unwinding, risk-off. 
+                            <strong>Key:</strong> Rapid yen strength (>2-3% daily) = margin call cascade risk.
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- US 10Y Treasury Yield -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="padding: 16px 18px 8px 18px;">
+                        <div class="card-title">US 10-Year Treasury Yield</div>
+                        <div class="card-subtitle">Benchmark interest rate - Cost of capital indicator</div>
+                    </div>
+                    <div class="tradingview-widget-container" style="height: 280px;">
+                        <div id="us10y-chart" style="height: 100%;"></div>
+                    </div>
+                    <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
+                        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+                            <strong style="color: var(--text);">How to read:</strong> 
+                            <span style="color: var(--bad);">Rising yields</span> = Tighter financial conditions, bearish for risk assets. 
+                            <span style="color: var(--good);">Falling yields</span> = Easier conditions, bullish for BTC. 
+                            <strong>Key:</strong> Above 5% = significant headwind. Rapid moves matter more than levels.
                         </div>
                     </div>
                 </div>
@@ -5327,6 +5366,46 @@
                 "backgroundColor": "rgba(10, 14, 23, 1)",
                 "gridColor": "rgba(255, 255, 255, 0.05)",
                 "container_id": "usdjpy-chart",
+                "hide_volume": true
+            });
+            
+            // DXY (US Dollar Index) Chart
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "TVC:DXY",
+                "interval": "D",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#0a0e17",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "backgroundColor": "rgba(10, 14, 23, 1)",
+                "gridColor": "rgba(255, 255, 255, 0.05)",
+                "container_id": "dxy-chart",
+                "hide_volume": true
+            });
+            
+            // US 10-Year Treasury Yield Chart
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "TVC:US10Y",
+                "interval": "D",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#0a0e17",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "backgroundColor": "rgba(10, 14, 23, 1)",
+                "gridColor": "rgba(255, 255, 255, 0.05)",
+                "container_id": "us10y-chart",
                 "hide_volume": true
             });
             
