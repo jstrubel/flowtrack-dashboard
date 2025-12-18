@@ -820,13 +820,15 @@
             <div class="section-header">
                 <div class="section-title">Cross-Asset Performance</div>
             </div>
+            
+            <!-- Symbol Overview widget with percentage comparison -->
             <div class="card" style="padding: 0; overflow: hidden;">
                 <div style="padding: 16px 18px 8px 18px;">
-                    <div class="card-title">BTC vs ETH vs S&P 500 vs NASDAQ vs Russell 2000 (% Change)</div>
+                    <div class="card-title">BTC vs ETH vs SPY vs QQQ vs IWM (% Change)</div>
                     <div class="card-subtitle">7 Days • Hourly • Percentage Scale</div>
                 </div>
                 <div class="tradingview-widget-container" style="height: 500px;">
-                    <div id="cross-asset-chart" style="height: 100%;"></div>
+                    <div class="tradingview-widget-container__widget" id="cross-asset-overview"></div>
                 </div>
             </div>
             
@@ -837,7 +839,7 @@
                     <div class="card-subtitle">BTC • ETH • SOL • HYPE • 7 Days Hourly</div>
                 </div>
                 <div class="tradingview-widget-container" style="height: 500px;">
-                    <div id="crypto-leaders-chart" style="height: 100%;"></div>
+                    <div class="tradingview-widget-container__widget" id="crypto-leaders-overview"></div>
                 </div>
             </div>
         </div>
@@ -5120,64 +5122,107 @@
                 });
             }
             
-            // Cross-Asset and Crypto Leaders - using TradingView embedded charts
-            // Note: TradingView assigns colors automatically to compare studies
-            // Reordering symbols can help get more color variety
+            // Cross-Asset Comparison using Symbol Overview widget
+            // This widget supports custom line colors!
+            const crossAssetContainer = document.getElementById('cross-asset-overview');
+            if (crossAssetContainer) {
+                const script1 = document.createElement('script');
+                script1.src = 'https://s3.tradingview.com/external-embedding/embed-widget-symbol-overview.js';
+                script1.async = true;
+                script1.innerHTML = JSON.stringify({
+                    "symbols": [
+                        ["BTC", "BINANCE:BTCUSDT|1D"]
+                    ],
+                    "chartOnly": true,
+                    "width": "100%",
+                    "height": "100%",
+                    "locale": "en",
+                    "colorTheme": "dark",
+                    "autosize": true,
+                    "showVolume": false,
+                    "showMA": false,
+                    "hideDateRanges": false,
+                    "hideMarketStatus": true,
+                    "hideSymbolLogo": true,
+                    "scalePosition": "right",
+                    "scaleMode": "Percentage",
+                    "fontFamily": "-apple-system, BlinkMacSystemFont, Trebuchet MS, Roboto, Ubuntu, sans-serif",
+                    "fontSize": "10",
+                    "noTimeScale": false,
+                    "valuesTracking": "1",
+                    "changeMode": "price-only",
+                    "chartType": "line",
+                    "lineWidth": 2,
+                    "lineType": 0,
+                    "lineColor": "rgba(247, 147, 26, 1)",
+                    "topColor": "rgba(247, 147, 26, 0.1)",
+                    "bottomColor": "rgba(247, 147, 26, 0)",
+                    "compareSymbols": [
+                        {"symbol": "BINANCE:ETHUSDT", "lineColor": "rgba(98, 126, 234, 1)", "lineWidth": 2},
+                        {"symbol": "AMEX:SPY", "lineColor": "rgba(74, 222, 128, 1)", "lineWidth": 2},
+                        {"symbol": "NASDAQ:QQQ", "lineColor": "rgba(244, 114, 182, 1)", "lineWidth": 2},
+                        {"symbol": "AMEX:IWM", "lineColor": "rgba(250, 204, 21, 1)", "lineWidth": 2}
+                    ],
+                    "dateRanges": [
+                        "1w|60",
+                        "1m|60",
+                        "3m|1D",
+                        "12m|1D"
+                    ],
+                    "dateFormat": "MMM dd"
+                });
+                crossAssetContainer.appendChild(script1);
+            }
             
-            // Cross-Asset Comparison Chart (BTC vs ETH vs S&P500 vs NASDAQ vs Russell 2000)
-            // 7 Days with hourly intervals
-            new TradingView.widget({
-                "autosize": true,
-                "symbol": "BINANCE:BTCUSDT",
-                "interval": "60",
-                "range": "7D",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "2",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "rgba(10, 14, 23, 1)",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "container_id": "cross-asset-chart",
-                "hide_volume": true,
-                "studies": [
-                    { id: "Compare@tv-basicstudies", inputs: { symbol: "BINANCE:ETHUSDT" } },
-                    { id: "Compare@tv-basicstudies", inputs: { symbol: "SP:SPX" } },
-                    { id: "Compare@tv-basicstudies", inputs: { symbol: "NASDAQ:NDX" } },
-                    { id: "Compare@tv-basicstudies", inputs: { symbol: "RUSSELL:RUT" } }
-                ]
-            });
-            
-            // Crypto Leaders Chart (BTC vs ETH vs SOL vs HYPE)
-            // 7 Days with hourly intervals
-            new TradingView.widget({
-                "autosize": true,
-                "symbol": "BINANCE:BTCUSDT",
-                "interval": "60",
-                "range": "7D",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "2",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "rgba(10, 14, 23, 1)",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "container_id": "crypto-leaders-chart",
-                "hide_volume": true,
-                "studies": [
-                    { id: "Compare@tv-basicstudies", inputs: { symbol: "BINANCE:ETHUSDT" } },
-                    { id: "Compare@tv-basicstudies", inputs: { symbol: "BINANCE:SOLUSDT" } },
-                    { id: "Compare@tv-basicstudies", inputs: { symbol: "BYBIT:HYPEUSDT.P" } }
-                ]
-            });
+            // Crypto Leaders using Symbol Overview widget
+            const cryptoLeadersContainer = document.getElementById('crypto-leaders-overview');
+            if (cryptoLeadersContainer) {
+                const script2 = document.createElement('script');
+                script2.src = 'https://s3.tradingview.com/external-embedding/embed-widget-symbol-overview.js';
+                script2.async = true;
+                script2.innerHTML = JSON.stringify({
+                    "symbols": [
+                        ["BTC", "BINANCE:BTCUSDT|1D"]
+                    ],
+                    "chartOnly": true,
+                    "width": "100%",
+                    "height": "100%",
+                    "locale": "en",
+                    "colorTheme": "dark",
+                    "autosize": true,
+                    "showVolume": false,
+                    "showMA": false,
+                    "hideDateRanges": false,
+                    "hideMarketStatus": true,
+                    "hideSymbolLogo": true,
+                    "scalePosition": "right",
+                    "scaleMode": "Percentage",
+                    "fontFamily": "-apple-system, BlinkMacSystemFont, Trebuchet MS, Roboto, Ubuntu, sans-serif",
+                    "fontSize": "10",
+                    "noTimeScale": false,
+                    "valuesTracking": "1",
+                    "changeMode": "price-only",
+                    "chartType": "line",
+                    "lineWidth": 2,
+                    "lineType": 0,
+                    "lineColor": "rgba(247, 147, 26, 1)",
+                    "topColor": "rgba(247, 147, 26, 0.1)",
+                    "bottomColor": "rgba(247, 147, 26, 0)",
+                    "compareSymbols": [
+                        {"symbol": "BINANCE:ETHUSDT", "lineColor": "rgba(98, 126, 234, 1)", "lineWidth": 2},
+                        {"symbol": "BINANCE:SOLUSDT", "lineColor": "rgba(153, 69, 255, 1)", "lineWidth": 2},
+                        {"symbol": "BYBIT:HYPEUSDT.P", "lineColor": "rgba(74, 222, 128, 1)", "lineWidth": 2}
+                    ],
+                    "dateRanges": [
+                        "1w|60",
+                        "1m|60",
+                        "3m|1D",
+                        "12m|1D"
+                    ],
+                    "dateFormat": "MMM dd"
+                });
+                cryptoLeadersContainer.appendChild(script2);
+            }
         }
         
         // Initialize Macro Dashboard charts (separate to avoid loading when not visible)
