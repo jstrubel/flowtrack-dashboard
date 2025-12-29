@@ -4305,28 +4305,49 @@
             if (loadingEl) loadingEl.style.display = 'block';
             
             try {
-                // Fetch both fees and price data in parallel
-                const [feesResponse, priceResponse] = await Promise.all([
-                    fetch('https://api.llama.fi/summary/fees/hyperliquid?dataType=dailyFees'),
-                    fetch('https://api.coingecko.com/api/v3/coins/hyperliquid/market_chart?vs_currency=usd&days=400&interval=daily')
-                ]);
-                
+                // Fetch fees data
+                const feesResponse = await fetch('https://api.llama.fi/summary/fees/hyperliquid?dataType=dailyFees');
                 if (!feesResponse.ok) throw new Error('Failed to fetch fees data');
-                if (!priceResponse.ok) throw new Error('Failed to fetch price data');
-                
                 const feesData = await feesResponse.json();
-                const priceData = await priceResponse.json();
                 
                 // Extract daily fees - [[timestamp, value], ...]
                 const dailyFees = feesData.totalDataChart || [];
                 if (dailyFees.length === 0) throw new Error('No fees data available');
                 
-                // Build a map of date -> price from CoinGecko
-                const priceMap = {};
-                priceData.prices.forEach(([timestamp, price]) => {
-                    const dateKey = new Date(timestamp).toISOString().split('T')[0];
-                    priceMap[dateKey] = price;
-                });
+                // Try to get price data - use DefiLlama coins API (more reliable)
+                let priceMap = {};
+                try {
+                    const priceResponse = await fetch('https://coins.llama.fi/chart/coingecko:hyperliquid?span=400&period=1d');
+                    if (priceResponse.ok) {
+                        const priceData = await priceResponse.json();
+                        if (priceData.coins && priceData.coins['coingecko:hyperliquid']) {
+                            priceData.coins['coingecko:hyperliquid'].prices.forEach(item => {
+                                const dateKey = new Date(item.timestamp * 1000).toISOString().split('T')[0];
+                                priceMap[dateKey] = item.price;
+                            });
+                        }
+                    }
+                } catch (e) {
+                    console.warn('DefiLlama price fetch failed, trying CoinGecko');
+                }
+                
+                // Fallback to CoinGecko with shorter range if DefiLlama failed
+                if (Object.keys(priceMap).length === 0) {
+                    try {
+                        const cgResponse = await fetch('https://api.coingecko.com/api/v3/coins/hyperliquid/market_chart?vs_currency=usd&days=365&interval=daily');
+                        if (cgResponse.ok) {
+                            const cgData = await cgResponse.json();
+                            if (cgData.prices) {
+                                cgData.prices.forEach(([timestamp, price]) => {
+                                    const dateKey = new Date(timestamp).toISOString().split('T')[0];
+                                    priceMap[dateKey] = price;
+                                });
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('CoinGecko price fetch also failed');
+                    }
+                }
                 
                 // Calculate 30-day rolling annualized revenue for each day
                 const labels = [];
@@ -4359,6 +4380,10 @@
                     }
                 }
                 
+                if (labels.length === 0) {
+                    throw new Error('No matching price/fees data found');
+                }
+                
                 // Calculate current stats
                 const currentAnnRev = annualizedRevenue[annualizedRevenue.length - 1] * 1000000000;
                 const currentPrice = hypePrice[hypePrice.length - 1];
@@ -4366,8 +4391,8 @@
                 const marketCap = currentPrice * circulatingSupply;
                 const psRatio = marketCap / currentAnnRev;
                 
-                const total30d = feesData.total30d || dailyFees.slice(-30).reduce((a, [_, v]) => a + v, 0);
-                const totalAllTime = feesData.totalAllTime || dailyFees.reduce((a, [_, v]) => a + v, 0);
+                const total30d = feesData.total30d || 0;
+                const totalAllTime = feesData.totalAllTime || 0;
                 
                 // Update stat displays
                 document.getElementById('annualizedRevDisplay').textContent = '$' + (currentAnnRev / 1000000000).toFixed(2) + 'B';
@@ -4437,7 +4462,8 @@
                                         if (ctx.dataset.label === 'HYPE Price') {
                                             return 'HYPE: $' + ctx.parsed.y.toFixed(2);
                                         } else {
-                                            const psAtPoint = (hypePrice[ctx.dataIndex] * circulatingSupply) / (ctx.parsed.y * 1000000000);
+                                            const priceAtPoint = hypePrice[ctx.dataIndex];
+                                            const psAtPoint = (priceAtPoint * circulatingSupply) / (ctx.parsed.y * 1000000000);
                                             return 'Ann. Rev: $' + ctx.parsed.y.toFixed(2) + 'B (P/S: ' + psAtPoint.toFixed(1) + 'x)';
                                         }
                                     }
@@ -4492,7 +4518,7 @@
                 
             } catch (error) {
                 console.error('Error loading fees/price data:', error);
-                if (loadingEl) loadingEl.innerHTML = '<div style="color: var(--text-muted);">Failed to load data</div>';
+                if (loadingEl) loadingEl.innerHTML = '<div style="color: var(--text-muted);">Failed to load data: ' + error.message + '</div>';
             }
         }
         
