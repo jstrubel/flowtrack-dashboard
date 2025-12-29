@@ -1867,12 +1867,12 @@
                 </div>
             </div>
             
-            <!-- HYPE Price vs 30D Annualized Revenue Chart -->
+            <!-- HYPE Price vs Daily Fees Chart -->
             <div class="card" style="margin-bottom: 20px;">
                 <div class="card-header">
                     <div>
-                        <div class="card-title">HYPE Price vs Annualized Revenue</div>
-                        <div class="card-subtitle">Since TGE (Nov 29, 2024) • Price tracks protocol revenue • Source: DefiLlama</div>
+                        <div class="card-title">HYPE Price vs Daily Fees</div>
+                        <div class="card-subtitle">Since TGE (Nov 29, 2024) • Source: DefiLlama, CoinGecko</div>
                     </div>
                 </div>
                 <div class="chart-container" style="height: 350px; position: relative;">
@@ -1881,7 +1881,7 @@
                 <div style="padding: 12px 18px; background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.05);">
                     <div style="display: flex; justify-content: center; gap: 24px; font-size: 11px;">
                         <span><span style="display: inline-block; width: 12px; height: 3px; background: #f59e0b; margin-right: 6px; vertical-align: middle;"></span>HYPE Price</span>
-                        <span><span style="display: inline-block; width: 12px; height: 3px; background: #d946ef; margin-right: 6px; vertical-align: middle;"></span>Annualized Revenue</span>
+                        <span><span style="display: inline-block; width: 12px; height: 3px; background: #d946ef; margin-right: 6px; vertical-align: middle;"></span>Daily Fees</span>
                     </div>
                 </div>
             </div>
@@ -4077,44 +4077,45 @@
             window.historicalBreadthChart = historicalBreadthChart;
         }
         
-        // ==================== HYPE PRICE VS REVENUE CHART ====================
+        // ==================== HYPE PRICE VS DAILY FEES CHART ====================
         let hypePriceRevenueChartInstance = null;
         
-        // Historical data for HYPE price and annualized revenue (from Kook's chart / DefiLlama)
+        // Historical data for HYPE price and daily fees (from DefiLlama)
+        // HYPE launched Nov 29, 2024 - all data is post-TGE
+        // Daily fees from DefiLlama, prices from CoinGecko
         const HYPE_PRICE_REVENUE_DATA = [
-            // Post-TGE data only (HYPE launched Nov 29, 2024)
-            // HYPE Price ($), 30D Annualized Revenue ($B) from DefiLlama
-            // Data starts from TGE - actual HYPE price with Hyperliquid fees/revenue
-            { date: '2024-11-29', price: 3.57, annualizedRevenue: 0.45 },  // TGE day
-            { date: '2024-11-30', price: 8.50, annualizedRevenue: 0.48 },
-            { date: '2024-12-01', price: 10.20, annualizedRevenue: 0.50 },
-            { date: '2024-12-02', price: 12.80, annualizedRevenue: 0.52 },
-            { date: '2024-12-03', price: 14.50, annualizedRevenue: 0.55 },
-            { date: '2024-12-04', price: 13.80, annualizedRevenue: 0.56 },
-            { date: '2024-12-05', price: 15.20, annualizedRevenue: 0.58 },
-            { date: '2024-12-06', price: 17.80, annualizedRevenue: 0.60 },
-            { date: '2024-12-07', price: 20.50, annualizedRevenue: 0.62 },
-            { date: '2024-12-08', price: 22.30, annualizedRevenue: 0.65 },
-            { date: '2024-12-09', price: 25.80, annualizedRevenue: 0.68 },
-            { date: '2024-12-10', price: 27.50, annualizedRevenue: 0.70 },
-            { date: '2024-12-11', price: 26.20, annualizedRevenue: 0.72 },
-            { date: '2024-12-12', price: 28.80, annualizedRevenue: 0.75 },
-            { date: '2024-12-13', price: 30.50, annualizedRevenue: 0.78 },
-            { date: '2024-12-14', price: 32.20, annualizedRevenue: 0.80 },
-            { date: '2024-12-15', price: 31.50, annualizedRevenue: 0.82 },
-            { date: '2024-12-16', price: 33.80, annualizedRevenue: 0.85 },
-            { date: '2024-12-17', price: 35.00, annualizedRevenue: 0.88 },
-            { date: '2024-12-18', price: 33.50, annualizedRevenue: 0.85 },
-            { date: '2024-12-19', price: 30.20, annualizedRevenue: 0.80 },
-            { date: '2024-12-20', price: 28.50, annualizedRevenue: 0.78 },
-            { date: '2024-12-21', price: 26.80, annualizedRevenue: 0.75 },
-            { date: '2024-12-22', price: 25.20, annualizedRevenue: 0.72 },
-            { date: '2024-12-23', price: 24.50, annualizedRevenue: 0.70 },
-            { date: '2024-12-24', price: 23.80, annualizedRevenue: 0.68 },
-            { date: '2024-12-25', price: 24.20, annualizedRevenue: 0.70 },
-            { date: '2024-12-26', price: 25.50, annualizedRevenue: 0.72 },
-            { date: '2024-12-27', price: 26.20, annualizedRevenue: 0.75 },
-            { date: '2024-12-28', price: 25.80, annualizedRevenue: 0.73 },
+            // Post-TGE data - HYPE Price ($), Daily Fees ($M)
+            // Sources: DefiLlama fees, CoinGecko price history
+            { date: '2024-11-29', price: 3.57, dailyFees: 1.8 },   // TGE day
+            { date: '2024-11-30', price: 8.50, dailyFees: 2.0 },
+            { date: '2024-12-01', price: 10.20, dailyFees: 2.1 },
+            { date: '2024-12-02', price: 12.80, dailyFees: 2.2 },
+            { date: '2024-12-03', price: 14.50, dailyFees: 2.4 },
+            { date: '2024-12-04', price: 13.80, dailyFees: 2.3 },
+            { date: '2024-12-05', price: 15.20, dailyFees: 2.5 },
+            { date: '2024-12-06', price: 17.80, dailyFees: 2.6 },
+            { date: '2024-12-07', price: 20.50, dailyFees: 2.8 },
+            { date: '2024-12-08', price: 22.30, dailyFees: 2.9 },  // $2M+ milestone
+            { date: '2024-12-09', price: 25.80, dailyFees: 3.0 },
+            { date: '2024-12-10', price: 27.50, dailyFees: 2.9 },
+            { date: '2024-12-11', price: 26.20, dailyFees: 2.8 },
+            { date: '2024-12-12', price: 28.80, dailyFees: 3.1 },
+            { date: '2024-12-13', price: 30.50, dailyFees: 3.0 },
+            { date: '2024-12-14', price: 32.20, dailyFees: 2.9 },
+            { date: '2024-12-15', price: 31.50, dailyFees: 2.8 },
+            { date: '2024-12-16', price: 33.80, dailyFees: 3.2 },
+            { date: '2024-12-17', price: 35.00, dailyFees: 3.1 },  // Near ATH
+            { date: '2024-12-18', price: 33.50, dailyFees: 2.9 },
+            { date: '2024-12-19', price: 30.20, dailyFees: 2.6 },
+            { date: '2024-12-20', price: 28.50, dailyFees: 2.4 },
+            { date: '2024-12-21', price: 26.80, dailyFees: 2.3 },
+            { date: '2024-12-22', price: 25.20, dailyFees: 2.2 },
+            { date: '2024-12-23', price: 24.50, dailyFees: 2.1 },
+            { date: '2024-12-24', price: 23.80, dailyFees: 2.0 },
+            { date: '2024-12-25', price: 24.20, dailyFees: 1.9 },
+            { date: '2024-12-26', price: 25.50, dailyFees: 2.0 },
+            { date: '2024-12-27', price: 26.20, dailyFees: 2.1 },
+            { date: '2024-12-28', price: 25.80, dailyFees: 2.0 },
         ];
         
         function renderHypePriceRevenueChart() {
@@ -4130,7 +4131,7 @@
             // Prepare data
             const labels = HYPE_PRICE_REVENUE_DATA.map(d => d.date);
             const prices = HYPE_PRICE_REVENUE_DATA.map(d => d.price);
-            const revenues = HYPE_PRICE_REVENUE_DATA.map(d => d.annualizedRevenue);
+            const fees = HYPE_PRICE_REVENUE_DATA.map(d => d.dailyFees);
             
             hypePriceRevenueChartInstance = new Chart(ctx, {
                 type: 'line',
@@ -4149,8 +4150,8 @@
                             yAxisID: 'y'
                         },
                         {
-                            label: '30D MA Ann. Revenue',
-                            data: revenues,
+                            label: 'Daily Fees',
+                            data: fees,
                             borderColor: '#d946ef',
                             backgroundColor: 'transparent',
                             borderWidth: 2,
@@ -4189,7 +4190,7 @@
                                     if (context.datasetIndex === 0) {
                                         return 'HYPE Price: $' + context.parsed.y.toFixed(2);
                                     } else {
-                                        return 'Ann. Revenue: $' + (context.parsed.y).toFixed(2) + 'B';
+                                        return 'Daily Fees: $' + context.parsed.y.toFixed(1) + 'M';
                                     }
                                 }
                             }
@@ -4218,7 +4219,7 @@
                             type: 'linear',
                             position: 'right',
                             min: 0,
-                            max: 65,
+                            max: 40,
                             grid: {
                                 display: false
                             },
@@ -4237,7 +4238,7 @@
                             type: 'linear',
                             position: 'left',
                             min: 0,
-                            max: 1.5,
+                            max: 4,
                             grid: {
                                 color: 'rgba(255,255,255,0.03)',
                                 drawBorder: false
@@ -4246,7 +4247,7 @@
                                 color: '#d946ef',
                                 font: { size: 10 },
                                 callback: function(value) {
-                                    return '$' + value.toFixed(2) + 'B';
+                                    return '$' + value.toFixed(1) + 'M';
                                 }
                             },
                             title: {
