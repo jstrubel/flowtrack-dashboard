@@ -1728,35 +1728,35 @@
                 </div>
             </div>
             
-            <!-- Hyperliquid Daily Fees Chart -->
+            <!-- HYPE Price vs Annualized Revenue Chart -->
             <div class="card" style="margin-bottom: 20px;">
                 <div class="card-header">
                     <div>
-                        <div class="card-title">Hyperliquid Daily Fees</div>
-                        <div class="card-subtitle">Protocol fees from perps + spot trading • Source: DefiLlama</div>
+                        <div class="card-title">HYPE Price vs Annualized Revenue</div>
+                        <div class="card-subtitle">30-day rolling fees × 12 • Source: DefiLlama + CoinGecko</div>
                     </div>
                 </div>
-                <div class="chart-container" style="height: 300px; position: relative;">
+                <div class="chart-container" style="height: 320px; position: relative;">
                     <canvas id="dailyFeesChart"></canvas>
                     <div id="dailyFeesLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                        <div style="font-size: 12px; color: var(--text-muted);">Loading fees data...</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">Loading data...</div>
                     </div>
                 </div>
                 <div style="margin: 12px 16px 16px 16px; display: flex; gap: 20px; flex-wrap: wrap;">
                     <div>
-                        <span style="font-size: 10px; color: var(--text-muted);">24h Fees:</span>
-                        <span id="fees24hDisplay" style="font-size: 12px; color: var(--good); margin-left: 4px;">--</span>
+                        <span style="font-size: 10px; color: var(--text-muted);">Current Ann. Rev:</span>
+                        <span id="annualizedRevDisplay" style="font-size: 12px; color: var(--good); margin-left: 4px;">--</span>
                     </div>
                     <div>
-                        <span style="font-size: 10px; color: var(--text-muted);">7d Fees:</span>
-                        <span id="fees7dDisplay" style="font-size: 12px; color: var(--cyan); margin-left: 4px;">--</span>
+                        <span style="font-size: 10px; color: var(--text-muted);">P/S Ratio:</span>
+                        <span id="psRatioDisplay" style="font-size: 12px; color: var(--cyan); margin-left: 4px;">--</span>
                     </div>
                     <div>
                         <span style="font-size: 10px; color: var(--text-muted);">30d Fees:</span>
                         <span id="fees30dDisplay" style="font-size: 12px; color: var(--text); margin-left: 4px;">--</span>
                     </div>
                     <div>
-                        <span style="font-size: 10px; color: var(--text-muted);">All-Time:</span>
+                        <span style="font-size: 10px; color: var(--text-muted);">All-Time Fees:</span>
                         <span id="feesTotalDisplay" style="font-size: 12px; color: var(--orange); margin-left: 4px;">--</span>
                     </div>
                 </div>
@@ -4294,7 +4294,7 @@
             }
         }
         
-        // ==================== HYPERLIQUID DAILY FEES CHART ====================
+        // ==================== HYPE PRICE VS ANNUALIZED REVENUE CHART ====================
         let dailyFeesChartInstance = null;
         
         async function loadDailyFees() {
@@ -4305,39 +4305,74 @@
             if (loadingEl) loadingEl.style.display = 'block';
             
             try {
-                const response = await fetch('https://api.llama.fi/summary/fees/hyperliquid?dataType=dailyFees');
+                // Fetch both fees and price data in parallel
+                const [feesResponse, priceResponse] = await Promise.all([
+                    fetch('https://api.llama.fi/summary/fees/hyperliquid?dataType=dailyFees'),
+                    fetch('https://api.coingecko.com/api/v3/coins/hyperliquid/market_chart?vs_currency=usd&days=400&interval=daily')
+                ]);
                 
-                if (!response.ok) throw new Error('Failed to fetch fees data');
+                if (!feesResponse.ok) throw new Error('Failed to fetch fees data');
+                if (!priceResponse.ok) throw new Error('Failed to fetch price data');
                 
-                const data = await response.json();
+                const feesData = await feesResponse.json();
+                const priceData = await priceResponse.json();
                 
-                // Extract daily fees from totalDataChart
-                const dailyData = data.totalDataChart || [];
+                // Extract daily fees - [[timestamp, value], ...]
+                const dailyFees = feesData.totalDataChart || [];
+                if (dailyFees.length === 0) throw new Error('No fees data available');
                 
-                if (dailyData.length === 0) {
-                    throw new Error('No fees data available');
-                }
-                
-                // Format data for chart - dailyData is [[timestamp, value], ...]
-                const labels = [];
-                const fees = [];
-                
-                dailyData.forEach(([timestamp, value]) => {
-                    const date = new Date(timestamp * 1000);
-                    labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-                    fees.push(value / 1000000); // Convert to millions
+                // Build a map of date -> price from CoinGecko
+                const priceMap = {};
+                priceData.prices.forEach(([timestamp, price]) => {
+                    const dateKey = new Date(timestamp).toISOString().split('T')[0];
+                    priceMap[dateKey] = price;
                 });
                 
-                // Calculate stats
-                const total24h = data.total24h || fees[fees.length - 1] * 1000000;
-                const total7d = data.total7d || fees.slice(-7).reduce((a, b) => a + b, 0) * 1000000;
-                const total30d = data.total30d || fees.slice(-30).reduce((a, b) => a + b, 0) * 1000000;
-                const totalAllTime = data.totalAllTime || fees.reduce((a, b) => a + b, 0) * 1000000;
+                // Calculate 30-day rolling annualized revenue for each day
+                const labels = [];
+                const annualizedRevenue = [];
+                const hypePrice = [];
+                
+                // Need at least 30 days of data
+                for (let i = 29; i < dailyFees.length; i++) {
+                    const [timestamp, _] = dailyFees[i];
+                    const date = new Date(timestamp * 1000);
+                    const dateKey = date.toISOString().split('T')[0];
+                    
+                    // Sum last 30 days of fees
+                    let rolling30d = 0;
+                    for (let j = i - 29; j <= i; j++) {
+                        rolling30d += dailyFees[j][1];
+                    }
+                    
+                    // Annualize: (30-day sum / 30) * 365
+                    const annualized = (rolling30d / 30) * 365;
+                    
+                    // Get price for this date
+                    const price = priceMap[dateKey];
+                    
+                    // Only include if we have price data (post-TGE)
+                    if (price !== undefined) {
+                        labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                        annualizedRevenue.push(annualized / 1000000000); // Convert to billions
+                        hypePrice.push(price);
+                    }
+                }
+                
+                // Calculate current stats
+                const currentAnnRev = annualizedRevenue[annualizedRevenue.length - 1] * 1000000000;
+                const currentPrice = hypePrice[hypePrice.length - 1];
+                const circulatingSupply = 333000000; // ~333M HYPE
+                const marketCap = currentPrice * circulatingSupply;
+                const psRatio = marketCap / currentAnnRev;
+                
+                const total30d = feesData.total30d || dailyFees.slice(-30).reduce((a, [_, v]) => a + v, 0);
+                const totalAllTime = feesData.totalAllTime || dailyFees.reduce((a, [_, v]) => a + v, 0);
                 
                 // Update stat displays
-                document.getElementById('fees24hDisplay').textContent = '$' + (total24h / 1000000).toFixed(2) + 'M';
-                document.getElementById('fees7dDisplay').textContent = '$' + (total7d / 1000000).toFixed(2) + 'M';
-                document.getElementById('fees30dDisplay').textContent = '$' + (total30d / 1000000).toFixed(2) + 'M';
+                document.getElementById('annualizedRevDisplay').textContent = '$' + (currentAnnRev / 1000000000).toFixed(2) + 'B';
+                document.getElementById('psRatioDisplay').textContent = psRatio.toFixed(1) + 'x';
+                document.getElementById('fees30dDisplay').textContent = '$' + (total30d / 1000000).toFixed(1) + 'M';
                 document.getElementById('feesTotalDisplay').textContent = '$' + (totalAllTime / 1000000).toFixed(0) + 'M';
                 
                 if (dailyFeesChartInstance) {
@@ -4350,30 +4385,62 @@
                     type: 'bar',
                     data: {
                         labels: labels,
-                        datasets: [{
-                            label: 'Daily Fees',
-                            data: fees,
-                            backgroundColor: 'rgba(74, 222, 128, 0.7)',
-                            borderColor: '#4ade80',
-                            borderWidth: 1,
-                            borderRadius: 2
-                        }]
+                        datasets: [
+                            {
+                                type: 'line',
+                                label: 'HYPE Price',
+                                data: hypePrice,
+                                borderColor: '#06b6d4',
+                                backgroundColor: 'transparent',
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                tension: 0.3,
+                                yAxisID: 'yPrice',
+                                order: 1
+                            },
+                            {
+                                type: 'bar',
+                                label: 'Annualized Revenue',
+                                data: annualizedRevenue,
+                                backgroundColor: 'rgba(74, 222, 128, 0.6)',
+                                borderColor: '#4ade80',
+                                borderWidth: 1,
+                                borderRadius: 2,
+                                yAxisID: 'yRevenue',
+                                order: 2
+                            }
+                        ]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
                         interaction: { intersect: false, mode: 'index' },
                         plugins: {
-                            legend: { display: false },
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    color: '#a0aec0',
+                                    padding: 15,
+                                    font: { size: 11 },
+                                    usePointStyle: true
+                                }
+                            },
                             tooltip: {
                                 backgroundColor: 'rgba(17, 24, 39, 0.95)',
                                 titleColor: '#fff',
                                 bodyColor: '#a0aec0',
                                 padding: 12,
-                                displayColors: false,
                                 callbacks: {
                                     title: (items) => items[0].label,
-                                    label: (ctx) => 'Fees: $' + ctx.parsed.y.toFixed(2) + 'M'
+                                    label: (ctx) => {
+                                        if (ctx.dataset.label === 'HYPE Price') {
+                                            return 'HYPE: $' + ctx.parsed.y.toFixed(2);
+                                        } else {
+                                            const psAtPoint = (hypePrice[ctx.dataIndex] * circulatingSupply) / (ctx.parsed.y * 1000000000);
+                                            return 'Ann. Rev: $' + ctx.parsed.y.toFixed(2) + 'B (P/S: ' + psAtPoint.toFixed(1) + 'x)';
+                                        }
+                                    }
                                 }
                             }
                         },
@@ -4383,16 +4450,40 @@
                                 ticks: {
                                     color: '#64748b',
                                     font: { size: 10 },
-                                    maxTicksLimit: 12,
+                                    maxTicksLimit: 10,
                                     maxRotation: 0
                                 }
                             },
-                            y: {
+                            yPrice: {
+                                type: 'linear',
+                                position: 'right',
+                                grid: { display: false },
+                                ticks: {
+                                    color: '#06b6d4',
+                                    font: { size: 10 },
+                                    callback: v => '$' + v.toFixed(0)
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'HYPE Price',
+                                    color: '#06b6d4',
+                                    font: { size: 10 }
+                                }
+                            },
+                            yRevenue: {
+                                type: 'linear',
+                                position: 'left',
                                 grid: { color: 'rgba(255,255,255,0.05)' },
                                 ticks: {
-                                    color: '#64748b',
+                                    color: '#4ade80',
                                     font: { size: 10 },
-                                    callback: v => '$' + v.toFixed(1) + 'M'
+                                    callback: v => '$' + v.toFixed(1) + 'B'
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Ann. Revenue',
+                                    color: '#4ade80',
+                                    font: { size: 10 }
                                 }
                             }
                         }
@@ -4400,8 +4491,8 @@
                 });
                 
             } catch (error) {
-                console.error('Error loading daily fees:', error);
-                if (loadingEl) loadingEl.innerHTML = '<div style="color: var(--text-muted);">Failed to load fees data</div>';
+                console.error('Error loading fees/price data:', error);
+                if (loadingEl) loadingEl.innerHTML = '<div style="color: var(--text-muted);">Failed to load data</div>';
             }
         }
         
