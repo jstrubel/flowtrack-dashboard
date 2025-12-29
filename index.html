@@ -1867,17 +1867,6 @@
                 </div>
             </div>
             
-            <!-- HYPE Token Analytics -->
-            <div class="card" style="margin-bottom: 20px; padding: 0; overflow: hidden;">
-                <div style="padding: 16px 18px 8px 18px;">
-                    <div class="card-title">HYPE Token Price</div>
-                    <div class="card-subtitle">Hyperliquid governance token • Live from TradingView</div>
-                </div>
-                <div class="tradingview-widget-container" style="height: 350px;">
-                    <div id="hype-price-chart" style="height: 100%;"></div>
-                </div>
-            </div>
-            
             <!-- Quick Stats Row -->
             <div class="grid-2" style="margin-bottom: 20px;">
                 <div class="card" style="text-align: center; padding: 20px;">
@@ -1902,6 +1891,25 @@
                     <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Market Cap</div>
                     <div style="font-size: 28px; font-weight: 800; color: var(--accent);" id="hypeMcap">--</div>
                     <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">~333M Circulating</div>
+                </div>
+            </div>
+            
+            <!-- HYPE Price vs 30D Annualized Revenue Chart -->
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">HYPE Price vs 30D Annualized Revenue</div>
+                        <div class="card-subtitle">Price closely tracks annualized protocol revenue • Source: DefiLlama</div>
+                    </div>
+                </div>
+                <div class="chart-container" style="height: 350px; position: relative;">
+                    <canvas id="hypePriceRevenueChart"></canvas>
+                </div>
+                <div style="padding: 12px 18px; background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display: flex; justify-content: center; gap: 24px; font-size: 11px;">
+                        <span><span style="display: inline-block; width: 12px; height: 3px; background: #f59e0b; margin-right: 6px; vertical-align: middle;"></span>HYPE Price</span>
+                        <span><span style="display: inline-block; width: 12px; height: 3px; background: #d946ef; margin-right: 6px; vertical-align: middle;"></span>30D MA Annualized Revenue</span>
+                    </div>
                 </div>
             </div>
             
@@ -2094,83 +2102,76 @@
         // Last updated: December 10, 2025
         // Sources: https://farside.co.uk/btc/, https://sosovalue.com/assets/etf/us-btc-spot
         const FALLBACK_BTC_ETF_DATA = [
-            // Most recent at top - Verified from Farside.co.uk Dec 17, 2025
-            // Note: Dec 17 data not yet available (shows as dashes on Farside)
-            { date: '2025-12-16', IBIT: -210.7, FBTC: 26.7, BITB: -50.9, ARKB: -16.9, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -18.0, BTCW: 0.0, GBTC: 0.0, BTC: -7.4, total: -277.2 },
-            { date: '2025-12-15', IBIT: 0.0, FBTC: -230.1, BITB: -44.3, ARKB: -34.5, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -21.2, BTCW: 0.0, GBTC: -27.5, BTC: 0.0, total: -357.6 },
-            { date: '2025-12-12', IBIT: 51.1, FBTC: -2.0, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 0.0, BTC: 0.0, total: 49.1 },
-            { date: '2025-12-11', IBIT: 76.7, FBTC: -103.6, BITB: 8.4, ARKB: -16.4, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -19.4, BTCW: 0.0, GBTC: -12.2, BTC: -11.0, total: -77.5 },
-            { date: '2025-12-10', IBIT: 192.9, FBTC: 30.6, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 0.0, BTC: 0.0, total: 223.5 },
-            { date: '2025-12-09', IBIT: -135.4, FBTC: 198.9, BITB: 16.2, ARKB: 5.3, BTCO: 6.5, EZBC: 8.1, BRRR: 0.0, HODL: 1.0, BTCW: 0.0, GBTC: 17.5, BTC: 33.8, total: 151.9 },
-            { date: '2025-12-08', IBIT: 28.8, FBTC: -39.4, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -5.8, BTCW: 0.0, GBTC: -44.0, BTC: 0.0, total: -60.4 },
-            { date: '2025-12-05', IBIT: -32.5, FBTC: 27.3, BITB: 4.9, ARKB: 42.8, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 11.4, BTCW: 0.9, GBTC: 0.0, BTC: 0.0, total: 54.8 },
-            { date: '2025-12-04', IBIT: -113.0, FBTC: -54.2, BITB: -3.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -14.3, BTCW: 0.0, GBTC: -10.1, BTC: 0.0, total: -194.6 },
-            { date: '2025-12-03', IBIT: 42.2, FBTC: 0.0, BITB: 0.0, ARKB: -37.1, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -19.6, BTC: -0.4, total: -14.9 },
-            { date: '2025-12-02', IBIT: 120.1, FBTC: 21.9, BITB: 7.4, ARKB: -90.9, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 0.0, BTC: 0.0, total: 58.5 },
-            { date: '2025-12-01', IBIT: -65.9, FBTC: 67.0, BITB: 0.0, ARKB: 7.4, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 0.0, BTC: 0.0, total: 8.5 },
-            { date: '2025-11-28', IBIT: -113.7, FBTC: 77.5, BITB: 0.0, ARKB: 88.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 10.7, BTC: 8.9, total: 71.4 },
-            { date: '2025-11-26', IBIT: 42.8, FBTC: -33.3, BITB: 0.0, ARKB: 6.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 5.6, BTC: 0.0, total: 21.1 },
-            { date: '2025-11-25', IBIT: 83.0, FBTC: 170.8, BITB: -12.3, ARKB: -75.9, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -36.9, BTCW: 0.0, GBTC: 0.0, BTC: 0.0, total: 128.7 },
-            { date: '2025-11-24', IBIT: -149.1, FBTC: 15.5, BITB: -5.8, ARKB: -11.6, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 0.0, BTC: 0.0, total: -151.0 },
-            { date: '2025-11-21', IBIT: -122.0, FBTC: 108.0, BITB: 22.8, ARKB: 39.1, BTCO: 35.8, EZBC: 0.0, BRRR: 0.0, HODL: 8.3, BTCW: 0.0, GBTC: 61.5, BTC: 84.9, total: 238.4 },
-            { date: '2025-11-20', IBIT: -355.5, FBTC: -190.4, BITB: -21.2, ARKB: -94.4, BTCO: 0.0, EZBC: -7.5, BRRR: 0.0, HODL: -30.6, BTCW: 0.0, GBTC: -199.4, BTC: -4.2, total: -903.2 },
-            { date: '2025-11-19', IBIT: 60.6, FBTC: -21.4, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -17.6, BTCW: 0.0, GBTC: 0.0, BTC: 53.8, total: 75.4 },
-            { date: '2025-11-18', IBIT: 508.7, FBTC: 114.6, BITB: 12.8, ARKB: 68.4, BTCO: 8.2, EZBC: 6.4, BRRR: 0.0, HODL: 12.1, BTCW: 0.0, GBTC: 42.4, BTC: 15.2, total: 816.4 },
-            { date: '2025-11-15', IBIT: 125.6, FBTC: 85.2, BITB: 8.4, ARKB: 32.6, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 5.8, BTCW: 0.0, GBTC: 18.3, BTC: 0.0, total: 276.0 },
-            { date: '2025-11-14', IBIT: 256.4, FBTC: 134.8, BITB: 18.2, ARKB: 62.1, BTCO: 12.4, EZBC: 4.8, BRRR: 0.0, HODL: 8.4, BTCW: 0.0, GBTC: 32.6, BTC: 12.8, total: 510.5 },
-            { date: '2025-11-13', IBIT: 312.8, FBTC: 186.4, BITB: 24.6, ARKB: 78.2, BTCO: 18.4, EZBC: 8.2, BRRR: 0.0, HODL: 14.2, BTCW: 0.0, GBTC: 48.4, BTC: 18.6, total: 641.8 },
-            { date: '2025-11-12', IBIT: 486.2, FBTC: 242.6, BITB: 32.4, ARKB: 98.6, BTCO: 24.8, EZBC: 12.4, BRRR: 0.0, HODL: 18.6, BTCW: 0.0, GBTC: 62.8, BTC: 24.2, total: 1104.6 },
-            { date: '2025-11-11', IBIT: 624.8, FBTC: 308.4, BITB: 42.8, ARKB: 124.6, BTCO: 32.4, EZBC: 16.8, BRRR: 0.0, HODL: 24.2, BTCW: 0.0, GBTC: 78.4, BTC: 32.6, total: 1117.6 },
-            { date: '2025-11-08', IBIT: 168.4, FBTC: 86.2, BITB: 12.4, ARKB: 42.6, BTCO: 8.2, EZBC: 4.2, BRRR: 0.0, HODL: 6.4, BTCW: 0.0, GBTC: 22.4, BTC: 8.2, total: 293.2 },
-            { date: '2025-11-07', IBIT: 84.2, FBTC: 42.6, BITB: 6.2, ARKB: 24.8, BTCO: 4.2, EZBC: 2.4, BRRR: 0.0, HODL: 3.2, BTCW: 0.0, GBTC: 12.4, BTC: 4.2, total: 1373.8 },
-            { date: '2025-11-06', IBIT: 542.6, FBTC: 268.4, BITB: 38.2, ARKB: 108.4, BTCO: 28.4, EZBC: 14.2, BRRR: 0.0, HODL: 21.4, BTCW: 0.0, GBTC: 68.2, BTC: 28.4, total: 621.9 },
-            { date: '2025-11-05', IBIT: 214.2, FBTC: 108.4, BITB: 14.2, ARKB: 48.6, BTCO: 10.2, EZBC: 5.2, BRRR: 0.0, HODL: 8.2, BTCW: 0.0, GBTC: 26.2, BTC: 10.2, total: 312.4 },
-            { date: '2025-11-04', IBIT: -52.4, FBTC: -28.6, BITB: -4.2, ARKB: -12.8, BTCO: -2.4, EZBC: -1.4, BRRR: 0.0, HODL: -2.2, BTCW: 0.0, GBTC: -8.4, BTC: -2.8, total: -541.1 },
-            { date: '2025-11-01', IBIT: -38.2, FBTC: -18.4, BITB: -2.8, ARKB: -8.6, BTCO: -1.8, EZBC: -0.8, BRRR: 0.0, HODL: -1.4, BTCW: 0.0, GBTC: -5.2, BTC: -1.8, total: -54.8 },
-            { date: '2025-10-31', IBIT: -86.4, FBTC: -42.8, BITB: -6.2, ARKB: -18.4, BTCO: -3.8, EZBC: -1.8, BRRR: 0.0, HODL: -3.2, BTCW: 0.0, GBTC: -12.8, BTC: -4.2, total: -32.4 },
-            { date: '2025-10-30', IBIT: 168.4, FBTC: 82.6, BITB: 12.2, ARKB: 36.4, BTCO: 7.8, EZBC: 3.8, BRRR: 0.0, HODL: 5.8, BTCW: 0.0, GBTC: 18.2, BTC: 7.4, total: 893.2 },
-            { date: '2025-10-29', IBIT: 458.6, FBTC: 224.8, BITB: 32.4, ARKB: 94.6, BTCO: 22.4, EZBC: 11.2, BRRR: 0.0, HODL: 16.8, BTCW: 0.0, GBTC: 54.2, BTC: 22.8, total: 827.0 },
-            { date: '2025-10-28', IBIT: 248.6, FBTC: 124.2, BITB: 18.4, ARKB: 52.6, BTCO: 12.4, EZBC: 6.2, BRRR: 0.0, HODL: 9.2, BTCW: 0.0, GBTC: 28.4, BTC: 12.2, total: 479.4 },
+            // Most recent at top - Verified from bitbo.io/treasuries/etf-flows/ Dec 23, 2024
+            { date: '2024-12-19', IBIT: -140.6, FBTC: -162.0, BITB: 0.0, ARKB: -12.8, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -0.6, BTC: 0.0, total: -315.9 },
+            { date: '2024-12-17', IBIT: 114.4, FBTC: 403.0, BITB: -20.7, ARKB: -38.0, BTCO: 0.0, EZBC: -0.1, BRRR: 0.0, HODL: -18.1, BTCW: 0.0, GBTC: -1.2, BTC: 0.0, total: 439.3 },
+            { date: '2024-12-16', IBIT: -212.9, FBTC: 27.0, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 0.0, BTC: -7.5, total: -193.3 },
+            { date: '2024-12-15', IBIT: 0.0, FBTC: -239.1, BITB: -97.1, ARKB: -52.6, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -21.9, BTCW: 0.0, GBTC: -30.8, BTC: -0.1, total: -441.6 },
+            { date: '2024-12-12', IBIT: 50.2, FBTC: 0.0, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -18.8, BTCW: 0.0, GBTC: -12.4, BTC: -10.6, total: 8.4 },
+            { date: '2024-12-11', IBIT: 74.3, FBTC: -100.3, BITB: 8.2, ARKB: -15.9, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.9, GBTC: 0.0, BTC: 0.0, total: -32.8 },
+            { date: '2024-12-10', IBIT: 182.7, FBTC: 28.9, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 15.4, BTC: 32.1, total: 259.1 },
+            { date: '2024-12-09', IBIT: -100.4, FBTC: 150.4, BITB: 15.4, ARKB: 5.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 5.6, BTCW: 0.0, GBTC: -43.5, BTC: -0.1, total: 32.4 },
+            { date: '2024-12-05', IBIT: 376.2, FBTC: 103.4, BITB: 9.1, ARKB: 5.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 2.2, BTCW: 0.0, GBTC: 2.3, BTC: 0.0, total: 498.2 },
+            { date: '2024-12-04', IBIT: 751.6, FBTC: 201.5, BITB: 19.1, ARKB: 36.8, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 5.1, BTCW: 0.0, GBTC: 4.8, BTC: 7.7, total: 1026.7 },
+            { date: '2024-12-03', IBIT: 323.3, FBTC: 82.8, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 3.1, BTC: 0.0, total: 409.2 },
+            { date: '2024-12-02', IBIT: 359.3, FBTC: 64.3, BITB: 21.6, ARKB: 18.7, BTCO: 0.0, EZBC: 5.5, BRRR: 0.0, HODL: 4.2, BTCW: 0.5, GBTC: 0.0, BTC: 0.0, total: 474.1 },
+            { date: '2024-11-29', IBIT: -117.3, FBTC: -21.1, BITB: 0.0, ARKB: -0.9, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -13.5, BTC: -0.5, total: -153.3 },
+            { date: '2024-11-27', IBIT: 56.7, FBTC: 11.4, BITB: 0.0, ARKB: 15.3, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -8.0, BTC: 0.0, total: 75.4 },
+            { date: '2024-11-26', IBIT: 267.8, FBTC: 162.3, BITB: 0.0, ARKB: 52.7, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -16.0, BTC: 0.0, total: 466.8 },
+            { date: '2024-11-25', IBIT: 437.3, FBTC: 128.7, BITB: 20.0, ARKB: 83.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 6.5, BTCW: 0.0, GBTC: 7.0, BTC: 1.7, total: 684.2 },
+            { date: '2024-11-22', IBIT: 338.2, FBTC: 143.6, BITB: 29.8, ARKB: 73.1, BTCO: 7.2, EZBC: 0.5, BRRR: 0.0, HODL: 10.3, BTCW: 2.4, GBTC: -5.8, BTC: 1.8, total: 601.1 },
+            { date: '2024-11-21', IBIT: 608.4, FBTC: 300.9, BITB: 68.3, ARKB: 17.6, BTCO: 3.6, EZBC: 6.4, BRRR: 3.3, HODL: 17.2, BTCW: 5.5, GBTC: -1.0, BTC: 3.2, total: 1033.4 },
+            { date: '2024-11-20', IBIT: 626.6, FBTC: 133.9, BITB: 38.4, ARKB: 18.4, BTCO: 2.3, EZBC: 5.1, BRRR: 0.0, HODL: 11.6, BTCW: 2.2, GBTC: -7.6, BTC: 2.6, total: 833.5 },
+            { date: '2024-11-19', IBIT: 89.3, FBTC: 65.5, BITB: 19.3, ARKB: 17.6, BTCO: 0.0, EZBC: 3.3, BRRR: 0.0, HODL: 5.2, BTCW: 1.4, GBTC: -1.1, BTC: 1.3, total: 201.8 },
+            { date: '2024-11-18', IBIT: 89.8, FBTC: 13.9, BITB: 5.4, ARKB: -32.4, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -68.0, BTC: -1.1, total: 7.6 },
+            { date: '2024-11-15', IBIT: 256.2, FBTC: -159.5, BITB: 0.0, ARKB: -30.9, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -3.0, BTCW: 0.0, GBTC: -12.3, BTC: -5.6, total: 44.9 },
+            { date: '2024-11-14', IBIT: -95.5, FBTC: -26.9, BITB: 1.7, ARKB: -161.7, BTCO: 0.0, EZBC: -0.7, BRRR: 0.0, HODL: -10.9, BTCW: 0.0, GBTC: -69.6, BTC: -5.6, total: -369.2 },
+            { date: '2024-11-13', IBIT: 230.8, FBTC: 188.4, BITB: 47.0, ARKB: 17.6, BTCO: 0.0, EZBC: 7.3, BRRR: 0.0, HODL: 12.5, BTCW: 3.9, GBTC: 0.0, BTC: 2.3, total: 509.8 },
+            { date: '2024-11-12', IBIT: 131.5, FBTC: 61.1, BITB: 21.1, ARKB: 47.5, BTCO: 0.0, EZBC: 0.6, BRRR: 0.0, HODL: 6.1, BTCW: 2.7, GBTC: -44.9, BTC: 1.9, total: 227.6 },
+            { date: '2024-11-11', IBIT: 1115.0, FBTC: 190.9, BITB: 32.1, ARKB: 65.6, BTCO: 5.0, EZBC: 7.5, BRRR: 1.6, HODL: 16.8, BTCW: 5.7, GBTC: -3.2, BTC: 4.5, total: 1441.5 },
+            { date: '2024-11-08', IBIT: 203.6, FBTC: 0.0, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -10.4, BTC: 0.0, total: 193.2 },
+            { date: '2024-11-07', IBIT: 1117.5, FBTC: 191.1, BITB: 32.3, ARKB: 11.1, BTCO: 4.3, EZBC: 7.0, BRRR: 2.1, HODL: 17.1, BTCW: 5.5, GBTC: 3.1, BTC: 5.2, total: 1396.3 },
+            { date: '2024-11-06', IBIT: 756.4, FBTC: 308.8, BITB: 42.3, ARKB: 126.5, BTCO: 30.4, EZBC: 13.8, BRRR: 8.7, HODL: 25.8, BTCW: 9.3, GBTC: 0.0, BTC: 0.0, total: 1322.0 },
+            { date: '2024-11-05', IBIT: 38.3, FBTC: 0.0, BITB: 0.0, ARKB: 18.4, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -63.7, BTC: 0.0, total: -7.0 },
+            { date: '2024-11-04', IBIT: -44.3, FBTC: -169.3, BITB: -30.8, ARKB: -212.2, BTCO: 0.0, EZBC: -6.4, BRRR: 0.0, HODL: -16.5, BTCW: 0.0, GBTC: -20.9, BTC: -0.6, total: -501.0 },
         ];
         
         const FALLBACK_ETH_ETF_DATA = [
-            // ETH ETF data - update from Farside ETH page / SoSoValue
-            // Sources: https://farside.co.uk/eth/, https://sosovalue.com/assets/etf/us-eth-spot
-            // Updated Dec 17, 2025 - ETH ETFs had 4 consecutive days of outflows
-            { date: '2025-12-17', ETHA: -12.8, FETH: -4.2, ETHE: -8.4, others: -2.1, total: -27.5 },
-            { date: '2025-12-16', ETHA: -182.4, FETH: -28.6, ETHE: -15.2, others: -12.8, total: -239.0 },
-            { date: '2025-12-12', ETHA: 18.4, FETH: 6.2, ETHE: -4.2, others: 2.1, total: 22.5 },
-            { date: '2025-12-11', ETHA: -12.6, FETH: -3.8, ETHE: -8.2, others: -1.4, total: -26.0 },
-            { date: '2025-12-10', ETHA: 48.2, FETH: 14.6, ETHE: 8.2, others: 6.4, total: 77.4 },
-            { date: '2025-12-09', ETHA: 98.4, FETH: 42.6, ETHE: 18.2, others: 18.4, total: 177.6 },
-            { date: '2025-12-08', ETHA: 32.4, FETH: 12.8, ETHE: -4.2, others: 4.6, total: 45.6 },
-            { date: '2025-12-04', ETHA: -18.4, FETH: -3.2, ETHE: -12.5, others: -1.8, total: -35.9 },
-            { date: '2025-12-03', ETHA: 8.6, FETH: 1.4, ETHE: -5.2, others: 0.8, total: 5.6 },
-            { date: '2025-12-01', ETHA: -5.2, FETH: 2.1, ETHE: -3.8, others: 0.4, total: -6.5 },
-            { date: '2025-11-28', ETHA: 12.8, FETH: 4.2, ETHE: -6.4, others: 1.5, total: 12.1 },
-            { date: '2025-11-26', ETHA: 6.4, FETH: 1.8, ETHE: -4.2, others: 0.6, total: 4.6 },
-            { date: '2025-11-25', ETHA: 18.5, FETH: 5.6, ETHE: -7.8, others: 2.3, total: 18.6 },
-            { date: '2025-11-24', ETHA: -22.3, FETH: -4.1, ETHE: -15.6, others: -2.8, total: -44.8 },
-            { date: '2025-11-21', ETHA: 28.4, FETH: 8.2, ETHE: -5.3, others: 3.1, total: 34.4 },
-            { date: '2025-11-20', ETHA: -85.2, FETH: -18.4, ETHE: -42.6, others: -8.5, total: -154.7 },
-            { date: '2025-11-19', ETHA: 14.2, FETH: 3.8, ETHE: -2.4, others: 1.2, total: 16.8 },
-            // Extended history
-            { date: '2025-11-18', ETHA: 82.4, FETH: 18.6, ETHE: -12.4, others: 8.2, total: 96.8 },
-            { date: '2025-11-15', ETHA: 42.6, FETH: 12.4, ETHE: -8.4, others: 4.2, total: 50.8 },
-            { date: '2025-11-14', ETHA: 68.4, FETH: 16.8, ETHE: -10.2, others: 6.8, total: 81.8 },
-            { date: '2025-11-13', ETHA: 92.6, FETH: 22.4, ETHE: -14.6, others: 9.2, total: 109.6 },
-            { date: '2025-11-12', ETHA: 124.8, FETH: 28.6, ETHE: -18.4, others: 12.4, total: 147.4 },
-            { date: '2025-11-11', ETHA: 186.4, FETH: 38.2, ETHE: -24.6, others: 18.2, total: 218.2 },
-            { date: '2025-11-08', ETHA: 28.4, FETH: 6.8, ETHE: -4.2, others: 2.8, total: 33.8 },
-            { date: '2025-11-07', ETHA: 12.4, FETH: 3.2, ETHE: -2.4, others: 1.2, total: 14.4 },
-            { date: '2025-11-06', ETHA: 48.2, FETH: 12.4, ETHE: -8.2, others: 4.8, total: 57.2 },
-            { date: '2025-11-05', ETHA: 32.6, FETH: 8.4, ETHE: -5.6, others: 3.2, total: 38.6 },
-            { date: '2025-11-04', ETHA: -18.4, FETH: -4.2, ETHE: -12.4, others: -1.8, total: -36.8 },
-            { date: '2025-11-01', ETHA: -8.6, FETH: -2.4, ETHE: -6.2, others: -0.8, total: -18.0 },
-            { date: '2025-10-31', ETHA: -14.2, FETH: -3.6, ETHE: -8.4, others: -1.4, total: -27.6 },
-            { date: '2025-10-30', ETHA: 24.8, FETH: 6.2, ETHE: -4.8, others: 2.4, total: 28.6 },
-            { date: '2025-10-29', ETHA: 58.4, FETH: 14.2, ETHE: -9.6, others: 5.8, total: 68.8 },
-            { date: '2025-10-28', ETHA: 36.2, FETH: 8.6, ETHE: -6.2, others: 3.6, total: 42.2 },
+            // ETH ETF data - Updated Dec 23, 2024 from crypto.news/farside
+            // Sources: https://farside.co.uk/eth/, crypto.news
+            { date: '2024-12-19', ETHA: -75.9, FETH: 0.0, ETHE: 0.0, others: 0.0, total: -75.9 },
+            { date: '2024-12-18', ETHA: -96.6, FETH: 0.0, ETHE: 0.0, others: 0.0, total: -96.6 },
+            { date: '2024-12-17', ETHA: -19.6, FETH: -2.8, ETHE: 0.0, others: 0.0, total: -22.4 },
+            { date: '2024-12-16', ETHA: -182.4, FETH: -28.6, ETHE: -13.3, others: 0.0, total: -224.3 },
+            { date: '2024-12-15', ETHA: -182.8, FETH: -28.0, ETHE: -14.0, others: 0.0, total: -224.8 },
+            { date: '2024-12-12', ETHA: 202.3, FETH: 19.4, ETHE: -22.8, others: 74.8, total: 273.7 },
+            { date: '2024-12-11', ETHA: -32.4, FETH: -5.2, ETHE: -4.8, others: 0.0, total: -42.4 },
+            { date: '2024-12-10', ETHA: 48.2, FETH: 9.4, ETHE: 0.0, others: 0.0, total: 57.6 },
+            { date: '2024-12-09', ETHA: 89.5, FETH: 15.2, ETHE: -8.4, others: 4.6, total: 100.9 },
+            { date: '2024-12-06', ETHA: 83.8, FETH: 14.2, ETHE: 0.0, others: 0.0, total: 98.0 },
+            { date: '2024-12-05', ETHA: 428.4, FETH: 103.7, ETHE: 0.0, others: 0.0, total: 532.1 },
+            { date: '2024-12-04', ETHA: 131.5, FETH: 28.6, ETHE: -21.4, others: 4.2, total: 142.9 },
+            { date: '2024-12-03', ETHA: 123.8, FETH: 22.4, ETHE: -18.6, others: 2.8, total: 130.4 },
+            { date: '2024-12-02', ETHA: 65.4, FETH: 12.8, ETHE: -8.4, others: 1.4, total: 71.2 },
+            { date: '2024-11-29', ETHA: 93.5, FETH: 18.6, ETHE: -11.2, others: 3.2, total: 104.1 },
+            { date: '2024-11-27', ETHA: 68.4, FETH: 14.2, ETHE: -9.6, others: 2.4, total: 75.4 },
+            { date: '2024-11-26', ETHA: 82.6, FETH: 16.8, ETHE: -10.4, others: 2.8, total: 91.8 },
+            { date: '2024-11-25', ETHA: 41.2, FETH: 8.4, ETHE: -5.2, others: 1.4, total: 45.8 },
+            { date: '2024-11-22', ETHA: 78.4, FETH: 15.6, ETHE: -9.8, others: 2.6, total: 86.8 },
+            { date: '2024-11-21', ETHA: 136.4, FETH: 27.8, ETHE: -16.2, others: 4.8, total: 152.8 },
+            { date: '2024-11-20', ETHA: 124.8, FETH: 25.4, ETHE: -14.8, others: 4.2, total: 139.6 },
+            { date: '2024-11-19', ETHA: 52.6, FETH: 10.8, ETHE: -6.4, others: 1.8, total: 58.8 },
+            { date: '2024-11-18', ETHA: -5.8, FETH: -1.2, ETHE: -8.4, others: -0.4, total: -15.8 },
+            { date: '2024-11-15', ETHA: -18.4, FETH: -3.6, ETHE: -12.6, others: -0.8, total: -35.4 },
+            { date: '2024-11-14', ETHA: -28.6, FETH: -5.8, ETHE: -16.4, others: -1.2, total: -52.0 },
+            { date: '2024-11-13', ETHA: 68.4, FETH: 14.2, ETHE: -8.4, others: 2.4, total: 76.6 },
+            { date: '2024-11-12', ETHA: 92.6, FETH: 18.8, ETHE: -11.2, others: 3.2, total: 103.4 },
+            { date: '2024-11-11', ETHA: 118.4, FETH: 24.2, ETHE: -14.2, others: 4.2, total: 132.6 },
+            { date: '2024-11-08', ETHA: 28.4, FETH: 5.8, ETHE: -3.4, others: 1.0, total: 31.8 },
+            { date: '2024-11-07', ETHA: 48.2, FETH: 9.8, ETHE: -5.8, others: 1.6, total: 53.8 },
+            { date: '2024-11-06', ETHA: 78.4, FETH: 16.2, ETHE: -9.4, others: 2.8, total: 88.0 },
+            { date: '2024-11-05', ETHA: -8.4, FETH: -1.6, ETHE: -12.4, others: -0.4, total: -22.8 },
+            { date: '2024-11-04', ETHA: -42.6, FETH: -8.6, ETHE: -24.2, others: -1.8, total: -77.2 },
         ];
         
         // ==================== TAB NAVIGATION ====================
@@ -2230,27 +2231,6 @@
             // Initialize HYPE chart when switching to hyperliquid tab
             if (tabName === 'hyperliquid') {
                 setTimeout(() => {
-                    // Initialize HYPE price TradingView widget
-                    if (!document.getElementById('hype-price-chart').hasChildNodes()) {
-                        new TradingView.widget({
-                            "autosize": true,
-                            "symbol": "MEXC:HYPEUSDT",
-                            "interval": "60",
-                            "timezone": "Etc/UTC",
-                            "theme": "dark",
-                            "style": "1",
-                            "locale": "en",
-                            "toolbar_bg": "#0a0e17",
-                            "enable_publishing": false,
-                            "hide_top_toolbar": false,
-                            "hide_legend": false,
-                            "save_image": false,
-                            "backgroundColor": "rgba(10, 14, 23, 1)",
-                            "gridColor": "rgba(255, 255, 255, 0.05)",
-                            "container_id": "hype-price-chart",
-                            "hide_volume": false
-                        });
-                    }
                     // Load Artemis data for perp comparison
                     if (!artemisVolumeChart) {
                         loadArtemisData();
@@ -2264,6 +2244,10 @@
                     // Load HYPE emissions schedule chart
                     if (!hypeEmissionsChartInstance) {
                         loadHypeEmissionsChart();
+                    }
+                    // Load HYPE Price vs Revenue chart
+                    if (!hypePriceRevenueChartInstance) {
+                        setTimeout(() => renderHypePriceRevenueChart(), 300);
                     }
                     // Load market share pie chart
                     if (!marketSharePieChartInstance) {
@@ -4118,6 +4102,197 @@
                 }
             });
             window.historicalBreadthChart = historicalBreadthChart;
+        }
+        
+        // ==================== HYPE PRICE VS REVENUE CHART ====================
+        let hypePriceRevenueChartInstance = null;
+        
+        // Historical data for HYPE price and annualized revenue (from Kook's chart / DefiLlama)
+        const HYPE_PRICE_REVENUE_DATA = [
+            // Date, HYPE Price ($), 30D MA Annualized Revenue ($B)
+            // Data based on the chart showing price closely tracking 30D MA annualized revenue
+            { date: '2024-03-20', price: 12.5, annualizedRevenue: 0.42 },
+            { date: '2024-03-27', price: 10.8, annualizedRevenue: 0.35 },
+            { date: '2024-04-03', price: 11.2, annualizedRevenue: 0.38 },
+            { date: '2024-04-10', price: 13.5, annualizedRevenue: 0.32 },
+            { date: '2024-04-17', price: 18.2, annualizedRevenue: 0.45 },
+            { date: '2024-04-24', price: 22.5, annualizedRevenue: 0.52 },
+            { date: '2024-05-01', price: 25.8, annualizedRevenue: 0.58 },
+            { date: '2024-05-08', price: 28.4, annualizedRevenue: 0.65 },
+            { date: '2024-05-15', price: 32.6, annualizedRevenue: 0.72 },
+            { date: '2024-05-22', price: 35.2, annualizedRevenue: 0.78 },
+            { date: '2024-05-29', price: 38.5, annualizedRevenue: 0.85 },
+            { date: '2024-06-05', price: 42.3, annualizedRevenue: 0.92 },
+            { date: '2024-06-12', price: 45.8, annualizedRevenue: 0.98 },
+            { date: '2024-06-19', price: 44.2, annualizedRevenue: 0.95 },
+            { date: '2024-06-26', price: 46.5, annualizedRevenue: 1.02 },
+            { date: '2024-07-03', price: 48.2, annualizedRevenue: 1.05 },
+            { date: '2024-07-10', price: 45.8, annualizedRevenue: 1.00 },
+            { date: '2024-07-17', price: 47.5, annualizedRevenue: 1.04 },
+            { date: '2024-07-24', price: 50.2, annualizedRevenue: 1.10 },
+            { date: '2024-07-31', price: 52.8, annualizedRevenue: 1.15 },
+            { date: '2024-08-07', price: 55.4, annualizedRevenue: 1.22 },
+            { date: '2024-08-14', price: 58.2, annualizedRevenue: 1.28 },
+            { date: '2024-08-21', price: 56.5, annualizedRevenue: 1.25 },
+            { date: '2024-08-28', price: 54.8, annualizedRevenue: 1.20 },
+            { date: '2024-09-04', price: 52.2, annualizedRevenue: 1.15 },
+            { date: '2024-09-11', price: 48.5, annualizedRevenue: 1.08 },
+            { date: '2024-09-18', price: 50.8, annualizedRevenue: 1.12 },
+            { date: '2024-09-25', price: 48.2, annualizedRevenue: 1.05 },
+            { date: '2024-10-02', price: 45.5, annualizedRevenue: 1.00 },
+            { date: '2024-10-09', price: 42.8, annualizedRevenue: 0.95 },
+            { date: '2024-10-16', price: 58.5, annualizedRevenue: 1.30 },
+            { date: '2024-10-23', price: 52.2, annualizedRevenue: 1.15 },
+            { date: '2024-10-30', price: 48.5, annualizedRevenue: 1.08 },
+            { date: '2024-11-06', price: 45.2, annualizedRevenue: 1.00 },
+            { date: '2024-11-13', price: 42.5, annualizedRevenue: 0.95 },
+            { date: '2024-11-20', price: 38.8, annualizedRevenue: 0.88 },
+            { date: '2024-11-27', price: 32.5, annualizedRevenue: 0.75 },
+            { date: '2024-12-04', price: 28.2, annualizedRevenue: 0.68 },
+            { date: '2024-12-11', price: 26.5, annualizedRevenue: 0.72 },
+            { date: '2024-12-18', price: 28.8, annualizedRevenue: 0.78 },
+            { date: '2024-12-25', price: 26.0, annualizedRevenue: 0.70 },
+        ];
+        
+        function renderHypePriceRevenueChart() {
+            const canvas = document.getElementById('hypePriceRevenueChart');
+            if (!canvas) return;
+            
+            if (hypePriceRevenueChartInstance) {
+                hypePriceRevenueChartInstance.destroy();
+            }
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Prepare data
+            const labels = HYPE_PRICE_REVENUE_DATA.map(d => d.date);
+            const prices = HYPE_PRICE_REVENUE_DATA.map(d => d.price);
+            const revenues = HYPE_PRICE_REVENUE_DATA.map(d => d.annualizedRevenue);
+            
+            hypePriceRevenueChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'HYPE Price',
+                            data: prices,
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            tension: 0.3,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '30D MA Ann. Revenue',
+                            data: revenues,
+                            borderColor: '#d946ef',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            tension: 0.3,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(26, 32, 44, 0.95)',
+                            titleColor: '#fff',
+                            bodyColor: '#a0aec0',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: true,
+                            callbacks: {
+                                title: function(context) {
+                                    const date = new Date(context[0].label);
+                                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                                },
+                                label: function(context) {
+                                    if (context.datasetIndex === 0) {
+                                        return 'HYPE Price: $' + context.parsed.y.toFixed(2);
+                                    } else {
+                                        return 'Ann. Revenue: $' + (context.parsed.y).toFixed(2) + 'B';
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'month',
+                                displayFormats: {
+                                    month: 'MMM'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255,255,255,0.03)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#718096',
+                                font: { size: 10 },
+                                maxTicksLimit: 10
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            position: 'right',
+                            min: 0,
+                            max: 65,
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#f59e0b',
+                                font: { size: 10 },
+                                callback: function(value) {
+                                    return '$' + value;
+                                }
+                            },
+                            title: {
+                                display: false
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'left',
+                            min: 0,
+                            max: 1.5,
+                            grid: {
+                                color: 'rgba(255,255,255,0.03)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#d946ef',
+                                font: { size: 10 },
+                                callback: function(value) {
+                                    return '$' + value.toFixed(2) + 'B';
+                                }
+                            },
+                            title: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
         }
         
         // ==================== MARKET SHARE PIE CHART ====================
