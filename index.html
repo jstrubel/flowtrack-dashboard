@@ -1867,21 +1867,27 @@
                 </div>
             </div>
             
-            <!-- HYPE Price vs Daily Fees Chart -->
+            <!-- HYPE Price vs Daily Revenue Chart -->
             <div class="card" style="margin-bottom: 20px;">
                 <div class="card-header">
                     <div>
-                        <div class="card-title">HYPE Price vs Daily Fees</div>
-                        <div class="card-subtitle">Since TGE (Nov 29, 2024) • Source: DefiLlama, CoinGecko</div>
+                        <div class="card-title">HYPE Price vs Daily Revenue</div>
+                        <div class="card-subtitle">Live data from Hypurrscan + CoinGecko</div>
                     </div>
                 </div>
                 <div class="chart-container" style="height: 350px; position: relative;">
+                    <div id="hypePriceRevenueLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #718096; display: none;">
+                        <div style="text-align: center;">
+                            <div style="margin-bottom: 8px;">Loading...</div>
+                            <div style="font-size: 10px;">Fetching from Hypurrscan API</div>
+                        </div>
+                    </div>
                     <canvas id="hypePriceRevenueChart"></canvas>
                 </div>
                 <div style="padding: 12px 18px; background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.05);">
                     <div style="display: flex; justify-content: center; gap: 24px; font-size: 11px;">
-                        <span><span style="display: inline-block; width: 12px; height: 3px; background: #f59e0b; margin-right: 6px; vertical-align: middle;"></span>HYPE Price</span>
-                        <span><span style="display: inline-block; width: 12px; height: 3px; background: #d946ef; margin-right: 6px; vertical-align: middle;"></span>Daily Fees</span>
+                        <span><span style="display: inline-block; width: 12px; height: 3px; background: #a78bfa; margin-right: 6px; vertical-align: middle;"></span>HYPE Price</span>
+                        <span><span style="display: inline-block; width: 12px; height: 8px; background: #facc15; margin-right: 6px; vertical-align: middle;"></span>Daily Revenue</span>
                     </div>
                 </div>
             </div>
@@ -4077,88 +4083,132 @@
             window.historicalBreadthChart = historicalBreadthChart;
         }
         
-        // ==================== HYPE PRICE VS DAILY FEES CHART ====================
+        // ==================== HYPE PRICE VS DAILY REVENUE CHART ====================
         let hypePriceRevenueChartInstance = null;
+        let hypePriceRevenueData = null; // Will be populated from APIs
         
-        // Historical data for HYPE price and daily fees (from DefiLlama)
-        // HYPE launched Nov 29, 2024 - all data is post-TGE
-        // Daily fees from DefiLlama, prices from CoinGecko
-        const HYPE_PRICE_REVENUE_DATA = [
-            // Post-TGE data - HYPE Price ($), Daily Fees ($M)
-            // Sources: DefiLlama fees, CoinGecko price history
-            { date: '2024-11-29', price: 3.57, dailyFees: 1.8 },   // TGE day
-            { date: '2024-11-30', price: 8.50, dailyFees: 2.0 },
-            { date: '2024-12-01', price: 10.20, dailyFees: 2.1 },
-            { date: '2024-12-02', price: 12.80, dailyFees: 2.2 },
-            { date: '2024-12-03', price: 14.50, dailyFees: 2.4 },
-            { date: '2024-12-04', price: 13.80, dailyFees: 2.3 },
-            { date: '2024-12-05', price: 15.20, dailyFees: 2.5 },
-            { date: '2024-12-06', price: 17.80, dailyFees: 2.6 },
-            { date: '2024-12-07', price: 20.50, dailyFees: 2.8 },
-            { date: '2024-12-08', price: 22.30, dailyFees: 2.9 },  // $2M+ milestone
-            { date: '2024-12-09', price: 25.80, dailyFees: 3.0 },
-            { date: '2024-12-10', price: 27.50, dailyFees: 2.9 },
-            { date: '2024-12-11', price: 26.20, dailyFees: 2.8 },
-            { date: '2024-12-12', price: 28.80, dailyFees: 3.1 },
-            { date: '2024-12-13', price: 30.50, dailyFees: 3.0 },
-            { date: '2024-12-14', price: 32.20, dailyFees: 2.9 },
-            { date: '2024-12-15', price: 31.50, dailyFees: 2.8 },
-            { date: '2024-12-16', price: 33.80, dailyFees: 3.2 },
-            { date: '2024-12-17', price: 35.00, dailyFees: 3.1 },  // Near ATH
-            { date: '2024-12-18', price: 33.50, dailyFees: 2.9 },
-            { date: '2024-12-19', price: 30.20, dailyFees: 2.6 },
-            { date: '2024-12-20', price: 28.50, dailyFees: 2.4 },
-            { date: '2024-12-21', price: 26.80, dailyFees: 2.3 },
-            { date: '2024-12-22', price: 25.20, dailyFees: 2.2 },
-            { date: '2024-12-23', price: 24.50, dailyFees: 2.1 },
-            { date: '2024-12-24', price: 23.80, dailyFees: 2.0 },
-            { date: '2024-12-25', price: 24.20, dailyFees: 1.9 },
-            { date: '2024-12-26', price: 25.50, dailyFees: 2.0 },
-            { date: '2024-12-27', price: 26.20, dailyFees: 2.1 },
-            { date: '2024-12-28', price: 25.80, dailyFees: 2.0 },
-        ];
+        // Fetch live data from Hypurrscan (fees) and CoinGecko (price)
+        async function fetchHypePriceRevenueData() {
+            try {
+                // Fetch fees from Hypurrscan API (cumulative fees over time)
+                const feesResponse = await fetch('https://api.hypurrscan.io/fees');
+                if (!feesResponse.ok) throw new Error('Hypurrscan API failed');
+                const feesData = await feesResponse.json();
+                
+                // Fetch HYPE price history from CoinGecko (max days)
+                const priceResponse = await fetch('https://api.coingecko.com/api/v3/coins/hyperliquid/market_chart?vs_currency=usd&days=max&interval=daily');
+                if (!priceResponse.ok) throw new Error('CoinGecko API failed');
+                const priceData = await priceResponse.json();
+                
+                // Process fees data - Hypurrscan returns cumulative fees
+                // Format: [{time: unix_seconds, total_fees: cumulative_usdc_micro}]
+                // Calculate daily fees by differencing
+                const dailyFeesMap = new Map();
+                const sortedFees = feesData.sort((a, b) => a.time - b.time);
+                
+                for (let i = 1; i < sortedFees.length; i++) {
+                    const curr = sortedFees[i];
+                    const prev = sortedFees[i - 1];
+                    const date = new Date(curr.time * 1000).toISOString().split('T')[0];
+                    const dailyFee = (curr.total_fees - prev.total_fees) / 1e6; // Convert from micro USDC
+                    
+                    // Aggregate by day (take max if multiple entries per day)
+                    if (!dailyFeesMap.has(date) || dailyFee > dailyFeesMap.get(date)) {
+                        dailyFeesMap.set(date, dailyFee);
+                    }
+                }
+                
+                // Process price data from CoinGecko
+                // Format: {prices: [[timestamp_ms, price], ...]}
+                const priceMap = new Map();
+                priceData.prices.forEach(([ts, price]) => {
+                    const date = new Date(ts).toISOString().split('T')[0];
+                    priceMap.set(date, price);
+                });
+                
+                // Merge data - only include dates where we have both price and fees
+                const combinedData = [];
+                const tgeDate = '2024-11-29'; // HYPE TGE
+                
+                dailyFeesMap.forEach((dailyFees, date) => {
+                    if (date >= tgeDate && priceMap.has(date) && dailyFees > 0) {
+                        combinedData.push({
+                            date: date,
+                            price: priceMap.get(date),
+                            dailyRevenue: dailyFees // Daily revenue in USD (millions)
+                        });
+                    }
+                });
+                
+                // Sort by date
+                combinedData.sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                console.log('HYPE Price/Revenue data loaded:', combinedData.length, 'days');
+                return combinedData;
+                
+            } catch (error) {
+                console.error('Error fetching HYPE price/revenue data:', error);
+                return null;
+            }
+        }
         
-        function renderHypePriceRevenueChart() {
+        async function renderHypePriceRevenueChart() {
             const canvas = document.getElementById('hypePriceRevenueChart');
+            const loadingEl = document.getElementById('hypePriceRevenueLoading');
             if (!canvas) return;
+            
+            if (loadingEl) loadingEl.style.display = 'block';
             
             if (hypePriceRevenueChartInstance) {
                 hypePriceRevenueChartInstance.destroy();
             }
             
+            // Fetch live data if not already loaded
+            if (!hypePriceRevenueData) {
+                hypePriceRevenueData = await fetchHypePriceRevenueData();
+            }
+            
+            if (loadingEl) loadingEl.style.display = 'none';
+            
+            if (!hypePriceRevenueData || hypePriceRevenueData.length === 0) {
+                console.error('No HYPE price/revenue data available');
+                return;
+            }
+            
             const ctx = canvas.getContext('2d');
             
             // Prepare data
-            const labels = HYPE_PRICE_REVENUE_DATA.map(d => d.date);
-            const prices = HYPE_PRICE_REVENUE_DATA.map(d => d.price);
-            const fees = HYPE_PRICE_REVENUE_DATA.map(d => d.dailyFees);
+            const labels = hypePriceRevenueData.map(d => d.date);
+            const prices = hypePriceRevenueData.map(d => d.price);
+            const revenues = hypePriceRevenueData.map(d => d.dailyRevenue / 1e6); // Convert to millions
             
             hypePriceRevenueChartInstance = new Chart(ctx, {
-                type: 'line',
+                type: 'bar', // Base type for revenue bars
                 data: {
                     labels: labels,
                     datasets: [
                         {
+                            type: 'line', // Price as line overlay
                             label: 'HYPE Price',
                             data: prices,
-                            borderColor: '#f59e0b',
+                            borderColor: '#a78bfa', // Purple like Artemis
                             backgroundColor: 'transparent',
                             borderWidth: 2,
                             pointRadius: 0,
                             pointHoverRadius: 4,
                             tension: 0.1,
-                            yAxisID: 'y'
+                            yAxisID: 'y',
+                            order: 0 // Draw on top
                         },
                         {
-                            label: 'Daily Fees',
-                            data: fees,
-                            borderColor: '#d946ef',
-                            backgroundColor: 'transparent',
-                            borderWidth: 2,
-                            pointRadius: 0,
-                            pointHoverRadius: 4,
-                            tension: 0.1,
-                            yAxisID: 'y1'
+                            type: 'bar', // Revenue as bars
+                            label: 'Daily Revenue',
+                            data: revenues,
+                            backgroundColor: 'rgba(250, 204, 21, 0.8)', // Yellow like Artemis
+                            borderColor: 'rgba(250, 204, 21, 1)',
+                            borderWidth: 0,
+                            yAxisID: 'y1',
+                            order: 1 // Draw behind
                         }
                     ]
                 },
@@ -4190,7 +4240,7 @@
                                     if (context.datasetIndex === 0) {
                                         return 'HYPE Price: $' + context.parsed.y.toFixed(2);
                                     } else {
-                                        return 'Daily Fees: $' + context.parsed.y.toFixed(1) + 'M';
+                                        return 'Daily Revenue: $' + context.parsed.y.toFixed(2) + 'M';
                                     }
                                 }
                             }
@@ -4218,13 +4268,11 @@
                         y: {
                             type: 'linear',
                             position: 'right',
-                            min: 0,
-                            max: 40,
                             grid: {
                                 display: false
                             },
                             ticks: {
-                                color: '#f59e0b',
+                                color: '#a78bfa', // Purple for price
                                 font: { size: 10 },
                                 callback: function(value) {
                                     return '$' + value;
@@ -4237,17 +4285,15 @@
                         y1: {
                             type: 'linear',
                             position: 'left',
-                            min: 0,
-                            max: 4,
                             grid: {
                                 color: 'rgba(255,255,255,0.03)',
                                 drawBorder: false
                             },
                             ticks: {
-                                color: '#d946ef',
+                                color: '#facc15', // Yellow for revenue
                                 font: { size: 10 },
                                 callback: function(value) {
-                                    return '$' + value.toFixed(1) + 'M';
+                                    return '$' + value.toFixed(0) + 'M';
                                 }
                             },
                             title: {
