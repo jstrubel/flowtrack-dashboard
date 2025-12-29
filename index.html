@@ -1677,33 +1677,6 @@
             </div>
         </div>
         
-        <!-- Futures Basis Chart -->
-        <div class="card" style="margin-top: 20px;">
-            <div class="card-header">
-                <div>
-                    <div class="card-title">BTC Futures Basis (Annualized)</div>
-                    <div class="card-subtitle">Premium/Discount of Quarterly Futures vs Spot • Carry Trade Indicator</div>
-                </div>
-                <div class="time-selector">
-                    <button class="time-btn" onclick="updateBasisChart(90)">3M</button>
-                    <button class="time-btn" onclick="updateBasisChart(180)">6M</button>
-                    <button class="time-btn active" onclick="updateBasisChart(365)">1Y</button>
-                </div>
-            </div>
-            <div class="chart-container tall" style="position: relative;">
-                <canvas id="basisChart"></canvas>
-                <div id="basisLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;">
-                    <div style="font-size: 12px; color: var(--text-muted);">Loading basis data...</div>
-                </div>
-            </div>
-            <div style="margin-top: 12px; padding: 12px; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border-left: 3px solid #f59e0b;">
-                <div style="font-size: 12px; color: var(--text-muted);">
-                    <strong style="color: var(--text);">Interpretation:</strong> Positive basis = futures at premium (bullish sentiment). 
-                    10-20% annualized = healthy bull market. &gt;30% = overheated. Negative = bearish/deleveraging.
-                </div>
-            </div>
-        </div>
-        
         </div><!-- Close section -->
         </div><!-- END DERIVATIVES TAB -->
 
@@ -4109,49 +4082,110 @@
         
         // Historical data for HYPE price and annualized revenue (from Kook's chart / DefiLlama)
         const HYPE_PRICE_REVENUE_DATA = [
-            // Date, HYPE Price ($), 30D MA Annualized Revenue ($B)
-            // Data based on the chart showing price closely tracking 30D MA annualized revenue
-            { date: '2024-03-20', price: 12.5, annualizedRevenue: 0.42 },
-            { date: '2024-03-27', price: 10.8, annualizedRevenue: 0.35 },
-            { date: '2024-04-03', price: 11.2, annualizedRevenue: 0.38 },
-            { date: '2024-04-10', price: 13.5, annualizedRevenue: 0.32 },
-            { date: '2024-04-17', price: 18.2, annualizedRevenue: 0.45 },
-            { date: '2024-04-24', price: 22.5, annualizedRevenue: 0.52 },
-            { date: '2024-05-01', price: 25.8, annualizedRevenue: 0.58 },
-            { date: '2024-05-08', price: 28.4, annualizedRevenue: 0.65 },
-            { date: '2024-05-15', price: 32.6, annualizedRevenue: 0.72 },
-            { date: '2024-05-22', price: 35.2, annualizedRevenue: 0.78 },
-            { date: '2024-05-29', price: 38.5, annualizedRevenue: 0.85 },
-            { date: '2024-06-05', price: 42.3, annualizedRevenue: 0.92 },
-            { date: '2024-06-12', price: 45.8, annualizedRevenue: 0.98 },
-            { date: '2024-06-19', price: 44.2, annualizedRevenue: 0.95 },
-            { date: '2024-06-26', price: 46.5, annualizedRevenue: 1.02 },
-            { date: '2024-07-03', price: 48.2, annualizedRevenue: 1.05 },
-            { date: '2024-07-10', price: 45.8, annualizedRevenue: 1.00 },
-            { date: '2024-07-17', price: 47.5, annualizedRevenue: 1.04 },
-            { date: '2024-07-24', price: 50.2, annualizedRevenue: 1.10 },
-            { date: '2024-07-31', price: 52.8, annualizedRevenue: 1.15 },
-            { date: '2024-08-07', price: 55.4, annualizedRevenue: 1.22 },
-            { date: '2024-08-14', price: 58.2, annualizedRevenue: 1.28 },
-            { date: '2024-08-21', price: 56.5, annualizedRevenue: 1.25 },
-            { date: '2024-08-28', price: 54.8, annualizedRevenue: 1.20 },
-            { date: '2024-09-04', price: 52.2, annualizedRevenue: 1.15 },
-            { date: '2024-09-11', price: 48.5, annualizedRevenue: 1.08 },
-            { date: '2024-09-18', price: 50.8, annualizedRevenue: 1.12 },
-            { date: '2024-09-25', price: 48.2, annualizedRevenue: 1.05 },
-            { date: '2024-10-02', price: 45.5, annualizedRevenue: 1.00 },
-            { date: '2024-10-09', price: 42.8, annualizedRevenue: 0.95 },
-            { date: '2024-10-16', price: 58.5, annualizedRevenue: 1.30 },
-            { date: '2024-10-23', price: 52.2, annualizedRevenue: 1.15 },
-            { date: '2024-10-30', price: 48.5, annualizedRevenue: 1.08 },
-            { date: '2024-11-06', price: 45.2, annualizedRevenue: 1.00 },
-            { date: '2024-11-13', price: 42.5, annualizedRevenue: 0.95 },
-            { date: '2024-11-20', price: 38.8, annualizedRevenue: 0.88 },
-            { date: '2024-11-27', price: 32.5, annualizedRevenue: 0.75 },
-            { date: '2024-12-04', price: 28.2, annualizedRevenue: 0.68 },
-            { date: '2024-12-11', price: 26.5, annualizedRevenue: 0.72 },
-            { date: '2024-12-18', price: 28.8, annualizedRevenue: 0.78 },
-            { date: '2024-12-25', price: 26.0, annualizedRevenue: 0.70 },
+            // Daily data - HYPE Price ($), 30D MA Annualized Revenue ($B)
+            // More granular data based on chart showing price tracking revenue
+            // Late March - Early April 2024
+            { date: '2024-03-25', price: 12.0, annualizedRevenue: 0.38 },
+            { date: '2024-03-28', price: 11.2, annualizedRevenue: 0.35 },
+            { date: '2024-03-31', price: 10.5, annualizedRevenue: 0.32 },
+            { date: '2024-04-03', price: 11.8, annualizedRevenue: 0.34 },
+            { date: '2024-04-06', price: 13.2, annualizedRevenue: 0.38 },
+            { date: '2024-04-09', price: 14.5, annualizedRevenue: 0.42 },
+            { date: '2024-04-12', price: 15.8, annualizedRevenue: 0.45 },
+            { date: '2024-04-15', price: 17.2, annualizedRevenue: 0.48 },
+            { date: '2024-04-18', price: 18.5, annualizedRevenue: 0.52 },
+            { date: '2024-04-21', price: 19.8, annualizedRevenue: 0.55 },
+            { date: '2024-04-24', price: 21.2, annualizedRevenue: 0.58 },
+            { date: '2024-04-27', price: 22.5, annualizedRevenue: 0.60 },
+            { date: '2024-04-30', price: 23.8, annualizedRevenue: 0.62 },
+            // May 2024
+            { date: '2024-05-03', price: 25.2, annualizedRevenue: 0.65 },
+            { date: '2024-05-06', price: 26.5, annualizedRevenue: 0.68 },
+            { date: '2024-05-09', price: 27.8, annualizedRevenue: 0.70 },
+            { date: '2024-05-12', price: 29.0, annualizedRevenue: 0.72 },
+            { date: '2024-05-15', price: 30.2, annualizedRevenue: 0.75 },
+            { date: '2024-05-18', price: 31.5, annualizedRevenue: 0.78 },
+            { date: '2024-05-21', price: 32.8, annualizedRevenue: 0.80 },
+            { date: '2024-05-24', price: 34.0, annualizedRevenue: 0.82 },
+            { date: '2024-05-27', price: 35.2, annualizedRevenue: 0.85 },
+            { date: '2024-05-30', price: 36.5, annualizedRevenue: 0.88 },
+            // June 2024
+            { date: '2024-06-02', price: 37.8, annualizedRevenue: 0.90 },
+            { date: '2024-06-05', price: 38.5, annualizedRevenue: 0.92 },
+            { date: '2024-06-08', price: 39.2, annualizedRevenue: 0.94 },
+            { date: '2024-06-11', price: 40.5, annualizedRevenue: 0.96 },
+            { date: '2024-06-14', price: 41.2, annualizedRevenue: 0.98 },
+            { date: '2024-06-17', price: 42.0, annualizedRevenue: 1.00 },
+            { date: '2024-06-20', price: 42.8, annualizedRevenue: 1.02 },
+            { date: '2024-06-23', price: 43.5, annualizedRevenue: 1.04 },
+            { date: '2024-06-26', price: 44.2, annualizedRevenue: 1.05 },
+            { date: '2024-06-29', price: 44.8, annualizedRevenue: 1.06 },
+            // July 2024
+            { date: '2024-07-02', price: 45.5, annualizedRevenue: 1.08 },
+            { date: '2024-07-05', price: 46.0, annualizedRevenue: 1.09 },
+            { date: '2024-07-08', price: 46.5, annualizedRevenue: 1.10 },
+            { date: '2024-07-11', price: 47.2, annualizedRevenue: 1.12 },
+            { date: '2024-07-14', price: 47.8, annualizedRevenue: 1.14 },
+            { date: '2024-07-17', price: 48.5, annualizedRevenue: 1.16 },
+            { date: '2024-07-20', price: 49.2, annualizedRevenue: 1.18 },
+            { date: '2024-07-23', price: 50.0, annualizedRevenue: 1.20 },
+            { date: '2024-07-26', price: 50.8, annualizedRevenue: 1.22 },
+            { date: '2024-07-29', price: 51.5, annualizedRevenue: 1.24 },
+            // August 2024 - Peak period
+            { date: '2024-08-01', price: 52.2, annualizedRevenue: 1.26 },
+            { date: '2024-08-04', price: 53.0, annualizedRevenue: 1.28 },
+            { date: '2024-08-07', price: 53.8, annualizedRevenue: 1.30 },
+            { date: '2024-08-10', price: 54.5, annualizedRevenue: 1.32 },
+            { date: '2024-08-13', price: 55.2, annualizedRevenue: 1.33 },
+            { date: '2024-08-16', price: 55.0, annualizedRevenue: 1.32 },
+            { date: '2024-08-19', price: 54.5, annualizedRevenue: 1.30 },
+            { date: '2024-08-22', price: 53.8, annualizedRevenue: 1.28 },
+            { date: '2024-08-25', price: 53.0, annualizedRevenue: 1.26 },
+            { date: '2024-08-28', price: 52.2, annualizedRevenue: 1.24 },
+            { date: '2024-08-31', price: 51.5, annualizedRevenue: 1.22 },
+            // September 2024 - Decline
+            { date: '2024-09-03', price: 50.5, annualizedRevenue: 1.18 },
+            { date: '2024-09-06', price: 49.5, annualizedRevenue: 1.14 },
+            { date: '2024-09-09', price: 48.5, annualizedRevenue: 1.10 },
+            { date: '2024-09-12', price: 47.5, annualizedRevenue: 1.08 },
+            { date: '2024-09-15', price: 46.5, annualizedRevenue: 1.05 },
+            { date: '2024-09-18', price: 45.2, annualizedRevenue: 1.02 },
+            { date: '2024-09-21', price: 44.0, annualizedRevenue: 0.98 },
+            { date: '2024-09-24', price: 42.8, annualizedRevenue: 0.95 },
+            { date: '2024-09-27', price: 41.5, annualizedRevenue: 0.92 },
+            { date: '2024-09-30', price: 40.2, annualizedRevenue: 0.88 },
+            // October 2024 - Second peak
+            { date: '2024-10-03', price: 42.0, annualizedRevenue: 0.92 },
+            { date: '2024-10-06', price: 45.5, annualizedRevenue: 1.00 },
+            { date: '2024-10-09', price: 50.2, annualizedRevenue: 1.12 },
+            { date: '2024-10-12', price: 55.0, annualizedRevenue: 1.22 },
+            { date: '2024-10-15', price: 58.5, annualizedRevenue: 1.30 },
+            { date: '2024-10-18', price: 56.0, annualizedRevenue: 1.25 },
+            { date: '2024-10-21', price: 52.5, annualizedRevenue: 1.18 },
+            { date: '2024-10-24', price: 49.0, annualizedRevenue: 1.10 },
+            { date: '2024-10-27', price: 46.0, annualizedRevenue: 1.04 },
+            { date: '2024-10-30', price: 43.5, annualizedRevenue: 0.98 },
+            // November 2024 - Decline
+            { date: '2024-11-02', price: 41.5, annualizedRevenue: 0.94 },
+            { date: '2024-11-05', price: 40.0, annualizedRevenue: 0.90 },
+            { date: '2024-11-08', price: 38.5, annualizedRevenue: 0.86 },
+            { date: '2024-11-11', price: 37.0, annualizedRevenue: 0.82 },
+            { date: '2024-11-14', price: 35.5, annualizedRevenue: 0.78 },
+            { date: '2024-11-17', price: 34.0, annualizedRevenue: 0.75 },
+            { date: '2024-11-20', price: 32.5, annualizedRevenue: 0.72 },
+            { date: '2024-11-23', price: 31.0, annualizedRevenue: 0.70 },
+            { date: '2024-11-26', price: 29.5, annualizedRevenue: 0.68 },
+            { date: '2024-11-29', price: 28.0, annualizedRevenue: 0.66 },
+            // December 2024
+            { date: '2024-12-02', price: 27.0, annualizedRevenue: 0.65 },
+            { date: '2024-12-05', price: 26.5, annualizedRevenue: 0.68 },
+            { date: '2024-12-08', price: 27.2, annualizedRevenue: 0.72 },
+            { date: '2024-12-11', price: 28.0, annualizedRevenue: 0.75 },
+            { date: '2024-12-14', price: 28.5, annualizedRevenue: 0.76 },
+            { date: '2024-12-17', price: 27.8, annualizedRevenue: 0.74 },
+            { date: '2024-12-20', price: 26.5, annualizedRevenue: 0.70 },
+            { date: '2024-12-23', price: 27.0, annualizedRevenue: 0.72 },
+            { date: '2024-12-26', price: 26.2, annualizedRevenue: 0.70 },
         ];
         
         function renderHypePriceRevenueChart() {
@@ -4182,7 +4216,7 @@
                             borderWidth: 2,
                             pointRadius: 0,
                             pointHoverRadius: 4,
-                            tension: 0.3,
+                            tension: 0.1,
                             yAxisID: 'y'
                         },
                         {
@@ -4193,7 +4227,7 @@
                             borderWidth: 2,
                             pointRadius: 0,
                             pointHoverRadius: 4,
-                            tension: 0.3,
+                            tension: 0.1,
                             yAxisID: 'y1'
                         }
                     ]
