@@ -1321,38 +1321,18 @@
                 </div>
             </div>
             
-            <!-- ETF Price Charts -->
-            <div class="grid-2" style="margin-top: 16px;">
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">iShares Bitcoin Trust (IBIT)</div>
-                        <div class="card-subtitle">BlackRock • Largest BTC ETF by AUM</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 350px;">
-                        <div id="ibit-chart" style="height: 100%;"></div>
-                    </div>
-                </div>
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">iShares Ethereum Trust (ETHA)</div>
-                        <div class="card-subtitle">BlackRock • Largest ETH ETF by AUM</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 350px;">
-                        <div id="etha-chart" style="height: 100%;"></div>
-                    </div>
-                </div>
-            </div>
-            
             <!-- Data Source Note -->
-            <div class="card" style="margin-top: 16px; background: var(--bg-secondary);">
+            <div class="card" style="margin-top: 16px; background: linear-gradient(135deg, rgba(234, 179, 8, 0.1) 0%, rgba(234, 179, 8, 0.02) 100%); border: 1px solid rgba(234, 179, 8, 0.2);">
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="font-size: 20px;"></div>
+                    <div style="font-size: 20px;">⚠️</div>
                     <div>
-                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">ETF Data Source</div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">ETF Data Source & Limitations</div>
                         <div style="font-size: 12px; color: var(--text-muted);">
-                            Data from Farside Investors. Updates daily after market close (~4:30 PM ET).
-                            <a href="https://farside.co.uk/btc/" target="_blank" style="color: var(--accent); text-decoration: none;"> View BTC ETF Data →</a>
-                            <a href="https://farside.co.uk/eth/" target="_blank" style="color: var(--accent); text-decoration: none; margin-left: 12px;"> ETH ETF Data →</a>
+                            Primary: SoSoValue API (auto-updates). Fallback: Farside Investors (manual updates). 
+                            If data appears stale, the SoSoValue API may be unavailable - check browser console for details.
+                            <a href="https://farside.co.uk/btc/" target="_blank" style="color: var(--cyan); text-decoration: none;"> View BTC ETF →</a>
+                            <a href="https://farside.co.uk/eth/" target="_blank" style="color: var(--cyan); text-decoration: none; margin-left: 12px;"> ETH ETF →</a>
+                            <a href="https://sosovalue.com/assets/etf/us-btc-spot" target="_blank" style="color: var(--cyan); text-decoration: none; margin-left: 12px;"> SoSoValue →</a>
                         </div>
                     </div>
                 </div>
@@ -7252,10 +7232,11 @@
             
             try {
                 // SoSoValue V2 API - POST request with x-soso-api-key header
+                // Using CORS proxy since SoSoValue doesn't support CORS
                 // Docs: https://sosovalue.gitbook.io/soso-value-api-doc/api-document/get-etf-historical-inflow-chart
-                console.log('Fetching BTC ETF data from SoSoValue API...');
+                console.log('Fetching BTC ETF data from SoSoValue API via CORS proxy...');
                 
-                const btcResponse = await fetch('https://api.sosovalue.xyz/openapi/v2/etf/historicalInflowChart', {
+                const btcResponse = await fetch(CORS_PROXY + encodeURIComponent('https://api.sosovalue.xyz/openapi/v2/etf/historicalInflowChart'), {
                     method: 'POST',
                     headers: {
                         'x-soso-api-key': SOSOVALUE_API_KEY,
@@ -7276,8 +7257,8 @@
                 }
                 
                 // Also fetch ETH ETF data
-                console.log('Fetching ETH ETF data from SoSoValue API...');
-                const ethResponse = await fetch('https://api.sosovalue.xyz/openapi/v2/etf/historicalInflowChart', {
+                console.log('Fetching ETH ETF data from SoSoValue API via CORS proxy...');
+                const ethResponse = await fetch(CORS_PROXY + encodeURIComponent('https://api.sosovalue.xyz/openapi/v2/etf/historicalInflowChart'), {
                     method: 'POST',
                     headers: {
                         'x-soso-api-key': SOSOVALUE_API_KEY,
@@ -7362,7 +7343,6 @@
             updateETFSummaryCards();
             renderETFCharts();
             updateETFTable();
-            initETFTradingViewCharts();
             
             // Hide loading indicators
             const btcLoading = document.getElementById('btcEtfLoading');
