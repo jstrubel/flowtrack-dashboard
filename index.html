@@ -8935,37 +8935,68 @@
         
         // Update portfolio charts
         function updatePortfolioCharts(totalValue, categoryTotals, mcapTotals) {
-            // Custom plugin to draw labels on doughnut chart
-            const datalabelsPlugin = {
-                id: 'datalabels',
+            // Plugin to draw center text (Portfolio Value)
+            const centerTextPlugin = {
+                id: 'centerText',
+                afterDraw(chart) {
+                    if (chart.config.options.plugins.centerText) {
+                        const { ctx, chartArea } = chart;
+                        const centerX = (chartArea.left + chartArea.right) / 2;
+                        const centerY = (chartArea.top + chartArea.bottom) / 2;
+                        
+                        ctx.save();
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        
+                        // "Portfolio Value" label
+                        ctx.fillStyle = '#22d3ee';
+                        ctx.font = '600 14px Inter, sans-serif';
+                        ctx.fillText('Portfolio Value', centerX, centerY - 12);
+                        
+                        // Value
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = 'bold 22px Inter, sans-serif';
+                        ctx.fillText(formatCurrency(totalValue), centerX, centerY + 14);
+                        
+                        ctx.restore();
+                    }
+                }
+            };
+            
+            // Plugin to draw token names on slices
+            const sliceLabelsPlugin = {
+                id: 'sliceLabels',
                 afterDatasetsDraw(chart) {
                     const { ctx, data } = chart;
-                    chart.getDatasetMeta(0).data.forEach((arc, index) => {
+                    const meta = chart.getDatasetMeta(0);
+                    const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                    
+                    meta.data.forEach((arc, index) => {
                         const value = data.datasets[0].data[index];
-                        const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
                         const pct = total > 0 ? (value / total * 100) : 0;
                         
-                        // Only show label if percentage is >= 5%
-                        if (pct >= 5) {
+                        // Only show label if percentage is >= 3%
+                        if (pct >= 3) {
                             const { x, y } = arc.tooltipPosition();
+                            const label = data.labels[index];
+                            
                             ctx.save();
                             ctx.fillStyle = '#ffffff';
-                            ctx.font = 'bold 14px Inter, sans-serif';
+                            ctx.font = 'bold 13px Inter, sans-serif';
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'middle';
-                            // Add text shadow for better readability
-                            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                            ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
                             ctx.shadowBlur = 4;
                             ctx.shadowOffsetX = 1;
                             ctx.shadowOffsetY = 1;
-                            ctx.fillText(`${pct.toFixed(1)}%`, x, y);
+                            ctx.fillText(label, x, y);
                             ctx.restore();
                         }
                     });
                 }
             };
             
-            // Allocation chart (by asset)
+            // Allocation chart (by asset) - main chart with center value
             const allocationCtx = document.getElementById('portfolioAllocationChart');
             if (allocationCtx) {
                 const sorted = [...portfolioHoldings].sort((a, b) => (b.size * b.price) - (a.size * a.price));
@@ -8980,21 +9011,24 @@
                         datasets: [{
                             data: sorted.map(h => h.size * h.price),
                             backgroundColor: colors,
-                            borderWidth: 0
+                            borderWidth: 2,
+                            borderColor: '#0f172a'
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        cutout: '55%',
+                        cutout: '58%',
                         plugins: {
+                            centerText: true,
                             legend: {
                                 position: 'right',
                                 labels: { 
-                                    color: '#94a3b8', 
-                                    padding: 12, 
-                                    font: { size: 11, weight: '600' }, 
+                                    color: '#ffffff',
+                                    padding: 14, 
+                                    font: { size: 13, weight: '600' }, 
                                     usePointStyle: true,
+                                    pointStyle: 'circle',
                                     generateLabels: function(chart) {
                                         const data = chart.data;
                                         const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
@@ -9002,8 +9036,9 @@
                                             const value = data.datasets[0].data[i];
                                             const pct = total > 0 ? (value / total * 100).toFixed(1) : 0;
                                             return {
-                                                text: `${label} (${pct}%)`,
+                                                text: `${label}  ${pct}%`,
                                                 fillStyle: data.datasets[0].backgroundColor[i],
+                                                fontColor: '#ffffff',
                                                 hidden: false,
                                                 index: i
                                             };
@@ -9013,6 +9048,8 @@
                             },
                             tooltip: {
                                 backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
                                 callbacks: {
                                     label: (ctx) => {
                                         const pct = totalValue > 0 ? (ctx.raw / totalValue * 100).toFixed(1) : 0;
@@ -9022,7 +9059,7 @@
                             }
                         }
                     },
-                    plugins: [datalabelsPlugin]
+                    plugins: [centerTextPlugin, sliceLabelsPlugin]
                 });
             }
             
@@ -9048,7 +9085,8 @@
                         datasets: [{
                             data: categories.map(c => categoryTotals[c]),
                             backgroundColor: categories.map(c => categoryColors[c]),
-                            borderWidth: 0
+                            borderWidth: 2,
+                            borderColor: '#0f172a'
                         }]
                     },
                     options: {
@@ -9059,10 +9097,11 @@
                             legend: {
                                 position: 'right',
                                 labels: { 
-                                    color: '#94a3b8', 
-                                    padding: 12, 
-                                    font: { size: 11, weight: '600' }, 
+                                    color: '#ffffff',
+                                    padding: 14, 
+                                    font: { size: 13, weight: '600' }, 
                                     usePointStyle: true,
+                                    pointStyle: 'circle',
                                     generateLabels: function(chart) {
                                         const data = chart.data;
                                         const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
@@ -9070,8 +9109,9 @@
                                             const value = data.datasets[0].data[i];
                                             const pct = total > 0 ? (value / total * 100).toFixed(1) : 0;
                                             return {
-                                                text: `${label} (${pct}%)`,
+                                                text: `${label}  ${pct}%`,
                                                 fillStyle: data.datasets[0].backgroundColor[i],
+                                                fontColor: '#ffffff',
                                                 hidden: false,
                                                 index: i
                                             };
@@ -9081,6 +9121,8 @@
                             },
                             tooltip: {
                                 backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
                                 callbacks: {
                                     label: (ctx) => {
                                         const pct = totalValue > 0 ? (ctx.raw / totalValue * 100).toFixed(1) : 0;
@@ -9090,7 +9132,7 @@
                             }
                         }
                     },
-                    plugins: [datalabelsPlugin]
+                    plugins: [sliceLabelsPlugin]
                 });
             }
         }
@@ -9115,9 +9157,9 @@
             
             if (categorySummaryChart) categorySummaryChart.destroy();
             
-            // Custom plugin for this chart
-            const labelPlugin = {
-                id: 'categoryLabels',
+            // Custom plugin for slice labels
+            const sliceLabelPlugin = {
+                id: 'categorySliceLabels',
                 afterDatasetsDraw(chart) {
                     const { ctx: c, data } = chart;
                     chart.getDatasetMeta(0).data.forEach((arc, index) => {
@@ -9128,12 +9170,12 @@
                             const { x, y } = arc.tooltipPosition();
                             c.save();
                             c.fillStyle = '#ffffff';
-                            c.font = 'bold 14px Inter, sans-serif';
+                            c.font = 'bold 13px Inter, sans-serif';
                             c.textAlign = 'center';
                             c.textBaseline = 'middle';
-                            c.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                            c.shadowColor = 'rgba(0, 0, 0, 0.7)';
                             c.shadowBlur = 4;
-                            c.fillText(`${pct.toFixed(1)}%`, x, y);
+                            c.fillText(data.labels[index], x, y);
                             c.restore();
                         }
                     });
@@ -9147,7 +9189,8 @@
                     datasets: [{
                         data: categories.map(c => categoryTotals[c]),
                         backgroundColor: categories.map(c => categoryColors[c]),
-                        borderWidth: 0
+                        borderWidth: 2,
+                        borderColor: '#0f172a'
                     }]
                 },
                 options: {
@@ -9158,10 +9201,11 @@
                         legend: {
                             position: 'right',
                             labels: { 
-                                color: '#e2e8f0', 
-                                padding: 12, 
-                                font: { size: 12, weight: '600' }, 
+                                color: '#ffffff', 
+                                padding: 14, 
+                                font: { size: 13, weight: '600' }, 
                                 usePointStyle: true,
+                                pointStyle: 'circle',
                                 generateLabels: function(chart) {
                                     const data = chart.data;
                                     const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
@@ -9169,8 +9213,9 @@
                                         const value = data.datasets[0].data[i];
                                         const pct = total > 0 ? (value / total * 100).toFixed(1) : 0;
                                         return {
-                                            text: `${label} (${pct}%)`,
+                                            text: `${label}  ${pct}%`,
                                             fillStyle: data.datasets[0].backgroundColor[i],
+                                            fontColor: '#ffffff',
                                             hidden: false,
                                             index: i
                                         };
@@ -9180,6 +9225,8 @@
                         },
                         tooltip: {
                             backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
                             callbacks: {
                                 label: (ctx) => {
                                     const pct = totalValue > 0 ? (ctx.raw / totalValue * 100).toFixed(1) : 0;
@@ -9189,7 +9236,7 @@
                         }
                     }
                 },
-                plugins: [labelPlugin]
+                plugins: [sliceLabelPlugin]
             });
         }
         
@@ -9201,6 +9248,7 @@
             const mcapLabels = [];
             const mcapData = [];
             const mcapColors = [];
+            const shortLabels = [];
             
             // Define colors for market cap tiers
             const tierColors = {
@@ -9210,16 +9258,16 @@
                 cash: '#10b981'     // green
             };
             
-            if (mcapTotals.large > 0) { mcapLabels.push('Large Cap (>$10B)'); mcapData.push(mcapTotals.large); mcapColors.push(tierColors.large); }
-            if (mcapTotals.mid > 0) { mcapLabels.push('Mid Cap ($2-10B)'); mcapData.push(mcapTotals.mid); mcapColors.push(tierColors.mid); }
-            if (mcapTotals.small > 0) { mcapLabels.push('Small Cap (<$2B)'); mcapData.push(mcapTotals.small); mcapColors.push(tierColors.small); }
-            if (mcapTotals.cash > 0) { mcapLabels.push('Cash'); mcapData.push(mcapTotals.cash); mcapColors.push(tierColors.cash); }
+            if (mcapTotals.large > 0) { mcapLabels.push('Large Cap'); shortLabels.push('Large'); mcapData.push(mcapTotals.large); mcapColors.push(tierColors.large); }
+            if (mcapTotals.mid > 0) { mcapLabels.push('Mid Cap'); shortLabels.push('Mid'); mcapData.push(mcapTotals.mid); mcapColors.push(tierColors.mid); }
+            if (mcapTotals.small > 0) { mcapLabels.push('Small Cap'); shortLabels.push('Small'); mcapData.push(mcapTotals.small); mcapColors.push(tierColors.small); }
+            if (mcapTotals.cash > 0) { mcapLabels.push('Cash'); shortLabels.push('Cash'); mcapData.push(mcapTotals.cash); mcapColors.push(tierColors.cash); }
             
             if (mcapSummaryChart) mcapSummaryChart.destroy();
             
-            // Custom plugin for this chart
-            const labelPlugin = {
-                id: 'mcapLabels',
+            // Custom plugin for slice labels
+            const sliceLabelPlugin = {
+                id: 'mcapSliceLabels',
                 afterDatasetsDraw(chart) {
                     const { ctx: c, data } = chart;
                     chart.getDatasetMeta(0).data.forEach((arc, index) => {
@@ -9230,12 +9278,12 @@
                             const { x, y } = arc.tooltipPosition();
                             c.save();
                             c.fillStyle = '#ffffff';
-                            c.font = 'bold 14px Inter, sans-serif';
+                            c.font = 'bold 13px Inter, sans-serif';
                             c.textAlign = 'center';
                             c.textBaseline = 'middle';
-                            c.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                            c.shadowColor = 'rgba(0, 0, 0, 0.7)';
                             c.shadowBlur = 4;
-                            c.fillText(`${pct.toFixed(1)}%`, x, y);
+                            c.fillText(shortLabels[index], x, y);
                             c.restore();
                         }
                     });
@@ -9249,7 +9297,8 @@
                     datasets: [{
                         data: mcapData,
                         backgroundColor: mcapColors,
-                        borderWidth: 0
+                        borderWidth: 2,
+                        borderColor: '#0f172a'
                     }]
                 },
                 options: {
@@ -9260,10 +9309,11 @@
                         legend: {
                             position: 'right',
                             labels: { 
-                                color: '#e2e8f0', 
-                                padding: 12, 
-                                font: { size: 12, weight: '600' }, 
+                                color: '#ffffff', 
+                                padding: 14, 
+                                font: { size: 13, weight: '600' }, 
                                 usePointStyle: true,
+                                pointStyle: 'circle',
                                 generateLabels: function(chart) {
                                     const data = chart.data;
                                     const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
@@ -9271,8 +9321,9 @@
                                         const value = data.datasets[0].data[i];
                                         const pct = total > 0 ? (value / total * 100).toFixed(1) : 0;
                                         return {
-                                            text: `${label} (${pct}%)`,
+                                            text: `${label}  ${pct}%`,
                                             fillStyle: data.datasets[0].backgroundColor[i],
+                                            fontColor: '#ffffff',
                                             hidden: false,
                                             index: i
                                         };
@@ -9282,6 +9333,8 @@
                         },
                         tooltip: {
                             backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
                             callbacks: {
                                 label: (ctx) => {
                                     const pct = totalValue > 0 ? (ctx.raw / totalValue * 100).toFixed(1) : 0;
@@ -9291,7 +9344,7 @@
                         }
                     }
                 },
-                plugins: [labelPlugin]
+                plugins: [sliceLabelPlugin]
             });
         }
         
