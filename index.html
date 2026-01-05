@@ -2767,6 +2767,95 @@
                     </div>
                 </div>
 
+                <!-- SMA Portfolio Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">Total AUM (Protocol Fund + SMAs)</div>
+                    </div>
+                    
+                    <!-- Total AUM Header -->
+                    <div class="card" style="margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                            <div>
+                                <div style="color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Total Assets Under Management</div>
+                                <div id="totalAumValue" style="font-size: 32px; font-weight: 700; color: var(--cyan); text-shadow: 0 0 20px rgba(34, 211, 238, 0.5);">--</div>
+                            </div>
+                            <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+                                <div style="text-align: center;">
+                                    <div style="color: var(--text-muted); font-size: 11px;">Protocol Fund</div>
+                                    <div id="protocolFundValue" style="font-size: 18px; font-weight: 600; color: #a78bfa;">--</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="color: var(--text-muted); font-size: 11px;">SMA Accounts</div>
+                                    <div id="smaValue" style="font-size: 18px; font-weight: 600; color: #22d3ee;">--</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <!-- Combined AUM Pie Chart -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div>
+                                    <div class="card-title">Combined Asset Allocation</div>
+                                    <div class="card-subtitle">Protocol Fund + All SMAs</div>
+                                </div>
+                            </div>
+                            <div class="chart-container" style="height: 320px;">
+                                <canvas id="combinedAumChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- SMA Breakdown -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div>
+                                    <div class="card-title">SMA Account Details</div>
+                                    <div class="card-subtitle">Separately Managed Accounts breakdown</div>
+                                </div>
+                            </div>
+                            <div id="smaAccountsList" style="padding: 10px 0;">
+                                <!-- Populated by JavaScript -->
+                            </div>
+                            <div style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 12px; padding-top: 12px;">
+                                <div style="display: flex; justify-content: space-between; font-weight: 600;">
+                                    <span style="color: var(--text-dim);">Total SMA Value</span>
+                                    <span id="smaTotalValue" style="color: var(--cyan);">--</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Combined Holdings Table -->
+                    <div class="card" style="margin-top: 16px;">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">Combined Holdings Summary</div>
+                                <div class="card-subtitle">Total positions across Protocol Fund and all SMAs</div>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="holdings-table">
+                                <thead>
+                                    <tr>
+                                        <th>Asset</th>
+                                        <th>Protocol Fund</th>
+                                        <th>SMA Total</th>
+                                        <th>Combined Size</th>
+                                        <th>Price</th>
+                                        <th>Total Value</th>
+                                        <th>Weight</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="combinedHoldingsTable">
+                                    <!-- Populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Disclaimer -->
                 <div class="portfolio-disclaimer">
                     ⚠️ <strong>CONFIDENTIAL</strong> — This portfolio information is for authorized viewers only. 
@@ -8541,6 +8630,35 @@
             'HYPE': '#e879f9',      // Hyperliquid pink/magenta
         };
         
+        // SMA (Separately Managed Accounts) Configuration
+        // Based on the Excel formula: =Portfolio!E23+2.51+1.5+2 for BTC and =Portfolio!E24+342.8 for ETH
+        let smaAccounts = [
+            { name: 'SMA Account #1', ticker: 'BTC', size: 2.51, client: 'Client A' },
+            { name: 'SMA Account #2', ticker: 'BTC', size: 1.5, client: 'Client B' },
+            { name: 'SMA Account #3', ticker: 'BTC', size: 2.0, client: 'Client C' },
+            { name: 'SMA Account #4', ticker: 'ETH', size: 342.8, client: 'Client D' }
+        ];
+        
+        let combinedAumChart = null;
+        
+        // Load SMA accounts from localStorage
+        function loadSmaFromStorage() {
+            const saved = localStorage.getItem('flowtrackSmaAccounts');
+            if (saved) {
+                try {
+                    smaAccounts = JSON.parse(saved);
+                    console.log('SMA accounts loaded:', smaAccounts.length, 'accounts');
+                } catch (e) {
+                    console.error('Error loading SMA accounts:', e);
+                }
+            }
+        }
+        
+        // Save SMA accounts to localStorage
+        function saveSmaToStorage() {
+            localStorage.setItem('flowtrackSmaAccounts', JSON.stringify(smaAccounts));
+        }
+        
         // Load portfolio from localStorage
         function loadPortfolioFromStorage() {
             const saved = localStorage.getItem('flowtrackPortfolio');
@@ -8597,8 +8715,9 @@
                 tabBtn.classList.add('unlocked');
             }
             
-            // Load saved portfolio and fetch prices
+            // Load saved portfolio and SMA data, then fetch prices
             loadPortfolioFromStorage();
+            loadSmaFromStorage();
             refreshPortfolioPrices();
         }
         
@@ -8810,6 +8929,9 @@
             
             // Update portfolio history chart
             updatePortfolioHistoryChart();
+            
+            // Update SMA / Total AUM section
+            updateSmaUI();
         }
         
         // Update holdings table
@@ -9347,6 +9469,278 @@
                 plugins: [sliceLabelPlugin]
             });
         }
+        
+        // ========== SMA PORTFOLIO FUNCTIONS ==========
+        
+        function calculateSmaTotal() {
+            let total = 0;
+            smaAccounts.forEach(sma => {
+                // Find the price from portfolio holdings
+                const holding = portfolioHoldings.find(h => h.ticker === sma.ticker);
+                if (holding) {
+                    total += sma.size * holding.price;
+                }
+            });
+            return total;
+        }
+        
+        function getCombinedHoldings() {
+            // Start with protocol fund holdings
+            const combined = {};
+            
+            portfolioHoldings.forEach(h => {
+                combined[h.ticker] = {
+                    ticker: h.ticker,
+                    name: h.name,
+                    cgId: h.cgId,
+                    category: h.category,
+                    price: h.price,
+                    mcap: h.mcap,
+                    image: h.image,
+                    protocolSize: h.size,
+                    smaSize: 0,
+                    totalSize: h.size
+                };
+            });
+            
+            // Add SMA holdings
+            smaAccounts.forEach(sma => {
+                if (combined[sma.ticker]) {
+                    combined[sma.ticker].smaSize += sma.size;
+                    combined[sma.ticker].totalSize += sma.size;
+                } else {
+                    // SMA has a token not in protocol fund
+                    const holding = portfolioHoldings.find(h => h.ticker === sma.ticker);
+                    combined[sma.ticker] = {
+                        ticker: sma.ticker,
+                        name: sma.ticker,
+                        cgId: '',
+                        category: 'other',
+                        price: holding ? holding.price : 0,
+                        mcap: 0,
+                        image: '',
+                        protocolSize: 0,
+                        smaSize: sma.size,
+                        totalSize: sma.size
+                    };
+                }
+            });
+            
+            return combined;
+        }
+        
+        function updateSmaUI() {
+            const { totalValue: protocolValue } = calculatePortfolioTotals();
+            const smaTotal = calculateSmaTotal();
+            const totalAum = protocolValue + smaTotal;
+            
+            // Update header values
+            document.getElementById('totalAumValue').textContent = formatCurrency(totalAum);
+            document.getElementById('protocolFundValue').textContent = formatCurrency(protocolValue);
+            document.getElementById('smaValue').textContent = formatCurrency(smaTotal);
+            document.getElementById('smaTotalValue').textContent = formatCurrency(smaTotal);
+            
+            // Update SMA accounts list
+            updateSmaAccountsList();
+            
+            // Update combined holdings table
+            updateCombinedHoldingsTable(totalAum);
+            
+            // Update combined AUM chart
+            updateCombinedAumChart(totalAum);
+        }
+        
+        function updateSmaAccountsList() {
+            const container = document.getElementById('smaAccountsList');
+            if (!container) return;
+            
+            container.innerHTML = smaAccounts.map((sma, idx) => {
+                const holding = portfolioHoldings.find(h => h.ticker === sma.ticker);
+                const price = holding ? holding.price : 0;
+                const value = sma.size * price;
+                const color = assetColors[sma.ticker] || '#6b7280';
+                
+                return `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 8px; height: 8px; border-radius: 50%; background: ${color};"></div>
+                            <div>
+                                <div style="font-weight: 600; color: #e2e8f0;">${sma.name}</div>
+                                <div style="font-size: 11px; color: var(--text-muted);">${sma.client}</div>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: 600; color: ${color};">${sma.size.toLocaleString()} ${sma.ticker}</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">${formatCurrency(value)}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function updateCombinedHoldingsTable(totalAum) {
+            const tbody = document.getElementById('combinedHoldingsTable');
+            if (!tbody) return;
+            
+            const combined = getCombinedHoldings();
+            const holdings = Object.values(combined).sort((a, b) => (b.totalSize * b.price) - (a.totalSize * a.price));
+            
+            tbody.innerHTML = holdings.map(h => {
+                const totalValue = h.totalSize * h.price;
+                const weight = totalAum > 0 ? (totalValue / totalAum * 100) : 0;
+                const iconColor = assetColors[h.ticker] || categoryColors[h.category] || '#6b7280';
+                
+                return `
+                    <tr>
+                        <td>
+                            <div class="asset-cell">
+                                ${h.image 
+                                    ? `<img src="${h.image}" alt="${h.ticker}" class="asset-icon-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                       <div class="asset-icon" style="background: ${iconColor}; display: none;">${h.ticker.charAt(0)}</div>`
+                                    : `<div class="asset-icon" style="background: ${iconColor};">${h.ticker.charAt(0)}</div>`
+                                }
+                                <div>
+                                    <div class="asset-name">${h.name}</div>
+                                    <div class="asset-ticker">${h.ticker}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="color: var(--text-dim);">${h.protocolSize.toLocaleString()}</td>
+                        <td style="color: #22d3ee;">${h.smaSize > 0 ? h.smaSize.toLocaleString() : '-'}</td>
+                        <td style="font-weight: 600;">${h.totalSize.toLocaleString()}</td>
+                        <td>${formatCurrency(h.price)}</td>
+                        <td style="font-weight: 600;">${formatCurrency(totalValue)}</td>
+                        <td style="color: var(--cyan); font-weight: 700;">${weight.toFixed(2)}%</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        function updateCombinedAumChart(totalAum) {
+            const ctx = document.getElementById('combinedAumChart');
+            if (!ctx) return;
+            
+            const combined = getCombinedHoldings();
+            const holdings = Object.values(combined)
+                .map(h => ({ ...h, value: h.totalSize * h.price }))
+                .filter(h => h.value > 0)
+                .sort((a, b) => b.value - a.value);
+            
+            const colors = holdings.map(h => assetColors[h.ticker] || categoryColors[h.category] || '#6b7280');
+            
+            if (combinedAumChart) combinedAumChart.destroy();
+            
+            // Center text plugin for total AUM
+            const centerTextPlugin = {
+                id: 'aumCenterText',
+                afterDraw(chart) {
+                    const { ctx: c, chartArea } = chart;
+                    const centerX = (chartArea.left + chartArea.right) / 2;
+                    const centerY = (chartArea.top + chartArea.bottom) / 2;
+                    
+                    c.save();
+                    c.textAlign = 'center';
+                    c.textBaseline = 'middle';
+                    
+                    c.fillStyle = '#22d3ee';
+                    c.font = '600 13px Inter, sans-serif';
+                    c.fillText('Total AUM', centerX, centerY - 12);
+                    
+                    c.fillStyle = '#ffffff';
+                    c.font = 'bold 20px Inter, sans-serif';
+                    c.fillText(formatCurrency(totalAum), centerX, centerY + 12);
+                    
+                    c.restore();
+                }
+            };
+            
+            // Slice labels plugin
+            const sliceLabelsPlugin = {
+                id: 'aumSliceLabels',
+                afterDatasetsDraw(chart) {
+                    const { ctx: c, data } = chart;
+                    const meta = chart.getDatasetMeta(0);
+                    const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                    
+                    meta.data.forEach((arc, index) => {
+                        const value = data.datasets[0].data[index];
+                        const pct = total > 0 ? (value / total * 100) : 0;
+                        
+                        if (pct >= 3) {
+                            const { x, y } = arc.tooltipPosition();
+                            c.save();
+                            c.fillStyle = '#ffffff';
+                            c.font = 'bold 12px Inter, sans-serif';
+                            c.textAlign = 'center';
+                            c.textBaseline = 'middle';
+                            c.shadowColor = 'rgba(0, 0, 0, 0.7)';
+                            c.shadowBlur = 4;
+                            c.fillText(data.labels[index], x, y);
+                            c.restore();
+                        }
+                    });
+                }
+            };
+            
+            combinedAumChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: holdings.map(h => h.ticker),
+                    datasets: [{
+                        data: holdings.map(h => h.value),
+                        backgroundColor: colors,
+                        borderWidth: 2,
+                        borderColor: '#0f172a'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '55%',
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { 
+                                color: '#ffffff',
+                                padding: 12, 
+                                font: { size: 12, weight: '600' }, 
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        const pct = total > 0 ? (value / total * 100).toFixed(1) : 0;
+                                        return {
+                                            text: `${label}  ${pct}%`,
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            fontColor: '#ffffff',
+                                            hidden: false,
+                                            index: i
+                                        };
+                                    });
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            callbacks: {
+                                label: (ctx) => {
+                                    const pct = totalAum > 0 ? (ctx.raw / totalAum * 100).toFixed(1) : 0;
+                                    return `${ctx.label}: ${formatCurrency(ctx.raw)} (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                },
+                plugins: [centerTextPlugin, sliceLabelsPlugin]
+            });
+        }
+        
+        // ========== END SMA FUNCTIONS ==========
         
         // Portfolio history management
         function getPortfolioHistory() {
