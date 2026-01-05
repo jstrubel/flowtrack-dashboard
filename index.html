@@ -970,6 +970,14 @@
             flex-shrink: 0;
         }
         
+        .asset-icon-img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            object-fit: cover;
+        }
+        
         .asset-icon.usdc { background: #2775ca; color: white; }
         .asset-icon.btc { background: #f7931a; color: white; }
         .asset-icon.eth { background: #627eea; color: white; }
@@ -1307,7 +1315,7 @@
             <button class="tab-btn" onclick="switchTab('macro')">Macro Dashboard</button>
             <button class="tab-btn" onclick="switchTab('derivatives')">Derivatives Data</button>
             <button class="tab-btn" onclick="switchTab('hyperliquid')">Hyperliquid</button>
-            <button class="tab-btn locked" id="portfolioTabBtn" onclick="switchTab('portfolio')">Protocol Fund</button>
+            <button class="tab-btn locked" id="portfolioTabBtn" onclick="switchTab('portfolio')">Portfolio</button>
         </div>
 
         <!-- DASHBOARD TAB -->
@@ -8484,11 +8492,11 @@
         
         // Portfolio holdings - stored in localStorage for persistence
         let portfolioHoldings = [
-            { ticker: 'USDC', name: 'USD Coin', cgId: 'usd-coin', size: 687794, category: 'stablecoin', price: 1.00, mcap: 0 },
-            { ticker: 'HYPE', name: 'Hyperliquid', cgId: 'hyperliquid', size: 14831, category: 'layer1', price: 0, mcap: 0 },
-            { ticker: 'ETH', name: 'Ethereum', cgId: 'ethereum', size: 113.81, category: 'majors', price: 0, mcap: 0 },
-            { ticker: 'BTC', name: 'Bitcoin', cgId: 'bitcoin', size: 0.87, category: 'majors', price: 0, mcap: 0 },
-            { ticker: 'SOL', name: 'Solana', cgId: 'solana', size: 1.47, category: 'layer1', price: 0, mcap: 0 }
+            { ticker: 'USDC', name: 'USD Coin', cgId: 'usd-coin', size: 687794, category: 'stablecoin', price: 1.00, mcap: 0, image: 'https://assets.coingecko.com/coins/images/6319/small/usdc.png' },
+            { ticker: 'HYPE', name: 'Hyperliquid', cgId: 'hyperliquid', size: 14831, category: 'layer1', price: 0, mcap: 0, image: 'https://assets.coingecko.com/coins/images/40280/small/hyperliquid.jpeg' },
+            { ticker: 'ETH', name: 'Ethereum', cgId: 'ethereum', size: 113.81, category: 'majors', price: 0, mcap: 0, image: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png' },
+            { ticker: 'BTC', name: 'Bitcoin', cgId: 'bitcoin', size: 0.87, category: 'majors', price: 0, mcap: 0, image: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png' },
+            { ticker: 'SOL', name: 'Solana', cgId: 'solana', size: 1.47, category: 'layer1', price: 0, mcap: 0, image: 'https://assets.coingecko.com/coins/images/4128/small/solana.png' }
         ];
         
         // Category colors
@@ -8625,6 +8633,10 @@
                             if (holding) {
                                 holding.price = coin.current_price || 0;
                                 holding.mcap = coin.market_cap || 0;
+                                // Update image URL if available
+                                if (coin.image) {
+                                    holding.image = coin.image;
+                                }
                                 console.log(`Updated ${holding.ticker}: $${holding.price}`);
                             }
                         });
@@ -8653,6 +8665,12 @@
                                 if (holding) {
                                     holding.price = coin.current_price || 0;
                                     holding.mcap = coin.market_cap || 0;
+                                if (holding) {
+                                    holding.price = coin.current_price || 0;
+                                    holding.mcap = coin.market_cap || 0;
+                                    if (coin.image) {
+                                        holding.image = coin.image;
+                                    }
                                 }
                             });
                             success = true;
@@ -8780,16 +8798,19 @@
             tbody.innerHTML = sorted.map((h, idx) => {
                 const value = h.size * h.price;
                 const weight = totalValue > 0 ? (value / totalValue * 100) : 0;
-                const iconClass = assetColors[h.ticker] ? h.ticker.toLowerCase() : 'default';
-                const iconColor = assetColors[h.ticker] || '#6b7280';
+                const iconColor = assetColors[h.ticker] || categoryColors[h.category] || '#6b7280';
+                
+                // Use real image if available, otherwise fallback to colored circle
+                const iconHtml = h.image 
+                    ? `<img src="${h.image}" alt="${h.ticker}" class="asset-icon-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                       <div class="asset-icon" style="background: ${iconColor}; display: none;">${h.ticker.charAt(0)}</div>`
+                    : `<div class="asset-icon" style="background: ${iconColor};">${h.ticker.charAt(0)}</div>`;
                 
                 return `
                     <tr data-ticker="${h.ticker}">
                         <td>
                             <div class="asset-cell">
-                                <div class="asset-icon ${iconClass}" style="${!assetColors[h.ticker] ? 'background: ' + iconColor : ''}">
-                                    ${h.ticker.charAt(0)}
-                                </div>
+                                ${iconHtml}
                                 <div>
                                     <div class="asset-name">${h.name}</div>
                                     <div class="asset-ticker">${h.ticker}</div>
@@ -8889,6 +8910,31 @@
         
         // Update portfolio charts
         function updatePortfolioCharts(totalValue, categoryTotals, mcapTotals) {
+            // Custom plugin to draw labels on doughnut chart
+            const datalabelsPlugin = {
+                id: 'datalabels',
+                afterDatasetsDraw(chart) {
+                    const { ctx, data } = chart;
+                    chart.getDatasetMeta(0).data.forEach((arc, index) => {
+                        const value = data.datasets[0].data[index];
+                        const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                        const pct = total > 0 ? (value / total * 100) : 0;
+                        
+                        // Only show label if percentage is >= 3%
+                        if (pct >= 3) {
+                            const { x, y } = arc.tooltipPosition();
+                            ctx.save();
+                            ctx.fillStyle = '#ffffff';
+                            ctx.font = 'bold 11px Inter, sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(`${pct.toFixed(1)}%`, x, y);
+                            ctx.restore();
+                        }
+                    });
+                }
+            };
+            
             // Allocation chart (by asset)
             const allocationCtx = document.getElementById('portfolioAllocationChart');
             if (allocationCtx) {
@@ -8910,11 +8956,30 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        cutout: '65%',
+                        cutout: '55%',
                         plugins: {
                             legend: {
                                 position: 'right',
-                                labels: { color: '#94a3b8', padding: 8, font: { size: 10, weight: '600' }, usePointStyle: true }
+                                labels: { 
+                                    color: '#94a3b8', 
+                                    padding: 12, 
+                                    font: { size: 11, weight: '600' }, 
+                                    usePointStyle: true,
+                                    generateLabels: function(chart) {
+                                        const data = chart.data;
+                                        const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                        return data.labels.map((label, i) => {
+                                            const value = data.datasets[0].data[i];
+                                            const pct = total > 0 ? (value / total * 100).toFixed(1) : 0;
+                                            return {
+                                                text: `${label} (${pct}%)`,
+                                                fillStyle: data.datasets[0].backgroundColor[i],
+                                                hidden: false,
+                                                index: i
+                                            };
+                                        });
+                                    }
+                                }
                             },
                             tooltip: {
                                 backgroundColor: 'rgba(17, 24, 39, 0.95)',
@@ -8926,7 +8991,8 @@
                                 }
                             }
                         }
-                    }
+                    },
+                    plugins: [datalabelsPlugin]
                 });
             }
             
@@ -8958,11 +9024,30 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        cutout: '65%',
+                        cutout: '55%',
                         plugins: {
                             legend: {
                                 position: 'right',
-                                labels: { color: '#94a3b8', padding: 8, font: { size: 10, weight: '600' }, usePointStyle: true }
+                                labels: { 
+                                    color: '#94a3b8', 
+                                    padding: 12, 
+                                    font: { size: 11, weight: '600' }, 
+                                    usePointStyle: true,
+                                    generateLabels: function(chart) {
+                                        const data = chart.data;
+                                        const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                        return data.labels.map((label, i) => {
+                                            const value = data.datasets[0].data[i];
+                                            const pct = total > 0 ? (value / total * 100).toFixed(1) : 0;
+                                            return {
+                                                text: `${label} (${pct}%)`,
+                                                fillStyle: data.datasets[0].backgroundColor[i],
+                                                hidden: false,
+                                                index: i
+                                            };
+                                        });
+                                    }
+                                }
                             },
                             tooltip: {
                                 backgroundColor: 'rgba(17, 24, 39, 0.95)',
@@ -8974,7 +9059,8 @@
                                 }
                             }
                         }
-                    }
+                    },
+                    plugins: [datalabelsPlugin]
                 });
             }
         }
