@@ -770,6 +770,474 @@
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
+        
+        /* ==================== PORTFOLIO TAB STYLES ==================== */
+        .tab-btn.locked::after {
+            content: '🔒';
+            margin-left: 6px;
+            font-size: 10px;
+        }
+        
+        .tab-btn.unlocked::after {
+            content: '✓';
+            margin-left: 6px;
+            font-size: 10px;
+            color: var(--good);
+        }
+        
+        /* Password Gate */
+        .password-gate {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 50vh;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .gate-icon {
+            font-size: 64px;
+            margin-bottom: 24px;
+            opacity: 0.8;
+        }
+        
+        .gate-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+        
+        .gate-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+        
+        .password-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+            max-width: 320px;
+        }
+        
+        .password-input {
+            padding: 14px 18px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            text-align: center;
+            letter-spacing: 2px;
+            transition: all 0.2s;
+        }
+        
+        .password-input:focus {
+            outline: none;
+            border-color: var(--cyan);
+            box-shadow: 0 0 20px var(--cyan-glow);
+        }
+        
+        .password-input::placeholder {
+            letter-spacing: normal;
+            color: var(--text-dim);
+        }
+        
+        .unlock-btn {
+            padding: 14px 24px;
+            background: linear-gradient(135deg, var(--cyan) 0%, #06b6d4 100%);
+            border: none;
+            border-radius: 10px;
+            color: var(--bg);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .unlock-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--cyan-glow);
+        }
+        
+        .error-msg {
+            color: var(--bad);
+            font-size: 12px;
+            font-weight: 600;
+            display: none;
+        }
+        
+        .error-msg.show {
+            display: block;
+        }
+        
+        /* Portfolio Header */
+        .portfolio-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        .portfolio-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text);
+        }
+        
+        .portfolio-date {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .portfolio-value {
+            text-align: right;
+        }
+        
+        .portfolio-value-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .portfolio-value-amount {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--cyan);
+            text-shadow: 0 0 30px var(--cyan-glow);
+        }
+        
+        /* Holdings Table */
+        .holdings-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .holdings-table th {
+            text-align: left;
+            padding: 12px 12px;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .holdings-table th:last-child,
+        .holdings-table td:last-child {
+            text-align: right;
+        }
+        
+        .holdings-table td {
+            padding: 12px 12px;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(42, 63, 95, 0.5);
+            vertical-align: middle;
+        }
+        
+        .holdings-table tr:hover {
+            background: rgba(34, 211, 238, 0.05);
+        }
+        
+        .asset-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .asset-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        
+        .asset-icon.usdc { background: #2775ca; color: white; }
+        .asset-icon.btc { background: #f7931a; color: white; }
+        .asset-icon.eth { background: #627eea; color: white; }
+        .asset-icon.sol { background: linear-gradient(135deg, #9945FF, #14F195); color: white; }
+        .asset-icon.hype { background: var(--cyan); color: var(--bg); }
+        .asset-icon.default { background: var(--border); color: var(--text); }
+        
+        .asset-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+        
+        .asset-ticker {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+        
+        /* Editable Input */
+        .editable-input {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 10px;
+            color: var(--text);
+            font-size: 13px;
+            font-family: inherit;
+            width: 100px;
+            text-align: right;
+            transition: all 0.2s;
+        }
+        
+        .editable-input:focus {
+            outline: none;
+            border-color: var(--cyan);
+            box-shadow: 0 0 12px var(--cyan-glow);
+        }
+        
+        .editable-input:hover {
+            border-color: var(--border-light);
+        }
+        
+        /* Action Buttons */
+        .action-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s;
+        }
+        
+        .action-btn:hover {
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
+        
+        .action-btn.delete:hover {
+            border-color: var(--bad);
+            color: var(--bad);
+        }
+        
+        .action-btn.add {
+            background: linear-gradient(135deg, var(--good) 0%, #16a34a 100%);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            font-weight: 600;
+        }
+        
+        .action-btn.add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px var(--good-glow);
+        }
+        
+        /* Add Token Form */
+        .add-token-form {
+            display: none;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 16px;
+        }
+        
+        .add-token-form.show {
+            display: block;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .form-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .form-input {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: var(--text);
+            font-size: 13px;
+            font-family: inherit;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--cyan);
+        }
+        
+        .form-select {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: var(--text);
+            font-size: 13px;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        
+        /* Category Breakdown */
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(42, 63, 95, 0.5);
+        }
+        
+        .category-item:last-child {
+            border-bottom: none;
+        }
+        
+        .category-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .category-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .category-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .category-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        
+        /* Market Cap Bar */
+        .mcap-bar {
+            display: flex;
+            height: 24px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+        
+        .mcap-segment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: white;
+            transition: all 0.3s;
+            min-width: 30px;
+        }
+        
+        .mcap-segment.large { background: var(--accent); }
+        .mcap-segment.mid { background: var(--purple); }
+        .mcap-segment.small { background: var(--orange); }
+        .mcap-segment.cash { background: var(--good); }
+        
+        .mcap-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 12px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        
+        /* Portfolio Disclaimer */
+        .portfolio-disclaimer {
+            margin-top: 24px;
+            padding: 16px;
+            background: rgba(234, 179, 8, 0.1);
+            border: 1px solid rgba(234, 179, 8, 0.3);
+            border-radius: 10px;
+            font-size: 11px;
+            color: var(--warn);
+        }
+        
+        /* Save indicator */
+        .save-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--good-bg);
+            border: 1px solid var(--good);
+            border-radius: 6px;
+            font-size: 11px;
+            color: var(--good);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .save-indicator.show {
+            opacity: 1;
+        }
+        
+        /* Lock button */
+        .lock-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .lock-btn:hover {
+            border-color: var(--bad);
+            color: var(--bad);
+        }
     </style>
 </head>
 <body>
@@ -839,6 +1307,7 @@
             <button class="tab-btn" onclick="switchTab('macro')">Macro Dashboard</button>
             <button class="tab-btn" onclick="switchTab('derivatives')">Derivatives Data</button>
             <button class="tab-btn" onclick="switchTab('hyperliquid')">Hyperliquid</button>
+            <button class="tab-btn locked" id="portfolioTabBtn" onclick="switchTab('portfolio')">Protocol Fund</button>
         </div>
 
         <!-- DASHBOARD TAB -->
@@ -2104,6 +2573,195 @@
         
         </div><!-- END HYPERLIQUID TAB -->
 
+        <!-- PORTFOLIO TAB -->
+        <div id="tab-portfolio" class="tab-content">
+            
+            <!-- Password Gate -->
+            <div id="passwordGate" class="password-gate">
+                <div class="gate-icon">🔐</div>
+                <div class="gate-title">Protocol Fund Portfolio</div>
+                <div class="gate-subtitle">This section is restricted to authorized viewers only</div>
+                <div class="password-form">
+                    <input type="password" id="passwordInput" class="password-input" placeholder="Enter access code" autocomplete="off">
+                    <button onclick="checkPortfolioPassword()" class="unlock-btn">Unlock Portfolio</button>
+                    <div id="errorMsg" class="error-msg">Incorrect access code. Please try again.</div>
+                </div>
+            </div>
+
+            <!-- Portfolio Content (Hidden until unlocked) -->
+            <div id="portfolioContent" style="display: none;">
+                
+                <!-- Portfolio Header -->
+                <div class="portfolio-header">
+                    <div>
+                        <div class="portfolio-title">Flowtrack Protocol Fund</div>
+                        <div class="portfolio-date">Last Updated: <span id="portfolioLastUpdate">--</span></div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div class="save-indicator" id="saveIndicator">✓ Saved</div>
+                        <button class="lock-btn" onclick="lockPortfolio()">🔒 Lock</button>
+                    </div>
+                    <div class="portfolio-value">
+                        <div class="portfolio-value-label">Total Portfolio Value</div>
+                        <div class="portfolio-value-amount" id="totalPortfolioValue">$0.00</div>
+                    </div>
+                </div>
+
+                <!-- Allocation Charts -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">Portfolio Allocation</div>
+                    </div>
+                    <div class="grid-3">
+                        <!-- Main Allocation Donut -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div>
+                                    <div class="card-title">Asset Allocation</div>
+                                    <div class="card-subtitle">By individual position</div>
+                                </div>
+                            </div>
+                            <div class="chart-container" style="height: 280px;">
+                                <canvas id="portfolioAllocationChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- Category Breakdown -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div>
+                                    <div class="card-title">Category Breakdown</div>
+                                    <div class="card-subtitle">By asset type</div>
+                                </div>
+                            </div>
+                            <div class="chart-container" style="height: 280px;">
+                                <canvas id="portfolioCategoryChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- Market Cap Breakdown -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div>
+                                    <div class="card-title">Market Cap Breakdown</div>
+                                    <div class="card-subtitle">By market cap tier</div>
+                                </div>
+                            </div>
+                            <div class="chart-container" style="height: 280px;">
+                                <canvas id="portfolioMcapChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Holdings Table -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">Current Holdings</div>
+                        <button class="action-btn add" onclick="toggleAddTokenForm()">+ Add Position</button>
+                    </div>
+                    
+                    <!-- Add Token Form -->
+                    <div id="addTokenForm" class="add-token-form">
+                        <div style="font-size: 14px; font-weight: 600; margin-bottom: 16px; color: var(--text);">Add New Position</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Ticker Symbol</label>
+                                <input type="text" id="newTokenTicker" class="form-input" placeholder="e.g., LINK" style="text-transform: uppercase;">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Asset Name</label>
+                                <input type="text" id="newTokenName" class="form-input" placeholder="e.g., Chainlink">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">CoinGecko ID</label>
+                                <input type="text" id="newTokenCgId" class="form-input" placeholder="e.g., chainlink">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Position Size</label>
+                                <input type="number" id="newTokenSize" class="form-input" placeholder="0.00" step="any">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Category</label>
+                                <select id="newTokenCategory" class="form-select">
+                                    <option value="majors">Majors (BTC/ETH)</option>
+                                    <option value="layer1">Layer 1</option>
+                                    <option value="layer2">Layer 2</option>
+                                    <option value="defi">DeFi</option>
+                                    <option value="stablecoin">Stablecoin</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 12px;">
+                            <button class="action-btn add" onclick="addNewToken()">Add Position</button>
+                            <button class="action-btn" onclick="toggleAddTokenForm()">Cancel</button>
+                        </div>
+                    </div>
+                    
+                    <div class="card" style="margin-top: 16px; overflow-x: auto;">
+                        <table class="holdings-table">
+                            <thead>
+                                <tr>
+                                    <th>Asset</th>
+                                    <th>Market Cap</th>
+                                    <th>Position Size</th>
+                                    <th>Current Price</th>
+                                    <th>Total Value</th>
+                                    <th>Weight</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="holdingsTableBody">
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Category & Market Cap Breakdown -->
+                <div class="section">
+                    <div class="grid-2">
+                        <!-- Category Breakdown List -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div>
+                                    <div class="card-title">Category Summary</div>
+                                    <div class="card-subtitle">Portfolio by asset type</div>
+                                </div>
+                            </div>
+                            <div id="categorySummary">
+                                <!-- Populated by JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <!-- Market Cap Breakdown -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div>
+                                    <div class="card-title">Market Cap Summary</div>
+                                    <div class="card-subtitle">Position sizing by market cap tier</div>
+                                </div>
+                            </div>
+                            <div class="mcap-bar" id="mcapBar">
+                                <!-- Populated by JavaScript -->
+                            </div>
+                            <div class="mcap-legend" id="mcapLegend">
+                                <!-- Populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Disclaimer -->
+                <div class="portfolio-disclaimer">
+                    ⚠️ <strong>CONFIDENTIAL</strong> — This portfolio information is for authorized viewers only. 
+                    Not financial advice. Past performance does not guarantee future results. 
+                    Position sizes and values are subject to market fluctuations. Prices update automatically from CoinGecko.
+                </div>
+            </div>
+        </div><!-- END PORTFOLIO TAB -->
+
     </div>
 
     <footer>
@@ -2330,6 +2988,17 @@
                         setTimeout(() => loadMarketShareChart(), 500);
                     }
                 }, 100);
+            }
+            
+            // Initialize portfolio when switching to portfolio tab
+            if (tabName === 'portfolio') {
+                // Check if already unlocked
+                if (sessionStorage.getItem('portfolioUnlocked') === 'true' && !portfolioUnlocked) {
+                    unlockPortfolio();
+                } else if (portfolioUnlocked) {
+                    // Refresh prices when returning to tab
+                    refreshPortfolioPrices();
+                }
             }
         }
         
@@ -7820,6 +8489,570 @@
             }
         }
         
+        // ==================== PORTFOLIO MANAGEMENT ====================
+        const PORTFOLIO_ACCESS_CODE = 'flowtrack2026';
+        let portfolioUnlocked = false;
+        let portfolioAllocationChart = null;
+        let portfolioCategoryChart = null;
+        let portfolioMcapChart = null;
+        
+        // Portfolio holdings - stored in localStorage for persistence
+        let portfolioHoldings = [
+            { ticker: 'USDC', name: 'USD Coin', cgId: 'usd-coin', size: 687794, category: 'stablecoin', price: 1.00, mcap: 0 },
+            { ticker: 'HYPE', name: 'Hyperliquid', cgId: 'hyperliquid', size: 14831, category: 'layer1', price: 0, mcap: 0 },
+            { ticker: 'ETH', name: 'Ethereum', cgId: 'ethereum', size: 113.81, category: 'majors', price: 0, mcap: 0 },
+            { ticker: 'BTC', name: 'Bitcoin', cgId: 'bitcoin', size: 0.87, category: 'majors', price: 0, mcap: 0 },
+            { ticker: 'SOL', name: 'Solana', cgId: 'solana', size: 1.47, category: 'layer1', price: 0, mcap: 0 }
+        ];
+        
+        // Category colors
+        const categoryColors = {
+            stablecoin: '#22c55e',
+            majors: '#a78bfa',
+            layer1: '#22d3ee',
+            layer2: '#3b82f6',
+            defi: '#f59e0b',
+            other: '#6b7280'
+        };
+        
+        // Asset icon colors
+        const assetColors = {
+            'USDC': '#2775ca',
+            'USDT': '#26a17b',
+            'BTC': '#f7931a',
+            'ETH': '#627eea',
+            'SOL': '#9945FF',
+            'HYPE': '#22d3ee'
+        };
+        
+        // Load portfolio from localStorage
+        function loadPortfolioFromStorage() {
+            const saved = localStorage.getItem('flowtrackPortfolio');
+            if (saved) {
+                try {
+                    portfolioHoldings = JSON.parse(saved);
+                    console.log('Portfolio loaded from storage:', portfolioHoldings.length, 'positions');
+                } catch (e) {
+                    console.error('Error loading portfolio:', e);
+                }
+            }
+        }
+        
+        // Save portfolio to localStorage
+        function savePortfolioToStorage() {
+            localStorage.setItem('flowtrackPortfolio', JSON.stringify(portfolioHoldings));
+            showSaveIndicator();
+        }
+        
+        // Show save indicator
+        function showSaveIndicator() {
+            const indicator = document.getElementById('saveIndicator');
+            if (indicator) {
+                indicator.classList.add('show');
+                setTimeout(() => indicator.classList.remove('show'), 2000);
+            }
+        }
+        
+        // Check portfolio password
+        function checkPortfolioPassword() {
+            const input = document.getElementById('passwordInput').value;
+            const errorMsg = document.getElementById('errorMsg');
+            
+            if (input === PORTFOLIO_ACCESS_CODE) {
+                sessionStorage.setItem('portfolioUnlocked', 'true');
+                unlockPortfolio();
+            } else {
+                errorMsg.classList.add('show');
+                document.getElementById('passwordInput').value = '';
+                setTimeout(() => errorMsg.classList.remove('show'), 3000);
+            }
+        }
+        
+        // Unlock portfolio
+        function unlockPortfolio() {
+            portfolioUnlocked = true;
+            document.getElementById('passwordGate').style.display = 'none';
+            document.getElementById('portfolioContent').style.display = 'block';
+            
+            // Update tab button
+            const tabBtn = document.getElementById('portfolioTabBtn');
+            if (tabBtn) {
+                tabBtn.classList.remove('locked');
+                tabBtn.classList.add('unlocked');
+            }
+            
+            // Load saved portfolio and fetch prices
+            loadPortfolioFromStorage();
+            refreshPortfolioPrices();
+        }
+        
+        // Lock portfolio
+        function lockPortfolio() {
+            portfolioUnlocked = false;
+            sessionStorage.removeItem('portfolioUnlocked');
+            document.getElementById('passwordGate').style.display = 'flex';
+            document.getElementById('portfolioContent').style.display = 'none';
+            document.getElementById('passwordInput').value = '';
+            
+            // Update tab button
+            const tabBtn = document.getElementById('portfolioTabBtn');
+            if (tabBtn) {
+                tabBtn.classList.add('locked');
+                tabBtn.classList.remove('unlocked');
+            }
+        }
+        
+        // Fetch current prices from CoinGecko
+        async function refreshPortfolioPrices() {
+            const cgIds = portfolioHoldings
+                .filter(h => h.cgId && h.cgId !== 'usd-coin') // Skip stablecoins
+                .map(h => h.cgId)
+                .join(',');
+            
+            if (!cgIds) {
+                updatePortfolioUI();
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${COINGECKO_API}/coins/markets?vs_currency=usd&ids=${cgIds}&order=market_cap_desc&sparkline=false`);
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Update prices and market caps
+                    data.forEach(coin => {
+                        const holding = portfolioHoldings.find(h => h.cgId === coin.id);
+                        if (holding) {
+                            holding.price = coin.current_price || 0;
+                            holding.mcap = coin.market_cap || 0;
+                        }
+                    });
+                    
+                    // Set stablecoin prices
+                    portfolioHoldings.forEach(h => {
+                        if (h.category === 'stablecoin') {
+                            h.price = 1.00;
+                            h.mcap = 0;
+                        }
+                    });
+                    
+                    console.log('Portfolio prices updated');
+                }
+            } catch (error) {
+                console.error('Error fetching portfolio prices:', error);
+            }
+            
+            updatePortfolioUI();
+        }
+        
+        // Calculate portfolio totals
+        function calculatePortfolioTotals() {
+            let totalValue = 0;
+            const categoryTotals = {};
+            const mcapTotals = { large: 0, mid: 0, small: 0, cash: 0 };
+            
+            portfolioHoldings.forEach(h => {
+                const value = h.size * h.price;
+                totalValue += value;
+                
+                // Category totals
+                if (!categoryTotals[h.category]) {
+                    categoryTotals[h.category] = 0;
+                }
+                categoryTotals[h.category] += value;
+                
+                // Market cap tier
+                if (h.category === 'stablecoin') {
+                    mcapTotals.cash += value;
+                } else if (h.mcap >= 10e9) {
+                    mcapTotals.large += value;
+                } else if (h.mcap >= 2e9) {
+                    mcapTotals.mid += value;
+                } else {
+                    mcapTotals.small += value;
+                }
+            });
+            
+            return { totalValue, categoryTotals, mcapTotals };
+        }
+        
+        // Update all portfolio UI elements
+        function updatePortfolioUI() {
+            const { totalValue, categoryTotals, mcapTotals } = calculatePortfolioTotals();
+            
+            // Update total value
+            document.getElementById('totalPortfolioValue').textContent = formatCurrency(totalValue);
+            document.getElementById('portfolioLastUpdate').textContent = new Date().toLocaleString();
+            
+            // Update holdings table
+            updateHoldingsTable(totalValue);
+            
+            // Update charts
+            updatePortfolioCharts(totalValue, categoryTotals, mcapTotals);
+            
+            // Update category summary
+            updateCategorySummary(totalValue, categoryTotals);
+            
+            // Update market cap bar
+            updateMcapBar(totalValue, mcapTotals);
+        }
+        
+        // Update holdings table
+        function updateHoldingsTable(totalValue) {
+            const tbody = document.getElementById('holdingsTableBody');
+            if (!tbody) return;
+            
+            // Sort by value descending
+            const sorted = [...portfolioHoldings].sort((a, b) => (b.size * b.price) - (a.size * a.price));
+            
+            tbody.innerHTML = sorted.map((h, idx) => {
+                const value = h.size * h.price;
+                const weight = totalValue > 0 ? (value / totalValue * 100) : 0;
+                const iconClass = assetColors[h.ticker] ? h.ticker.toLowerCase() : 'default';
+                const iconColor = assetColors[h.ticker] || '#6b7280';
+                
+                return `
+                    <tr data-ticker="${h.ticker}">
+                        <td>
+                            <div class="asset-cell">
+                                <div class="asset-icon ${iconClass}" style="${!assetColors[h.ticker] ? 'background: ' + iconColor : ''}">
+                                    ${h.ticker.charAt(0)}
+                                </div>
+                                <div>
+                                    <div class="asset-name">${h.name}</div>
+                                    <div class="asset-ticker">${h.ticker}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="color: var(--text-dim);">
+                            ${h.category === 'stablecoin' ? 'Stablecoin' : formatMcap(h.mcap)}
+                        </td>
+                        <td>
+                            <input type="number" 
+                                   class="editable-input" 
+                                   value="${h.size}" 
+                                   step="any"
+                                   onchange="updatePositionSize('${h.ticker}', this.value)"
+                                   onkeypress="if(event.key === 'Enter') this.blur()">
+                        </td>
+                        <td>${formatCurrency(h.price)}</td>
+                        <td style="font-weight: 600;">${formatCurrency(value)}</td>
+                        <td style="color: var(--cyan); font-weight: 700;">${weight.toFixed(2)}%</td>
+                        <td>
+                            <button class="action-btn delete" onclick="removePosition('${h.ticker}')" title="Remove position">✕</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        // Update position size
+        function updatePositionSize(ticker, newSize) {
+            const holding = portfolioHoldings.find(h => h.ticker === ticker);
+            if (holding) {
+                holding.size = parseFloat(newSize) || 0;
+                savePortfolioToStorage();
+                updatePortfolioUI();
+            }
+        }
+        
+        // Remove position
+        function removePosition(ticker) {
+            if (confirm(`Remove ${ticker} from portfolio?`)) {
+                portfolioHoldings = portfolioHoldings.filter(h => h.ticker !== ticker);
+                savePortfolioToStorage();
+                updatePortfolioUI();
+            }
+        }
+        
+        // Toggle add token form
+        function toggleAddTokenForm() {
+            const form = document.getElementById('addTokenForm');
+            form.classList.toggle('show');
+        }
+        
+        // Add new token
+        async function addNewToken() {
+            const ticker = document.getElementById('newTokenTicker').value.toUpperCase().trim();
+            const name = document.getElementById('newTokenName').value.trim();
+            const cgId = document.getElementById('newTokenCgId').value.toLowerCase().trim();
+            const size = parseFloat(document.getElementById('newTokenSize').value) || 0;
+            const category = document.getElementById('newTokenCategory').value;
+            
+            if (!ticker || !name) {
+                alert('Please enter ticker and name');
+                return;
+            }
+            
+            // Check if already exists
+            if (portfolioHoldings.find(h => h.ticker === ticker)) {
+                alert('This token already exists in your portfolio');
+                return;
+            }
+            
+            // Add new holding
+            const newHolding = {
+                ticker,
+                name,
+                cgId: cgId || ticker.toLowerCase(),
+                size,
+                category,
+                price: category === 'stablecoin' ? 1.00 : 0,
+                mcap: 0
+            };
+            
+            portfolioHoldings.push(newHolding);
+            savePortfolioToStorage();
+            
+            // Close form and clear inputs
+            toggleAddTokenForm();
+            document.getElementById('newTokenTicker').value = '';
+            document.getElementById('newTokenName').value = '';
+            document.getElementById('newTokenCgId').value = '';
+            document.getElementById('newTokenSize').value = '';
+            
+            // Refresh prices
+            await refreshPortfolioPrices();
+        }
+        
+        // Update portfolio charts
+        function updatePortfolioCharts(totalValue, categoryTotals, mcapTotals) {
+            // Allocation chart (by asset)
+            const allocationCtx = document.getElementById('portfolioAllocationChart');
+            if (allocationCtx) {
+                const sorted = [...portfolioHoldings].sort((a, b) => (b.size * b.price) - (a.size * a.price));
+                const colors = sorted.map(h => assetColors[h.ticker] || categoryColors[h.category] || '#6b7280');
+                
+                if (portfolioAllocationChart) portfolioAllocationChart.destroy();
+                
+                portfolioAllocationChart = new Chart(allocationCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: sorted.map(h => h.ticker),
+                        datasets: [{
+                            data: sorted.map(h => h.size * h.price),
+                            backgroundColor: colors,
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '65%',
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: { color: '#94a3b8', padding: 8, font: { size: 10, weight: '600' }, usePointStyle: true }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                                callbacks: {
+                                    label: (ctx) => {
+                                        const pct = totalValue > 0 ? (ctx.raw / totalValue * 100).toFixed(1) : 0;
+                                        return `${ctx.label}: ${formatCurrency(ctx.raw)} (${pct}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Category chart
+            const categoryCtx = document.getElementById('portfolioCategoryChart');
+            if (categoryCtx) {
+                const categories = Object.keys(categoryTotals).filter(k => categoryTotals[k] > 0);
+                const categoryNames = {
+                    stablecoin: 'Cash',
+                    majors: 'Majors',
+                    layer1: 'Layer 1',
+                    layer2: 'Layer 2',
+                    defi: 'DeFi',
+                    other: 'Other'
+                };
+                
+                if (portfolioCategoryChart) portfolioCategoryChart.destroy();
+                
+                portfolioCategoryChart = new Chart(categoryCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: categories.map(c => categoryNames[c] || c),
+                        datasets: [{
+                            data: categories.map(c => categoryTotals[c]),
+                            backgroundColor: categories.map(c => categoryColors[c]),
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '65%',
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: { color: '#94a3b8', padding: 8, font: { size: 10, weight: '600' }, usePointStyle: true }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                                callbacks: {
+                                    label: (ctx) => {
+                                        const pct = totalValue > 0 ? (ctx.raw / totalValue * 100).toFixed(1) : 0;
+                                        return `${ctx.label}: ${formatCurrency(ctx.raw)} (${pct}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Market cap chart
+            const mcapCtx = document.getElementById('portfolioMcapChart');
+            if (mcapCtx) {
+                const mcapLabels = [];
+                const mcapData = [];
+                const mcapColors = [];
+                
+                if (mcapTotals.large > 0) { mcapLabels.push('Large Cap (>$10B)'); mcapData.push(mcapTotals.large); mcapColors.push('#3b82f6'); }
+                if (mcapTotals.mid > 0) { mcapLabels.push('Mid Cap ($2-10B)'); mcapData.push(mcapTotals.mid); mcapColors.push('#a78bfa'); }
+                if (mcapTotals.small > 0) { mcapLabels.push('Small Cap (<$2B)'); mcapData.push(mcapTotals.small); mcapColors.push('#fb923c'); }
+                if (mcapTotals.cash > 0) { mcapLabels.push('Cash'); mcapData.push(mcapTotals.cash); mcapColors.push('#22c55e'); }
+                
+                if (portfolioMcapChart) portfolioMcapChart.destroy();
+                
+                portfolioMcapChart = new Chart(mcapCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: mcapLabels,
+                        datasets: [{
+                            data: mcapData,
+                            backgroundColor: mcapColors,
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '65%',
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: { color: '#94a3b8', padding: 8, font: { size: 10, weight: '600' }, usePointStyle: true }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                                callbacks: {
+                                    label: (ctx) => {
+                                        const pct = totalValue > 0 ? (ctx.raw / totalValue * 100).toFixed(1) : 0;
+                                        return `${ctx.label}: ${formatCurrency(ctx.raw)} (${pct}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Update category summary
+        function updateCategorySummary(totalValue, categoryTotals) {
+            const container = document.getElementById('categorySummary');
+            if (!container) return;
+            
+            const categoryNames = {
+                stablecoin: 'Cash (Stablecoins)',
+                majors: 'Majors (BTC + ETH)',
+                layer1: 'Layer 1',
+                layer2: 'Layer 2',
+                defi: 'DeFi',
+                other: 'Other'
+            };
+            
+            const categories = Object.keys(categoryTotals)
+                .filter(k => categoryTotals[k] > 0)
+                .sort((a, b) => categoryTotals[b] - categoryTotals[a]);
+            
+            container.innerHTML = categories.map(cat => {
+                const pct = totalValue > 0 ? (categoryTotals[cat] / totalValue * 100).toFixed(2) : 0;
+                return `
+                    <div class="category-item">
+                        <div class="category-label">
+                            <div class="category-dot" style="background: ${categoryColors[cat]};"></div>
+                            <div class="category-name">${categoryNames[cat] || cat}</div>
+                        </div>
+                        <div class="category-value">${pct}%</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Update market cap bar
+        function updateMcapBar(totalValue, mcapTotals) {
+            const bar = document.getElementById('mcapBar');
+            const legend = document.getElementById('mcapLegend');
+            if (!bar || !legend) return;
+            
+            const segments = [];
+            if (mcapTotals.large > 0) {
+                const pct = (mcapTotals.large / totalValue * 100).toFixed(1);
+                segments.push(`<div class="mcap-segment large" style="width: ${pct}%;">${pct}%</div>`);
+            }
+            if (mcapTotals.mid > 0) {
+                const pct = (mcapTotals.mid / totalValue * 100).toFixed(1);
+                segments.push(`<div class="mcap-segment mid" style="width: ${pct}%;">${pct}%</div>`);
+            }
+            if (mcapTotals.small > 0) {
+                const pct = (mcapTotals.small / totalValue * 100).toFixed(1);
+                segments.push(`<div class="mcap-segment small" style="width: ${pct}%;">${pct}%</div>`);
+            }
+            if (mcapTotals.cash > 0) {
+                const pct = (mcapTotals.cash / totalValue * 100).toFixed(1);
+                segments.push(`<div class="mcap-segment cash" style="width: ${pct}%;">${pct}%</div>`);
+            }
+            
+            bar.innerHTML = segments.join('');
+            
+            legend.innerHTML = `
+                <div class="legend-item"><div class="legend-dot" style="background: #3b82f6;"></div><span>Large Cap (>$10B): ${(mcapTotals.large / totalValue * 100).toFixed(1)}%</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background: #a78bfa;"></div><span>Mid Cap ($2-10B): ${(mcapTotals.mid / totalValue * 100).toFixed(1)}%</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background: #fb923c;"></div><span>Small Cap (<$2B): ${(mcapTotals.small / totalValue * 100).toFixed(1)}%</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background: #22c55e;"></div><span>Cash: ${(mcapTotals.cash / totalValue * 100).toFixed(1)}%</span></div>
+            `;
+        }
+        
+        // Helper: Format currency
+        function formatCurrency(value) {
+            if (value >= 1e9) return '$' + (value / 1e9).toFixed(2) + 'B';
+            if (value >= 1e6) return '$' + (value / 1e6).toFixed(2) + 'M';
+            if (value >= 1e3) return '$' + value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            return '$' + value.toFixed(2);
+        }
+        
+        // Helper: Format market cap
+        function formatMcap(mcap) {
+            if (!mcap || mcap === 0) return '--';
+            if (mcap >= 1e12) return '$' + (mcap / 1e12).toFixed(2) + 'T';
+            if (mcap >= 1e9) return '$' + (mcap / 1e9).toFixed(1) + 'B';
+            if (mcap >= 1e6) return '$' + (mcap / 1e6).toFixed(1) + 'M';
+            return '$' + mcap.toLocaleString();
+        }
+        
+        // Initialize portfolio on page load if already unlocked
+        function initPortfolio() {
+            // Add enter key listener for password
+            const passwordInput = document.getElementById('passwordInput');
+            if (passwordInput) {
+                passwordInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') checkPortfolioPassword();
+                });
+            }
+            
+            // Check if already unlocked this session
+            if (sessionStorage.getItem('portfolioUnlocked') === 'true') {
+                unlockPortfolio();
+            }
+        }
+
         // ==================== INITIALIZE ====================
         document.addEventListener('DOMContentLoaded', () => {
             refreshAllData();
@@ -7842,8 +9075,18 @@
             // Initialize ETF Flows
             setTimeout(() => loadETFData(), 4000);
             
+            // Initialize Portfolio
+            initPortfolio();
+            
             // Auto refresh every 60 seconds
             setInterval(refreshAllData, 60000);
+            
+            // Auto refresh portfolio prices every 2 minutes if unlocked
+            setInterval(() => {
+                if (portfolioUnlocked) {
+                    refreshPortfolioPrices();
+                }
+            }, 120000);
         });
     </script>
 </body>
