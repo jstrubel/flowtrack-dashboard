@@ -2714,10 +2714,32 @@
                     </div>
                 </div>
 
+                <!-- Portfolio Value History -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">Portfolio Value History</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">Daily Portfolio Value</div>
+                                <div class="card-subtitle">Tracks portfolio value over time (recorded daily)</div>
+                            </div>
+                            <button class="action-btn" onclick="recordPortfolioValue(false)" style="font-size: 10px;" title="Manually update today's recorded value">📊 Update Today</button>
+                        </div>
+                        <div class="chart-container" style="height: 250px;">
+                            <canvas id="portfolioHistoryChart"></canvas>
+                        </div>
+                        <div id="portfolioHistoryEmpty" style="text-align: center; padding: 40px; color: var(--text-muted); display: none;">
+                            No historical data yet. Click "Record Today" to start tracking.
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Category & Market Cap Breakdown -->
                 <div class="section">
                     <div class="grid-2">
-                        <!-- Category Breakdown List -->
+                        <!-- Category Breakdown Pie -->
                         <div class="card">
                             <div class="card-header">
                                 <div>
@@ -2725,12 +2747,12 @@
                                     <div class="card-subtitle">Portfolio by asset type</div>
                                 </div>
                             </div>
-                            <div id="categorySummary">
-                                <!-- Populated by JavaScript -->
+                            <div class="chart-container" style="height: 280px;">
+                                <canvas id="categorySummaryChart"></canvas>
                             </div>
                         </div>
                         
-                        <!-- Market Cap Breakdown -->
+                        <!-- Market Cap Breakdown Pie -->
                         <div class="card">
                             <div class="card-header">
                                 <div>
@@ -2738,11 +2760,8 @@
                                     <div class="card-subtitle">Position sizing by market cap tier</div>
                                 </div>
                             </div>
-                            <div class="mcap-bar" id="mcapBar">
-                                <!-- Populated by JavaScript -->
-                            </div>
-                            <div class="mcap-legend" id="mcapLegend">
-                                <!-- Populated by JavaScript -->
+                            <div class="chart-container" style="height: 280px;">
+                                <canvas id="mcapSummaryChart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -8489,6 +8508,9 @@
         let portfolioUnlocked = false;
         let portfolioAllocationChart = null;
         let portfolioCategoryChart = null;
+        let categorySummaryChart = null;
+        let mcapSummaryChart = null;
+        let portfolioHistoryChart = null;
         
         // Portfolio holdings - stored in localStorage for persistence
         let portfolioHoldings = [
@@ -8499,24 +8521,24 @@
             { ticker: 'SOL', name: 'Solana', cgId: 'solana', size: 1.47, category: 'layer1', price: 0, mcap: 0, image: 'https://assets.coingecko.com/coins/images/4128/small/solana.png' }
         ];
         
-        // Category colors
+        // Category colors - more diverse palette
         const categoryColors = {
-            stablecoin: '#22c55e',
-            majors: '#a78bfa',
-            layer1: '#22d3ee',
-            layer2: '#3b82f6',
-            defi: '#f59e0b',
-            other: '#6b7280'
+            stablecoin: '#10b981',  // emerald green
+            majors: '#8b5cf6',      // violet
+            layer1: '#06b6d4',      // cyan
+            layer2: '#3b82f6',      // blue
+            defi: '#f59e0b',        // amber
+            other: '#6b7280'        // gray
         };
         
-        // Asset icon colors
+        // Asset icon colors - diverse palette
         const assetColors = {
-            'USDC': '#2775ca',
-            'USDT': '#26a17b',
-            'BTC': '#f7931a',
-            'ETH': '#627eea',
-            'SOL': '#9945FF',
-            'HYPE': '#22d3ee'
+            'USDC': '#2775ca',      // USDC blue
+            'USDT': '#26a17b',      // Tether green
+            'BTC': '#f7931a',       // Bitcoin orange
+            'ETH': '#627eea',       // Ethereum purple-blue
+            'SOL': '#14f195',       // Solana green
+            'HYPE': '#e879f9',      // Hyperliquid pink/magenta
         };
         
         // Load portfolio from localStorage
@@ -8730,6 +8752,9 @@
             }
             
             updatePortfolioUI();
+            
+            // Auto-record portfolio value once per day
+            autoRecordPortfolioValue();
         }
         
         // Calculate portfolio totals
@@ -8780,8 +8805,11 @@
             // Update category summary
             updateCategorySummary(totalValue, categoryTotals);
             
-            // Update market cap bar
+            // Update market cap chart
             updateMcapBar(totalValue, mcapTotals);
+            
+            // Update portfolio history chart
+            updatePortfolioHistoryChart();
         }
         
         // Update holdings table
@@ -8917,14 +8945,19 @@
                         const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
                         const pct = total > 0 ? (value / total * 100) : 0;
                         
-                        // Only show label if percentage is >= 3%
-                        if (pct >= 3) {
+                        // Only show label if percentage is >= 5%
+                        if (pct >= 5) {
                             const { x, y } = arc.tooltipPosition();
                             ctx.save();
                             ctx.fillStyle = '#ffffff';
-                            ctx.font = 'bold 11px Inter, sans-serif';
+                            ctx.font = 'bold 14px Inter, sans-serif';
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'middle';
+                            // Add text shadow for better readability
+                            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                            ctx.shadowBlur = 4;
+                            ctx.shadowOffsetX = 1;
+                            ctx.shadowOffsetY = 1;
                             ctx.fillText(`${pct.toFixed(1)}%`, x, y);
                             ctx.restore();
                         }
@@ -9064,12 +9097,12 @@
         
         // Update category summary
         function updateCategorySummary(totalValue, categoryTotals) {
-            const container = document.getElementById('categorySummary');
-            if (!container) return;
+            const ctx = document.getElementById('categorySummaryChart');
+            if (!ctx) return;
             
             const categoryNames = {
-                stablecoin: 'Cash (Stablecoins)',
-                majors: 'Majors (BTC + ETH)',
+                stablecoin: 'Cash',
+                majors: 'Majors',
                 layer1: 'Layer 1',
                 layer2: 'Layer 2',
                 defi: 'DeFi',
@@ -9080,52 +9113,326 @@
                 .filter(k => categoryTotals[k] > 0)
                 .sort((a, b) => categoryTotals[b] - categoryTotals[a]);
             
-            container.innerHTML = categories.map(cat => {
-                const pct = totalValue > 0 ? (categoryTotals[cat] / totalValue * 100).toFixed(2) : 0;
-                return `
-                    <div class="category-item">
-                        <div class="category-label">
-                            <div class="category-dot" style="background: ${categoryColors[cat]};"></div>
-                            <div class="category-name">${categoryNames[cat] || cat}</div>
-                        </div>
-                        <div class="category-value">${pct}%</div>
-                    </div>
-                `;
-            }).join('');
+            if (categorySummaryChart) categorySummaryChart.destroy();
+            
+            // Custom plugin for this chart
+            const labelPlugin = {
+                id: 'categoryLabels',
+                afterDatasetsDraw(chart) {
+                    const { ctx: c, data } = chart;
+                    chart.getDatasetMeta(0).data.forEach((arc, index) => {
+                        const value = data.datasets[0].data[index];
+                        const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                        const pct = total > 0 ? (value / total * 100) : 0;
+                        if (pct >= 5) {
+                            const { x, y } = arc.tooltipPosition();
+                            c.save();
+                            c.fillStyle = '#ffffff';
+                            c.font = 'bold 14px Inter, sans-serif';
+                            c.textAlign = 'center';
+                            c.textBaseline = 'middle';
+                            c.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                            c.shadowBlur = 4;
+                            c.fillText(`${pct.toFixed(1)}%`, x, y);
+                            c.restore();
+                        }
+                    });
+                }
+            };
+            
+            categorySummaryChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: categories.map(c => categoryNames[c] || c),
+                    datasets: [{
+                        data: categories.map(c => categoryTotals[c]),
+                        backgroundColor: categories.map(c => categoryColors[c]),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '50%',
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { 
+                                color: '#e2e8f0', 
+                                padding: 12, 
+                                font: { size: 12, weight: '600' }, 
+                                usePointStyle: true,
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        const pct = total > 0 ? (value / total * 100).toFixed(1) : 0;
+                                        return {
+                                            text: `${label} (${pct}%)`,
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            hidden: false,
+                                            index: i
+                                        };
+                                    });
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                            callbacks: {
+                                label: (ctx) => {
+                                    const pct = totalValue > 0 ? (ctx.raw / totalValue * 100).toFixed(1) : 0;
+                                    return `${ctx.label}: ${formatCurrency(ctx.raw)} (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                },
+                plugins: [labelPlugin]
+            });
         }
         
-        // Update market cap bar
+        // Update market cap chart
         function updateMcapBar(totalValue, mcapTotals) {
-            const bar = document.getElementById('mcapBar');
-            const legend = document.getElementById('mcapLegend');
-            if (!bar || !legend) return;
+            const ctx = document.getElementById('mcapSummaryChart');
+            if (!ctx) return;
             
-            const segments = [];
-            if (mcapTotals.large > 0) {
-                const pct = (mcapTotals.large / totalValue * 100).toFixed(1);
-                segments.push(`<div class="mcap-segment large" style="width: ${pct}%;">${pct}%</div>`);
+            const mcapLabels = [];
+            const mcapData = [];
+            const mcapColors = [];
+            
+            // Define colors for market cap tiers
+            const tierColors = {
+                large: '#3b82f6',   // blue
+                mid: '#a78bfa',     // purple
+                small: '#fb923c',   // orange
+                cash: '#10b981'     // green
+            };
+            
+            if (mcapTotals.large > 0) { mcapLabels.push('Large Cap (>$10B)'); mcapData.push(mcapTotals.large); mcapColors.push(tierColors.large); }
+            if (mcapTotals.mid > 0) { mcapLabels.push('Mid Cap ($2-10B)'); mcapData.push(mcapTotals.mid); mcapColors.push(tierColors.mid); }
+            if (mcapTotals.small > 0) { mcapLabels.push('Small Cap (<$2B)'); mcapData.push(mcapTotals.small); mcapColors.push(tierColors.small); }
+            if (mcapTotals.cash > 0) { mcapLabels.push('Cash'); mcapData.push(mcapTotals.cash); mcapColors.push(tierColors.cash); }
+            
+            if (mcapSummaryChart) mcapSummaryChart.destroy();
+            
+            // Custom plugin for this chart
+            const labelPlugin = {
+                id: 'mcapLabels',
+                afterDatasetsDraw(chart) {
+                    const { ctx: c, data } = chart;
+                    chart.getDatasetMeta(0).data.forEach((arc, index) => {
+                        const value = data.datasets[0].data[index];
+                        const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                        const pct = total > 0 ? (value / total * 100) : 0;
+                        if (pct >= 5) {
+                            const { x, y } = arc.tooltipPosition();
+                            c.save();
+                            c.fillStyle = '#ffffff';
+                            c.font = 'bold 14px Inter, sans-serif';
+                            c.textAlign = 'center';
+                            c.textBaseline = 'middle';
+                            c.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                            c.shadowBlur = 4;
+                            c.fillText(`${pct.toFixed(1)}%`, x, y);
+                            c.restore();
+                        }
+                    });
+                }
+            };
+            
+            mcapSummaryChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: mcapLabels,
+                    datasets: [{
+                        data: mcapData,
+                        backgroundColor: mcapColors,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '50%',
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { 
+                                color: '#e2e8f0', 
+                                padding: 12, 
+                                font: { size: 12, weight: '600' }, 
+                                usePointStyle: true,
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        const pct = total > 0 ? (value / total * 100).toFixed(1) : 0;
+                                        return {
+                                            text: `${label} (${pct}%)`,
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            hidden: false,
+                                            index: i
+                                        };
+                                    });
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                            callbacks: {
+                                label: (ctx) => {
+                                    const pct = totalValue > 0 ? (ctx.raw / totalValue * 100).toFixed(1) : 0;
+                                    return `${ctx.label}: ${formatCurrency(ctx.raw)} (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                },
+                plugins: [labelPlugin]
+            });
+        }
+        
+        // Portfolio history management
+        function getPortfolioHistory() {
+            const saved = localStorage.getItem('flowtrackPortfolioHistory');
+            if (saved) {
+                try {
+                    return JSON.parse(saved);
+                } catch (e) {
+                    return [];
+                }
             }
-            if (mcapTotals.mid > 0) {
-                const pct = (mcapTotals.mid / totalValue * 100).toFixed(1);
-                segments.push(`<div class="mcap-segment mid" style="width: ${pct}%;">${pct}%</div>`);
-            }
-            if (mcapTotals.small > 0) {
-                const pct = (mcapTotals.small / totalValue * 100).toFixed(1);
-                segments.push(`<div class="mcap-segment small" style="width: ${pct}%;">${pct}%</div>`);
-            }
-            if (mcapTotals.cash > 0) {
-                const pct = (mcapTotals.cash / totalValue * 100).toFixed(1);
-                segments.push(`<div class="mcap-segment cash" style="width: ${pct}%;">${pct}%</div>`);
+            return [];
+        }
+        
+        function savePortfolioHistory(history) {
+            localStorage.setItem('flowtrackPortfolioHistory', JSON.stringify(history));
+        }
+        
+        function recordPortfolioValue(isAutomatic = false) {
+            const { totalValue } = calculatePortfolioTotals();
+            
+            // Don't record if total value is 0 or very small (prices haven't loaded)
+            if (totalValue < 1000) {
+                console.log('Skipping auto-record: prices not loaded yet');
+                return;
             }
             
-            bar.innerHTML = segments.join('');
+            const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
             
-            legend.innerHTML = `
-                <div class="legend-item"><div class="legend-dot" style="background: #3b82f6;"></div><span>Large Cap (>$10B): ${(mcapTotals.large / totalValue * 100).toFixed(1)}%</span></div>
-                <div class="legend-item"><div class="legend-dot" style="background: #a78bfa;"></div><span>Mid Cap ($2-10B): ${(mcapTotals.mid / totalValue * 100).toFixed(1)}%</span></div>
-                <div class="legend-item"><div class="legend-dot" style="background: #fb923c;"></div><span>Small Cap (<$2B): ${(mcapTotals.small / totalValue * 100).toFixed(1)}%</span></div>
-                <div class="legend-item"><div class="legend-dot" style="background: #22c55e;"></div><span>Cash: ${(mcapTotals.cash / totalValue * 100).toFixed(1)}%</span></div>
-            `;
+            let history = getPortfolioHistory();
+            
+            // Check if we already have an entry for today
+            const existingIndex = history.findIndex(h => h.date === today);
+            
+            if (isAutomatic && existingIndex >= 0) {
+                // Auto-record: don't overwrite existing entry for today
+                console.log('Auto-record skipped: already recorded today');
+                return;
+            }
+            
+            if (existingIndex >= 0) {
+                history[existingIndex].value = totalValue;
+            } else {
+                history.push({ date: today, value: totalValue });
+            }
+            
+            // Keep only last 365 days
+            history = history.slice(-365);
+            
+            savePortfolioHistory(history);
+            updatePortfolioHistoryChart();
+            
+            if (!isAutomatic) {
+                showSaveIndicator();
+            }
+            console.log(`Portfolio value recorded: ${formatCurrency(totalValue)} for ${today}`);
+        }
+        
+        // Auto-record after prices load (called after refreshPortfolioPrices completes)
+        function autoRecordPortfolioValue() {
+            // Small delay to ensure prices are fully updated
+            setTimeout(() => {
+                recordPortfolioValue(true); // true = automatic
+            }, 2000);
+        }
+        
+        function updatePortfolioHistoryChart() {
+            const ctx = document.getElementById('portfolioHistoryChart');
+            const emptyMsg = document.getElementById('portfolioHistoryEmpty');
+            if (!ctx) return;
+            
+            const history = getPortfolioHistory();
+            
+            if (history.length === 0) {
+                ctx.style.display = 'none';
+                if (emptyMsg) emptyMsg.style.display = 'block';
+                return;
+            }
+            
+            ctx.style.display = 'block';
+            if (emptyMsg) emptyMsg.style.display = 'none';
+            
+            // Sort by date
+            history.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            if (portfolioHistoryChart) portfolioHistoryChart.destroy();
+            
+            portfolioHistoryChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: history.map(h => {
+                        const d = new Date(h.date);
+                        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    }),
+                    datasets: [{
+                        label: 'Portfolio Value',
+                        data: history.map(h => h.value),
+                        borderColor: '#22d3ee',
+                        backgroundColor: 'rgba(34, 211, 238, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#22d3ee',
+                        pointBorderColor: '#0b1120',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#64748b', font: { size: 10 } }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { 
+                                color: '#64748b', 
+                                font: { size: 10 },
+                                callback: (value) => '$' + (value / 1e6).toFixed(2) + 'M'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                            callbacks: {
+                                label: (ctx) => `Value: ${formatCurrency(ctx.raw)}`
+                            }
+                        }
+                    }
+                }
+            });
         }
         
         // Helper: Format currency
