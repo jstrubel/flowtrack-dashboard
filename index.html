@@ -2612,7 +2612,7 @@
                     <div class="section-header">
                         <div class="section-title">Portfolio Allocation</div>
                     </div>
-                    <div class="grid-3">
+                    <div class="grid-2">
                         <!-- Main Allocation Donut -->
                         <div class="card">
                             <div class="card-header">
@@ -2621,7 +2621,7 @@
                                     <div class="card-subtitle">By individual position</div>
                                 </div>
                             </div>
-                            <div class="chart-container" style="height: 280px;">
+                            <div class="chart-container" style="height: 320px;">
                                 <canvas id="portfolioAllocationChart"></canvas>
                             </div>
                         </div>
@@ -2631,24 +2631,11 @@
                             <div class="card-header">
                                 <div>
                                     <div class="card-title">Category Breakdown</div>
-                                    <div class="card-subtitle">By asset type</div>
+                                    <div class="card-subtitle">Cash • Majors • Layer 1 • DeFi</div>
                                 </div>
                             </div>
-                            <div class="chart-container" style="height: 280px;">
+                            <div class="chart-container" style="height: 320px;">
                                 <canvas id="portfolioCategoryChart"></canvas>
-                            </div>
-                        </div>
-                        
-                        <!-- Market Cap Breakdown -->
-                        <div class="card">
-                            <div class="card-header">
-                                <div>
-                                    <div class="card-title">Market Cap Breakdown</div>
-                                    <div class="card-subtitle">By market cap tier</div>
-                                </div>
-                            </div>
-                            <div class="chart-container" style="height: 280px;">
-                                <canvas id="portfolioMcapChart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -8494,7 +8481,6 @@
         let portfolioUnlocked = false;
         let portfolioAllocationChart = null;
         let portfolioCategoryChart = null;
-        let portfolioMcapChart = null;
         
         // Portfolio holdings - stored in localStorage for persistence
         let portfolioHoldings = [
@@ -8604,42 +8590,128 @@
         
         // Fetch current prices from CoinGecko
         async function refreshPortfolioPrices() {
+            console.log('Refreshing portfolio prices...');
+            
             const cgIds = portfolioHoldings
-                .filter(h => h.cgId && h.cgId !== 'usd-coin') // Skip stablecoins
+                .filter(h => h.cgId && h.category !== 'stablecoin')
                 .map(h => h.cgId)
                 .join(',');
             
             if (!cgIds) {
+                // Set stablecoin prices only
+                portfolioHoldings.forEach(h => {
+                    if (h.category === 'stablecoin') {
+                        h.price = 1.00;
+                        h.mcap = 0;
+                    }
+                });
                 updatePortfolioUI();
                 return;
             }
             
+            let success = false;
+            
+            // Method 1: Direct CoinGecko API (same as rest of dashboard)
             try {
-                const response = await fetch(`${COINGECKO_API}/coins/markets?vs_currency=usd&ids=${cgIds}&order=market_cap_desc&sparkline=false`);
+                console.log('Trying direct CoinGecko API...');
+                const url = `${COINGECKO_API}/coins/markets?vs_currency=usd&ids=${cgIds}&order=market_cap_desc&sparkline=false`;
+                const response = await fetch(url);
+                
                 if (response.ok) {
                     const data = await response.json();
-                    
-                    // Update prices and market caps
-                    data.forEach(coin => {
-                        const holding = portfolioHoldings.find(h => h.cgId === coin.id);
-                        if (holding) {
-                            holding.price = coin.current_price || 0;
-                            holding.mcap = coin.market_cap || 0;
-                        }
-                    });
-                    
-                    // Set stablecoin prices
-                    portfolioHoldings.forEach(h => {
-                        if (h.category === 'stablecoin') {
-                            h.price = 1.00;
-                            h.mcap = 0;
-                        }
-                    });
-                    
-                    console.log('Portfolio prices updated');
+                    if (data && data.length > 0) {
+                        data.forEach(coin => {
+                            const holding = portfolioHoldings.find(h => h.cgId === coin.id);
+                            if (holding) {
+                                holding.price = coin.current_price || 0;
+                                holding.mcap = coin.market_cap || 0;
+                                console.log(`Updated ${holding.ticker}: $${holding.price}`);
+                            }
+                        });
+                        success = true;
+                        console.log('Portfolio prices updated via direct API');
+                    }
+                } else {
+                    console.log('Direct API failed:', response.status);
                 }
             } catch (error) {
-                console.error('Error fetching portfolio prices:', error);
+                console.log('Direct CoinGecko error:', error.message);
+            }
+            
+            // Method 2: Try CORS proxy if direct failed
+            if (!success) {
+                try {
+                    console.log('Trying CoinGecko via CORS proxy...');
+                    const url = `${COINGECKO_API}/coins/markets?vs_currency=usd&ids=${cgIds}&order=market_cap_desc&sparkline=false`;
+                    const response = await fetch(CORS_PROXY + encodeURIComponent(url));
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data && data.length > 0) {
+                            data.forEach(coin => {
+                                const holding = portfolioHoldings.find(h => h.cgId === coin.id);
+                                if (holding) {
+                                    holding.price = coin.current_price || 0;
+                                    holding.mcap = coin.market_cap || 0;
+                                }
+                            });
+                            success = true;
+                            console.log('Portfolio prices updated via CORS proxy');
+                        }
+                    }
+                } catch (error) {
+                    console.log('CORS proxy error:', error.message);
+                }
+            }
+            
+            // Method 3: Use simple price endpoint as fallback
+            if (!success) {
+                try {
+                    console.log('Trying CoinGecko simple price endpoint...');
+                    const url = `${COINGECKO_API}/simple/price?ids=${cgIds}&vs_currencies=usd&include_market_cap=true`;
+                    const response = await fetch(url);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        Object.keys(data).forEach(id => {
+                            const holding = portfolioHoldings.find(h => h.cgId === id);
+                            if (holding && data[id]) {
+                                holding.price = data[id].usd || 0;
+                                holding.mcap = data[id].usd_market_cap || 0;
+                            }
+                        });
+                        success = true;
+                        console.log('Portfolio prices updated via simple price endpoint');
+                    }
+                } catch (error) {
+                    console.log('Simple price error:', error.message);
+                }
+            }
+            
+            // Set stablecoin prices regardless
+            portfolioHoldings.forEach(h => {
+                if (h.category === 'stablecoin') {
+                    h.price = 1.00;
+                    h.mcap = 0;
+                }
+            });
+            
+            // If all methods failed, use fallback prices (updated Jan 5, 2026)
+            if (!success) {
+                console.log('Using fallback prices...');
+                const fallbackPrices = {
+                    'bitcoin': { price: 94635, mcap: 1890997465389 },
+                    'ethereum': { price: 3253.11, mcap: 392933462733 },
+                    'solana': { price: 139.36, mcap: 78236439986 },
+                    'hyperliquid': { price: 27.43, mcap: 6530518029 }
+                };
+                
+                portfolioHoldings.forEach(h => {
+                    if (fallbackPrices[h.cgId]) {
+                        h.price = fallbackPrices[h.cgId].price;
+                        h.mcap = fallbackPrices[h.cgId].mcap;
+                    }
+                });
             }
             
             updatePortfolioUI();
@@ -8880,53 +8952,6 @@
                         datasets: [{
                             data: categories.map(c => categoryTotals[c]),
                             backgroundColor: categories.map(c => categoryColors[c]),
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '65%',
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                                labels: { color: '#94a3b8', padding: 8, font: { size: 10, weight: '600' }, usePointStyle: true }
-                            },
-                            tooltip: {
-                                backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                                callbacks: {
-                                    label: (ctx) => {
-                                        const pct = totalValue > 0 ? (ctx.raw / totalValue * 100).toFixed(1) : 0;
-                                        return `${ctx.label}: ${formatCurrency(ctx.raw)} (${pct}%)`;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-            
-            // Market cap chart
-            const mcapCtx = document.getElementById('portfolioMcapChart');
-            if (mcapCtx) {
-                const mcapLabels = [];
-                const mcapData = [];
-                const mcapColors = [];
-                
-                if (mcapTotals.large > 0) { mcapLabels.push('Large Cap (>$10B)'); mcapData.push(mcapTotals.large); mcapColors.push('#3b82f6'); }
-                if (mcapTotals.mid > 0) { mcapLabels.push('Mid Cap ($2-10B)'); mcapData.push(mcapTotals.mid); mcapColors.push('#a78bfa'); }
-                if (mcapTotals.small > 0) { mcapLabels.push('Small Cap (<$2B)'); mcapData.push(mcapTotals.small); mcapColors.push('#fb923c'); }
-                if (mcapTotals.cash > 0) { mcapLabels.push('Cash'); mcapData.push(mcapTotals.cash); mcapColors.push('#22c55e'); }
-                
-                if (portfolioMcapChart) portfolioMcapChart.destroy();
-                
-                portfolioMcapChart = new Chart(mcapCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: mcapLabels,
-                        datasets: [{
-                            data: mcapData,
-                            backgroundColor: mcapColors,
                             borderWidth: 0
                         }]
                     },
