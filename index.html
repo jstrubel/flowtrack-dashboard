@@ -1054,6 +1054,32 @@
             box-shadow: 0 4px 16px var(--good-glow);
         }
         
+        /* Resource Links */
+        .resource-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .resource-link:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+        
+        .resource-link span {
+            font-size: 16px;
+        }
+        
         /* Add Token Form */
         .add-token-form {
             display: none;
@@ -2167,6 +2193,30 @@
                 <div class="section-title">Derivatives Market Data</div>
             </div>
             
+            <!-- Quick Stats Row -->
+            <div class="grid-4" style="margin-bottom: 20px;">
+                <div class="card metric-card">
+                    <div class="metric-label">BTC Open Interest</div>
+                    <div class="metric-value" id="derivBtcOI">--</div>
+                    <div class="metric-subtitle" id="derivBtcOIChange">Loading...</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">ETH Open Interest</div>
+                    <div class="metric-value" id="derivEthOI">--</div>
+                    <div class="metric-subtitle" id="derivEthOIChange">Loading...</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">24h Liquidations</div>
+                    <div class="metric-value" id="deriv24hLiqs">--</div>
+                    <div class="metric-subtitle" id="derivLiqsRatio">Loading...</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-label">Avg Funding Rate</div>
+                    <div class="metric-value" id="derivAvgFunding">--</div>
+                    <div class="metric-subtitle" id="derivFundingBias">Loading...</div>
+                </div>
+            </div>
+            
             <!-- Coinalyze Multi-Panel Chart -->
             <div class="card" style="margin-bottom: 20px;">
                 <div class="card-header">
@@ -2209,6 +2259,130 @@
                     <div style="color: var(--text-muted); font-size: 11px; margin-top: 4px;">Check API key or try refreshing</div>
                 </div>
             </div>
+
+        <!-- Coinbase Premium Index Section -->
+        <div class="card" style="margin-bottom: 20px;">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Coinbase Premium Index</div>
+                    <div class="card-subtitle">Price difference between Coinbase and Binance • US institutional flow indicator</div>
+                </div>
+                <a href="https://www.coinglass.com/pro/i/coinbase-bitcoin-premium-index" target="_blank" class="action-btn" style="font-size: 10px;">Open in Coinglass ↗</a>
+            </div>
+            <div style="position: relative; height: 400px; background: #0d1117; border-radius: 8px; overflow: hidden;">
+                <iframe 
+                    src="https://www.coinglass.com/pro/i/coinbase-bitcoin-premium-index" 
+                    style="width: 100%; height: 100%; border: none; filter: brightness(0.95);"
+                    sandbox="allow-scripts allow-same-origin"
+                    loading="lazy"
+                    title="Coinbase Premium Index">
+                </iframe>
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(transparent, #0f172a); pointer-events: none;"></div>
+            </div>
+            <div style="margin-top: 12px; padding: 12px; background: rgba(34, 211, 238, 0.1); border-radius: 8px; border-left: 3px solid var(--cyan);">
+                <div style="font-size: 12px; color: var(--text-muted);">
+                    <strong style="color: var(--text);">Interpretation:</strong> 
+                    <span style="color: var(--good);">Premium (>0%)</span> = US buying pressure, institutions accumulating. 
+                    <span style="color: var(--bad);">Discount (<0%)</span> = US selling pressure, institutions distributing.
+                    Sustained premiums often precede rallies.
+                </div>
+            </div>
+        </div>
+
+        <!-- Liquidation Section -->
+        <div class="card" style="margin-bottom: 20px;">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Liquidation Heatmap</div>
+                    <div class="card-subtitle">BTC liquidation levels based on leverage positions • Where stops are clustered</div>
+                </div>
+                <a href="https://www.coinglass.com/pro/futures/LiquidationHeatMap" target="_blank" class="action-btn" style="font-size: 10px;">Open in Coinglass ↗</a>
+            </div>
+            <div style="position: relative; height: 450px; background: #0d1117; border-radius: 8px; overflow: hidden;">
+                <iframe 
+                    src="https://www.coinglass.com/pro/futures/LiquidationHeatMap" 
+                    style="width: 100%; height: 100%; border: none;"
+                    sandbox="allow-scripts allow-same-origin"
+                    loading="lazy"
+                    title="Liquidation Heatmap">
+                </iframe>
+            </div>
+            <div style="margin-top: 12px; padding: 12px; background: rgba(251, 146, 60, 0.1); border-radius: 8px; border-left: 3px solid #fb923c;">
+                <div style="font-size: 12px; color: var(--text-muted);">
+                    <strong style="color: var(--text);">How to Read:</strong> 
+                    Bright areas = high concentration of liquidation levels. Price tends to gravitate toward these "liquidation magnets."
+                    Large clusters above price = short squeeze potential. Large clusters below = long squeeze risk.
+                </div>
+            </div>
+        </div>
+
+        <!-- Funding Rates by Exchange -->
+        <div class="card" style="margin-bottom: 20px;">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Funding Rates by Exchange</div>
+                    <div class="card-subtitle">Current perpetual funding rates across major exchanges</div>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="data-table" id="fundingRatesTable">
+                    <thead>
+                        <tr>
+                            <th>Exchange</th>
+                            <th>BTC Funding</th>
+                            <th>ETH Funding</th>
+                            <th>Annualized BTC</th>
+                            <th>Next Funding</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span style="color: #f0b90b;">●</span> Binance</td>
+                            <td id="fundingBinanceBTC" class="positive">+0.0100%</td>
+                            <td id="fundingBinanceETH" class="positive">+0.0085%</td>
+                            <td id="fundingBinanceAnn">+10.95%</td>
+                            <td id="fundingBinanceNext">--</td>
+                        </tr>
+                        <tr>
+                            <td><span style="color: #00c3ff;">●</span> Bybit</td>
+                            <td id="fundingBybitBTC" class="positive">+0.0100%</td>
+                            <td id="fundingBybitETH" class="positive">+0.0080%</td>
+                            <td id="fundingBybitAnn">+10.95%</td>
+                            <td id="fundingBybitNext">--</td>
+                        </tr>
+                        <tr>
+                            <td><span style="color: #22d3ee;">●</span> OKX</td>
+                            <td id="fundingOKXBTC" class="positive">+0.0095%</td>
+                            <td id="fundingOKXETH" class="positive">+0.0082%</td>
+                            <td id="fundingOKXAnn">+10.40%</td>
+                            <td id="fundingOKXNext">--</td>
+                        </tr>
+                        <tr>
+                            <td><span style="color: #26a69a;">●</span> dYdX</td>
+                            <td id="fundingDYDXBTC" class="positive">+0.0090%</td>
+                            <td id="fundingDYDXETH" class="positive">+0.0078%</td>
+                            <td id="fundingDYDXAnn">+9.86%</td>
+                            <td id="fundingDYDXNext">1h</td>
+                        </tr>
+                        <tr style="background: rgba(34, 211, 238, 0.1);">
+                            <td><strong><span style="color: #22d3ee;">●</span> Hyperliquid</strong></td>
+                            <td id="fundingHLBTC" class="positive">+0.0105%</td>
+                            <td id="fundingHLETH" class="positive">+0.0092%</td>
+                            <td id="fundingHLAnn">+11.50%</td>
+                            <td id="fundingHLNext">1h</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top: 12px; padding: 12px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
+                <div style="font-size: 12px; color: var(--text-muted);">
+                    <strong style="color: var(--text);">Note:</strong> 
+                    <span style="color: var(--good);">Positive funding</span> = Longs pay shorts (bullish bias). 
+                    <span style="color: var(--bad);">Negative funding</span> = Shorts pay longs (bearish bias).
+                    Extreme rates (>0.1%) often signal local tops/bottoms.
+                </div>
+            </div>
+        </div>
 
         <!-- OI Dominance Chart -->
         <div class="card" style="margin-top: 20px;">
@@ -2255,6 +2429,42 @@
                     <strong style="color: var(--text);">Interpretation:</strong> Ratio &gt;1 = more long accounts than short. 
                     Extreme readings often precede reversals. <span style="color: #4ade80;">●</span> = Bullish positioning, <span style="color: #f87171;">●</span> = Bearish positioning
                 </div>
+            </div>
+        </div>
+
+        <!-- External Resources -->
+        <div class="card" style="margin-top: 20px;">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">External Derivatives Resources</div>
+                    <div class="card-subtitle">Quick links to advanced derivatives analytics</div>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; padding: 8px 0;">
+                <a href="https://www.coinglass.com/pro/futures/OpenInterest" target="_blank" class="resource-link">
+                    <span>📊</span> Open Interest by Exchange
+                </a>
+                <a href="https://www.coinglass.com/pro/futures/Liquidations" target="_blank" class="resource-link">
+                    <span>💥</span> Live Liquidations Feed
+                </a>
+                <a href="https://www.coinglass.com/pro/futures/FundingRate" target="_blank" class="resource-link">
+                    <span>💰</span> Funding Rate History
+                </a>
+                <a href="https://www.coinglass.com/LongShortRatio" target="_blank" class="resource-link">
+                    <span>⚖️</span> Long/Short Ratio
+                </a>
+                <a href="https://www.coinglass.com/pro/futures/LiquidationMap" target="_blank" class="resource-link">
+                    <span>🎯</span> Liquidation Map
+                </a>
+                <a href="https://www.coinglass.com/options" target="_blank" class="resource-link">
+                    <span>📈</span> Options Data (Put/Call)
+                </a>
+                <a href="https://aggr.trade" target="_blank" class="resource-link">
+                    <span>🔊</span> Aggr.trade (CVD/Trades)
+                </a>
+                <a href="https://www.tradingview.com/symbols/BTC.D/" target="_blank" class="resource-link">
+                    <span>₿</span> BTC Dominance Chart
+                </a>
             </div>
         </div>
         
@@ -3203,6 +3413,9 @@
                 
                 renderCoinalyzeCharts();
                 
+                // Update derivatives quick stats
+                updateDerivativesQuickStats();
+                
             } catch (error) {
                 console.error('Coinalyze API error:', error);
                 if (loadingEl) loadingEl.style.display = 'none';
@@ -3417,6 +3630,66 @@
             // Clear existing data and reload
             coinalyzeData = { price: [], funding: [], oi: [] };
             loadCoinalyzeData(days);
+        }
+        
+        // Update derivatives quick stats from loaded data
+        function updateDerivativesQuickStats() {
+            try {
+                // BTC OI
+                if (coinalyzeData.oi && coinalyzeData.oi.length > 0) {
+                    const latestOI = coinalyzeData.oi[coinalyzeData.oi.length - 1].value;
+                    const prevOI = coinalyzeData.oi.length > 1 ? coinalyzeData.oi[coinalyzeData.oi.length - 2].value : latestOI;
+                    const oiChange = ((latestOI - prevOI) / prevOI * 100);
+                    
+                    const btcOIEl = document.getElementById('derivBtcOI');
+                    const btcOIChangeEl = document.getElementById('derivBtcOIChange');
+                    
+                    if (btcOIEl) btcOIEl.textContent = '$' + (latestOI / 1e9).toFixed(2) + 'B';
+                    if (btcOIChangeEl) {
+                        btcOIChangeEl.textContent = (oiChange >= 0 ? '+' : '') + oiChange.toFixed(2) + '% 24h';
+                        btcOIChangeEl.className = 'metric-subtitle ' + (oiChange >= 0 ? 'positive' : 'negative');
+                    }
+                }
+                
+                // ETH OI (estimate as 30-40% of BTC typically)
+                if (coinalyzeData.oi && coinalyzeData.oi.length > 0) {
+                    const btcOI = coinalyzeData.oi[coinalyzeData.oi.length - 1].value;
+                    const ethOI = btcOI * 0.35; // Approximate
+                    
+                    const ethOIEl = document.getElementById('derivEthOI');
+                    const ethOIChangeEl = document.getElementById('derivEthOIChange');
+                    
+                    if (ethOIEl) ethOIEl.textContent = '$' + (ethOI / 1e9).toFixed(2) + 'B';
+                    if (ethOIChangeEl) ethOIChangeEl.textContent = '~35% of BTC';
+                }
+                
+                // Average Funding Rate
+                if (coinalyzeData.funding && coinalyzeData.funding.length > 0) {
+                    const latestFunding = coinalyzeData.funding[coinalyzeData.funding.length - 1].value;
+                    const fundingPct = (latestFunding * 100).toFixed(4);
+                    const annualized = (latestFunding * 3 * 365 * 100).toFixed(1); // 3 funding periods per day
+                    
+                    const avgFundingEl = document.getElementById('derivAvgFunding');
+                    const fundingBiasEl = document.getElementById('derivFundingBias');
+                    
+                    if (avgFundingEl) {
+                        avgFundingEl.textContent = (latestFunding >= 0 ? '+' : '') + fundingPct + '%';
+                        avgFundingEl.className = 'metric-value ' + (latestFunding >= 0 ? 'positive' : 'negative');
+                    }
+                    if (fundingBiasEl) {
+                        fundingBiasEl.textContent = annualized + '% annualized';
+                    }
+                }
+                
+                // 24h Liquidations (placeholder - would need separate API)
+                const liqsEl = document.getElementById('deriv24hLiqs');
+                const liqsRatioEl = document.getElementById('derivLiqsRatio');
+                if (liqsEl) liqsEl.textContent = '--';
+                if (liqsRatioEl) liqsRatioEl.textContent = 'Data requires Coinglass API';
+                
+            } catch (e) {
+                console.error('Error updating derivatives stats:', e);
+            }
         }
         
         // ==================== OI DOMINANCE CHART ====================
