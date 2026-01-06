@@ -2193,30 +2193,6 @@
                 <div class="section-title">Derivatives Market Data</div>
             </div>
             
-            <!-- Quick Stats Row -->
-            <div class="grid-4" style="margin-bottom: 20px;">
-                <div class="card metric-card">
-                    <div class="metric-label">BTC Open Interest</div>
-                    <div class="metric-value" id="derivBtcOI">--</div>
-                    <div class="metric-subtitle" id="derivBtcOIChange">Loading...</div>
-                </div>
-                <div class="card metric-card">
-                    <div class="metric-label">ETH Open Interest</div>
-                    <div class="metric-value" id="derivEthOI">--</div>
-                    <div class="metric-subtitle" id="derivEthOIChange">Loading...</div>
-                </div>
-                <div class="card metric-card">
-                    <div class="metric-label">24h Liquidations</div>
-                    <div class="metric-value" id="deriv24hLiqs">--</div>
-                    <div class="metric-subtitle" id="derivLiqsRatio">Loading...</div>
-                </div>
-                <div class="card metric-card">
-                    <div class="metric-label">Avg Funding Rate</div>
-                    <div class="metric-value" id="derivAvgFunding">--</div>
-                    <div class="metric-subtitle" id="derivFundingBias">Loading...</div>
-                </div>
-            </div>
-            
             <!-- Coinalyze Multi-Panel Chart -->
             <div class="card" style="margin-bottom: 20px;">
                 <div class="card-header">
@@ -2259,183 +2235,6 @@
                     <div style="color: var(--text-muted); font-size: 11px; margin-top: 4px;">Check API key or try refreshing</div>
                 </div>
             </div>
-
-        <!-- Funding Rate History Chart -->
-        <div class="card" style="margin-bottom: 20px;">
-            <div class="card-header">
-                <div>
-                    <div class="card-title">BTC Funding Rate History</div>
-                    <div class="card-subtitle">Historical funding rates • Extreme values signal local tops/bottoms</div>
-                </div>
-            </div>
-            <div class="chart-container tall" style="position: relative;">
-                <canvas id="fundingHistoryChart"></canvas>
-            </div>
-            <div style="margin-top: 12px; padding: 12px; background: rgba(34, 211, 238, 0.1); border-radius: 8px; border-left: 3px solid var(--cyan);">
-                <div style="font-size: 12px; color: var(--text-muted);">
-                    <strong style="color: var(--text);">Interpretation:</strong> 
-                    <span style="color: var(--good);">High positive funding (>0.05%)</span> = Overleveraged longs, potential local top. 
-                    <span style="color: var(--bad);">Negative funding</span> = Shorts paying longs, often signals bottoms.
-                    Neutral funding (~0.01%) is healthy.
-                </div>
-            </div>
-        </div>
-
-        <!-- Liquidation Data Section -->
-        <div class="card" style="margin-bottom: 20px;">
-            <div class="card-header">
-                <div>
-                    <div class="card-title">Estimated Liquidation Levels</div>
-                    <div class="card-subtitle">Key price levels where liquidations cluster • Based on typical leverage</div>
-                </div>
-            </div>
-            <div id="liquidationLevelsContainer" style="padding: 16px 0;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <!-- Long Liquidations (below current price) -->
-                    <div>
-                        <div style="font-size: 12px; color: var(--bad); font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-                            <span>📉</span> LONG LIQUIDATION LEVELS
-                        </div>
-                        <div id="longLiqLevels" style="display: flex; flex-direction: column; gap: 8px;">
-                            <!-- Populated by JS -->
-                        </div>
-                    </div>
-                    <!-- Short Liquidations (above current price) -->
-                    <div>
-                        <div style="font-size: 12px; color: var(--good); font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-                            <span>📈</span> SHORT LIQUIDATION LEVELS
-                        </div>
-                        <div id="shortLiqLevels" style="display: flex; flex-direction: column; gap: 8px;">
-                            <!-- Populated by JS -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div style="margin-top: 12px; padding: 12px; background: rgba(251, 146, 60, 0.1); border-radius: 8px; border-left: 3px solid #fb923c;">
-                <div style="font-size: 12px; color: var(--text-muted);">
-                    <strong style="color: var(--text);">How to Read:</strong> 
-                    These are estimated liquidation prices based on common leverage levels (5x, 10x, 25x, 50x, 100x).
-                    Price tends to "hunt" these levels. Large clusters act as magnets.
-                    <a href="https://www.coinglass.com/pro/futures/LiquidationHeatMap" target="_blank" style="color: var(--cyan); margin-left: 8px;">View full heatmap →</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- BTC vs ETH Performance -->
-        <div class="card" style="margin-bottom: 20px;">
-            <div class="card-header">
-                <div>
-                    <div class="card-title">BTC vs ETH Derivatives Comparison</div>
-                    <div class="card-subtitle">Key metrics comparison between BTC and ETH perpetuals</div>
-                </div>
-            </div>
-            <div class="table-container">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Metric</th>
-                            <th style="text-align: center;">BTC</th>
-                            <th style="text-align: center;">ETH</th>
-                            <th style="text-align: center;">Ratio/Diff</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Open Interest</td>
-                            <td id="compBtcOI" style="text-align: center; font-weight: 600;">--</td>
-                            <td id="compEthOI" style="text-align: center; font-weight: 600;">--</td>
-                            <td id="compOIRatio" style="text-align: center; color: var(--cyan);">--</td>
-                        </tr>
-                        <tr>
-                            <td>Funding Rate (8h)</td>
-                            <td id="compBtcFunding" style="text-align: center;">--</td>
-                            <td id="compEthFunding" style="text-align: center;">--</td>
-                            <td id="compFundingDiff" style="text-align: center;">--</td>
-                        </tr>
-                        <tr>
-                            <td>24h Price Change</td>
-                            <td id="compBtcChange" style="text-align: center;">--</td>
-                            <td id="compEthChange" style="text-align: center;">--</td>
-                            <td id="compChangeDiff" style="text-align: center;">--</td>
-                        </tr>
-                        <tr>
-                            <td>Long/Short Ratio</td>
-                            <td id="compBtcLS" style="text-align: center;">--</td>
-                            <td id="compEthLS" style="text-align: center;">--</td>
-                            <td id="compLSDiff" style="text-align: center;">--</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Funding Rates by Exchange -->
-        <div class="card" style="margin-bottom: 20px;">
-            <div class="card-header">
-                <div>
-                    <div class="card-title">Funding Rates by Exchange</div>
-                    <div class="card-subtitle">Current perpetual funding rates across major exchanges</div>
-                </div>
-            </div>
-            <div class="table-container">
-                <table class="data-table" id="fundingRatesTable">
-                    <thead>
-                        <tr>
-                            <th>Exchange</th>
-                            <th>BTC Funding</th>
-                            <th>ETH Funding</th>
-                            <th>Annualized BTC</th>
-                            <th>Next Funding</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><span style="color: #f0b90b;">●</span> Binance</td>
-                            <td id="fundingBinanceBTC" class="positive">+0.0100%</td>
-                            <td id="fundingBinanceETH" class="positive">+0.0085%</td>
-                            <td id="fundingBinanceAnn">+10.95%</td>
-                            <td id="fundingBinanceNext">--</td>
-                        </tr>
-                        <tr>
-                            <td><span style="color: #00c3ff;">●</span> Bybit</td>
-                            <td id="fundingBybitBTC" class="positive">+0.0100%</td>
-                            <td id="fundingBybitETH" class="positive">+0.0080%</td>
-                            <td id="fundingBybitAnn">+10.95%</td>
-                            <td id="fundingBybitNext">--</td>
-                        </tr>
-                        <tr>
-                            <td><span style="color: #22d3ee;">●</span> OKX</td>
-                            <td id="fundingOKXBTC" class="positive">+0.0095%</td>
-                            <td id="fundingOKXETH" class="positive">+0.0082%</td>
-                            <td id="fundingOKXAnn">+10.40%</td>
-                            <td id="fundingOKXNext">--</td>
-                        </tr>
-                        <tr>
-                            <td><span style="color: #26a69a;">●</span> dYdX</td>
-                            <td id="fundingDYDXBTC" class="positive">+0.0090%</td>
-                            <td id="fundingDYDXETH" class="positive">+0.0078%</td>
-                            <td id="fundingDYDXAnn">+9.86%</td>
-                            <td id="fundingDYDXNext">1h</td>
-                        </tr>
-                        <tr style="background: rgba(34, 211, 238, 0.1);">
-                            <td><strong><span style="color: #22d3ee;">●</span> Hyperliquid</strong></td>
-                            <td id="fundingHLBTC" class="positive">+0.0105%</td>
-                            <td id="fundingHLETH" class="positive">+0.0092%</td>
-                            <td id="fundingHLAnn">+11.50%</td>
-                            <td id="fundingHLNext">1h</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div style="margin-top: 12px; padding: 12px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
-                <div style="font-size: 12px; color: var(--text-muted);">
-                    <strong style="color: var(--text);">Note:</strong> 
-                    <span style="color: var(--good);">Positive funding</span> = Longs pay shorts (bullish bias). 
-                    <span style="color: var(--bad);">Negative funding</span> = Shorts pay longs (bearish bias).
-                    Extreme rates (>0.1%) often signal local tops/bottoms.
-                </div>
-            </div>
-        </div>
 
         <!-- OI Dominance Chart -->
         <div class="card" style="margin-top: 20px;">
@@ -2482,42 +2281,6 @@
                     <strong style="color: var(--text);">Interpretation:</strong> Ratio &gt;1 = more long accounts than short. 
                     Extreme readings often precede reversals. <span style="color: #4ade80;">●</span> = Bullish positioning, <span style="color: #f87171;">●</span> = Bearish positioning
                 </div>
-            </div>
-        </div>
-
-        <!-- External Resources -->
-        <div class="card" style="margin-top: 20px;">
-            <div class="card-header">
-                <div>
-                    <div class="card-title">External Derivatives Resources</div>
-                    <div class="card-subtitle">Quick links to advanced derivatives analytics</div>
-                </div>
-            </div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; padding: 8px 0;">
-                <a href="https://www.coinglass.com/pro/futures/OpenInterest" target="_blank" class="resource-link">
-                    <span>📊</span> Open Interest by Exchange
-                </a>
-                <a href="https://www.coinglass.com/pro/futures/Liquidations" target="_blank" class="resource-link">
-                    <span>💥</span> Live Liquidations Feed
-                </a>
-                <a href="https://www.coinglass.com/pro/futures/FundingRate" target="_blank" class="resource-link">
-                    <span>💰</span> Funding Rate History
-                </a>
-                <a href="https://www.coinglass.com/LongShortRatio" target="_blank" class="resource-link">
-                    <span>⚖️</span> Long/Short Ratio
-                </a>
-                <a href="https://www.coinglass.com/pro/futures/LiquidationMap" target="_blank" class="resource-link">
-                    <span>🎯</span> Liquidation Map
-                </a>
-                <a href="https://www.coinglass.com/options" target="_blank" class="resource-link">
-                    <span>📈</span> Options Data (Put/Call)
-                </a>
-                <a href="https://aggr.trade" target="_blank" class="resource-link">
-                    <span>🔊</span> Aggr.trade (CVD/Trades)
-                </a>
-                <a href="https://www.tradingview.com/symbols/BTC.D/" target="_blank" class="resource-link">
-                    <span>₿</span> BTC Dominance Chart
-                </a>
             </div>
         </div>
         
@@ -3466,9 +3229,6 @@
                 
                 renderCoinalyzeCharts();
                 
-                // Update derivatives quick stats
-                updateDerivativesQuickStats();
-                
             } catch (error) {
                 console.error('Coinalyze API error:', error);
                 if (loadingEl) loadingEl.style.display = 'none';
@@ -3683,196 +3443,6 @@
             // Clear existing data and reload
             coinalyzeData = { price: [], funding: [], oi: [] };
             loadCoinalyzeData(days);
-        }
-        
-        // Update derivatives quick stats from loaded data
-        function updateDerivativesQuickStats() {
-            try {
-                // BTC OI
-                if (coinalyzeData.oi && coinalyzeData.oi.length > 0) {
-                    const latestOI = coinalyzeData.oi[coinalyzeData.oi.length - 1].value;
-                    const prevOI = coinalyzeData.oi.length > 1 ? coinalyzeData.oi[coinalyzeData.oi.length - 2].value : latestOI;
-                    const oiChange = ((latestOI - prevOI) / prevOI * 100);
-                    
-                    const btcOIEl = document.getElementById('derivBtcOI');
-                    const btcOIChangeEl = document.getElementById('derivBtcOIChange');
-                    
-                    if (btcOIEl) btcOIEl.textContent = '$' + (latestOI / 1e9).toFixed(2) + 'B';
-                    if (btcOIChangeEl) {
-                        btcOIChangeEl.textContent = (oiChange >= 0 ? '+' : '') + oiChange.toFixed(2) + '% 24h';
-                        btcOIChangeEl.className = 'metric-subtitle ' + (oiChange >= 0 ? 'positive' : 'negative');
-                    }
-                    
-                    // Update comparison table
-                    const compBtcOI = document.getElementById('compBtcOI');
-                    if (compBtcOI) compBtcOI.textContent = '$' + (latestOI / 1e9).toFixed(2) + 'B';
-                }
-                
-                // ETH OI (estimate as 30-40% of BTC typically)
-                if (coinalyzeData.oi && coinalyzeData.oi.length > 0) {
-                    const btcOI = coinalyzeData.oi[coinalyzeData.oi.length - 1].value;
-                    const ethOI = btcOI * 0.35; // Approximate
-                    
-                    const ethOIEl = document.getElementById('derivEthOI');
-                    const ethOIChangeEl = document.getElementById('derivEthOIChange');
-                    
-                    if (ethOIEl) ethOIEl.textContent = '$' + (ethOI / 1e9).toFixed(2) + 'B';
-                    if (ethOIChangeEl) ethOIChangeEl.textContent = '~35% of BTC';
-                    
-                    // Update comparison table
-                    const compEthOI = document.getElementById('compEthOI');
-                    const compOIRatio = document.getElementById('compOIRatio');
-                    if (compEthOI) compEthOI.textContent = '$' + (ethOI / 1e9).toFixed(2) + 'B';
-                    if (compOIRatio) compOIRatio.textContent = '2.86:1';
-                }
-                
-                // Average Funding Rate
-                if (coinalyzeData.funding && coinalyzeData.funding.length > 0) {
-                    const latestFunding = coinalyzeData.funding[coinalyzeData.funding.length - 1].value;
-                    const fundingPct = (latestFunding * 100).toFixed(4);
-                    const annualized = (latestFunding * 3 * 365 * 100).toFixed(1); // 3 funding periods per day
-                    
-                    const avgFundingEl = document.getElementById('derivAvgFunding');
-                    const fundingBiasEl = document.getElementById('derivFundingBias');
-                    
-                    if (avgFundingEl) {
-                        avgFundingEl.textContent = (latestFunding >= 0 ? '+' : '') + fundingPct + '%';
-                        avgFundingEl.className = 'metric-value ' + (latestFunding >= 0 ? 'positive' : 'negative');
-                    }
-                    if (fundingBiasEl) {
-                        fundingBiasEl.textContent = annualized + '% annualized';
-                    }
-                    
-                    // Update comparison table
-                    const compBtcFunding = document.getElementById('compBtcFunding');
-                    if (compBtcFunding) {
-                        compBtcFunding.textContent = (latestFunding >= 0 ? '+' : '') + fundingPct + '%';
-                        compBtcFunding.className = latestFunding >= 0 ? 'positive' : 'negative';
-                    }
-                }
-                
-                // 24h Liquidations (placeholder - would need separate API)
-                const liqsEl = document.getElementById('deriv24hLiqs');
-                const liqsRatioEl = document.getElementById('derivLiqsRatio');
-                if (liqsEl) liqsEl.textContent = '--';
-                if (liqsRatioEl) liqsRatioEl.textContent = 'View on Coinglass';
-                
-                // Render funding history chart
-                renderFundingHistoryChart();
-                
-                // Calculate and display liquidation levels
-                updateLiquidationLevels();
-                
-            } catch (e) {
-                console.error('Error updating derivatives stats:', e);
-            }
-        }
-        
-        // Funding History Chart
-        let fundingHistoryChart = null;
-        
-        function renderFundingHistoryChart() {
-            const ctx = document.getElementById('fundingHistoryChart');
-            if (!ctx || !coinalyzeData.funding || coinalyzeData.funding.length === 0) return;
-            
-            if (fundingHistoryChart) fundingHistoryChart.destroy();
-            
-            // Get last 90 days of funding data
-            const fundingData = coinalyzeData.funding.slice(-90);
-            
-            fundingHistoryChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: fundingData.map(d => new Date(d.t).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
-                    datasets: [{
-                        label: 'Funding Rate',
-                        data: fundingData.map(d => d.value * 100),
-                        backgroundColor: fundingData.map(d => d.value >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
-                        borderColor: fundingData.map(d => d.value >= 0 ? '#22c55e' : '#ef4444'),
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                            titleColor: '#fff',
-                            bodyColor: '#fff',
-                            callbacks: {
-                                label: (ctx) => `Funding: ${ctx.raw >= 0 ? '+' : ''}${ctx.raw.toFixed(4)}%`
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: '#64748b', maxTicksLimit: 10 }
-                        },
-                        y: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { 
-                                color: '#64748b',
-                                callback: (v) => v.toFixed(3) + '%'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        // Calculate and display liquidation levels
-        function updateLiquidationLevels() {
-            const longContainer = document.getElementById('longLiqLevels');
-            const shortContainer = document.getElementById('shortLiqLevels');
-            
-            if (!longContainer || !shortContainer) return;
-            
-            // Get current BTC price from coinalyze data or use a fallback
-            let currentPrice = 94000; // fallback
-            if (coinalyzeData.price && coinalyzeData.price.length > 0) {
-                currentPrice = coinalyzeData.price[coinalyzeData.price.length - 1].c;
-            }
-            
-            const leverages = [5, 10, 25, 50, 100];
-            
-            // Long liquidation levels (price drops)
-            // Liquidation price for longs = Entry * (1 - 1/Leverage)
-            const longLiqs = leverages.map(lev => ({
-                leverage: lev,
-                price: currentPrice * (1 - 1/lev),
-                drop: (1/lev * 100).toFixed(1)
-            })).reverse(); // Show highest (closest) first
-            
-            // Short liquidation levels (price rises)
-            // Liquidation price for shorts = Entry * (1 + 1/Leverage)
-            const shortLiqs = leverages.map(lev => ({
-                leverage: lev,
-                price: currentPrice * (1 + 1/lev),
-                rise: (1/lev * 100).toFixed(1)
-            }));
-            
-            longContainer.innerHTML = longLiqs.map(l => `
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(239, 68, 68, 0.1); border-radius: 6px; border-left: 3px solid rgba(239, 68, 68, ${0.3 + l.leverage/150});">
-                    <div>
-                        <span style="font-weight: 600; color: #f87171;">${l.leverage}x</span>
-                        <span style="color: var(--text-muted); font-size: 11px; margin-left: 6px;">-${l.drop}%</span>
-                    </div>
-                    <div style="font-family: monospace; font-weight: 600; color: var(--text);">$${l.price.toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
-                </div>
-            `).join('');
-            
-            shortContainer.innerHTML = shortLiqs.map(s => `
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(34, 197, 94, 0.1); border-radius: 6px; border-left: 3px solid rgba(34, 197, 94, ${0.3 + s.leverage/150});">
-                    <div>
-                        <span style="font-weight: 600; color: #4ade80;">${s.leverage}x</span>
-                        <span style="color: var(--text-muted); font-size: 11px; margin-left: 6px;">+${s.rise}%</span>
-                    </div>
-                    <div style="font-family: monospace; font-weight: 600; color: var(--text);">$${s.price.toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
-                </div>
-            `).join('');
         }
         
         // ==================== OI DOMINANCE CHART ====================
@@ -8465,60 +8035,134 @@
         async function loadETFData() {
             console.log('Loading ETF data...');
             
-            // Try SoSoValue API first (official endpoint per docs)
+            // Multiple CORS proxy options to try
+            const corsProxies = [
+                'https://api.allorigins.win/raw?url=',
+                'https://corsproxy.io/?',
+                'https://api.codetabs.com/v1/proxy?quest='
+            ];
+            
             let btcApiData = null;
             let ethApiData = null;
             
-            try {
-                // SoSoValue V2 API - POST request with x-soso-api-key header
-                // Using CORS proxy since SoSoValue doesn't support CORS
-                // Docs: https://sosovalue.gitbook.io/soso-value-api-doc/api-document/get-etf-historical-inflow-chart
-                console.log('Fetching BTC ETF data from SoSoValue API via CORS proxy...');
+            // Method 1: Try SoSoValue's website API (the one their frontend uses)
+            // This endpoint doesn't require API key authentication
+            for (const proxy of corsProxies) {
+                if (btcApiData) break;
                 
-                const btcResponse = await fetch(CORS_PROXY + encodeURIComponent('https://api.sosovalue.xyz/openapi/v2/etf/historicalInflowChart'), {
-                    method: 'POST',
-                    headers: {
-                        'x-soso-api-key': SOSOVALUE_API_KEY,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ type: 'us-btc-spot' })
-                });
-                
-                if (btcResponse.ok) {
-                    const btcJson = await btcResponse.json();
-                    console.log('BTC ETF API response:', btcJson);
-                    if (btcJson.code === 0 && btcJson.data && btcJson.data.list) {
-                        btcApiData = btcJson.data.list;
-                        console.log('BTC ETF data loaded:', btcApiData.length, 'days');
+                try {
+                    console.log(`Trying BTC ETF via ${proxy.split('/')[2]}...`);
+                    
+                    // SoSoValue website API endpoint (no auth needed)
+                    const btcUrl = 'https://api.sosovalue.com/common/v2/etf/inflow/history?etfType=us-btc-spot';
+                    const btcResponse = await fetch(proxy + encodeURIComponent(btcUrl), {
+                        method: 'GET',
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    
+                    if (btcResponse.ok) {
+                        const btcJson = await btcResponse.json();
+                        console.log('BTC ETF response:', btcJson);
+                        
+                        if (btcJson.code === 0 && btcJson.data && btcJson.data.list) {
+                            btcApiData = btcJson.data.list;
+                            console.log('✓ BTC ETF data loaded:', btcApiData.length, 'days');
+                        } else if (btcJson.data && Array.isArray(btcJson.data)) {
+                            btcApiData = btcJson.data;
+                            console.log('✓ BTC ETF data loaded (alt format):', btcApiData.length, 'days');
+                        }
                     }
-                } else {
-                    console.log('BTC ETF API failed:', btcResponse.status, await btcResponse.text());
+                } catch (e) {
+                    console.log(`BTC ETF failed with ${proxy.split('/')[2]}:`, e.message);
                 }
+            }
+            
+            // Try ETH with same proxy that worked for BTC, or iterate
+            for (const proxy of corsProxies) {
+                if (ethApiData) break;
                 
-                // Also fetch ETH ETF data
-                console.log('Fetching ETH ETF data from SoSoValue API via CORS proxy...');
-                const ethResponse = await fetch(CORS_PROXY + encodeURIComponent('https://api.sosovalue.xyz/openapi/v2/etf/historicalInflowChart'), {
-                    method: 'POST',
-                    headers: {
-                        'x-soso-api-key': SOSOVALUE_API_KEY,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ type: 'us-eth-spot' })
-                });
-                
-                if (ethResponse.ok) {
-                    const ethJson = await ethResponse.json();
-                    console.log('ETH ETF API response:', ethJson);
-                    if (ethJson.code === 0 && ethJson.data && ethJson.data.list) {
-                        ethApiData = ethJson.data.list;
-                        console.log('ETH ETF data loaded:', ethApiData.length, 'days');
+                try {
+                    console.log(`Trying ETH ETF via ${proxy.split('/')[2]}...`);
+                    
+                    const ethUrl = 'https://api.sosovalue.com/common/v2/etf/inflow/history?etfType=us-eth-spot';
+                    const ethResponse = await fetch(proxy + encodeURIComponent(ethUrl), {
+                        method: 'GET',
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    
+                    if (ethResponse.ok) {
+                        const ethJson = await ethResponse.json();
+                        console.log('ETH ETF response:', ethJson);
+                        
+                        if (ethJson.code === 0 && ethJson.data && ethJson.data.list) {
+                            ethApiData = ethJson.data.list;
+                            console.log('✓ ETH ETF data loaded:', ethApiData.length, 'days');
+                        } else if (ethJson.data && Array.isArray(ethJson.data)) {
+                            ethApiData = ethJson.data;
+                            console.log('✓ ETH ETF data loaded (alt format):', ethApiData.length, 'days');
+                        }
                     }
-                } else {
-                    console.log('ETH ETF API failed:', ethResponse.status);
+                } catch (e) {
+                    console.log(`ETH ETF failed with ${proxy.split('/')[2]}:`, e.message);
                 }
-                
-            } catch (apiError) {
-                console.log('SoSoValue API error:', apiError.message);
+            }
+            
+            // Method 2: If Method 1 failed, try the official API with different proxies
+            if (!btcApiData) {
+                for (const proxy of corsProxies) {
+                    if (btcApiData) break;
+                    
+                    try {
+                        console.log(`Trying official BTC API via ${proxy.split('/')[2]}...`);
+                        
+                        // Build POST request as URL-encoded body
+                        const btcResponse = await fetch(proxy + encodeURIComponent('https://api.sosovalue.xyz/openapi/v2/etf/historicalInflowChart'), {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'x-soso-api-key': SOSOVALUE_API_KEY
+                            },
+                            body: JSON.stringify({ type: 'us-btc-spot' })
+                        });
+                        
+                        if (btcResponse.ok) {
+                            const btcJson = await btcResponse.json();
+                            if (btcJson.code === 0 && btcJson.data && btcJson.data.list) {
+                                btcApiData = btcJson.data.list;
+                                console.log('✓ BTC ETF loaded via official API:', btcApiData.length, 'days');
+                            }
+                        }
+                    } catch (e) {
+                        console.log(`Official BTC API failed:`, e.message);
+                    }
+                }
+            }
+            
+            if (!ethApiData) {
+                for (const proxy of corsProxies) {
+                    if (ethApiData) break;
+                    
+                    try {
+                        const ethResponse = await fetch(proxy + encodeURIComponent('https://api.sosovalue.xyz/openapi/v2/etf/historicalInflowChart'), {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'x-soso-api-key': SOSOVALUE_API_KEY
+                            },
+                            body: JSON.stringify({ type: 'us-eth-spot' })
+                        });
+                        
+                        if (ethResponse.ok) {
+                            const ethJson = await ethResponse.json();
+                            if (ethJson.code === 0 && ethJson.data && ethJson.data.list) {
+                                ethApiData = ethJson.data.list;
+                                console.log('✓ ETH ETF loaded via official API:', ethApiData.length, 'days');
+                            }
+                        }
+                    } catch (e) {
+                        console.log(`Official ETH API failed:`, e.message);
+                    }
+                }
             }
             
             // Transform API data or use fallback
@@ -8527,35 +8171,54 @@
             if (btcApiData && btcApiData.length > 0) {
                 // Transform SoSoValue format to our display format
                 btcData = btcApiData.map(item => ({
-                    date: item.date,
-                    // API only gives totals, not per-fund breakdown
-                    IBIT: 0, FBTC: 0, BITB: 0, ARKB: 0, GBTC: 0,
-                    BTCO: 0, EZBC: 0, BRRR: 0, HODL: 0, BTCW: 0, BTC: 0,
-                    total: item.totalNetInflow / 1000000, // Convert to millions
-                    totalValueTraded: item.totalValueTraded,
-                    totalNetAssets: item.totalNetAssets,
-                    cumNetInflow: item.cumNetInflow
-                }));
-                console.log('Using SoSoValue API data for BTC ETF');
+                    date: item.date || item.dataDate,
+                    IBIT: item.ibit || 0, 
+                    FBTC: item.fbtc || 0, 
+                    BITB: item.bitb || 0, 
+                    ARKB: item.arkb || 0, 
+                    GBTC: item.gbtc || 0,
+                    BTCO: item.btco || 0, 
+                    EZBC: item.ezbc || 0, 
+                    BRRR: item.brrr || 0, 
+                    HODL: item.hodl || 0, 
+                    BTCW: item.btcw || 0, 
+                    BTC: item.btc || 0,
+                    total: (item.totalNetInflow || item.netInflow || 0) / 1000000,
+                    totalValueTraded: item.totalValueTraded || item.tradingVolume || 0,
+                    totalNetAssets: item.totalNetAssets || item.netAssets || 0,
+                    cumNetInflow: item.cumNetInflow || item.cumulativeNetInflow || 0
+                })).sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort newest first
+                
+                console.log('✓ Using live SoSoValue API data for BTC ETF');
+                console.log('Latest BTC date:', btcData[0]?.date, 'Flow:', btcData[0]?.total, 'M');
             } else {
                 btcData = FALLBACK_BTC_ETF_DATA;
-                console.log('Using fallback Farside BTC ETF data');
+                console.log('⚠ Using fallback BTC ETF data (API unavailable)');
             }
             
             if (ethApiData && ethApiData.length > 0) {
                 ethData = ethApiData.map(item => ({
-                    date: item.date,
-                    ETHA: 0, FETH: 0, ETHW: 0, CETH: 0, ETHV: 0,
-                    QETH: 0, EZET: 0, ETHE: 0, ETH: 0,
-                    total: item.totalNetInflow / 1000000,
-                    totalValueTraded: item.totalValueTraded,
-                    totalNetAssets: item.totalNetAssets,
-                    cumNetInflow: item.cumNetInflow
-                }));
-                console.log('Using SoSoValue API data for ETH ETF');
+                    date: item.date || item.dataDate,
+                    ETHA: item.etha || 0, 
+                    FETH: item.feth || 0, 
+                    ETHW: item.ethw || 0, 
+                    CETH: item.ceth || 0, 
+                    ETHV: item.ethv || 0,
+                    QETH: item.qeth || 0, 
+                    EZET: item.ezet || 0, 
+                    ETHE: item.ethe || 0, 
+                    ETH: item.eth || 0,
+                    total: (item.totalNetInflow || item.netInflow || 0) / 1000000,
+                    totalValueTraded: item.totalValueTraded || item.tradingVolume || 0,
+                    totalNetAssets: item.totalNetAssets || item.netAssets || 0,
+                    cumNetInflow: item.cumNetInflow || item.cumulativeNetInflow || 0
+                })).sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                console.log('✓ Using live SoSoValue API data for ETH ETF');
+                console.log('Latest ETH date:', ethData[0]?.date, 'Flow:', ethData[0]?.total, 'M');
             } else {
                 ethData = FALLBACK_ETH_ETF_DATA;
-                console.log('Using fallback Farside ETH ETF data');
+                console.log('⚠ Using fallback ETH ETF data (API unavailable)');
             }
             
             // Store data
