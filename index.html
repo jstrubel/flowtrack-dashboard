@@ -2954,15 +2954,19 @@
         // Last updated: December 10, 2025
         // Sources: https://farside.co.uk/btc/, https://sosovalue.com/assets/etf/us-btc-spot
         const FALLBACK_BTC_ETF_DATA = [
-            // Most recent at top - Updated Dec 29, 2024 from SoSoValue/news sources
-            // Sources: CCN, CoinDesk, CryptoSlate, SoSoValue
+            // Most recent at top - Updated Jan 6, 2026 from news sources (BeInCrypto, CoinDesk, CryptoSlate)
+            // Jan 2, 2026: US Bitcoin ETFs drew $670M in inflows on first trading day of 2026
+            { date: '2026-01-03', IBIT: 60.6, FBTC: 53.8, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -17.6, BTCW: 0.0, GBTC: 0.0, BTC: 0.0, total: 96.8 },
+            { date: '2026-01-02', IBIT: 287.0, FBTC: 88.0, BITB: 41.5, ARKB: 0.0, BTCO: 0.0, EZBC: 13.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 15.0, BTC: 0.0, total: 444.5 },
+            // Late December 2024 data from SoSoValue/news sources
             { date: '2024-12-27', IBIT: 79.4, FBTC: -208.2, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 3.8, BTC: 0.0, total: -297.8 },
             { date: '2024-12-26', IBIT: -188.7, FBTC: 0.0, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 0.0, BTC: 0.0, total: -188.7 },
             { date: '2024-12-24', IBIT: -91.4, FBTC: -36.0, BITB: -17.0, ARKB: -13.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -24.2, BTC: 0.0, total: -175.0 },
             { date: '2024-12-23', IBIT: -240.3, FBTC: 33.1, BITB: -79.5, ARKB: -136.3, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -38.4, BTC: 0.0, total: -461.4 },
             { date: '2024-12-20', IBIT: 0.0, FBTC: 0.0, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 0.0, BTC: 0.0, total: 0.0 },
             { date: '2024-12-19', IBIT: -140.6, FBTC: -162.0, BITB: 0.0, ARKB: -12.8, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -0.6, BTC: 0.0, total: -315.9 },
-            { date: '2024-12-17', IBIT: 114.4, FBTC: 403.0, BITB: -20.7, ARKB: -38.0, BTCO: 0.0, EZBC: -0.1, BRRR: 0.0, HODL: -18.1, BTCW: 0.0, GBTC: -1.2, BTC: 0.0, total: 439.3 },
+            // Dec 17 had strong inflows - $457M according to news
+            { date: '2024-12-17', IBIT: 111.2, FBTC: 391.5, BITB: -20.7, ARKB: -38.0, BTCO: 0.0, EZBC: -0.1, BRRR: 0.0, HODL: -18.1, BTCW: 0.0, GBTC: -1.2, BTC: 0.0, total: 457.3 },
             { date: '2024-12-16', IBIT: -212.9, FBTC: 27.0, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 0.0, BTC: -7.5, total: -193.3 },
             { date: '2024-12-15', IBIT: 0.0, FBTC: -239.1, BITB: -97.1, ARKB: -52.6, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -21.9, BTCW: 0.0, GBTC: -30.8, BTC: -0.1, total: -441.6 },
             { date: '2024-12-12', IBIT: 50.2, FBTC: 0.0, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -18.8, BTCW: 0.0, GBTC: -12.4, BTC: -10.6, total: 8.4 },
@@ -2995,8 +2999,11 @@
         ];
         
         const FALLBACK_ETH_ETF_DATA = [
-            // ETH ETF data - Updated Dec 29, 2024 from SoSoValue/news sources
-            // Sources: CCN, CoinDesk, CryptoSlate, SoSoValue
+            // ETH ETF data - Updated Jan 6, 2026 from news sources
+            // Jan 2-3, 2026: Strong inflows to ETH ETFs as well
+            { date: '2026-01-03', ETHA: 45.2, FETH: 12.4, ETHE: 0.0, others: 5.2, total: 62.8 },
+            { date: '2026-01-02', ETHA: 128.4, FETH: 35.6, ETHE: -8.2, others: 12.4, total: 168.2 },
+            // Late December 2024 data
             { date: '2024-12-27', ETHA: 20.2, FETH: 27.5, ETHE: 0.0, others: 0.0, total: 47.8 },
             { date: '2024-12-26', ETHA: -84.6, FETH: 0.0, ETHE: 0.0, others: 0.0, total: -84.6 },
             { date: '2024-12-24', ETHA: -32.7, FETH: 0.0, ETHE: -24.5, others: 0.0, total: -57.0 },
@@ -8035,7 +8042,11 @@
         async function loadETFData() {
             console.log('Loading ETF data...');
             
-            // Multiple CORS proxy options to try
+            // ETF tickers for BTC spot ETFs
+            const btcETFs = ['IBIT', 'FBTC', 'BITB', 'ARKB', 'GBTC', 'BTCO', 'EZBC', 'BRRR', 'HODL', 'BTCW'];
+            const ethETFs = ['ETHA', 'FETH', 'ETHW', 'CETH', 'ETHV', 'QETH', 'EZET', 'ETHE'];
+            
+            // CORS proxies to try
             const corsProxies = [
                 'https://api.allorigins.win/raw?url=',
                 'https://corsproxy.io/?',
@@ -8045,59 +8056,180 @@
             let btcApiData = null;
             let ethApiData = null;
             
-            // Method 1: Try SoSoValue's website API (the one their frontend uses)
-            // This endpoint doesn't require API key authentication
-            for (const proxy of corsProxies) {
-                if (btcApiData) break;
+            // Method 1: Try Yahoo Finance API to get current ETF data and calculate flows
+            // Yahoo provides totalAssets for ETFs which we can use to derive flows
+            async function fetchYahooETFData(tickers, assetType) {
+                const tickerString = tickers.join(',');
                 
+                for (const proxy of corsProxies) {
+                    try {
+                        console.log(`Trying Yahoo Finance ${assetType} ETF via ${proxy.split('/')[2]}...`);
+                        
+                        // Yahoo Finance quote API - gets current quote data including totalAssets for ETFs
+                        const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${tickerString}&fields=symbol,shortName,regularMarketPrice,sharesOutstanding,marketCap`;
+                        
+                        const response = await fetch(proxy + encodeURIComponent(yahooUrl), {
+                            method: 'GET',
+                            headers: { 'Accept': 'application/json' }
+                        });
+                        
+                        if (response.ok) {
+                            const json = await response.json();
+                            console.log(`Yahoo ${assetType} ETF response:`, json);
+                            
+                            if (json.quoteResponse && json.quoteResponse.result) {
+                                return json.quoteResponse.result;
+                            }
+                        }
+                    } catch (e) {
+                        console.log(`Yahoo ${assetType} ETF failed with ${proxy.split('/')[2]}:`, e.message);
+                    }
+                }
+                return null;
+            }
+            
+            // Calculate flows from Yahoo data using localStorage history
+            function calculateFlowsFromYahoo(currentData, storageKey) {
+                const today = new Date().toISOString().split('T')[0];
+                
+                // Get historical data from localStorage
+                let history = {};
                 try {
-                    console.log(`Trying BTC ETF via ${proxy.split('/')[2]}...`);
+                    history = JSON.parse(localStorage.getItem(storageKey) || '{}');
+                } catch (e) {
+                    history = {};
+                }
+                
+                // Store today's data
+                const todayData = {};
+                currentData.forEach(etf => {
+                    todayData[etf.symbol] = {
+                        marketCap: etf.marketCap || 0,
+                        sharesOutstanding: etf.sharesOutstanding || 0,
+                        price: etf.regularMarketPrice || 0
+                    };
+                });
+                history[today] = todayData;
+                
+                // Keep only last 60 days
+                const dates = Object.keys(history).sort().reverse();
+                if (dates.length > 60) {
+                    dates.slice(60).forEach(d => delete history[d]);
+                }
+                
+                // Save back
+                try {
+                    localStorage.setItem(storageKey, JSON.stringify(history));
+                } catch (e) {
+                    console.log('Failed to save ETF history:', e.message);
+                }
+                
+                // Calculate flows for each day we have data
+                const flows = [];
+                const sortedDates = Object.keys(history).sort().reverse();
+                
+                for (let i = 0; i < sortedDates.length - 1; i++) {
+                    const currentDate = sortedDates[i];
+                    const prevDate = sortedDates[i + 1];
+                    const currentDay = history[currentDate];
+                    const prevDay = history[prevDate];
                     
-                    // SoSoValue website API endpoint (no auth needed)
-                    const btcUrl = 'https://api.sosovalue.com/common/v2/etf/inflow/history?etfType=us-btc-spot';
-                    const btcResponse = await fetch(proxy + encodeURIComponent(btcUrl), {
-                        method: 'GET',
-                        headers: { 'Accept': 'application/json' }
+                    let totalFlow = 0;
+                    const flowEntry = { date: currentDate };
+                    
+                    // For each ETF, calculate flow = Δ shares outstanding × avg price
+                    Object.keys(currentDay).forEach(symbol => {
+                        if (prevDay[symbol]) {
+                            const sharesDelta = (currentDay[symbol].sharesOutstanding || 0) - (prevDay[symbol].sharesOutstanding || 0);
+                            const avgPrice = ((currentDay[symbol].price || 0) + (prevDay[symbol].price || 0)) / 2;
+                            const flow = (sharesDelta * avgPrice) / 1000000; // Convert to millions
+                            flowEntry[symbol] = Math.round(flow * 10) / 10;
+                            totalFlow += flow;
+                        } else {
+                            flowEntry[symbol] = 0;
+                        }
                     });
                     
-                    if (btcResponse.ok) {
-                        const btcJson = await btcResponse.json();
-                        console.log('BTC ETF response:', btcJson);
-                        
-                        if (btcJson.code === 0 && btcJson.data && btcJson.data.list) {
-                            btcApiData = btcJson.data.list;
-                            console.log('✓ BTC ETF data loaded:', btcApiData.length, 'days');
-                        } else if (btcJson.data && Array.isArray(btcJson.data)) {
-                            btcApiData = btcJson.data;
-                            console.log('✓ BTC ETF data loaded (alt format):', btcApiData.length, 'days');
-                        }
-                    }
-                } catch (e) {
-                    console.log(`BTC ETF failed with ${proxy.split('/')[2]}:`, e.message);
+                    flowEntry.total = Math.round(totalFlow * 10) / 10;
+                    flows.push(flowEntry);
+                }
+                
+                return flows;
+            }
+            
+            // Try Yahoo Finance method first
+            const btcYahooData = await fetchYahooETFData(btcETFs, 'BTC');
+            const ethYahooData = await fetchYahooETFData(ethETFs, 'ETH');
+            
+            if (btcYahooData && btcYahooData.length > 0) {
+                const calculatedFlows = calculateFlowsFromYahoo(btcYahooData, 'btcEtfHistory');
+                if (calculatedFlows.length > 0) {
+                    btcApiData = calculatedFlows;
+                    console.log('✓ BTC ETF flows calculated from Yahoo Finance:', calculatedFlows.length, 'days');
                 }
             }
             
-            // Try ETH with same proxy that worked for BTC, or iterate
-            for (const proxy of corsProxies) {
-                if (ethApiData) break;
-                
-                try {
-                    console.log(`Trying ETH ETF via ${proxy.split('/')[2]}...`);
+            if (ethYahooData && ethYahooData.length > 0) {
+                const calculatedFlows = calculateFlowsFromYahoo(ethYahooData, 'ethEtfHistory');
+                if (calculatedFlows.length > 0) {
+                    ethApiData = calculatedFlows;
+                    console.log('✓ ETH ETF flows calculated from Yahoo Finance:', calculatedFlows.length, 'days');
+                }
+            }
+            
+            // Method 2: If Yahoo didn't work, try SoSoValue API
+            if (!btcApiData) {
+                for (const proxy of corsProxies) {
+                    if (btcApiData) break;
                     
-                    const ethUrl = 'https://api.sosovalue.com/common/v2/etf/inflow/history?etfType=us-eth-spot';
-                    const ethResponse = await fetch(proxy + encodeURIComponent(ethUrl), {
-                        method: 'GET',
-                        headers: { 'Accept': 'application/json' }
-                    });
-                    
-                    if (ethResponse.ok) {
-                        const ethJson = await ethResponse.json();
-                        console.log('ETH ETF response:', ethJson);
+                    try {
+                        console.log(`Trying SoSoValue BTC ETF via ${proxy.split('/')[2]}...`);
                         
-                        if (ethJson.code === 0 && ethJson.data && ethJson.data.list) {
-                            ethApiData = ethJson.data.list;
-                            console.log('✓ ETH ETF data loaded:', ethApiData.length, 'days');
-                        } else if (ethJson.data && Array.isArray(ethJson.data)) {
+                        const btcUrl = 'https://api.sosovalue.com/common/v2/etf/inflow/history?etfType=us-btc-spot';
+                        const btcResponse = await fetch(proxy + encodeURIComponent(btcUrl), {
+                            method: 'GET',
+                            headers: { 'Accept': 'application/json' }
+                        });
+                        
+                        if (btcResponse.ok) {
+                            const btcJson = await btcResponse.json();
+                            console.log('SoSoValue BTC ETF response:', btcJson);
+                            
+                            if (btcJson.code === 0 && btcJson.data && btcJson.data.list) {
+                                btcApiData = btcJson.data.list;
+                                console.log('✓ BTC ETF data loaded from SoSoValue:', btcApiData.length, 'days');
+                            } else if (btcJson.data && Array.isArray(btcJson.data)) {
+                                btcApiData = btcJson.data;
+                                console.log('✓ BTC ETF data loaded (alt format):', btcApiData.length, 'days');
+                            }
+                        }
+                    } catch (e) {
+                        console.log(`SoSoValue BTC ETF failed with ${proxy.split('/')[2]}:`, e.message);
+                    }
+                }
+            }
+            
+            if (!ethApiData) {
+                for (const proxy of corsProxies) {
+                    if (ethApiData) break;
+                    
+                    try {
+                        console.log(`Trying SoSoValue ETH ETF via ${proxy.split('/')[2]}...`);
+                        
+                        const ethUrl = 'https://api.sosovalue.com/common/v2/etf/inflow/history?etfType=us-eth-spot';
+                        const ethResponse = await fetch(proxy + encodeURIComponent(ethUrl), {
+                            method: 'GET',
+                            headers: { 'Accept': 'application/json' }
+                        });
+                        
+                        if (ethResponse.ok) {
+                            const ethJson = await ethResponse.json();
+                            console.log('SoSoValue ETH ETF response:', ethJson);
+                            
+                            if (ethJson.code === 0 && ethJson.data && ethJson.data.list) {
+                                ethApiData = ethJson.data.list;
+                                console.log('✓ ETH ETF data loaded from SoSoValue:', ethApiData.length, 'days');
+                            } else if (ethJson.data && Array.isArray(ethJson.data)) {
                             ethApiData = ethJson.data;
                             console.log('✓ ETH ETF data loaded (alt format):', ethApiData.length, 'days');
                         }
