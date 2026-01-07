@@ -1880,8 +1880,8 @@
                 <div style="margin-top: 12px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
                     <div style="font-size: 12px; color: var(--text-muted);">
                         <strong style="color: var(--text);">Key Events to Watch:</strong> 
-                        <span style="color: var(--bad);">🔴 High Impact</span> = FOMC, NFP, CPI - Often cause significant market volatility. 
-                        <span style="color: #f59e0b;">🟡 Medium Impact</span> = GDP, PMI, Retail Sales. 
+                        <span style="color: var(--bad);">High Impact</span> = FOMC, NFP, CPI - Often cause significant market volatility. 
+                        <span style="color: #f59e0b;">Medium Impact</span> = GDP, PMI, Retail Sales. 
                         Plan positions around these dates.
                     </div>
                 </div>
@@ -2234,6 +2234,21 @@
                     <div style="color: var(--bad); font-size: 13px;">Failed to load Coinalyze data</div>
                     <div style="color: var(--text-muted); font-size: 11px; margin-top: 4px;">Check API key or try refreshing</div>
                 </div>
+                
+                <div style="margin-top: 12px; padding: 16px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
+                    <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+                        <strong style="color: var(--text);">How to Interpret Funding Rate:</strong><br>
+                        Funding rate is the periodic payment between long and short traders in perpetual futures. Positive funding means longs pay shorts (bullish sentiment), negative means shorts pay longs (bearish sentiment).<br><br>
+                        <span style="color: #4ade80;">Bullish signals:</span> Negative or near-zero funding during uptrends indicates sustainable rallies with room to run.<br>
+                        <span style="color: #f87171;">Bearish signals:</span> Extremely high funding (>0.05% per 8h or 0.15%/day) indicates overleveraged longs and often precedes local tops or corrections.<br><br>
+                        <strong style="color: var(--text);">How to Interpret Open Interest:</strong><br>
+                        Open Interest (OI) represents the total value of outstanding futures contracts. Rising OI means new money entering the market.<br><br>
+                        <span style="color: #4ade80;">Price up + OI up</span> = Strong trend with conviction (new longs opening).<br>
+                        <span style="color: #4ade80;">Price down + OI down</span> = Longs closing, selling exhaustion possible.<br>
+                        <span style="color: #f87171;">Price up + OI down</span> = Weak rally (shorts covering, not new buying).<br>
+                        <span style="color: #f87171;">Price down + OI up</span> = New shorts opening, could accelerate downtrend or set up short squeeze.
+                    </div>
+                </div>
             </div>
 
         <!-- OI Dominance Chart -->
@@ -2253,6 +2268,16 @@
                 <canvas id="oiDominanceChart"></canvas>
                 <div id="oiDominanceLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;">
                     <div style="font-size: 12px; color: var(--text-muted);">Loading dominance data...</div>
+                </div>
+            </div>
+            <div style="margin-top: 12px; padding: 16px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
+                <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+                    <strong style="color: var(--text);">How to Interpret OI Dominance:</strong><br>
+                    OI Dominance shows what percentage of total futures open interest is concentrated in BTC vs ETH vs altcoins. It reveals where leveraged speculation is focused.<br><br>
+                    <span style="color: #f7931a;">Rising BTC Dominance:</span> Capital flowing to safety/majors. Often occurs during uncertainty or early bull markets when traders prefer BTC's relative stability.<br>
+                    <span style="color: #627eea;">Rising ETH Dominance:</span> Increased speculation on ETH, often tied to DeFi activity, upgrades, or ETH-specific narratives.<br>
+                    <span style="color: #9ca3af;">Rising "Others" (Altcoin) Dominance:</span> Risk-on sentiment. Traders are rotating into higher-beta altcoin leveraged positions. Often seen in late-stage bull markets and altcoin seasons.<br><br>
+                    <strong style="color: var(--text);">Cycle Context:</strong> Early bull markets typically see BTC dominance rise first, then ETH, then altcoins. A sharp rise in altcoin OI dominance during already elevated prices can signal frothy conditions and increased correction risk.
                 </div>
             </div>
         </div>
@@ -2277,9 +2302,12 @@
                 </div>
             </div>
             <div style="margin-top: 12px; padding: 12px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
-                <div style="font-size: 12px; color: var(--text-muted);">
-                    <strong style="color: var(--text);">Interpretation:</strong> Ratio &gt;1 = more long accounts than short. 
-                    Extreme readings often precede reversals. <span style="color: #4ade80;">●</span> = Bullish positioning, <span style="color: #f87171;">●</span> = Bearish positioning
+                <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+                    <strong style="color: var(--text);">How to Interpret Long/Short Ratio:</strong><br>
+                    This ratio shows the proportion of accounts holding long vs short positions on major exchanges. It reflects retail sentiment more than institutional positioning.<br><br>
+                    <span style="color: #4ade80;">Contrarian bullish:</span> Ratio significantly below 1.0 (more shorts) often precedes rallies as shorts get squeezed.<br>
+                    <span style="color: #f87171;">Contrarian bearish:</span> Ratio significantly above 1.5 (crowded longs) often precedes corrections as overleveraged longs get liquidated.<br><br>
+                    <strong style="color: var(--text);">Key levels:</strong> Readings above 2.0 or below 0.7 are extreme and historically mark turning points. The indicator works best as a contrarian signal when combined with price action at support/resistance levels.
                 </div>
             </div>
         </div>
@@ -2288,7 +2316,7 @@
         <div class="card" style="margin-top: 20px;">
             <div class="card-header">
                 <div>
-                    <div class="card-title">📊 BTC Cumulative Volume Delta (CVD)</div>
+                    <div class="card-title">BTC Cumulative Volume Delta (CVD)</div>
                     <div class="card-subtitle">Buy Volume - Sell Volume • Measures aggressive buying vs selling pressure • Data from Coinalyze</div>
                 </div>
                 <div class="time-selector">
@@ -2308,10 +2336,15 @@
             <div id="cvdLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;">
                 <div style="font-size: 12px; color: var(--text-muted);">Loading CVD data...</div>
             </div>
-            <div style="margin-top: 12px; padding: 12px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
-                <div style="font-size: 12px; color: var(--text-muted);">
-                    <strong style="color: var(--text);">Interpretation:</strong> CVD rising = aggressive buying dominates. CVD falling = aggressive selling dominates.
-                    <span style="color: #4ade80;">●</span> Price up + CVD up = healthy trend. <span style="color: #f87171;">●</span> Price up + CVD down = bearish divergence (warning).
+            <div style="margin-top: 12px; padding: 16px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
+                <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+                    <strong style="color: var(--text);">How to Interpret Cumulative Volume Delta (CVD):</strong><br>
+                    CVD tracks the cumulative difference between aggressive buying (market buy orders) and aggressive selling (market sell orders). It reveals whether buyers or sellers are more urgently executing trades.<br><br>
+                    <span style="color: #4ade80;">Healthy uptrend:</span> Price rising AND CVD rising confirms buyers are in control with conviction.<br>
+                    <span style="color: #4ade80;">Healthy downtrend:</span> Price falling AND CVD falling confirms sellers are in control.<br>
+                    <span style="color: #f87171;">Bearish divergence:</span> Price making new highs BUT CVD failing to confirm (flat or falling) warns of weakening momentum and potential reversal.<br>
+                    <span style="color: #f87171;">Bullish divergence:</span> Price making new lows BUT CVD not making new lows suggests selling pressure is exhausting.<br><br>
+                    <strong style="color: var(--text);">Best use:</strong> CVD divergences are most powerful at key support/resistance levels or after extended trends. A divergence alone is not a trade signal but a warning to reduce position size or tighten stops.
                 </div>
             </div>
         </div>
@@ -2320,7 +2353,7 @@
         <div class="card" style="margin-top: 20px;">
             <div class="card-header">
                 <div>
-                    <div class="card-title">🎯 BTC Options Analytics (Deribit)</div>
+                    <div class="card-title">BTC Options Analytics (Deribit)</div>
                     <div class="card-subtitle">Put/Call Ratio, Max Pain, DVOL (Implied Volatility Index) • Real-time data from Deribit</div>
                 </div>
                 <button class="time-btn" onclick="loadDeribitOptions()" style="background: var(--accent); color: white;">↻ Refresh</button>
@@ -2358,10 +2391,20 @@
             <div id="deribitLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;">
                 <div style="font-size: 12px; color: var(--text-muted);">Loading Deribit options data...</div>
             </div>
-            <div style="margin-top: 12px; padding: 12px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
-                <div style="font-size: 12px; color: var(--text-muted);">
-                    <strong style="color: var(--text);">Key Signals:</strong> P/C Ratio &lt;0.7 = Bullish, &gt;1.0 = Bearish. 
-                    Max Pain = price where most options expire worthless (magnet). DVOL &gt;80 = high volatility expected.
+            <div style="margin-top: 12px; padding: 16px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
+                <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+                    <strong style="color: var(--text);">How to Interpret Options Data:</strong><br><br>
+                    <strong style="color: var(--text);">Put/Call Ratio (P/C):</strong> Measures the ratio of put option open interest to call option open interest.<br>
+                    <span style="color: #4ade80;">Below 0.7:</span> Bullish sentiment - traders are buying more calls (betting on upside).<br>
+                    <span style="color: #fbbf24;">0.7 to 1.0:</span> Neutral sentiment - balanced positioning.<br>
+                    <span style="color: #f87171;">Above 1.0:</span> Bearish sentiment - traders are buying more puts (hedging or betting on downside).<br>
+                    Note: Extreme readings can be contrarian signals. Very low P/C may indicate complacency before a drop.<br><br>
+                    <strong style="color: var(--text);">Max Pain:</strong> The price level where the most options (both puts and calls) expire worthless, causing maximum loss to option buyers. Price often gravitates toward max pain near expiration as market makers hedge their positions. Most reliable within 48 hours of major expiries (monthly/quarterly).<br><br>
+                    <strong style="color: var(--text);">DVOL (Deribit Volatility Index):</strong> A 30-day implied volatility index similar to VIX for stocks.<br>
+                    <span style="color: #60a5fa;">Below 40:</span> Low volatility - market is calm, possible complacency before big move.<br>
+                    <span style="color: #4ade80;">40 to 60:</span> Normal volatility range for Bitcoin.<br>
+                    <span style="color: #fbbf24;">60 to 80:</span> Elevated volatility - expect larger price swings.<br>
+                    <span style="color: #f87171;">Above 80:</span> High volatility - significant moves expected, often seen during crashes or parabolic rallies.
                 </div>
             </div>
         </div>
@@ -2370,7 +2413,7 @@
         <div class="card" style="margin-top: 20px;">
             <div class="card-header">
                 <div>
-                    <div class="card-title">🏦 Exchange Netflow Indicator</div>
+                    <div class="card-title">Exchange Netflow Indicator</div>
                     <div class="card-subtitle">BTC flowing into/out of exchanges • Inflows = potential selling, Outflows = accumulation • Data from CryptoQuant</div>
                 </div>
                 <div class="time-selector">
@@ -2411,11 +2454,17 @@
             <div id="exchangeFlowLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;">
                 <div style="font-size: 12px; color: var(--text-muted);">Loading exchange flow data...</div>
             </div>
-            <div style="margin-top: 12px; padding: 12px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
-                <div style="font-size: 12px; color: var(--text-muted);">
-                    <strong style="color: var(--text);">Interpretation:</strong> 
-                    <span style="color: #f87171;">● Large inflows</span> = coins moving to exchanges (selling pressure). 
-                    <span style="color: #4ade80;">● Large outflows</span> = coins moving to cold storage (accumulation/hodling).
+            <div style="margin-top: 12px; padding: 16px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
+                <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+                    <strong style="color: var(--text);">How to Interpret Exchange Flows:</strong><br>
+                    Exchange netflow tracks BTC moving into and out of exchange wallets. This is one of the most reliable on-chain indicators for gauging market sentiment.<br><br>
+                    <span style="color: #f87171;">Inflows (Positive/Red):</span> Coins moving TO exchanges typically indicate intent to sell. Large inflows during rallies suggest profit-taking and can precede corrections. Sustained inflows during downtrends confirm selling pressure.<br><br>
+                    <span style="color: #4ade80;">Outflows (Negative/Green):</span> Coins moving FROM exchanges to cold storage indicate accumulation and long-term holding. Persistent outflows are bullish as they reduce available supply. Outflows during dips suggest buyers are accumulating.<br><br>
+                    <strong style="color: var(--text);">Key Context:</strong><br>
+                    - Single-day spikes can be noise (exchange wallet shuffling). Look for sustained trends over 7+ days.<br>
+                    - Exchange balance at multi-year lows is structurally bullish (supply squeeze potential).<br>
+                    - Large inflows combined with rising OI often precede volatility events.<br>
+                    - Note: This visualization uses estimated data. For precise flows, CryptoQuant or Glassnode subscriptions provide real exchange-tracked data.
                 </div>
             </div>
         </div>
@@ -2569,13 +2618,13 @@
                     <!-- Key Notes -->
                     <div style="background: rgba(248, 113, 113, 0.1); border-radius: 8px; padding: 12px; border-left: 3px solid var(--bad); margin-bottom: 12px;">
                         <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
-                            <strong style="color: var(--bad);">⚠️Key Unlock Event:</strong> Core contributor vesting began Nov 29, 2025. 
+                            <strong style="color: var(--bad);">Key Unlock Event:</strong> Core contributor vesting began Nov 29, 2025. 
                             ~10M HYPE/month (~$280M at current prices) over 24 months. Team has mostly restaked; 97% of fees go to buybacks.
                         </div>
                     </div>
                     <div style="padding: 12px; background: rgba(74, 222, 128, 0.1); border-radius: 8px; border-left: 3px solid var(--good);">
                         <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
-                            <strong style="color: var(--good);">✓No VC Allocation:</strong> Unlike most projects, Hyperliquid raised no venture capital. 
+                            <strong style="color: var(--good);">No VC Allocation:</strong> Unlike most projects, Hyperliquid raised no venture capital. 
                             All tokens distributed to community & team only. No external investor unlocks to worry about.
                         </div>
                     </div>
@@ -2887,7 +2936,7 @@
                                 <div class="card-title">Daily Portfolio Value</div>
                                 <div class="card-subtitle">Tracks portfolio value over time (recorded daily)</div>
                             </div>
-                            <button class="action-btn" onclick="recordPortfolioValue(false)" style="font-size: 10px;" title="Manually update today's recorded value">📊 Update Today</button>
+                            <button class="action-btn" onclick="recordPortfolioValue(false)" style="font-size: 10px;" title="Manually update today's recorded value">Update Today</button>
                         </div>
                         <div class="chart-container" style="height: 250px;">
                             <canvas id="portfolioHistoryChart"></canvas>
@@ -3020,7 +3069,7 @@
 
                 <!-- Disclaimer -->
                 <div class="portfolio-disclaimer">
-                    ⚠️ <strong>CONFIDENTIAL</strong> — This portfolio information is for authorized viewers only. 
+                    <strong>CONFIDENTIAL</strong> — This portfolio information is for authorized viewers only. 
                     Not financial advice. Past performance does not guarantee future results. 
                     Position sizes and values are subject to market fluctuations. Prices update automatically from CoinGecko.
                 </div>
@@ -4202,16 +4251,16 @@
                         let signal = '';
                         let color = '';
                         if (latestDVOL > 80) {
-                            signal = '🔴 High volatility expected';
+                            signal = 'High volatility expected';
                             color = '#f87171';
                         } else if (latestDVOL > 60) {
-                            signal = '🟡 Elevated volatility';
+                            signal = 'Elevated volatility';
                             color = '#fbbf24';
                         } else if (latestDVOL > 40) {
-                            signal = '🟢 Normal volatility';
+                            signal = 'Normal volatility';
                             color = '#4ade80';
                         } else {
-                            signal = '🔵 Low volatility (complacency)';
+                            signal = 'Low volatility (complacency)';
                             color = '#60a5fa';
                         }
                         
@@ -4266,19 +4315,19 @@
             let pcSignal = '';
             let pcColor = '';
             if (pcRatio < 0.5) {
-                pcSignal = '🟢 Very Bullish (low puts)';
+                pcSignal = 'Very Bullish (low puts)';
                 pcColor = '#4ade80';
             } else if (pcRatio < 0.7) {
-                pcSignal = '🟢 Bullish';
+                pcSignal = 'Bullish';
                 pcColor = '#4ade80';
             } else if (pcRatio < 1.0) {
-                pcSignal = '🟡 Neutral';
+                pcSignal = 'Neutral';
                 pcColor = '#fbbf24';
             } else if (pcRatio < 1.3) {
-                pcSignal = '🔴 Bearish';
+                pcSignal = 'Bearish';
                 pcColor = '#f87171';
             } else {
-                pcSignal = '🔴 Very Bearish (high puts)';
+                pcSignal = 'Very Bearish (high puts)';
                 pcColor = '#f87171';
             }
             document.getElementById('deribitPCRatioSignal').innerHTML = `<span style="color: ${pcColor}">${pcSignal}</span>`;
@@ -4582,8 +4631,8 @@
                 (netflow24h > 0 ? '+' : '') + (netflow24h / 1000).toFixed(1) + 'K BTC';
             document.getElementById('exchangeNetflow24h').style.color = netflow24h > 0 ? '#f87171' : '#4ade80';
             document.getElementById('exchangeNetflowSignal').innerHTML = netflow24h > 0 
-                ? '<span style="color: #f87171">⚠️ Net inflow (selling pressure)</span>'
-                : '<span style="color: #4ade80">✓ Net outflow (accumulation)</span>';
+                ? '<span style="color: #f87171">Net inflow (selling pressure)</span>'
+                : '<span style="color: #4ade80">Net outflow (accumulation)</span>';
             
             // 7d netflow (sum of last 7 days)
             const last7Days = data.slice(-7);
@@ -8828,9 +8877,9 @@
             let btcData = FALLBACK_BTC_ETF_DATA;
             let ethData = FALLBACK_ETH_ETF_DATA;
             
-            console.log('✓ Using Farside.uk fallback data for BTC ETF');
+            console.log('Using Farside.uk fallback data for BTC ETF');
             console.log('Latest BTC date:', btcData[0]?.date, 'Flow:', btcData[0]?.total, 'M');
-            console.log('✓ Using Farside.uk fallback data for ETH ETF');  
+            console.log('Using Farside.uk fallback data for ETH ETF');  
             console.log('Latest ETH date:', ethData[0]?.date, 'Flow:', ethData[0]?.total, 'M');
             
             // Store data
