@@ -3196,28 +3196,43 @@
         const SOSOVALUE_API_KEY = 'SOSO-f250a44853234783968e9a6fd628ebb4';
         
         // CoinGlass API Configuration
-        const COINGLASS_API_KEY = '22baaf6e13c74eb79e1b0d3fe096ae29';
-        const COINGLASS_BASE_URL = 'https://open-api-v4.coinglass.com/api';
+        // In production (Vercel), calls go through /api/coinglass proxy
+        // This keeps the API key secure server-side
+        const COINGLASS_API_KEY = ''; // Not needed client-side - handled by proxy
+        const COINGLASS_BASE_URL = '/api/coinglass'; // Proxy endpoint
         
-        // Helper function for CoinGlass API calls
+        // Helper function for CoinGlass API calls (via proxy)
         async function coinglassAPI(endpoint) {
             try {
-                const response = await fetch(`${COINGLASS_BASE_URL}${endpoint}`, {
+                // Remove leading slash if present since base URL already has the path
+                const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
+                const url = `${COINGLASS_BASE_URL}/${cleanEndpoint}`;
+                
+                console.log('Calling CoinGlass API via proxy:', url);
+                const response = await fetch(url, {
+                    method: 'GET',
                     headers: {
-                        'CG-API-KEY': COINGLASS_API_KEY,
-                        'accept': 'application/json'
+                        'Accept': 'application/json'
                     }
                 });
+                
                 if (!response.ok) {
-                    throw new Error(`CoinGlass API error: ${response.status}`);
+                    console.error('CoinGlass API HTTP error:', response.status, response.statusText);
+                    return null;
                 }
-                const data = await response.json();
-                if (data.code !== '0' && data.code !== 0) {
-                    throw new Error(`CoinGlass API error: ${data.msg || 'Unknown error'}`);
+                
+                const json = await response.json();
+                console.log('CoinGlass API response:', json);
+                
+                // CoinGlass returns { code: "0", msg: "success", data: [...] }
+                if (json.code === '0' || json.code === 0) {
+                    return json.data;
+                } else {
+                    console.error('CoinGlass API error:', json.msg || json);
+                    return null;
                 }
-                return data.data;
             } catch (error) {
-                console.error('CoinGlass API error:', error);
+                console.error('CoinGlass API fetch error:', error.message);
                 return null;
             }
         }
@@ -3234,11 +3249,14 @@
         };
         
         // Fallback ETF data (manually updated from Farside.co.uk)
-        // Last updated: December 10, 2025
-        // Sources: https://farside.co.uk/btc/, https://sosovalue.com/assets/etf/us-btc-spot
+        // Last updated: January 8, 2026
+        // Sources: https://farside.co.uk/btc/, https://coinglass.com/bitcoin-etf
         const FALLBACK_BTC_ETF_DATA = [
-            // Most recent at top - Updated Jan 6, 2026 from news sources (BeInCrypto, CoinDesk, CryptoSlate)
-            // Jan 2, 2026: US Bitcoin ETFs drew $670M in inflows on first trading day of 2026
+            // Most recent at top - Updated Jan 8, 2026
+            // Note: Markets closed on weekends, so we only have weekday data
+            { date: '2026-01-08', IBIT: 596.1, FBTC: 50.6, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -89.0, BTC: 0.0, total: 557.8 },
+            { date: '2026-01-07', IBIT: 978.6, FBTC: 370.2, BITB: 66.2, ARKB: 153.3, BTCO: 0.0, EZBC: 11.9, BRRR: 0.0, HODL: 5.0, BTCW: 0.0, GBTC: -125.1, BTC: 0.0, total: 1460.1 },
+            { date: '2026-01-06', IBIT: 130.0, FBTC: 51.9, BITB: 52.5, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -17.6, BTCW: 0.0, GBTC: -61.5, BTC: 0.0, total: 155.3 },
             { date: '2026-01-03', IBIT: 60.6, FBTC: 53.8, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -17.6, BTCW: 0.0, GBTC: 0.0, BTC: 0.0, total: 96.8 },
             { date: '2026-01-02', IBIT: 287.0, FBTC: 88.0, BITB: 41.5, ARKB: 0.0, BTCO: 0.0, EZBC: 13.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 15.0, BTC: 0.0, total: 444.5 },
             // Late December 2024 data from SoSoValue/news sources
@@ -3282,8 +3300,10 @@
         ];
         
         const FALLBACK_ETH_ETF_DATA = [
-            // ETH ETF data - Updated Jan 6, 2026 from news sources
-            // Jan 2-3, 2026: Strong inflows to ETH ETFs as well
+            // ETH ETF data - Updated Jan 8, 2026
+            { date: '2026-01-08', ETHA: 101.3, FETH: 33.2, ETHE: -17.3, others: 11.7, total: 128.9 },
+            { date: '2026-01-07', ETHA: 219.5, FETH: 95.4, ETHE: 0.0, others: 45.2, total: 360.1 },
+            { date: '2026-01-06', ETHA: 76.2, FETH: 28.4, ETHE: -9.3, others: 8.4, total: 103.7 },
             { date: '2026-01-03', ETHA: 45.2, FETH: 12.4, ETHE: 0.0, others: 5.2, total: 62.8 },
             { date: '2026-01-02', ETHA: 128.4, FETH: 35.6, ETHE: -8.2, others: 12.4, total: 168.2 },
             // Late December 2024 data
@@ -9221,42 +9241,49 @@
         
         // Load ETF data from CoinGlass API (primary) or fallback to manual data
         async function loadETFData() {
-            console.log('Loading ETF data from CoinGlass API...');
+            console.log('Loading ETF data...');
             
             // Try CoinGlass API first
             let btcApiData = null;
             let ethApiData = null;
+            let usedAPI = false;
             
             try {
                 // Fetch BTC ETF flow history from CoinGlass
                 btcApiData = await coinglassAPI('/etf/bitcoin/flow-history');
-                console.log('CoinGlass BTC ETF response:', btcApiData);
                 
                 // Fetch ETH ETF flow history from CoinGlass  
                 ethApiData = await coinglassAPI('/etf/ethereum/flow-history');
-                console.log('CoinGlass ETH ETF response:', ethApiData);
+                
+                if (btcApiData && btcApiData.length > 0) {
+                    console.log('CoinGlass BTC ETF data loaded:', btcApiData.length, 'days');
+                    usedAPI = true;
+                }
+                if (ethApiData && ethApiData.length > 0) {
+                    console.log('CoinGlass ETH ETF data loaded:', ethApiData.length, 'days');
+                }
             } catch (error) {
-                console.log('CoinGlass API failed, using fallback data:', error);
+                console.log('CoinGlass API error:', error.message);
             }
             
             // Process BTC data
             let btcData;
             if (btcApiData && Array.isArray(btcApiData) && btcApiData.length > 0) {
                 btcData = parseCoinglassETFData(btcApiData, 'btc');
-                console.log('Using CoinGlass BTC ETF data:', btcData.length, 'days');
+                console.log('Parsed CoinGlass BTC ETF data:', btcData.length, 'days, latest:', btcData[0]?.date);
             } else {
                 btcData = FALLBACK_BTC_ETF_DATA;
-                console.log('Using fallback BTC ETF data');
+                console.log('Using FALLBACK BTC ETF data:', btcData.length, 'days, latest:', btcData[0]?.date);
             }
             
             // Process ETH data
             let ethData;
             if (ethApiData && Array.isArray(ethApiData) && ethApiData.length > 0) {
                 ethData = parseCoinglassETFData(ethApiData, 'eth');
-                console.log('Using CoinGlass ETH ETF data:', ethData.length, 'days');
+                console.log('Parsed CoinGlass ETH ETF data:', ethData.length, 'days, latest:', ethData[0]?.date);
             } else {
                 ethData = FALLBACK_ETH_ETF_DATA;
-                console.log('Using fallback ETH ETF data');
+                console.log('Using FALLBACK ETH ETF data:', ethData.length, 'days, latest:', ethData[0]?.date);
             }
             
             // Store data
@@ -9264,20 +9291,11 @@
             etfData.eth.daily = ethData;
             
             // Calculate cumulative flows
-            if (btcData[0] && btcData[0].cumNetInflow !== undefined) {
-                etfData.btc.cumulative = btcData[0].cumNetInflow;
-                console.log('BTC cumulative from API:', etfData.btc.cumulative, 'M');
-            } else {
-                // Base + sum of recent flows
-                etfData.btc.cumulative = 35000 + btcData.reduce((sum, d) => sum + d.total, 0);
-            }
+            etfData.btc.cumulative = 35000 + btcData.reduce((sum, d) => sum + (d.total || 0), 0);
+            etfData.eth.cumulative = 2500 + ethData.reduce((sum, d) => sum + (d.total || 0), 0);
             
-            if (ethData[0] && ethData[0].cumNetInflow !== undefined) {
-                etfData.eth.cumulative = ethData[0].cumNetInflow;
-                console.log('ETH cumulative from API:', etfData.eth.cumulative, 'M');
-            } else {
-                etfData.eth.cumulative = 2500 + ethData.reduce((sum, d) => sum + d.total, 0);
-            }
+            console.log('ETF Data loaded - BTC cumulative:', etfData.btc.cumulative.toFixed(0), 'M, ETH:', etfData.eth.cumulative.toFixed(0), 'M');
+            console.log('Data source:', usedAPI ? 'CoinGlass API' : 'Fallback data');
             
             // Update UI
             updateETFSummaryCards();
@@ -9294,45 +9312,62 @@
         }
         
         // Parse CoinGlass ETF API response into our standard format
+        // CoinGlass format: { timestamp: ms, flow_usd: number, etf_flows: [{etf_ticker, flow_usd}] }
         function parseCoinglassETFData(apiData, type) {
+            console.log('Parsing CoinGlass ETF data:', apiData?.length, 'items');
+            
             // CoinGlass returns array sorted by date descending (most recent first)
             return apiData.map(item => {
-                // Convert timestamp to date string if needed
+                // Convert timestamp (milliseconds) to date string
                 let dateStr;
-                if (item.date) {
-                    dateStr = item.date;
-                } else if (item.time || item.timestamp) {
-                    const ts = item.time || item.timestamp;
-                    const date = new Date(ts * 1000);
+                if (item.timestamp) {
+                    const date = new Date(item.timestamp);
                     dateStr = date.toISOString().split('T')[0];
+                } else if (item.date) {
+                    dateStr = item.date;
+                } else {
+                    dateStr = 'Unknown';
+                }
+                
+                // Total flow in millions (API returns USD, we display in millions)
+                const totalFlow = (item.flow_usd || 0) / 1000000;
+                
+                // Parse individual ETF flows
+                const etfFlows = {};
+                if (item.etf_flows && Array.isArray(item.etf_flows)) {
+                    item.etf_flows.forEach(etf => {
+                        if (etf.etf_ticker && etf.flow_usd !== undefined) {
+                            etfFlows[etf.etf_ticker] = (etf.flow_usd || 0) / 1000000;
+                        }
+                    });
                 }
                 
                 if (type === 'btc') {
                     return {
                         date: dateStr,
-                        IBIT: item.IBIT || item.ibit || 0,
-                        FBTC: item.FBTC || item.fbtc || 0,
-                        BITB: item.BITB || item.bitb || 0,
-                        ARKB: item.ARKB || item.arkb || 0,
-                        GBTC: item.GBTC || item.gbtc || 0,
-                        BTCO: item.BTCO || item.btco || 0,
-                        EZBC: item.EZBC || item.ezbc || 0,
-                        BRRR: item.BRRR || item.brrr || 0,
-                        HODL: item.HODL || item.hodl || 0,
-                        BTCW: item.BTCW || item.btcw || 0,
-                        BTC: item.BTC || item.btc_grayscale || 0,
-                        total: item.totalNetInflow || item.netInflow || item.total || 0,
-                        cumNetInflow: item.cumNetInflow || item.cumulativeNetInflow || undefined
+                        IBIT: etfFlows.IBIT || 0,
+                        FBTC: etfFlows.FBTC || 0,
+                        BITB: etfFlows.BITB || 0,
+                        ARKB: etfFlows.ARKB || 0,
+                        GBTC: etfFlows.GBTC || 0,
+                        BTCO: etfFlows.BTCO || 0,
+                        EZBC: etfFlows.EZBC || 0,
+                        BRRR: etfFlows.BRRR || 0,
+                        HODL: etfFlows.HODL || 0,
+                        BTCW: etfFlows.BTCW || 0,
+                        BTC: etfFlows.BTC || 0,
+                        total: totalFlow
                     };
                 } else {
                     return {
                         date: dateStr,
-                        ETHA: item.ETHA || item.etha || 0,
-                        FETH: item.FETH || item.feth || 0,
-                        ETHE: item.ETHE || item.ethe || 0,
-                        others: item.others || 0,
-                        total: item.totalNetInflow || item.netInflow || item.total || 0,
-                        cumNetInflow: item.cumNetInflow || item.cumulativeNetInflow || undefined
+                        ETHA: etfFlows.ETHA || 0,
+                        FETH: etfFlows.FETH || 0,
+                        ETHE: etfFlows.ETHE || 0,
+                        others: Object.keys(etfFlows)
+                            .filter(k => !['ETHA', 'FETH', 'ETHE'].includes(k))
+                            .reduce((sum, k) => sum + etfFlows[k], 0),
+                        total: totalFlow
                     };
                 }
             });
