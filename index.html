@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flowtrack | Crypto Market Intelligence</title>
+    <title>Flowtrack | Crypto Market Intelligence v12</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -1827,15 +1827,15 @@
             <!-- Data Source Note -->
             <div class="card" style="margin-top: 16px; background: linear-gradient(135deg, rgba(234, 179, 8, 0.1) 0%, rgba(234, 179, 8, 0.02) 100%); border: 1px solid rgba(234, 179, 8, 0.2);">
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="font-size: 20px;">⚠️</div>
+                    <div style="font-size: 20px;">📡</div>
                     <div>
-                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">ETF Data Source & Limitations</div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">ETF Data Source</div>
                         <div style="font-size: 12px; color: var(--text-muted);">
-                            Primary: SoSoValue API (auto-updates). Fallback: Farside Investors (manual updates). 
-                            If data appears stale, the SoSoValue API may be unavailable - check browser console for details.
-                            <a href="https://farside.co.uk/btc/" target="_blank" style="color: var(--cyan); text-decoration: none;"> View BTC ETF →</a>
-                            <a href="https://farside.co.uk/eth/" target="_blank" style="color: var(--cyan); text-decoration: none; margin-left: 12px;"> ETH ETF →</a>
-                            <a href="https://sosovalue.com/assets/etf/us-btc-spot" target="_blank" style="color: var(--cyan); text-decoration: none; margin-left: 12px;"> SoSoValue →</a>
+                            Primary: CoinGlass API (live auto-updates). Fallback: Farside Investors (manual). 
+                            Check browser console for API status.
+                            <a href="https://www.coinglass.com/bitcoin-etf" target="_blank" style="color: var(--cyan); text-decoration: none;"> CoinGlass ETF →</a>
+                            <a href="https://farside.co.uk/btc/" target="_blank" style="color: var(--cyan); text-decoration: none; margin-left: 12px;"> Farside BTC →</a>
+                            <a href="https://farside.co.uk/eth/" target="_blank" style="color: var(--cyan); text-decoration: none; margin-left: 12px;"> Farside ETH →</a>
                         </div>
                     </div>
                 </div>
@@ -2469,6 +2469,77 @@
             </div>
         </div>
         
+        <!-- CoinGlass Market Indicators Section -->
+        <div class="card" style="margin-top: 20px;">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Market Sentiment Indicators</div>
+                    <div class="card-subtitle">Live data from CoinGlass API • Updates every minute</div>
+                </div>
+                <button class="time-btn" onclick="loadCoinglassIndicators()" style="background: var(--accent); color: white;">Refresh</button>
+            </div>
+            
+            <!-- Indicator Cards Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;">
+                <!-- Fear & Greed Index -->
+                <div class="metric-card" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); text-align: center;">
+                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">FEAR & GREED INDEX</div>
+                    <div id="fearGreedValue" style="font-size: 42px; font-weight: 700; color: var(--text);">--</div>
+                    <div id="fearGreedLabel" style="font-size: 14px; font-weight: 600; color: var(--text-muted); margin-top: 4px;">Loading...</div>
+                    <div id="fearGreedChange" style="font-size: 11px; color: var(--text-dim); margin-top: 8px;">--</div>
+                </div>
+                
+                <!-- Long/Short Ratio -->
+                <div class="metric-card" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); text-align: center;">
+                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">BTC LONG/SHORT RATIO</div>
+                    <div id="longShortValue" style="font-size: 42px; font-weight: 700; color: var(--text);">--</div>
+                    <div id="longShortLabel" style="font-size: 14px; font-weight: 600; color: var(--text-muted); margin-top: 4px;">Loading...</div>
+                    <div style="display: flex; justify-content: center; gap: 16px; margin-top: 8px;">
+                        <div style="font-size: 11px;"><span style="color: #4ade80;">Long:</span> <span id="longPct">--</span></div>
+                        <div style="font-size: 11px;"><span style="color: #f87171;">Short:</span> <span id="shortPct">--</span></div>
+                    </div>
+                </div>
+                
+                <!-- 24H Liquidations -->
+                <div class="metric-card" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); text-align: center;">
+                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">24H LIQUIDATIONS</div>
+                    <div id="liqTotalValue" style="font-size: 36px; font-weight: 700; color: var(--text);">--</div>
+                    <div style="display: flex; justify-content: center; gap: 16px; margin-top: 8px;">
+                        <div style="font-size: 12px;"><span style="color: #4ade80;">Longs:</span> <span id="liqLongs">--</span></div>
+                        <div style="font-size: 12px;"><span style="color: #f87171;">Shorts:</span> <span id="liqShorts">--</span></div>
+                    </div>
+                    <div id="liqDominance" style="font-size: 11px; color: var(--text-dim); margin-top: 8px;">--</div>
+                </div>
+                
+                <!-- OI-Weighted Funding -->
+                <div class="metric-card" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); text-align: center;">
+                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">OI-WEIGHTED FUNDING (BTC)</div>
+                    <div id="oiFundingValue" style="font-size: 36px; font-weight: 700; color: var(--text);">--</div>
+                    <div id="oiFundingAnnualized" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">--</div>
+                    <div id="oiFundingSignal" style="font-size: 11px; color: var(--text-dim); margin-top: 8px;">--</div>
+                </div>
+            </div>
+            
+            <!-- Fear & Greed History Chart -->
+            <div style="height: 200px; position: relative; margin-top: 16px;">
+                <div style="position: absolute; top: 8px; left: 12px; font-size: 11px; color: var(--text-muted); z-index: 10;">Fear & Greed Index (30 Days)</div>
+                <canvas id="fearGreedChart"></canvas>
+            </div>
+            
+            <div style="margin-top: 12px; padding: 16px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
+                <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+                    <strong style="color: var(--text);">Fear & Greed Index Interpretation:</strong><br>
+                    <span style="color: #f87171;">0-25 (Extreme Fear):</span> Market is fearful - historically good buying opportunities. Contrarian signal to accumulate.<br>
+                    <span style="color: #fbbf24;">26-45 (Fear):</span> Caution in the market. Watch for capitulation signals.<br>
+                    <span style="color: #94a3b8;">46-55 (Neutral):</span> Market is balanced. No strong directional bias.<br>
+                    <span style="color: #4ade80;">56-75 (Greed):</span> Optimism rising. Trend likely to continue but be cautious of overextension.<br>
+                    <span style="color: #22d3ee;">76-100 (Extreme Greed):</span> Market euphoria - historically precedes corrections. Consider taking profits.<br><br>
+                    <strong style="color: var(--text);">Long/Short Ratio:</strong> Ratio >1.0 means more traders are long (bullish positioning). Extreme readings (>2.0 or <0.5) often signal crowded trades that reverse.<br><br>
+                    <strong style="color: var(--text);">OI-Weighted Funding:</strong> More accurate than simple average. Weights each exchange's funding by their open interest contribution. High positive funding (>0.03%) = overleveraged longs.
+                </div>
+            </div>
+        </div>
+        
         </div><!-- Close section -->
         </div><!-- END DERIVATIVES TAB -->
 
@@ -3079,8 +3150,8 @@
     </div>
 
     <footer>
-        <p><strong>FLOWTRACK</strong> — Crypto Derivatives Intelligence</p>
-        <p style="margin-top: 6px;">Data from Binance Futures API, CoinGecko, Alternative.me, SoSoValue, TradingView</p>
+        <p><strong>FLOWTRACK v12</strong> — Crypto Derivatives Intelligence</p>
+        <p style="margin-top: 6px;">Data from CoinGlass API, Binance Futures, CoinGecko, Coinalyze, TradingView</p>
         <p style="margin-top: 6px;">Auto-refreshes every 60 seconds • Not financial advice</p>
     </footer>
     
@@ -3123,6 +3194,33 @@
         
         // ==================== ETF FLOWS CONFIGURATION ====================
         const SOSOVALUE_API_KEY = 'SOSO-f250a44853234783968e9a6fd628ebb4';
+        
+        // CoinGlass API Configuration
+        const COINGLASS_API_KEY = '22baaf6e13c74eb79e1b0d3fe096ae29';
+        const COINGLASS_BASE_URL = 'https://open-api-v4.coinglass.com/api';
+        
+        // Helper function for CoinGlass API calls
+        async function coinglassAPI(endpoint) {
+            try {
+                const response = await fetch(`${COINGLASS_BASE_URL}${endpoint}`, {
+                    headers: {
+                        'CG-API-KEY': COINGLASS_API_KEY,
+                        'accept': 'application/json'
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error(`CoinGlass API error: ${response.status}`);
+                }
+                const data = await response.json();
+                if (data.code !== '0' && data.code !== 0) {
+                    throw new Error(`CoinGlass API error: ${data.msg || 'Unknown error'}`);
+                }
+                return data.data;
+            } catch (error) {
+                console.error('CoinGlass API error:', error);
+                return null;
+            }
+        }
         
         // ETF Charts
         let btcEtfFlowChart = null;
@@ -3292,6 +3390,10 @@
                 // Load Exchange Flow Data
                 if (!exchangeFlowChart) {
                     setTimeout(() => loadExchangeFlowData(90), 1700);
+                }
+                // Load CoinGlass Indicators (Fear & Greed, Long/Short, Liquidations, Funding)
+                if (!coinglassIndicatorsLoaded) {
+                    setTimeout(() => loadCoinglassIndicators(), 2000);
                 }
             }
             
@@ -3890,6 +3992,257 @@
             event.target.classList.add('active');
             
             loadOIDominanceData(days);
+        }
+        
+        // ==================== COINGLASS MARKET INDICATORS ====================
+        let fearGreedChart = null;
+        let coinglassIndicatorsLoaded = false;
+        
+        async function loadCoinglassIndicators() {
+            console.log('Loading CoinGlass market indicators...');
+            
+            // Load all indicators in parallel
+            await Promise.all([
+                loadFearGreedIndex(),
+                loadCoinglassLongShort(),
+                loadCoinglassLiquidations(),
+                loadCoinglassFunding()
+            ]);
+            
+            coinglassIndicatorsLoaded = true;
+        }
+        
+        // Fear & Greed Index
+        async function loadFearGreedIndex() {
+            try {
+                const data = await coinglassAPI('/indicator/fear-greed');
+                console.log('Fear & Greed response:', data);
+                
+                if (data && Array.isArray(data) && data.length > 0) {
+                    // Get current value (most recent)
+                    const current = data[0];
+                    const value = current.value || current.fgi || 0;
+                    
+                    // Update display
+                    const valueEl = document.getElementById('fearGreedValue');
+                    const labelEl = document.getElementById('fearGreedLabel');
+                    const changeEl = document.getElementById('fearGreedChange');
+                    
+                    if (valueEl) {
+                        valueEl.textContent = Math.round(value);
+                        valueEl.style.color = getFearGreedColor(value);
+                    }
+                    if (labelEl) {
+                        labelEl.textContent = getFearGreedLabel(value);
+                        labelEl.style.color = getFearGreedColor(value);
+                    }
+                    
+                    // Calculate change from yesterday
+                    if (changeEl && data.length > 1) {
+                        const yesterday = data[1].value || data[1].fgi || 0;
+                        const change = value - yesterday;
+                        changeEl.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(0)} from yesterday`;
+                        changeEl.style.color = change >= 0 ? '#4ade80' : '#f87171';
+                    }
+                    
+                    // Render chart with last 30 days
+                    renderFearGreedChart(data.slice(0, 30).reverse());
+                }
+            } catch (error) {
+                console.error('Failed to load Fear & Greed:', error);
+                document.getElementById('fearGreedValue').textContent = '--';
+                document.getElementById('fearGreedLabel').textContent = 'API Error';
+            }
+        }
+        
+        function getFearGreedColor(value) {
+            if (value <= 25) return '#f87171'; // Extreme Fear - red
+            if (value <= 45) return '#fbbf24'; // Fear - yellow
+            if (value <= 55) return '#94a3b8'; // Neutral - gray
+            if (value <= 75) return '#4ade80'; // Greed - green
+            return '#22d3ee'; // Extreme Greed - cyan
+        }
+        
+        function getFearGreedLabel(value) {
+            if (value <= 25) return 'Extreme Fear';
+            if (value <= 45) return 'Fear';
+            if (value <= 55) return 'Neutral';
+            if (value <= 75) return 'Greed';
+            return 'Extreme Greed';
+        }
+        
+        function renderFearGreedChart(data) {
+            const ctx = document.getElementById('fearGreedChart');
+            if (!ctx) return;
+            
+            if (fearGreedChart) {
+                fearGreedChart.destroy();
+            }
+            
+            fearGreedChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => {
+                        const date = new Date(d.time ? d.time * 1000 : d.date);
+                        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    }),
+                    datasets: [{
+                        label: 'Fear & Greed',
+                        data: data.map(d => d.value || d.fgi),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 0,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `${ctx.raw} - ${getFearGreedLabel(ctx.raw)}`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#64748b', font: { size: 10 }, maxTicksLimit: 7 }
+                        },
+                        y: {
+                            min: 0,
+                            max: 100,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#64748b', font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // CoinGlass Long/Short Ratio
+        async function loadCoinglassLongShort() {
+            try {
+                const data = await coinglassAPI('/futures/global-long-short-account-ratio?symbol=BTC');
+                console.log('Long/Short response:', data);
+                
+                if (data && Array.isArray(data) && data.length > 0) {
+                    // Get latest data point
+                    const latest = data[0];
+                    const ratio = latest.longShortRatio || latest.ratio || 1;
+                    const longPct = latest.longAccount || latest.longRate || (ratio / (1 + ratio) * 100);
+                    const shortPct = latest.shortAccount || latest.shortRate || (1 / (1 + ratio) * 100);
+                    
+                    const valueEl = document.getElementById('longShortValue');
+                    const labelEl = document.getElementById('longShortLabel');
+                    const longEl = document.getElementById('longPct');
+                    const shortEl = document.getElementById('shortPct');
+                    
+                    if (valueEl) {
+                        valueEl.textContent = ratio.toFixed(2);
+                        valueEl.style.color = ratio > 1 ? '#4ade80' : '#f87171';
+                    }
+                    if (labelEl) {
+                        if (ratio > 1.5) labelEl.textContent = 'Very Bullish';
+                        else if (ratio > 1.1) labelEl.textContent = 'Bullish';
+                        else if (ratio > 0.9) labelEl.textContent = 'Neutral';
+                        else if (ratio > 0.67) labelEl.textContent = 'Bearish';
+                        else labelEl.textContent = 'Very Bearish';
+                    }
+                    if (longEl) longEl.textContent = longPct.toFixed(1) + '%';
+                    if (shortEl) shortEl.textContent = shortPct.toFixed(1) + '%';
+                }
+            } catch (error) {
+                console.error('Failed to load Long/Short:', error);
+            }
+        }
+        
+        // CoinGlass Liquidations
+        async function loadCoinglassLiquidations() {
+            try {
+                const data = await coinglassAPI('/futures/liquidation/coin-list');
+                console.log('Liquidations response:', data);
+                
+                if (data && Array.isArray(data)) {
+                    // Sum up all liquidations (or find BTC specifically)
+                    let totalLong = 0, totalShort = 0;
+                    
+                    data.forEach(coin => {
+                        totalLong += (coin.longLiquidationUsd || coin.longUsd || 0);
+                        totalShort += (coin.shortLiquidationUsd || coin.shortUsd || 0);
+                    });
+                    
+                    const total = totalLong + totalShort;
+                    
+                    const totalEl = document.getElementById('liqTotalValue');
+                    const longsEl = document.getElementById('liqLongs');
+                    const shortsEl = document.getElementById('liqShorts');
+                    const domEl = document.getElementById('liqDominance');
+                    
+                    if (totalEl) totalEl.textContent = '$' + formatMillions(total);
+                    if (longsEl) longsEl.textContent = '$' + formatMillions(totalLong);
+                    if (shortsEl) shortsEl.textContent = '$' + formatMillions(totalShort);
+                    if (domEl) {
+                        const longDom = (totalLong / total * 100).toFixed(0);
+                        domEl.textContent = totalLong > totalShort 
+                            ? `Long liquidations dominant (${longDom}%)`
+                            : `Short liquidations dominant (${100 - longDom}%)`;
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load Liquidations:', error);
+            }
+        }
+        
+        function formatMillions(value) {
+            if (value >= 1e9) return (value / 1e9).toFixed(2) + 'B';
+            if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
+            if (value >= 1e3) return (value / 1e3).toFixed(0) + 'K';
+            return value.toFixed(0);
+        }
+        
+        // CoinGlass OI-Weighted Funding Rate
+        async function loadCoinglassFunding() {
+            try {
+                const data = await coinglassAPI('/futures/funding-rate/oi-weight-ohlc-history?symbol=BTC&interval=h8');
+                console.log('Funding response:', data);
+                
+                if (data && Array.isArray(data) && data.length > 0) {
+                    // Get latest funding rate
+                    const latest = data[0];
+                    const rate = (latest.c || latest.close || latest.rate || 0) * 100; // Convert to percentage
+                    
+                    const valueEl = document.getElementById('oiFundingValue');
+                    const annualEl = document.getElementById('oiFundingAnnualized');
+                    const signalEl = document.getElementById('oiFundingSignal');
+                    
+                    if (valueEl) {
+                        valueEl.textContent = rate.toFixed(4) + '%';
+                        valueEl.style.color = rate > 0.02 ? '#f87171' : rate < -0.01 ? '#4ade80' : '#94a3b8';
+                    }
+                    
+                    // Annualized: rate * 3 (per day) * 365
+                    const annualized = rate * 3 * 365;
+                    if (annualEl) {
+                        annualEl.textContent = `${annualized.toFixed(1)}% annualized`;
+                    }
+                    
+                    if (signalEl) {
+                        if (rate > 0.03) signalEl.textContent = 'Overleveraged longs - correction risk';
+                        else if (rate > 0.01) signalEl.textContent = 'Moderately bullish positioning';
+                        else if (rate > -0.01) signalEl.textContent = 'Neutral positioning';
+                        else if (rate > -0.03) signalEl.textContent = 'Shorts paying longs';
+                        else signalEl.textContent = 'Extreme bearish positioning - bounce risk';
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load Funding:', error);
+            }
         }
         
         // ==================== LONG/SHORT RATIO CHART ====================
@@ -8866,38 +9219,62 @@
         
         // ==================== ETF FLOWS FUNCTIONS ====================
         
-        // Load ETF data - uses manually updated fallback data from Farside.uk
-        // To update: Visit https://farside.co.uk/btc/ and https://farside.co.uk/eth/ 
-        // and update FALLBACK_BTC_ETF_DATA and FALLBACK_ETH_ETF_DATA arrays above
+        // Load ETF data from CoinGlass API (primary) or fallback to manual data
         async function loadETFData() {
-            console.log('Loading ETF data from fallback (Farside.uk manual data)...');
+            console.log('Loading ETF data from CoinGlass API...');
             
-            // Use fallback data directly - this is the reliable method
-            // Data source: https://farside.co.uk/btc/ and https://farside.co.uk/eth/
-            let btcData = FALLBACK_BTC_ETF_DATA;
-            let ethData = FALLBACK_ETH_ETF_DATA;
+            // Try CoinGlass API first
+            let btcApiData = null;
+            let ethApiData = null;
             
-            console.log('Using Farside.uk fallback data for BTC ETF');
-            console.log('Latest BTC date:', btcData[0]?.date, 'Flow:', btcData[0]?.total, 'M');
-            console.log('Using Farside.uk fallback data for ETH ETF');  
-            console.log('Latest ETH date:', ethData[0]?.date, 'Flow:', ethData[0]?.total, 'M');
+            try {
+                // Fetch BTC ETF flow history from CoinGlass
+                btcApiData = await coinglassAPI('/etf/bitcoin/flow-history');
+                console.log('CoinGlass BTC ETF response:', btcApiData);
+                
+                // Fetch ETH ETF flow history from CoinGlass  
+                ethApiData = await coinglassAPI('/etf/ethereum/flow-history');
+                console.log('CoinGlass ETH ETF response:', ethApiData);
+            } catch (error) {
+                console.log('CoinGlass API failed, using fallback data:', error);
+            }
+            
+            // Process BTC data
+            let btcData;
+            if (btcApiData && Array.isArray(btcApiData) && btcApiData.length > 0) {
+                btcData = parseCoinglassETFData(btcApiData, 'btc');
+                console.log('Using CoinGlass BTC ETF data:', btcData.length, 'days');
+            } else {
+                btcData = FALLBACK_BTC_ETF_DATA;
+                console.log('Using fallback BTC ETF data');
+            }
+            
+            // Process ETH data
+            let ethData;
+            if (ethApiData && Array.isArray(ethApiData) && ethApiData.length > 0) {
+                ethData = parseCoinglassETFData(ethApiData, 'eth');
+                console.log('Using CoinGlass ETH ETF data:', ethData.length, 'days');
+            } else {
+                ethData = FALLBACK_ETH_ETF_DATA;
+                console.log('Using fallback ETH ETF data');
+            }
             
             // Store data
             etfData.btc.daily = btcData;
             etfData.eth.daily = ethData;
             
-            // Use API cumulative if available (latest day's cumNetInflow), otherwise calculate
-            if (btcData[0] && btcData[0].cumNetInflow) {
-                etfData.btc.cumulative = btcData[0].cumNetInflow / 1000000; // Convert to millions
-                console.log('Using API cumulative for BTC:', etfData.btc.cumulative, 'M');
+            // Calculate cumulative flows
+            if (btcData[0] && btcData[0].cumNetInflow !== undefined) {
+                etfData.btc.cumulative = btcData[0].cumNetInflow;
+                console.log('BTC cumulative from API:', etfData.btc.cumulative, 'M');
             } else {
-                // Fallback: use historical base (~$35B as of late 2024) + sum of recent flows
+                // Base + sum of recent flows
                 etfData.btc.cumulative = 35000 + btcData.reduce((sum, d) => sum + d.total, 0);
             }
             
-            if (ethData[0] && ethData[0].cumNetInflow) {
-                etfData.eth.cumulative = ethData[0].cumNetInflow / 1000000;
-                console.log('Using API cumulative for ETH:', etfData.eth.cumulative, 'M');
+            if (ethData[0] && ethData[0].cumNetInflow !== undefined) {
+                etfData.eth.cumulative = ethData[0].cumNetInflow;
+                console.log('ETH cumulative from API:', etfData.eth.cumulative, 'M');
             } else {
                 etfData.eth.cumulative = 2500 + ethData.reduce((sum, d) => sum + d.total, 0);
             }
@@ -8916,31 +9293,49 @@
             if (cumLoading) cumLoading.style.display = 'none';
         }
         
-        // Parse SoSoValue API response into our standard format
-        function parseSOSOResponse(apiData) {
-            // Adjust this based on actual API response structure
-            const rawData = apiData.data || apiData.flows || apiData.results || apiData;
-            
-            if (!Array.isArray(rawData)) {
-                console.log('Unexpected API response format:', apiData);
-                return null;
-            }
-            
-            return rawData.map(item => ({
-                date: item.date || item.tradingDate || item.timestamp,
-                IBIT: item.IBIT || item.ibit || 0,
-                FBTC: item.FBTC || item.fbtc || 0,
-                BITB: item.BITB || item.bitb || 0,
-                ARKB: item.ARKB || item.arkb || 0,
-                GBTC: item.GBTC || item.gbtc || 0,
-                BTCO: item.BTCO || item.btco || 0,
-                EZBC: item.EZBC || item.ezbc || 0,
-                BRRR: item.BRRR || item.brrr || 0,
-                HODL: item.HODL || item.hodl || 0,
-                BTCW: item.BTCW || item.btcw || 0,
-                BTC: item.BTC || item.btc_grayscale || 0,
-                total: item.total || item.netInflow || item.totalNetInflow || 0
-            }));
+        // Parse CoinGlass ETF API response into our standard format
+        function parseCoinglassETFData(apiData, type) {
+            // CoinGlass returns array sorted by date descending (most recent first)
+            return apiData.map(item => {
+                // Convert timestamp to date string if needed
+                let dateStr;
+                if (item.date) {
+                    dateStr = item.date;
+                } else if (item.time || item.timestamp) {
+                    const ts = item.time || item.timestamp;
+                    const date = new Date(ts * 1000);
+                    dateStr = date.toISOString().split('T')[0];
+                }
+                
+                if (type === 'btc') {
+                    return {
+                        date: dateStr,
+                        IBIT: item.IBIT || item.ibit || 0,
+                        FBTC: item.FBTC || item.fbtc || 0,
+                        BITB: item.BITB || item.bitb || 0,
+                        ARKB: item.ARKB || item.arkb || 0,
+                        GBTC: item.GBTC || item.gbtc || 0,
+                        BTCO: item.BTCO || item.btco || 0,
+                        EZBC: item.EZBC || item.ezbc || 0,
+                        BRRR: item.BRRR || item.brrr || 0,
+                        HODL: item.HODL || item.hodl || 0,
+                        BTCW: item.BTCW || item.btcw || 0,
+                        BTC: item.BTC || item.btc_grayscale || 0,
+                        total: item.totalNetInflow || item.netInflow || item.total || 0,
+                        cumNetInflow: item.cumNetInflow || item.cumulativeNetInflow || undefined
+                    };
+                } else {
+                    return {
+                        date: dateStr,
+                        ETHA: item.ETHA || item.etha || 0,
+                        FETH: item.FETH || item.feth || 0,
+                        ETHE: item.ETHE || item.ethe || 0,
+                        others: item.others || 0,
+                        total: item.totalNetInflow || item.netInflow || item.total || 0,
+                        cumNetInflow: item.cumNetInflow || item.cumulativeNetInflow || undefined
+                    };
+                }
+            });
         }
         
         function updateETFSummaryCards() {
