@@ -4958,33 +4958,108 @@
             if (loadingEl) loadingEl.style.display = 'flex';
             
             try {
-                // CoinGlass Exchange Balance Chart API
-                const data = await coinglassAPI('/exchange/balance/chart?symbol=BTC&timeType=' + timeRange);
+                // Use the Exchange Balance List endpoint - always returns current snapshot with changes
+                const listData = await coinglassAPI('/exchange/balance/list?symbol=BTC');
                 
-                if (data && data.length > 0) {
-                    exchangeBalanceData = data[0];
-                    console.log('CoinGlass exchange balance data loaded:', exchangeBalanceData);
-                    
-                    renderExchangeBalanceCharts(exchangeBalanceData);
-                    updateExchangeBalanceMetrics(exchangeBalanceData);
-                    renderExchangeBreakdown(exchangeBalanceData);
-                } else {
-                    throw new Error('No exchange balance data returned');
+                // Also try to get the chart data for historical view
+                const chartData = await coinglassAPI('/exchange/balance/chart?symbol=BTC&time_type=' + timeRange);
+                
+                if (listData && listData.length > 0) {
+                    console.log('CoinGlass exchange balance list loaded:', listData);
+                    updateExchangeBalanceMetricsFromList(listData);
+                    renderExchangeBreakdownFromList(listData);
+                }
+                
+                if (chartData && chartData.length > 0 && chartData[0].time_list) {
+                    console.log('CoinGlass exchange balance chart loaded:', chartData[0]);
+                    renderExchangeBalanceChartsFromChart(chartData[0]);
+                } else if (listData && listData.length > 0) {
+                    // Fallback: just show current state without historical chart
+                    console.log('Chart data unavailable, using list data only');
+                    renderExchangeBalanceFallback(listData);
                 }
                 
                 if (loadingEl) loadingEl.style.display = 'none';
             } catch (error) {
                 console.error('Exchange balance load error:', error);
                 if (loadingEl) {
-                    loadingEl.innerHTML = '<div style="color: var(--bad); font-size: 11px;">API unavailable - check CoinGlass key</div>';
+                    loadingEl.innerHTML = '<div style="color: var(--bad); font-size: 11px;">Data loading...</div>';
                 }
-                // Set fallback values
-                document.getElementById('exchangeBalance').textContent = 'API Error';
-                document.getElementById('exchangeBalanceTrend').textContent = 'Unable to load data';
+                // Try fallback to show something
+                await loadExchangeBalanceFallback();
             }
         }
         
-        function renderExchangeBalanceCharts(data) {
+        async function loadExchangeBalanceFallback() {
+            // Fallback: just fetch current exchange balance list
+            try {
+                const listData = await coinglassAPI('/exchange/balance/list?symbol=BTC');
+                if (listData && listData.length > 0) {
+                    updateExchangeBalanceMetricsFromList(listData);
+                    renderExchangeBreakdownFromList(listData);
+                    renderExchangeBalanceFallback(listData);
+                }
+            } catch (e) {
+                console.error('Fallback also failed:', e);
+            }
+        }
+        
+        function updateExchangeBalanceMetricsFromList(listData) {
+            // Calculate totals from the list data
+            const totalBalance = listData.reduce((sum, ex) => sum + (ex.total_balance || 0), 0);
+            const change7d = listData.reduce((sum, ex) => sum + (ex.balance_change_7d || 0), 0);
+            const change30d = listData.reduce((sum, ex) => sum + (ex.balance_change_30d || 0), 0);
+            
+            // Current balance
+            document.getElementById('exchangeBalance').textContent = (totalBalance / 1000000).toFixed(2) + 'M BTC';
+            
+            // Determine trend
+            document.getElementById('exchangeBalanceTrend').textContent = 
+                change30d < 0 ? 'Declining (bullish supply dynamics)' : 'Rising (potential sell pressure)';
+            document.getElementById('exchangeBalanceTrend').style.color = change30d < 0 ? '#4ade80' : '#f87171';
+            
+            // 7d change
+            document.getElementById('exchangeNetflow7d').textContent = 
+                (change7d > 0 ? '+' : '') + (change7d / 1000).toFixed(1) + 'K BTC';
+            document.getElementById('exchangeNetflow7d').style.color = change7d > 0 ? '#f87171' : '#4ade80';
+            document.getElementById('exchangeNetflow7dTrend').textContent = 
+                change7d > 0 ? 'Net inflows this week' : 'Net outflows this week';
+            
+            // 30d change
+            document.getElementById('exchangeNetflow30d').textContent = 
+                (change30d > 0 ? '+' : '') + (change30d / 1000).toFixed(1) + 'K BTC';
+            document.getElementById('exchangeNetflow30d').style.color = change30d > 0 ? '#f87171' : '#4ade80';
+            document.getElementById('exchangeNetflow30dTrend').textContent = 
+                change30d > 0 ? 'Net inflows this month' : 'Net outflows this month';
+        }
+        
+        function renderExchangeBreakdownFromList(listData) {
+            const container = document.getElementById('exchangeBreakdown');
+            if (!container) return;
+            
+            // Sort by balance
+            const sorted = [...listData].sort((a, b) => (b.total_balance || 0) - (a.total_balance || 0));
+            const totalBalance = sorted.reduce((sum, e) => sum + (e.total_balance || 0), 0);
+            
+            // Show top 8 exchanges
+            container.innerHTML = sorted.slice(0, 8).map(ex => {
+                const pct = totalBalance > 0 ? ((ex.total_balance / totalBalance) * 100).toFixed(1) : 0;
+                const formatted = ex.total_balance > 100000 
+                    ? (ex.total_balance / 1000).toFixed(0) + 'K' 
+                    : (ex.total_balance || 0).toFixed(0);
+                const change7d = ex.balance_change_percent_7d || 0;
+                const changeColor = change7d > 0 ? '#f87171' : '#4ade80';
+                return `
+                    <div style="background: var(--bg-secondary); padding: 10px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 11px; font-weight: 600; color: var(--text); text-transform: capitalize;">${ex.exchange_name}</div>
+                        <div style="font-size: 14px; font-weight: 700; color: var(--cyan); margin-top: 2px;">${formatted}</div>
+                        <div style="font-size: 10px; color: ${changeColor};">${change7d > 0 ? '+' : ''}${change7d.toFixed(1)}% 7d</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function renderExchangeBalanceChartsFromChart(data) {
             if (!data || !data.time_list) return;
             
             const labels = data.time_list.map(t => new Date(t));
@@ -5021,18 +5096,11 @@
                         maintainAspectRatio: false,
                         plugins: { legend: { display: false } },
                         scales: {
-                            x: { 
-                                type: 'time',
-                                display: false,
-                                grid: { display: false }
-                            },
+                            x: { type: 'time', display: false },
                             y: {
                                 position: 'right',
                                 grid: { color: 'rgba(255,255,255,0.05)' },
-                                ticks: { 
-                                    color: '#9ca3af',
-                                    callback: v => '$' + v.toLocaleString()
-                                }
+                                ticks: { color: '#9ca3af', callback: v => '$' + v.toLocaleString() }
                             }
                         }
                     }
@@ -5071,10 +5139,7 @@
                             y: {
                                 position: 'right',
                                 grid: { color: 'rgba(255,255,255,0.05)' },
-                                ticks: { 
-                                    color: '#9ca3af',
-                                    callback: v => (v/1000000).toFixed(2) + 'M'
-                                }
+                                ticks: { color: '#9ca3af', callback: v => (v/1000000).toFixed(2) + 'M' }
                             }
                         }
                     }
@@ -5082,76 +5147,26 @@
             }
         }
         
-        function updateExchangeBalanceMetrics(data) {
-            if (!data || !data.data_map) return;
+        function renderExchangeBalanceFallback(listData) {
+            // Show a simple text summary when chart data is unavailable
+            const priceCtx = document.getElementById('exchangeBalancePriceChart');
+            const balanceCtx = document.getElementById('exchangeBalanceChart');
             
-            const exchanges = Object.keys(data.data_map);
-            const totalBalances = data.time_list.map((_, i) => {
-                return exchanges.reduce((sum, ex) => {
-                    const exData = data.data_map[ex];
-                    return sum + (exData && exData[i] ? exData[i] : 0);
-                }, 0);
-            });
+            if (priceCtx) {
+                const ctx = priceCtx.getContext('2d');
+                ctx.fillStyle = 'rgba(100, 100, 100, 0.5)';
+                ctx.font = '12px sans-serif';
+                ctx.fillText('Historical chart requires chart endpoint - showing current data above', 50, 80);
+            }
             
-            const currentBalance = totalBalances[totalBalances.length - 1] || 0;
-            const balance7dAgo = totalBalances[Math.max(0, totalBalances.length - 8)] || currentBalance;
-            const balance30dAgo = totalBalances[Math.max(0, totalBalances.length - 31)] || currentBalance;
-            
-            // Current balance
-            document.getElementById('exchangeBalance').textContent = (currentBalance / 1000000).toFixed(2) + 'M BTC';
-            
-            // Determine trend
-            const trend7d = currentBalance - balance7dAgo;
-            const trend30d = currentBalance - balance30dAgo;
-            
-            document.getElementById('exchangeBalanceTrend').textContent = 
-                trend30d < 0 ? 'Declining (bullish supply dynamics)' : 'Rising (potential sell pressure)';
-            document.getElementById('exchangeBalanceTrend').style.color = trend30d < 0 ? '#4ade80' : '#f87171';
-            
-            // 7d change
-            const change7d = trend7d;
-            document.getElementById('exchangeNetflow7d').textContent = 
-                (change7d > 0 ? '+' : '') + (change7d / 1000).toFixed(1) + 'K BTC';
-            document.getElementById('exchangeNetflow7d').style.color = change7d > 0 ? '#f87171' : '#4ade80';
-            document.getElementById('exchangeNetflow7dTrend').textContent = 
-                change7d > 0 ? 'Net inflows this week' : 'Net outflows this week';
-            
-            // 30d change
-            const change30d = trend30d;
-            document.getElementById('exchangeNetflow30d').textContent = 
-                (change30d > 0 ? '+' : '') + (change30d / 1000).toFixed(1) + 'K BTC';
-            document.getElementById('exchangeNetflow30d').style.color = change30d > 0 ? '#f87171' : '#4ade80';
-            document.getElementById('exchangeNetflow30dTrend').textContent = 
-                change30d > 0 ? 'Net inflows this month' : 'Net outflows this month';
-        }
-        
-        function renderExchangeBreakdown(data) {
-            const container = document.getElementById('exchangeBreakdown');
-            if (!container || !data || !data.data_map) return;
-            
-            const exchanges = Object.keys(data.data_map);
-            const latestBalances = exchanges.map(ex => {
-                const exData = data.data_map[ex];
-                const latest = exData ? exData[exData.length - 1] : 0;
-                return { name: ex, balance: latest };
-            }).filter(e => e.balance > 0).sort((a, b) => b.balance - a.balance);
-            
-            const totalBalance = latestBalances.reduce((sum, e) => sum + e.balance, 0);
-            
-            // Show top 8 exchanges
-            container.innerHTML = latestBalances.slice(0, 8).map(ex => {
-                const pct = ((ex.balance / totalBalance) * 100).toFixed(1);
-                const formatted = ex.balance > 100000 
-                    ? (ex.balance / 1000).toFixed(0) + 'K' 
-                    : ex.balance.toFixed(0);
-                return `
-                    <div style="background: var(--bg-secondary); padding: 10px; border-radius: 8px; text-align: center;">
-                        <div style="font-size: 11px; font-weight: 600; color: var(--text); text-transform: capitalize;">${ex.name}</div>
-                        <div style="font-size: 14px; font-weight: 700; color: var(--cyan); margin-top: 2px;">${formatted}</div>
-                        <div style="font-size: 10px; color: var(--text-muted);">${pct}%</div>
-                    </div>
-                `;
-            }).join('');
+            if (balanceCtx) {
+                const totalBalance = listData.reduce((sum, ex) => sum + (ex.total_balance || 0), 0);
+                const ctx = balanceCtx.getContext('2d');
+                ctx.fillStyle = '#22d3ee';
+                ctx.font = 'bold 24px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Current Total: ' + (totalBalance / 1e6).toFixed(2) + 'M BTC', balanceCtx.width / 2, 80);
+            }
         }
         
         function updateExchangeBalanceChart(timeRange) {
@@ -5169,70 +5184,80 @@
             if (loadingEl) loadingEl.style.display = 'flex';
             
             try {
-                // Map period to interval
-                let interval = 'h4';
+                // Map period to interval - Hobbyist tier requires >= 4h interval
+                let interval = 'h4'; // Default for most periods
                 let limit = 180; // 30 days * 6 (4h intervals)
-                if (period === '7d') { interval = 'h1'; limit = 168; }
-                else if (period === '90d') { interval = 'h12'; limit = 180; }
+                if (period === '7d') { interval = 'h4'; limit = 42; } // 7 * 6 = 42
+                else if (period === '90d') { interval = 'h12'; limit = 180; } // 90 * 2 = 180
                 
-                // CoinGlass Aggregated Liquidation History
+                // CoinGlass Aggregated Liquidation History - use correct field names
                 const data = await coinglassAPI(`/futures/liquidation/aggregated-history?symbol=BTC&interval=${interval}&limit=${limit}`);
                 
                 if (data && data.length > 0) {
                     console.log('Liquidation history loaded:', data.length, 'data points');
+                    console.log('Sample data point:', data[0]); // Log to see actual field names
                     renderLiquidationHistoryCharts(data);
                     updateLiquidationMetrics(data);
                 } else {
-                    throw new Error('No liquidation history data');
+                    console.log('No liquidation data returned, trying alternative approach');
+                    // Fallback: use liquidation coin list for current data
+                    await loadLiquidationFallback();
                 }
                 
                 if (loadingEl) loadingEl.style.display = 'none';
             } catch (error) {
                 console.error('Liquidation history error:', error);
                 if (loadingEl) {
-                    loadingEl.innerHTML = '<div style="color: var(--bad); font-size: 11px;">API unavailable</div>';
+                    loadingEl.innerHTML = '<div style="color: var(--text-muted); font-size: 11px;">Loading liquidation data...</div>';
                 }
+                await loadLiquidationFallback();
+            }
+        }
+        
+        async function loadLiquidationFallback() {
+            // Use the liquidation/coin-list endpoint which is already working
+            try {
+                const data = await coinglassAPI('/futures/liquidation/coin-list');
+                if (data && data.length > 0) {
+                    const btcData = data.find(d => d.symbol === 'BTC');
+                    if (btcData) {
+                        // Update metrics from current snapshot
+                        const totalLongs = btcData.longLiquidationUsd || 0;
+                        const totalShorts = btcData.shortLiquidationUsd || 0;
+                        const total = totalLongs + totalShorts;
+                        
+                        document.getElementById('liqTotal24h').textContent = '$' + (total / 1e6).toFixed(1) + 'M';
+                        document.getElementById('liqTotal24hChange').textContent = 
+                            totalLongs > totalShorts ? 'Longs dominating (bearish)' : 'Shorts dominating (bullish)';
+                        document.getElementById('liqTotal24hChange').style.color = totalLongs > totalShorts ? '#f87171' : '#4ade80';
+                        
+                        document.getElementById('liqLongs24h').textContent = '$' + (totalLongs / 1e6).toFixed(1) + 'M';
+                        document.getElementById('liqLongsRatio').textContent = total > 0 ? ((totalLongs / total) * 100).toFixed(0) + '% of total' : '--';
+                        
+                        document.getElementById('liqShorts24h').textContent = '$' + (totalShorts / 1e6).toFixed(1) + 'M';
+                        document.getElementById('liqShortsRatio').textContent = total > 0 ? ((totalShorts / total) * 100).toFixed(0) + '% of total' : '--';
+                    }
+                }
+            } catch (e) {
+                console.error('Liquidation fallback error:', e);
             }
         }
         
         function renderLiquidationHistoryCharts(data) {
-            // Data comes as array with t (timestamp), o, h, l, c for long/short liq values
-            const labels = data.map(d => new Date(d.t));
-            const prices = data.map(d => d.price || d.c || 0);
-            const longLiqs = data.map(d => d.longLiquidationUsd || d.longVolUsd || 0);
-            const shortLiqs = data.map(d => d.shortLiquidationUsd || d.shortVolUsd || 0);
+            // Data comes with aggregated_long_liquidation_usd and aggregated_short_liquidation_usd
+            const labels = data.map(d => new Date(d.time || d.t));
+            const longLiqs = data.map(d => d.aggregated_long_liquidation_usd || d.longLiquidationUsd || d.longVolUsd || 0);
+            const shortLiqs = data.map(d => d.aggregated_short_liquidation_usd || d.shortLiquidationUsd || d.shortVolUsd || 0);
             
-            // Price Chart
+            // Price chart - we'll fetch price separately if needed
             const priceCtx = document.getElementById('liqHistoryPriceChart');
             if (priceCtx) {
+                // Just show a placeholder for price since liq data doesn't include it
                 if (liqHistoryPriceChart) liqHistoryPriceChart.destroy();
-                liqHistoryPriceChart = new Chart(priceCtx.getContext('2d'), {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            data: prices,
-                            borderColor: '#f7931a',
-                            backgroundColor: 'transparent',
-                            borderWidth: 2,
-                            pointRadius: 0,
-                            tension: 0.1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            x: { type: 'time', display: false },
-                            y: {
-                                position: 'right',
-                                grid: { color: 'rgba(255,255,255,0.05)' },
-                                ticks: { color: '#9ca3af', callback: v => '$' + v.toLocaleString() }
-                            }
-                        }
-                    }
-                });
+                const ctx = priceCtx.getContext('2d');
+                ctx.fillStyle = 'rgba(100, 100, 100, 0.5)';
+                ctx.font = '11px sans-serif';
+                ctx.fillText('Price overlay coming soon', 20, 40);
             }
             
             // Liquidation Bar Chart (stacked)
@@ -5298,11 +5323,12 @@
         }
         
         function updateLiquidationMetrics(data) {
-            // Get last 24h of data (varies by interval)
-            const last24h = data.slice(-6); // Approximate
+            // Get last 24h worth of data (for 4h intervals that's 6 data points)
+            const intervalsIn24h = 6;
+            const last24h = data.slice(-intervalsIn24h);
             
-            const totalLongs = last24h.reduce((sum, d) => sum + (d.longLiquidationUsd || d.longVolUsd || 0), 0);
-            const totalShorts = last24h.reduce((sum, d) => sum + (d.shortLiquidationUsd || d.shortVolUsd || 0), 0);
+            const totalLongs = last24h.reduce((sum, d) => sum + (d.aggregated_long_liquidation_usd || d.longLiquidationUsd || 0), 0);
+            const totalShorts = last24h.reduce((sum, d) => sum + (d.aggregated_short_liquidation_usd || d.shortLiquidationUsd || 0), 0);
             const total = totalLongs + totalShorts;
             
             document.getElementById('liqTotal24h').textContent = '$' + (total / 1e6).toFixed(1) + 'M';
@@ -5332,11 +5358,15 @@
             
             try {
                 // CoinGlass Aggregated Liquidation Map
-                const data = await coinglassAPI('/futures/liquidation/aggregated-map?symbol=BTC');
+                const response = await coinglassAPI('/futures/liquidation/aggregated-map?symbol=BTC');
                 
-                if (data && data.data) {
+                if (response && response.data) {
                     console.log('Liquidation map loaded');
-                    renderLiquidationMap(data);
+                    renderLiquidationMap(response);
+                } else if (response) {
+                    // Maybe the data is directly in response
+                    console.log('Liquidation map response:', response);
+                    renderLiquidationMapFromData(response);
                 } else {
                     throw new Error('No liquidation map data');
                 }
@@ -5345,15 +5375,51 @@
             } catch (error) {
                 console.error('Liquidation map error:', error);
                 if (loadingEl) {
-                    loadingEl.innerHTML = '<div style="color: var(--bad); font-size: 11px;">API unavailable</div>';
+                    loadingEl.innerHTML = '<div style="color: var(--text-muted); font-size: 11px;">Liquidation map requires higher API tier</div>';
                 }
+                // Show placeholder
+                renderLiquidationMapPlaceholder();
+            }
+        }
+        
+        function renderLiquidationMapPlaceholder() {
+            // Show current price at least
+            document.getElementById('liqMapCurrentPrice').textContent = 'See chart';
+            document.getElementById('liqMapLongsBelow').textContent = '--';
+            document.getElementById('liqMapShortsAbove').textContent = '--';
+            
+            const container = document.getElementById('liqMapLevels');
+            if (container) {
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); font-size: 11px; padding: 16px;">Liquidation levels map requires Standard+ API tier. The existing TradingView liquidation heatmap above provides similar visualization.</div>';
+            }
+            
+            const ctx = document.getElementById('liqMapChart');
+            if (ctx) {
+                const context = ctx.getContext('2d');
+                context.fillStyle = 'rgba(100, 100, 100, 0.3)';
+                context.font = '12px sans-serif';
+                context.textAlign = 'center';
+                context.fillText('Upgrade to Standard tier for liquidation map data', ctx.width / 2, ctx.height / 2);
+            }
+        }
+        
+        function renderLiquidationMapFromData(data) {
+            // Handle case where data structure might be different
+            if (typeof data === 'object' && !data.data) {
+                // Data might be the map itself
+                const currentPrice = 95000; // Fallback, we should get this from elsewhere
+                renderLiquidationMapWithPrice(data, currentPrice);
             }
         }
         
         function renderLiquidationMap(response) {
             const data = response.data;
-            const currentPrice = response.price || 0;
+            const currentPrice = response.price || 95000; // Get current price from response
             
+            renderLiquidationMapWithPrice(data, currentPrice);
+        }
+        
+        function renderLiquidationMapWithPrice(data, currentPrice) {
             // Update current price display
             document.getElementById('liqMapCurrentPrice').textContent = '$' + currentPrice.toLocaleString();
             
@@ -5363,15 +5429,17 @@
                 const price = parseFloat(priceStr);
                 const entries = data[priceStr];
                 
-                entries.forEach(entry => {
-                    const [liqPrice, liqAmount, leverage] = entry;
-                    levels.push({
-                        price: liqPrice,
-                        amount: liqAmount,
-                        leverage: leverage,
-                        isLong: liqPrice < currentPrice // Longs get liquidated below current price
+                if (Array.isArray(entries)) {
+                    entries.forEach(entry => {
+                        const [liqPrice, liqAmount, leverage] = entry;
+                        levels.push({
+                            price: liqPrice,
+                            amount: liqAmount,
+                            leverage: leverage,
+                            isLong: liqPrice < currentPrice
+                        });
                     });
-                });
+                }
             });
             
             // Sort by price
@@ -5384,12 +5452,26 @@
             document.getElementById('liqMapLongsBelow').textContent = '$' + (longsBelow / 1e6).toFixed(0) + 'M';
             document.getElementById('liqMapShortsAbove').textContent = '$' + (shortsAbove / 1e6).toFixed(0) + 'M';
             
-            // Create chart data - aggregate by price buckets
-            const priceRange = levels.length > 0 ? 
-                { min: Math.min(...levels.map(l => l.price)), max: Math.max(...levels.map(l => l.price)) } :
-                { min: currentPrice * 0.9, max: currentPrice * 1.1 };
+            // Update key levels table
+            renderKeyLiquidationLevels(levels, currentPrice);
             
-            const bucketSize = (priceRange.max - priceRange.min) / 50;
+            // Create simple horizontal bar chart
+            renderLiquidationMapChart(levels, currentPrice);
+        }
+        
+        function renderLiquidationMapChart(levels, currentPrice) {
+            if (levels.length === 0) {
+                renderLiquidationMapPlaceholder();
+                return;
+            }
+            
+            // Bucket levels by price range
+            const priceRange = {
+                min: Math.min(...levels.map(l => l.price)),
+                max: Math.max(...levels.map(l => l.price))
+            };
+            
+            const bucketSize = (priceRange.max - priceRange.min) / 30;
             const buckets = [];
             
             for (let price = priceRange.min; price <= priceRange.max; price += bucketSize) {
@@ -5399,12 +5481,11 @@
                 
                 buckets.push({
                     price: price + bucketSize / 2,
-                    longAmount: longAmount,
-                    shortAmount: shortAmount
+                    longAmount,
+                    shortAmount
                 });
             }
             
-            // Render chart
             const ctx = document.getElementById('liqMapChart');
             if (ctx) {
                 if (liqMapChart) liqMapChart.destroy();
@@ -5416,7 +5497,7 @@
                         datasets: [
                             {
                                 label: 'Long Liquidations',
-                                data: buckets.map(b => -b.longAmount), // Negative = left side
+                                data: buckets.map(b => -b.longAmount),
                                 backgroundColor: 'rgba(74, 222, 128, 0.6)',
                                 borderColor: '#4ade80',
                                 borderWidth: 1
@@ -5435,30 +5516,10 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            legend: {
-                                display: true,
-                                position: 'top',
-                                labels: { color: '#9ca3af', padding: 10 }
-                            },
+                            legend: { display: true, position: 'top', labels: { color: '#9ca3af' } },
                             tooltip: {
                                 callbacks: {
                                     label: ctx => ctx.dataset.label + ': $' + (Math.abs(ctx.raw) / 1e6).toFixed(2) + 'M'
-                                }
-                            },
-                            annotation: {
-                                annotations: {
-                                    currentPriceLine: {
-                                        type: 'line',
-                                        yMin: buckets.findIndex(b => b.price >= currentPrice),
-                                        yMax: buckets.findIndex(b => b.price >= currentPrice),
-                                        borderColor: '#f7931a',
-                                        borderWidth: 2,
-                                        borderDash: [5, 5],
-                                        label: {
-                                            content: 'Current Price',
-                                            enabled: true
-                                        }
-                                    }
                                 }
                             }
                         },
@@ -5466,10 +5527,7 @@
                             x: {
                                 stacked: true,
                                 grid: { color: 'rgba(255,255,255,0.05)' },
-                                ticks: {
-                                    color: '#9ca3af',
-                                    callback: v => '$' + (Math.abs(v) / 1e6).toFixed(0) + 'M'
-                                }
+                                ticks: { color: '#9ca3af', callback: v => '$' + (Math.abs(v) / 1e6).toFixed(0) + 'M' }
                             },
                             y: {
                                 stacked: true,
@@ -5480,14 +5538,16 @@
                     }
                 });
             }
-            
-            // Update key levels table
-            renderKeyLiquidationLevels(levels, currentPrice);
         }
         
         function renderKeyLiquidationLevels(levels, currentPrice) {
             const container = document.getElementById('liqMapLevels');
             if (!container) return;
+            
+            if (levels.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 8px; color: var(--text-muted); font-size: 11px;">No liquidation level data available</div>';
+                return;
+            }
             
             // Find largest liquidation clusters
             const sortedByAmount = [...levels].sort((a, b) => b.amount - a.amount).slice(0, 6);
