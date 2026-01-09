@@ -3196,23 +3196,18 @@
         const SOSOVALUE_API_KEY = 'SOSO-f250a44853234783968e9a6fd628ebb4';
         
         // CoinGlass API Configuration
-        // In production (Vercel), calls go through /api/coinglass proxy
-        // This keeps the API key secure server-side
-        const COINGLASS_API_KEY = ''; // Not needed client-side - handled by proxy
-        const COINGLASS_BASE_URL = '/api/coinglass'; // Proxy endpoint
+        const COINGLASS_API_KEY = '22baaf6e13c74eb79e1b0d3fe096ae29';
+        const COINGLASS_BASE_URL = 'https://open-api-v4.coinglass.com/api';
         
-        // Helper function for CoinGlass API calls (via proxy)
+        // Helper function for CoinGlass API calls
         async function coinglassAPI(endpoint) {
             try {
-                // Remove leading slash if present since base URL already has the path
-                const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
-                const url = `${COINGLASS_BASE_URL}/${cleanEndpoint}`;
-                
-                console.log('Calling CoinGlass API via proxy:', url);
-                const response = await fetch(url, {
+                console.log('Calling CoinGlass API:', endpoint);
+                const response = await fetch(`${COINGLASS_BASE_URL}${endpoint}`, {
                     method: 'GET',
                     headers: {
-                        'Accept': 'application/json'
+                        'CG-API-KEY': COINGLASS_API_KEY,
+                        'accept': 'application/json'
                     }
                 });
                 
