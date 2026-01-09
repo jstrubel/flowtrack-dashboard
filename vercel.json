@@ -1,5 +1,0 @@
-{
-  "rewrites": [
-    { "source": "/api/coinglass/:path*", "destination": "/api/coinglass/[...path]" }
-  ]
-}
