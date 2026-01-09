@@ -2409,62 +2409,177 @@
             </div>
         </div>
 
-        <!-- Exchange Flow Indicator -->
+        <!-- Exchange Balance & Flow Indicator (CoinGlass Real Data) -->
         <div class="card" style="margin-top: 20px;">
             <div class="card-header">
                 <div>
-                    <div class="card-title">Exchange Netflow Indicator</div>
-                    <div class="card-subtitle">BTC flowing into/out of exchanges • Inflows = potential selling, Outflows = accumulation • Data from CryptoQuant</div>
+                    <div class="card-title">Exchange Balance & Netflow</div>
+                    <div class="card-subtitle">Real on-chain BTC balance across all exchanges • Data from CoinGlass API</div>
                 </div>
                 <div class="time-selector">
-                    <button class="time-btn" onclick="updateExchangeFlowChart(30)">1M</button>
-                    <button class="time-btn active" onclick="updateExchangeFlowChart(90)">3M</button>
-                    <button class="time-btn" onclick="updateExchangeFlowChart(180)">6M</button>
+                    <button class="time-btn" onclick="updateExchangeBalanceChart('1m')">1M</button>
+                    <button class="time-btn active" onclick="updateExchangeBalanceChart('3m')">3M</button>
+                    <button class="time-btn" onclick="updateExchangeBalanceChart('1y')">1Y</button>
                 </div>
             </div>
             
-            <!-- Exchange Flow Metrics -->
+            <!-- Exchange Balance Metrics -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px;">
                 <div class="metric-card" style="background: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border);">
-                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">24H NET FLOW</div>
-                    <div id="exchangeNetflow24h" style="font-size: 24px; font-weight: 600; color: var(--text);">--</div>
-                    <div id="exchangeNetflowSignal" style="font-size: 11px; color: var(--text-muted);">Loading...</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">TOTAL EXCHANGE BALANCE</div>
+                    <div id="exchangeBalance" style="font-size: 24px; font-weight: 600; color: var(--text);">--</div>
+                    <div id="exchangeBalanceTrend" style="font-size: 11px; color: var(--text-muted);">Loading...</div>
                 </div>
                 <div class="metric-card" style="background: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border);">
-                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">7D NET FLOW</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">7D CHANGE</div>
                     <div id="exchangeNetflow7d" style="font-size: 24px; font-weight: 600; color: var(--text);">--</div>
                     <div id="exchangeNetflow7dTrend" style="font-size: 11px; color: var(--text-muted);">Loading...</div>
                 </div>
                 <div class="metric-card" style="background: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border);">
-                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">EXCHANGE BALANCE</div>
-                    <div id="exchangeBalance" style="font-size: 24px; font-weight: 600; color: var(--text);">--</div>
-                    <div id="exchangeBalanceTrend" style="font-size: 11px; color: var(--text-muted);">Loading...</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">30D CHANGE</div>
+                    <div id="exchangeNetflow30d" style="font-size: 24px; font-weight: 600; color: var(--text);">--</div>
+                    <div id="exchangeNetflow30dTrend" style="font-size: 11px; color: var(--text-muted);">Loading...</div>
                 </div>
             </div>
             
-            <!-- Exchange Flow Chart -->
+            <!-- Exchange Balance Chart -->
             <div style="height: 200px; position: relative; border-bottom: 1px solid var(--border);">
                 <div style="position: absolute; top: 8px; left: 12px; font-size: 11px; color: var(--text-muted); z-index: 10;">BTC/USD Price</div>
-                <canvas id="exchangeFlowPriceChart"></canvas>
+                <canvas id="exchangeBalancePriceChart"></canvas>
             </div>
             <div style="height: 180px; position: relative;">
-                <div style="position: absolute; top: 8px; left: 12px; font-size: 11px; color: var(--text-muted); z-index: 10;">Exchange Netflow (BTC)</div>
-                <canvas id="exchangeFlowChart"></canvas>
+                <div style="position: absolute; top: 8px; left: 12px; font-size: 11px; color: var(--text-muted); z-index: 10;">Total Exchange Balance (BTC)</div>
+                <canvas id="exchangeBalanceChart"></canvas>
             </div>
-            <div id="exchangeFlowLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;">
-                <div style="font-size: 12px; color: var(--text-muted);">Loading exchange flow data...</div>
+            <div id="exchangeBalanceLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;">
+                <div style="font-size: 12px; color: var(--text-muted);">Loading exchange balance data...</div>
             </div>
+            
+            <!-- Exchange Breakdown -->
+            <div style="margin-top: 16px;">
+                <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Exchange Breakdown</div>
+                <div id="exchangeBreakdown" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px;">
+                    <div style="text-align: center; padding: 8px; color: var(--text-muted); font-size: 11px;">Loading...</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 16px; padding: 16px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
+                <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+                    <strong style="color: var(--text);">How to Interpret Exchange Balances:</strong><br>
+                    Exchange balance tracks total BTC held in known exchange wallets. This is one of the most reliable on-chain indicators for supply dynamics.<br><br>
+                    <span style="color: #4ade80;">Declining Balance (Bullish):</span> BTC leaving exchanges indicates long-term accumulation. Reduced exchange supply creates potential for supply squeezes during demand spikes.<br><br>
+                    <span style="color: #f87171;">Rising Balance (Bearish):</span> BTC flowing to exchanges suggests intent to sell. Large, sudden inflows often precede volatility and can signal distribution by whales.<br><br>
+                    <strong style="color: var(--text);">Current Context:</strong> Exchange balances have been in a secular decline since 2020, dropping from ~3M to ~2M BTC. This structural supply reduction supports higher prices long-term.
+                </div>
+            </div>
+        </div>
+        
+        <!-- Liquidation History Chart (CoinGlass) -->
+        <div class="card" style="margin-top: 20px;">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Liquidation History</div>
+                    <div class="card-subtitle">Aggregated BTC long/short liquidations • Data from CoinGlass API</div>
+                </div>
+                <div class="time-selector">
+                    <button class="time-btn" onclick="updateLiquidationHistoryChart('7d')">7D</button>
+                    <button class="time-btn active" onclick="updateLiquidationHistoryChart('30d')">30D</button>
+                    <button class="time-btn" onclick="updateLiquidationHistoryChart('90d')">90D</button>
+                </div>
+            </div>
+            
+            <!-- Liquidation Metrics -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px;">
+                <div class="metric-card" style="background: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border);">
+                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">24H TOTAL LIQUIDATIONS</div>
+                    <div id="liqTotal24h" style="font-size: 24px; font-weight: 600; color: var(--text);">--</div>
+                    <div id="liqTotal24hChange" style="font-size: 11px; color: var(--text-muted);">Loading...</div>
+                </div>
+                <div class="metric-card" style="background: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border);">
+                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">24H LONGS LIQUIDATED</div>
+                    <div id="liqLongs24h" style="font-size: 24px; font-weight: 600; color: #4ade80;">--</div>
+                    <div id="liqLongsRatio" style="font-size: 11px; color: var(--text-muted);">--</div>
+                </div>
+                <div class="metric-card" style="background: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border);">
+                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">24H SHORTS LIQUIDATED</div>
+                    <div id="liqShorts24h" style="font-size: 24px; font-weight: 600; color: #f87171;">--</div>
+                    <div id="liqShortsRatio" style="font-size: 11px; color: var(--text-muted);">--</div>
+                </div>
+            </div>
+            
+            <!-- Liquidation Chart -->
+            <div style="height: 200px; position: relative; border-bottom: 1px solid var(--border);">
+                <div style="position: absolute; top: 8px; left: 12px; font-size: 11px; color: var(--text-muted); z-index: 10;">BTC/USD Price</div>
+                <canvas id="liqHistoryPriceChart"></canvas>
+            </div>
+            <div style="height: 180px; position: relative;">
+                <div style="position: absolute; top: 8px; left: 12px; font-size: 11px; color: var(--text-muted); z-index: 10;">Liquidations (USD) — <span style="color: #4ade80;">Longs</span> vs <span style="color: #f87171;">Shorts</span></div>
+                <canvas id="liqHistoryChart"></canvas>
+            </div>
+            <div id="liqHistoryLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;">
+                <div style="font-size: 12px; color: var(--text-muted);">Loading liquidation data...</div>
+            </div>
+            
             <div style="margin-top: 12px; padding: 16px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
                 <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
-                    <strong style="color: var(--text);">How to Interpret Exchange Flows:</strong><br>
-                    Exchange netflow tracks BTC moving into and out of exchange wallets. This is one of the most reliable on-chain indicators for gauging market sentiment.<br><br>
-                    <span style="color: #f87171;">Inflows (Positive/Red):</span> Coins moving TO exchanges typically indicate intent to sell. Large inflows during rallies suggest profit-taking and can precede corrections. Sustained inflows during downtrends confirm selling pressure.<br><br>
-                    <span style="color: #4ade80;">Outflows (Negative/Green):</span> Coins moving FROM exchanges to cold storage indicate accumulation and long-term holding. Persistent outflows are bullish as they reduce available supply. Outflows during dips suggest buyers are accumulating.<br><br>
-                    <strong style="color: var(--text);">Key Context:</strong><br>
-                    - Single-day spikes can be noise (exchange wallet shuffling). Look for sustained trends over 7+ days.<br>
-                    - Exchange balance at multi-year lows is structurally bullish (supply squeeze potential).<br>
-                    - Large inflows combined with rising OI often precede volatility events.<br>
-                    - Note: This visualization uses estimated data. For precise flows, CryptoQuant or Glassnode subscriptions provide real exchange-tracked data.
+                    <strong style="color: var(--text);">How to Interpret Liquidations:</strong><br>
+                    Liquidations occur when leveraged positions are forcefully closed due to insufficient margin. They reveal market positioning and can signal trend exhaustion.<br><br>
+                    <span style="color: #4ade80;">Long Liquidations (Green bars down):</span> Longs getting liquidated indicates price dropping through stop-loss clusters. Large long liquidation spikes often mark local bottoms as weak hands are flushed out.<br><br>
+                    <span style="color: #f87171;">Short Liquidations (Red bars up):</span> Shorts getting squeezed indicates price rallying through resistance. Large short liquidation cascades can fuel rapid upside moves.<br><br>
+                    <strong style="color: var(--text);">Key Patterns:</strong> Sustained one-sided liquidations (longs or shorts dominating for days) often signal trend direction. Extreme liquidation spikes (>$100M single day) frequently mark turning points.
+                </div>
+            </div>
+        </div>
+        
+        <!-- Liquidation Levels Map (CoinGlass) -->
+        <div class="card" style="margin-top: 20px;">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Liquidation Levels Map</div>
+                    <div class="card-subtitle">Estimated liquidation clusters by leverage • Real-time from CoinGlass</div>
+                </div>
+                <button class="time-btn" onclick="loadLiquidationMap()" style="background: var(--accent); color: white;">Refresh</button>
+            </div>
+            
+            <!-- Current Price Reference -->
+            <div style="display: flex; justify-content: center; gap: 24px; margin-bottom: 16px; padding: 12px; background: var(--bg-secondary); border-radius: 8px;">
+                <div style="text-align: center;">
+                    <div style="font-size: 10px; color: var(--text-muted);">CURRENT BTC PRICE</div>
+                    <div id="liqMapCurrentPrice" style="font-size: 20px; font-weight: 700; color: var(--text);">--</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 10px; color: var(--text-muted);">LONGS LIQ BELOW</div>
+                    <div id="liqMapLongsBelow" style="font-size: 20px; font-weight: 700; color: #4ade80;">--</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 10px; color: var(--text-muted);">SHORTS LIQ ABOVE</div>
+                    <div id="liqMapShortsAbove" style="font-size: 20px; font-weight: 700; color: #f87171;">--</div>
+                </div>
+            </div>
+            
+            <!-- Liquidation Map Chart -->
+            <div style="height: 320px; position: relative;">
+                <canvas id="liqMapChart"></canvas>
+                <div id="liqMapLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;">
+                    <div style="font-size: 12px; color: var(--text-muted);">Loading liquidation map...</div>
+                </div>
+            </div>
+            
+            <!-- Key Levels Table -->
+            <div style="margin-top: 16px;">
+                <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Key Liquidation Clusters</div>
+                <div id="liqMapLevels" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px;">
+                    <div style="text-align: center; padding: 8px; color: var(--text-muted); font-size: 11px;">Loading...</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 16px; padding: 16px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
+                <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+                    <strong style="color: var(--text);">How to Interpret Liquidation Levels:</strong><br>
+                    This chart shows estimated price levels where leveraged positions would be liquidated based on common leverage ratios (10x, 25x, 50x, 100x).<br><br>
+                    <span style="color: #4ade80;">Long Liquidation Clusters (Below Price):</span> Dense clusters below current price act as "magnet zones" - large sell pressure if triggered. Deep liquidation hunting can cause flash crashes.<br><br>
+                    <span style="color: #f87171;">Short Liquidation Clusters (Above Price):</span> Dense clusters above current price fuel short squeezes. Breaking through these levels can trigger cascading buy orders.<br><br>
+                    <strong style="color: var(--text);">Trading Application:</strong> Large liquidation clusters often act as temporary support/resistance. When price approaches dense clusters, expect increased volatility. Thin liquidation zones may be swept quickly.
                 </div>
             </div>
         </div>
@@ -3402,13 +3517,19 @@
                 if (!optionsOIChart) {
                     setTimeout(() => loadDeribitOptions(), 1400);
                 }
-                // Load Exchange Flow Data
-                if (!exchangeFlowChart) {
-                    setTimeout(() => loadExchangeFlowData(90), 1700);
+                // Load Exchange Balance Data (CoinGlass Real Data)
+                if (!exchangeBalanceChart) {
+                    setTimeout(() => loadExchangeBalanceData('3m'), 1700);
                 }
+                // Load Liquidation History (CoinGlass)
+                if (!liqHistoryChart) {
+                    setTimeout(() => loadLiquidationHistory('30d'), 2000);
+                }
+                // Load Liquidation Map (CoinGlass)
+                setTimeout(() => loadLiquidationMap(), 2300);
                 // Load CoinGlass Indicators (Fear & Greed, Long/Short, Liquidations, Funding)
                 if (!coinglassIndicatorsLoaded) {
-                    setTimeout(() => loadCoinglassIndicators(), 2000);
+                    setTimeout(() => loadCoinglassIndicators(), 2600);
                 }
             }
             
@@ -4826,93 +4947,63 @@
             });
         }
         
-        // ==================== EXCHANGE FLOW INDICATOR ====================
-        let exchangeFlowPriceChart = null;
-        let exchangeFlowChart = null;
+        // ==================== EXCHANGE BALANCE (COINGLASS REAL DATA) ====================
+        let exchangeBalancePriceChart = null;
+        let exchangeBalanceChart = null;
+        let exchangeBalanceData = null;
         
-        // Exchange flow data - using simulated data based on typical patterns
-        // In production, this would come from CryptoQuant API ($39+/mo)
-        async function loadExchangeFlowData(days = 90) {
-            const loadingEl = document.getElementById('exchangeFlowLoading');
+        // Load real exchange balance data from CoinGlass
+        async function loadExchangeBalanceData(timeRange = '3m') {
+            const loadingEl = document.getElementById('exchangeBalanceLoading');
             if (loadingEl) loadingEl.style.display = 'flex';
             
             try {
-                // Get price data from Coinalyze to overlay
-                const now = Math.floor(Date.now() / 1000);
-                const from = now - (days * 24 * 60 * 60);
-                const symbol = 'BTCUSDT_PERP.A';
-                const url = `${COINALYZE_BASE}/ohlcv-history?symbols=${symbol}&interval=daily&from=${from}&to=${now}&api_key=${COINALYZE_API_KEY}`;
+                // CoinGlass Exchange Balance Chart API
+                const data = await coinglassAPI('/exchange/balance/chart?symbol=BTC&timeType=' + timeRange);
                 
-                let response;
-                try {
-                    response = await fetch(url);
-                } catch (e) {
-                    response = await fetch(CORS_PROXY + encodeURIComponent(url));
+                if (data && data.length > 0) {
+                    exchangeBalanceData = data[0];
+                    console.log('CoinGlass exchange balance data loaded:', exchangeBalanceData);
+                    
+                    renderExchangeBalanceCharts(exchangeBalanceData);
+                    updateExchangeBalanceMetrics(exchangeBalanceData);
+                    renderExchangeBreakdown(exchangeBalanceData);
+                } else {
+                    throw new Error('No exchange balance data returned');
                 }
-                
-                let priceData = [];
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data && data[0] && data[0].history) {
-                        priceData = data[0].history.map(h => ({
-                            t: h.t * 1000,
-                            price: h.c
-                        }));
-                    }
-                }
-                
-                // Generate simulated exchange flow based on price movements
-                // In reality, this would come from CryptoQuant or Glassnode
-                // Exchange flows often correlate inversely with price (selling into strength)
-                const flowData = generateExchangeFlowData(priceData);
-                
-                renderExchangeFlowCharts(flowData);
-                updateExchangeFlowMetrics(flowData);
                 
                 if (loadingEl) loadingEl.style.display = 'none';
             } catch (error) {
-                console.error('Exchange flow load error:', error);
-                if (loadingEl) loadingEl.style.display = 'none';
+                console.error('Exchange balance load error:', error);
+                if (loadingEl) {
+                    loadingEl.innerHTML = '<div style="color: var(--bad); font-size: 11px;">API unavailable - check CoinGlass key</div>';
+                }
+                // Set fallback values
+                document.getElementById('exchangeBalance').textContent = 'API Error';
+                document.getElementById('exchangeBalanceTrend').textContent = 'Unable to load data';
             }
         }
         
-        function generateExchangeFlowData(priceData) {
-            // Simulate exchange netflow based on typical patterns:
-            // - Large price increases often see inflows (profit-taking)
-            // - Large price decreases often see outflows (buying dips)
-            // - Add some noise for realism
+        function renderExchangeBalanceCharts(data) {
+            if (!data || !data.time_list) return;
             
-            if (!priceData.length) return [];
+            const labels = data.time_list.map(t => new Date(t));
+            const prices = data.price_list || [];
             
-            return priceData.map((item, i) => {
-                let netflow = 0;
-                
-                if (i > 0) {
-                    const priceChange = (item.price - priceData[i-1].price) / priceData[i-1].price;
-                    // Inverse correlation with some randomness
-                    netflow = -priceChange * 50000 + (Math.random() - 0.5) * 10000;
-                    // Clamp to realistic range (-30k to +30k BTC per day)
-                    netflow = Math.max(-30000, Math.min(30000, netflow));
-                }
-                
-                return {
-                    t: item.t,
-                    price: item.price,
-                    netflow: netflow
-                };
+            // Calculate total balance across all exchanges
+            const exchanges = Object.keys(data.data_map || {});
+            const totalBalances = data.time_list.map((_, i) => {
+                return exchanges.reduce((sum, ex) => {
+                    const exData = data.data_map[ex];
+                    return sum + (exData && exData[i] ? exData[i] : 0);
+                }, 0);
             });
-        }
-        
-        function renderExchangeFlowCharts(data) {
-            const labels = data.map(d => new Date(d.t));
-            const prices = data.map(d => d.price);
-            const flows = data.map(d => d.netflow);
             
             // Price Chart
-            const priceCtx = document.getElementById('exchangeFlowPriceChart');
-            if (priceCtx) {
-                if (exchangeFlowPriceChart) exchangeFlowPriceChart.destroy();
-                exchangeFlowPriceChart = new Chart(priceCtx.getContext('2d'), {
+            const priceCtx = document.getElementById('exchangeBalancePriceChart');
+            if (priceCtx && prices.length > 0) {
+                if (exchangeBalancePriceChart) exchangeBalancePriceChart.destroy();
+                exchangeBalancePriceChart = new Chart(priceCtx.getContext('2d'), {
                     type: 'line',
                     data: {
                         labels: labels,
@@ -4948,22 +5039,23 @@
                 });
             }
             
-            // Flow Chart (bar chart with color by direction)
-            const flowCtx = document.getElementById('exchangeFlowChart');
-            if (flowCtx) {
-                if (exchangeFlowChart) exchangeFlowChart.destroy();
+            // Balance Chart (area chart)
+            const balanceCtx = document.getElementById('exchangeBalanceChart');
+            if (balanceCtx && totalBalances.length > 0) {
+                if (exchangeBalanceChart) exchangeBalanceChart.destroy();
                 
-                const flowColors = flows.map(f => f > 0 ? 'rgba(248, 113, 113, 0.7)' : 'rgba(74, 222, 128, 0.7)');
-                
-                exchangeFlowChart = new Chart(flowCtx.getContext('2d'), {
-                    type: 'bar',
+                exchangeBalanceChart = new Chart(balanceCtx.getContext('2d'), {
+                    type: 'line',
                     data: {
                         labels: labels,
                         datasets: [{
-                            data: flows,
-                            backgroundColor: flowColors,
-                            borderColor: flowColors.map(c => c.replace('0.7', '1')),
-                            borderWidth: 1
+                            data: totalBalances,
+                            borderColor: '#22d3ee',
+                            backgroundColor: 'rgba(34, 211, 238, 0.1)',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            fill: true,
+                            tension: 0.1
                         }]
                     },
                     options: {
@@ -4981,7 +5073,7 @@
                                 grid: { color: 'rgba(255,255,255,0.05)' },
                                 ticks: { 
                                     color: '#9ca3af',
-                                    callback: v => (v/1000).toFixed(0) + 'K'
+                                    callback: v => (v/1000000).toFixed(2) + 'M'
                                 }
                             }
                         }
@@ -4990,40 +5082,430 @@
             }
         }
         
-        function updateExchangeFlowMetrics(data) {
-            if (!data.length) return;
+        function updateExchangeBalanceMetrics(data) {
+            if (!data || !data.data_map) return;
             
-            // 24h netflow (last data point)
-            const netflow24h = data[data.length - 1]?.netflow || 0;
-            document.getElementById('exchangeNetflow24h').textContent = 
-                (netflow24h > 0 ? '+' : '') + (netflow24h / 1000).toFixed(1) + 'K BTC';
-            document.getElementById('exchangeNetflow24h').style.color = netflow24h > 0 ? '#f87171' : '#4ade80';
-            document.getElementById('exchangeNetflowSignal').innerHTML = netflow24h > 0 
-                ? '<span style="color: #f87171">Net inflow (selling pressure)</span>'
-                : '<span style="color: #4ade80">Net outflow (accumulation)</span>';
+            const exchanges = Object.keys(data.data_map);
+            const totalBalances = data.time_list.map((_, i) => {
+                return exchanges.reduce((sum, ex) => {
+                    const exData = data.data_map[ex];
+                    return sum + (exData && exData[i] ? exData[i] : 0);
+                }, 0);
+            });
             
-            // 7d netflow (sum of last 7 days)
-            const last7Days = data.slice(-7);
-            const netflow7d = last7Days.reduce((sum, d) => sum + d.netflow, 0);
-            document.getElementById('exchangeNetflow7d').textContent = 
-                (netflow7d > 0 ? '+' : '') + (netflow7d / 1000).toFixed(1) + 'K BTC';
-            document.getElementById('exchangeNetflow7d').style.color = netflow7d > 0 ? '#f87171' : '#4ade80';
-            document.getElementById('exchangeNetflow7dTrend').textContent = netflow7d > 0 
-                ? 'Weekly inflows dominating'
-                : 'Weekly outflows dominating';
+            const currentBalance = totalBalances[totalBalances.length - 1] || 0;
+            const balance7dAgo = totalBalances[Math.max(0, totalBalances.length - 8)] || currentBalance;
+            const balance30dAgo = totalBalances[Math.max(0, totalBalances.length - 31)] || currentBalance;
             
-            // Simulated exchange balance (declining trend in 2024-2025)
-            const baseBalance = 2100000; // ~2.1M BTC on exchanges historically
-            const totalFlow = data.reduce((sum, d) => sum + d.netflow, 0);
-            const currentBalance = baseBalance + totalFlow;
+            // Current balance
             document.getElementById('exchangeBalance').textContent = (currentBalance / 1000000).toFixed(2) + 'M BTC';
-            document.getElementById('exchangeBalanceTrend').textContent = 'Est. total on all exchanges';
+            
+            // Determine trend
+            const trend7d = currentBalance - balance7dAgo;
+            const trend30d = currentBalance - balance30dAgo;
+            
+            document.getElementById('exchangeBalanceTrend').textContent = 
+                trend30d < 0 ? 'Declining (bullish supply dynamics)' : 'Rising (potential sell pressure)';
+            document.getElementById('exchangeBalanceTrend').style.color = trend30d < 0 ? '#4ade80' : '#f87171';
+            
+            // 7d change
+            const change7d = trend7d;
+            document.getElementById('exchangeNetflow7d').textContent = 
+                (change7d > 0 ? '+' : '') + (change7d / 1000).toFixed(1) + 'K BTC';
+            document.getElementById('exchangeNetflow7d').style.color = change7d > 0 ? '#f87171' : '#4ade80';
+            document.getElementById('exchangeNetflow7dTrend').textContent = 
+                change7d > 0 ? 'Net inflows this week' : 'Net outflows this week';
+            
+            // 30d change
+            const change30d = trend30d;
+            document.getElementById('exchangeNetflow30d').textContent = 
+                (change30d > 0 ? '+' : '') + (change30d / 1000).toFixed(1) + 'K BTC';
+            document.getElementById('exchangeNetflow30d').style.color = change30d > 0 ? '#f87171' : '#4ade80';
+            document.getElementById('exchangeNetflow30dTrend').textContent = 
+                change30d > 0 ? 'Net inflows this month' : 'Net outflows this month';
         }
         
-        function updateExchangeFlowChart(days) {
+        function renderExchangeBreakdown(data) {
+            const container = document.getElementById('exchangeBreakdown');
+            if (!container || !data || !data.data_map) return;
+            
+            const exchanges = Object.keys(data.data_map);
+            const latestBalances = exchanges.map(ex => {
+                const exData = data.data_map[ex];
+                const latest = exData ? exData[exData.length - 1] : 0;
+                return { name: ex, balance: latest };
+            }).filter(e => e.balance > 0).sort((a, b) => b.balance - a.balance);
+            
+            const totalBalance = latestBalances.reduce((sum, e) => sum + e.balance, 0);
+            
+            // Show top 8 exchanges
+            container.innerHTML = latestBalances.slice(0, 8).map(ex => {
+                const pct = ((ex.balance / totalBalance) * 100).toFixed(1);
+                const formatted = ex.balance > 100000 
+                    ? (ex.balance / 1000).toFixed(0) + 'K' 
+                    : ex.balance.toFixed(0);
+                return `
+                    <div style="background: var(--bg-secondary); padding: 10px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 11px; font-weight: 600; color: var(--text); text-transform: capitalize;">${ex.name}</div>
+                        <div style="font-size: 14px; font-weight: 700; color: var(--cyan); margin-top: 2px;">${formatted}</div>
+                        <div style="font-size: 10px; color: var(--text-muted);">${pct}%</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function updateExchangeBalanceChart(timeRange) {
             event.target.parentElement.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-            loadExchangeFlowData(days);
+            loadExchangeBalanceData(timeRange);
+        }
+        
+        // ==================== LIQUIDATION HISTORY (COINGLASS) ====================
+        let liqHistoryPriceChart = null;
+        let liqHistoryChart = null;
+        
+        async function loadLiquidationHistory(period = '30d') {
+            const loadingEl = document.getElementById('liqHistoryLoading');
+            if (loadingEl) loadingEl.style.display = 'flex';
+            
+            try {
+                // Map period to interval
+                let interval = 'h4';
+                let limit = 180; // 30 days * 6 (4h intervals)
+                if (period === '7d') { interval = 'h1'; limit = 168; }
+                else if (period === '90d') { interval = 'h12'; limit = 180; }
+                
+                // CoinGlass Aggregated Liquidation History
+                const data = await coinglassAPI(`/futures/liquidation/aggregated-history?symbol=BTC&interval=${interval}&limit=${limit}`);
+                
+                if (data && data.length > 0) {
+                    console.log('Liquidation history loaded:', data.length, 'data points');
+                    renderLiquidationHistoryCharts(data);
+                    updateLiquidationMetrics(data);
+                } else {
+                    throw new Error('No liquidation history data');
+                }
+                
+                if (loadingEl) loadingEl.style.display = 'none';
+            } catch (error) {
+                console.error('Liquidation history error:', error);
+                if (loadingEl) {
+                    loadingEl.innerHTML = '<div style="color: var(--bad); font-size: 11px;">API unavailable</div>';
+                }
+            }
+        }
+        
+        function renderLiquidationHistoryCharts(data) {
+            // Data comes as array with t (timestamp), o, h, l, c for long/short liq values
+            const labels = data.map(d => new Date(d.t));
+            const prices = data.map(d => d.price || d.c || 0);
+            const longLiqs = data.map(d => d.longLiquidationUsd || d.longVolUsd || 0);
+            const shortLiqs = data.map(d => d.shortLiquidationUsd || d.shortVolUsd || 0);
+            
+            // Price Chart
+            const priceCtx = document.getElementById('liqHistoryPriceChart');
+            if (priceCtx) {
+                if (liqHistoryPriceChart) liqHistoryPriceChart.destroy();
+                liqHistoryPriceChart = new Chart(priceCtx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: prices,
+                            borderColor: '#f7931a',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { type: 'time', display: false },
+                            y: {
+                                position: 'right',
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                ticks: { color: '#9ca3af', callback: v => '$' + v.toLocaleString() }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Liquidation Bar Chart (stacked)
+            const liqCtx = document.getElementById('liqHistoryChart');
+            if (liqCtx) {
+                if (liqHistoryChart) liqHistoryChart.destroy();
+                
+                liqHistoryChart = new Chart(liqCtx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Long Liquidations',
+                                data: longLiqs.map(v => -v), // Negative for longs (below axis)
+                                backgroundColor: 'rgba(74, 222, 128, 0.7)',
+                                borderColor: '#4ade80',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Short Liquidations',
+                                data: shortLiqs, // Positive for shorts (above axis)
+                                backgroundColor: 'rgba(248, 113, 113, 0.7)',
+                                borderColor: '#f87171',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: ctx => {
+                                        const val = Math.abs(ctx.raw);
+                                        return ctx.dataset.label + ': $' + (val / 1e6).toFixed(2) + 'M';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { 
+                                type: 'time',
+                                stacked: true,
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                ticks: { color: '#9ca3af', maxTicksLimit: 8 }
+                            },
+                            y: {
+                                stacked: true,
+                                position: 'right',
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                ticks: { 
+                                    color: '#9ca3af',
+                                    callback: v => '$' + (Math.abs(v) / 1e6).toFixed(0) + 'M'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        function updateLiquidationMetrics(data) {
+            // Get last 24h of data (varies by interval)
+            const last24h = data.slice(-6); // Approximate
+            
+            const totalLongs = last24h.reduce((sum, d) => sum + (d.longLiquidationUsd || d.longVolUsd || 0), 0);
+            const totalShorts = last24h.reduce((sum, d) => sum + (d.shortLiquidationUsd || d.shortVolUsd || 0), 0);
+            const total = totalLongs + totalShorts;
+            
+            document.getElementById('liqTotal24h').textContent = '$' + (total / 1e6).toFixed(1) + 'M';
+            document.getElementById('liqTotal24hChange').textContent = 
+                totalLongs > totalShorts ? 'Longs dominating (bearish)' : 'Shorts dominating (bullish)';
+            document.getElementById('liqTotal24hChange').style.color = totalLongs > totalShorts ? '#f87171' : '#4ade80';
+            
+            document.getElementById('liqLongs24h').textContent = '$' + (totalLongs / 1e6).toFixed(1) + 'M';
+            document.getElementById('liqLongsRatio').textContent = total > 0 ? ((totalLongs / total) * 100).toFixed(0) + '% of total' : '--';
+            
+            document.getElementById('liqShorts24h').textContent = '$' + (totalShorts / 1e6).toFixed(1) + 'M';
+            document.getElementById('liqShortsRatio').textContent = total > 0 ? ((totalShorts / total) * 100).toFixed(0) + '% of total' : '--';
+        }
+        
+        function updateLiquidationHistoryChart(period) {
+            event.target.parentElement.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            loadLiquidationHistory(period);
+        }
+        
+        // ==================== LIQUIDATION MAP (COINGLASS) ====================
+        let liqMapChart = null;
+        
+        async function loadLiquidationMap() {
+            const loadingEl = document.getElementById('liqMapLoading');
+            if (loadingEl) loadingEl.style.display = 'flex';
+            
+            try {
+                // CoinGlass Aggregated Liquidation Map
+                const data = await coinglassAPI('/futures/liquidation/aggregated-map?symbol=BTC');
+                
+                if (data && data.data) {
+                    console.log('Liquidation map loaded');
+                    renderLiquidationMap(data);
+                } else {
+                    throw new Error('No liquidation map data');
+                }
+                
+                if (loadingEl) loadingEl.style.display = 'none';
+            } catch (error) {
+                console.error('Liquidation map error:', error);
+                if (loadingEl) {
+                    loadingEl.innerHTML = '<div style="color: var(--bad); font-size: 11px;">API unavailable</div>';
+                }
+            }
+        }
+        
+        function renderLiquidationMap(response) {
+            const data = response.data;
+            const currentPrice = response.price || 0;
+            
+            // Update current price display
+            document.getElementById('liqMapCurrentPrice').textContent = '$' + currentPrice.toLocaleString();
+            
+            // Parse liquidation levels
+            const levels = [];
+            Object.keys(data).forEach(priceStr => {
+                const price = parseFloat(priceStr);
+                const entries = data[priceStr];
+                
+                entries.forEach(entry => {
+                    const [liqPrice, liqAmount, leverage] = entry;
+                    levels.push({
+                        price: liqPrice,
+                        amount: liqAmount,
+                        leverage: leverage,
+                        isLong: liqPrice < currentPrice // Longs get liquidated below current price
+                    });
+                });
+            });
+            
+            // Sort by price
+            levels.sort((a, b) => a.price - b.price);
+            
+            // Calculate totals
+            const longsBelow = levels.filter(l => l.isLong).reduce((sum, l) => sum + l.amount, 0);
+            const shortsAbove = levels.filter(l => !l.isLong).reduce((sum, l) => sum + l.amount, 0);
+            
+            document.getElementById('liqMapLongsBelow').textContent = '$' + (longsBelow / 1e6).toFixed(0) + 'M';
+            document.getElementById('liqMapShortsAbove').textContent = '$' + (shortsAbove / 1e6).toFixed(0) + 'M';
+            
+            // Create chart data - aggregate by price buckets
+            const priceRange = levels.length > 0 ? 
+                { min: Math.min(...levels.map(l => l.price)), max: Math.max(...levels.map(l => l.price)) } :
+                { min: currentPrice * 0.9, max: currentPrice * 1.1 };
+            
+            const bucketSize = (priceRange.max - priceRange.min) / 50;
+            const buckets = [];
+            
+            for (let price = priceRange.min; price <= priceRange.max; price += bucketSize) {
+                const bucketLevels = levels.filter(l => l.price >= price && l.price < price + bucketSize);
+                const longAmount = bucketLevels.filter(l => l.isLong).reduce((sum, l) => sum + l.amount, 0);
+                const shortAmount = bucketLevels.filter(l => !l.isLong).reduce((sum, l) => sum + l.amount, 0);
+                
+                buckets.push({
+                    price: price + bucketSize / 2,
+                    longAmount: longAmount,
+                    shortAmount: shortAmount
+                });
+            }
+            
+            // Render chart
+            const ctx = document.getElementById('liqMapChart');
+            if (ctx) {
+                if (liqMapChart) liqMapChart.destroy();
+                
+                liqMapChart = new Chart(ctx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: buckets.map(b => '$' + (b.price / 1000).toFixed(0) + 'K'),
+                        datasets: [
+                            {
+                                label: 'Long Liquidations',
+                                data: buckets.map(b => -b.longAmount), // Negative = left side
+                                backgroundColor: 'rgba(74, 222, 128, 0.6)',
+                                borderColor: '#4ade80',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Short Liquidations',
+                                data: buckets.map(b => b.shortAmount),
+                                backgroundColor: 'rgba(248, 113, 113, 0.6)',
+                                borderColor: '#f87171',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: { color: '#9ca3af', padding: 10 }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: ctx => ctx.dataset.label + ': $' + (Math.abs(ctx.raw) / 1e6).toFixed(2) + 'M'
+                                }
+                            },
+                            annotation: {
+                                annotations: {
+                                    currentPriceLine: {
+                                        type: 'line',
+                                        yMin: buckets.findIndex(b => b.price >= currentPrice),
+                                        yMax: buckets.findIndex(b => b.price >= currentPrice),
+                                        borderColor: '#f7931a',
+                                        borderWidth: 2,
+                                        borderDash: [5, 5],
+                                        label: {
+                                            content: 'Current Price',
+                                            enabled: true
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                ticks: {
+                                    color: '#9ca3af',
+                                    callback: v => '$' + (Math.abs(v) / 1e6).toFixed(0) + 'M'
+                                }
+                            },
+                            y: {
+                                stacked: true,
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                ticks: { color: '#9ca3af' }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Update key levels table
+            renderKeyLiquidationLevels(levels, currentPrice);
+        }
+        
+        function renderKeyLiquidationLevels(levels, currentPrice) {
+            const container = document.getElementById('liqMapLevels');
+            if (!container) return;
+            
+            // Find largest liquidation clusters
+            const sortedByAmount = [...levels].sort((a, b) => b.amount - a.amount).slice(0, 6);
+            
+            container.innerHTML = sortedByAmount.map(level => {
+                const diff = ((level.price - currentPrice) / currentPrice * 100).toFixed(1);
+                const direction = level.price > currentPrice ? '+' : '';
+                const color = level.isLong ? '#4ade80' : '#f87171';
+                const type = level.isLong ? 'Longs' : 'Shorts';
+                
+                return `
+                    <div style="background: var(--bg-secondary); padding: 10px; border-radius: 8px; border-left: 3px solid ${color};">
+                        <div style="font-size: 14px; font-weight: 700; color: var(--text);">$${level.price.toLocaleString()}</div>
+                        <div style="font-size: 11px; color: ${color};">${type} @ ${level.leverage}x</div>
+                        <div style="font-size: 11px; color: var(--text-muted);">$${(level.amount / 1e6).toFixed(1)}M (${direction}${diff}%)</div>
+                    </div>
+                `;
+            }).join('');
         }
         
         // ==================== BASIS (FUTURES PREMIUM) CHART ====================
