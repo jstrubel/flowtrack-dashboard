@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flowtrack | Crypto Market Intelligence v14</title>
+    <title>Flowtrack | Crypto Market Intelligence v15</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -1720,7 +1720,7 @@
                 <div class="card-header">
                     <div>
                         <div class="card-title">Bitcoin Spot ETF Net Flows</div>
-                        <div class="card-subtitle">Daily net inflows/outflows in USD (millions) • Data from SoSoValue</div>
+                        <div class="card-subtitle">Daily net inflows/outflows in USD (millions) • Data from CoinGlass</div>
                     </div>
                     <div class="time-btns">
                         <button class="time-btn" onclick="updateETFChart('btc', 14)">2W</button>
@@ -1776,7 +1776,7 @@
                 <div class="card-header">
                     <div>
                         <div class="card-title">Ethereum Spot ETF Net Flows</div>
-                        <div class="card-subtitle">Daily net inflows/outflows in USD (millions) • Data from SoSoValue</div>
+                        <div class="card-subtitle">Daily net inflows/outflows in USD (millions) • Data from CoinGlass</div>
                     </div>
                     <div class="time-btns">
                         <button class="time-btn" onclick="updateETFChart('eth', 14)">2W</button>
@@ -3193,45 +3193,37 @@
         // const ARTEMIS_BASE = 'https://data.artemis.xyz/api/v1';
         
         // ==================== ETF FLOWS CONFIGURATION ====================
-        const SOSOVALUE_API_KEY = 'SOSO-f250a44853234783968e9a6fd628ebb4';
-        
-        // CoinGlass API Configuration
-        // Using Cloudflare Worker proxy to handle API key server-side
-        const COINGLASS_API_KEY = ''; // Not needed client-side - handled by proxy
-        const COINGLASS_BASE_URL = 'https://coinglass-proxy.justin-strubel.workers.dev'; // Cloudflare Worker proxy
+        // CoinGlass API Configuration - API-only, no fallback data
+        const COINGLASS_BASE_URL = 'https://coinglass-proxy.justin-strubel.workers.dev';
         
         // Helper function for CoinGlass API calls (via proxy)
         async function coinglassAPI(endpoint) {
             try {
-                // Remove leading slash if present since base URL already has the path
                 const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
                 const url = `${COINGLASS_BASE_URL}/${cleanEndpoint}`;
                 
-                console.log('Calling CoinGlass API via proxy:', url);
+                console.log('[CoinGlass] Calling:', url);
                 const response = await fetch(url, {
                     method: 'GET',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
+                    headers: { 'Accept': 'application/json' }
                 });
                 
                 if (!response.ok) {
-                    console.error('CoinGlass API HTTP error:', response.status, response.statusText);
+                    console.error('[CoinGlass] HTTP error:', response.status, response.statusText);
                     return null;
                 }
                 
                 const json = await response.json();
-                console.log('CoinGlass API response:', json);
+                console.log('[CoinGlass] Response code:', json.code, 'msg:', json.msg);
                 
-                // CoinGlass returns { code: "0", msg: "success", data: [...] }
                 if (json.code === '0' || json.code === 0) {
                     return json.data;
                 } else {
-                    console.error('CoinGlass API error:', json.msg || json);
+                    console.error('[CoinGlass] API error:', json.msg || json);
                     return null;
                 }
             } catch (error) {
-                console.error('CoinGlass API fetch error:', error.message);
+                console.error('[CoinGlass] Fetch error:', error.message);
                 return null;
             }
         }
@@ -3239,119 +3231,12 @@
         // ETF Charts
         let btcEtfFlowChart = null;
         let ethEtfFlowChart = null;
-        // Cumulative charts use window.btcCumulativeChartInstance and window.ethCumulativeChartInstance
         
         // ETF Data storage
         let etfData = {
             btc: { daily: [], cumulative: 0 },
             eth: { daily: [], cumulative: 0 }
         };
-        
-        // Fallback ETF data (manually updated from Coinglass)
-        // Last updated: January 12, 2026
-        // Sources: https://coinglass.com/bitcoin-etf
-        const FALLBACK_BTC_ETF_DATA = [
-            // Most recent at top - Updated Jan 12, 2026 from Coinglass screenshot
-            // Note: Markets closed on weekends, so we only have weekday data
-            // Data from Coinglass update time: 2026-01-12 11:25 UTC
-            { date: '2026-01-09', IBIT: 0, FBTC: 7.9, BITB: 0, ARKB: -5.9, BTCO: 0, EZBC: 0, BRRR: 0, HODL: 0, BTCW: 0, GBTC: -252.0, BTC: 0, total: -250.0 },
-            { date: '2026-01-08', IBIT: -193.3, FBTC: -120.5, BITB: 3.0, ARKB: -9.6, BTCO: 0, EZBC: 0, BRRR: 0, HODL: 0, BTCW: 1.9, GBTC: -73.1, BTC: -7.2, total: -398.8 },
-            { date: '2026-01-07', IBIT: -130.0, FBTC: -247.6, BITB: -39.0, ARKB: -42.3, BTCO: 0, EZBC: 0, BRRR: 0, HODL: -11.6, BTCW: 0, GBTC: -15.6, BTC: 0, total: -486.1 },
-            { date: '2026-01-06', IBIT: 228.7, FBTC: -312.2, BITB: 0, ARKB: -29.5, BTCO: 0, EZBC: 0, BRRR: 0, HODL: -14.4, BTCW: 0, GBTC: -83.1, BTC: -32.7, total: -243.2 },
-            { date: '2026-01-05', IBIT: 372.5, FBTC: 191.2, BITB: 38.5, ARKB: 36.0, BTCO: 15.0, EZBC: 13.6, BRRR: 7.2, HODL: 5.3, BTCW: 0, GBTC: 0, BTC: 17.9, total: 697.2 },
-            { date: '2026-01-02', IBIT: 287.4, FBTC: 88.1, BITB: 41.5, ARKB: 6.7, BTCO: 4.5, EZBC: 13.0, BRRR: 0, HODL: 8.3, BTCW: 0, GBTC: 15.4, BTC: 6.4, total: 471.3 },
-            { date: '2025-12-31', IBIT: -99.0, FBTC: -66.6, BITB: -13.8, ARKB: -76.5, BTCO: 0, EZBC: 0, BRRR: 0, HODL: -6.8, BTCW: 0, GBTC: -69.1, BTC: -11.2, total: -348.1 },
-            { date: '2025-12-30', IBIT: 143.7, FBTC: 78.6, BITB: 13.9, ARKB: 109.6, BTCO: 0, EZBC: 0, BRRR: 0, HODL: 5.0, BTCW: 0, GBTC: 0, BTC: 4.3, total: 355.1 },
-            { date: '2025-12-29', IBIT: -7.9, FBTC: 5.7, BITB: 0, ARKB: -6.7, BTCO: -10.4, EZBC: 0, BRRR: 0, HODL: 0, BTCW: 0, GBTC: 0, BTC: 0, total: -19.3 },
-            { date: '2025-12-26', IBIT: 62.09, FBTC: 12.1, BITB: 2.14, ARKB: 1.66, BTCO: 0.215, EZBC: 0.550, BRRR: 0.044, HODL: 1.07, BTCW: 0, GBTC: -25.14, BTC: 1.94, total: 56.99 },
-            // Previous data - keeping historical for cumulative calculation
-            { date: '2025-12-24', IBIT: -91.4, FBTC: -36.0, BITB: -17.0, ARKB: -13.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -24.2, BTC: 0.0, total: -175.0 },
-            { date: '2025-12-23', IBIT: -240.3, FBTC: 33.1, BITB: -79.5, ARKB: -136.3, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -38.4, BTC: 0.0, total: -461.4 },
-            { date: '2025-12-20', IBIT: 0.0, FBTC: 0.0, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 0.0, BTC: 0.0, total: 0.0 },
-            { date: '2025-12-19', IBIT: -140.6, FBTC: -162.0, BITB: 0.0, ARKB: -12.8, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -0.6, BTC: 0.0, total: -315.9 },
-            { date: '2025-12-17', IBIT: 111.2, FBTC: 391.5, BITB: -20.7, ARKB: -38.0, BTCO: 0.0, EZBC: -0.1, BRRR: 0.0, HODL: -18.1, BTCW: 0.0, GBTC: -1.2, BTC: 0.0, total: 457.3 },
-            { date: '2025-12-16', IBIT: -212.9, FBTC: 27.0, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 0.0, BTC: -7.5, total: -193.3 },
-            { date: '2025-12-15', IBIT: 0.0, FBTC: -239.1, BITB: -97.1, ARKB: -52.6, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -21.9, BTCW: 0.0, GBTC: -30.8, BTC: -0.1, total: -441.6 },
-            { date: '2025-12-12', IBIT: 50.2, FBTC: 0.0, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -18.8, BTCW: 0.0, GBTC: -12.4, BTC: -10.6, total: 8.4 },
-            { date: '2025-12-11', IBIT: 74.3, FBTC: -100.3, BITB: 8.2, ARKB: -15.9, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.9, GBTC: 0.0, BTC: 0.0, total: -32.8 },
-            { date: '2025-12-10', IBIT: 182.7, FBTC: 28.9, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 15.4, BTC: 32.1, total: 259.1 },
-            { date: '2025-12-09', IBIT: -100.4, FBTC: 150.4, BITB: 15.4, ARKB: 5.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 5.6, BTCW: 0.0, GBTC: -43.5, BTC: -0.1, total: 32.4 },
-            { date: '2025-12-05', IBIT: 376.2, FBTC: 103.4, BITB: 9.1, ARKB: 5.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 2.2, BTCW: 0.0, GBTC: 2.3, BTC: 0.0, total: 498.2 },
-            { date: '2025-12-04', IBIT: 751.6, FBTC: 201.5, BITB: 19.1, ARKB: 36.8, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 5.1, BTCW: 0.0, GBTC: 4.8, BTC: 7.7, total: 1026.7 },
-            { date: '2025-12-03', IBIT: 323.3, FBTC: 82.8, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 3.1, BTC: 0.0, total: 409.2 },
-            { date: '2025-12-02', IBIT: 359.3, FBTC: 64.3, BITB: 21.6, ARKB: 18.7, BTCO: 0.0, EZBC: 5.5, BRRR: 0.0, HODL: 4.2, BTCW: 0.5, GBTC: 0.0, BTC: 0.0, total: 474.1 },
-            { date: '2025-11-29', IBIT: -117.3, FBTC: -21.1, BITB: 0.0, ARKB: -0.9, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -13.5, BTC: -0.5, total: -153.3 },
-            { date: '2025-11-27', IBIT: 56.7, FBTC: 11.4, BITB: 0.0, ARKB: 15.3, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -8.0, BTC: 0.0, total: 75.4 },
-            { date: '2025-11-26', IBIT: 267.8, FBTC: 162.3, BITB: 0.0, ARKB: 52.7, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -16.0, BTC: 0.0, total: 466.8 },
-            { date: '2025-11-25', IBIT: 437.3, FBTC: 128.7, BITB: 20.0, ARKB: 83.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 6.5, BTCW: 0.0, GBTC: 7.0, BTC: 1.7, total: 684.2 },
-            { date: '2025-11-22', IBIT: 338.2, FBTC: 143.6, BITB: 29.8, ARKB: 73.1, BTCO: 7.2, EZBC: 0.5, BRRR: 0.0, HODL: 10.3, BTCW: 2.4, GBTC: -5.8, BTC: 1.8, total: 601.1 },
-            { date: '2025-11-21', IBIT: 608.4, FBTC: 300.9, BITB: 68.3, ARKB: 17.6, BTCO: 3.6, EZBC: 6.4, BRRR: 3.3, HODL: 17.2, BTCW: 5.5, GBTC: -1.0, BTC: 3.2, total: 1033.4 },
-            { date: '2025-11-20', IBIT: 626.6, FBTC: 133.9, BITB: 38.4, ARKB: 18.4, BTCO: 2.3, EZBC: 5.1, BRRR: 0.0, HODL: 11.6, BTCW: 2.2, GBTC: -7.6, BTC: 2.6, total: 833.5 },
-            { date: '2025-11-19', IBIT: 89.3, FBTC: 65.5, BITB: 19.3, ARKB: 17.6, BTCO: 0.0, EZBC: 3.3, BRRR: 0.0, HODL: 5.2, BTCW: 1.4, GBTC: -1.1, BTC: 1.3, total: 201.8 },
-            { date: '2025-11-18', IBIT: 89.8, FBTC: 13.9, BITB: 5.4, ARKB: -32.4, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -68.0, BTC: -1.1, total: 7.6 },
-            { date: '2025-11-15', IBIT: 256.2, FBTC: -159.5, BITB: 0.0, ARKB: -30.9, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -3.0, BTCW: 0.0, GBTC: -12.3, BTC: -5.6, total: 44.9 },
-            { date: '2025-11-14', IBIT: -95.5, FBTC: -26.9, BITB: 1.7, ARKB: -161.7, BTCO: 0.0, EZBC: -0.7, BRRR: 0.0, HODL: -10.9, BTCW: 0.0, GBTC: -69.6, BTC: -5.6, total: -369.2 },
-            { date: '2025-11-13', IBIT: 230.8, FBTC: 188.4, BITB: 47.0, ARKB: 17.6, BTCO: 0.0, EZBC: 7.3, BRRR: 0.0, HODL: 12.5, BTCW: 3.9, GBTC: 0.0, BTC: 2.3, total: 509.8 },
-            { date: '2025-11-12', IBIT: 131.5, FBTC: 61.1, BITB: 21.1, ARKB: 47.5, BTCO: 0.0, EZBC: 0.6, BRRR: 0.0, HODL: 6.1, BTCW: 2.7, GBTC: -44.9, BTC: 1.9, total: 227.6 },
-            { date: '2025-11-11', IBIT: 1115.0, FBTC: 190.9, BITB: 32.1, ARKB: 65.6, BTCO: 5.0, EZBC: 7.5, BRRR: 1.6, HODL: 16.8, BTCW: 5.7, GBTC: -3.2, BTC: 4.5, total: 1441.5 },
-            { date: '2025-11-08', IBIT: 203.6, FBTC: 0.0, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -10.4, BTC: 0.0, total: 193.2 },
-            { date: '2025-11-07', IBIT: 1117.5, FBTC: 191.1, BITB: 32.3, ARKB: 11.1, BTCO: 4.3, EZBC: 7.0, BRRR: 2.1, HODL: 17.1, BTCW: 5.5, GBTC: 3.1, BTC: 5.2, total: 1396.3 },
-            { date: '2025-11-06', IBIT: 756.4, FBTC: 308.8, BITB: 42.3, ARKB: 126.5, BTCO: 30.4, EZBC: 13.8, BRRR: 8.7, HODL: 25.8, BTCW: 9.3, GBTC: 0.0, BTC: 0.0, total: 1322.0 },
-            { date: '2025-11-05', IBIT: 38.3, FBTC: 0.0, BITB: 0.0, ARKB: 18.4, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -63.7, BTC: 0.0, total: -7.0 },
-            { date: '2025-11-04', IBIT: -44.3, FBTC: -169.3, BITB: -30.8, ARKB: -212.2, BTCO: 0.0, EZBC: -6.4, BRRR: 0.0, HODL: -16.5, BTCW: 0.0, GBTC: -20.9, BTC: -0.6, total: -501.0 },
-        ];
-        
-        const FALLBACK_ETH_ETF_DATA = [
-            // ETH ETF data - Updated Jan 12, 2026
-            // Note: ETH ETFs have much lower flows than BTC, data estimated from market patterns
-            { date: '2026-01-09', ETHA: -35.0, FETH: -15.0, ETHE: -8.0, others: -2.0, total: -60.0 },
-            { date: '2026-01-08', ETHA: -45.2, FETH: -18.3, ETHE: -12.5, others: -4.0, total: -80.0 },
-            { date: '2026-01-07', ETHA: -52.4, FETH: -22.1, ETHE: -15.3, others: -5.2, total: -95.0 },
-            { date: '2026-01-06', ETHA: -28.5, FETH: -12.4, ETHE: -8.1, others: -3.0, total: -52.0 },
-            { date: '2026-01-05', ETHA: 85.2, FETH: 35.4, ETHE: -5.2, others: 9.6, total: 125.0 },
-            { date: '2026-01-02', ETHA: 62.4, FETH: 25.6, ETHE: -4.2, others: 6.2, total: 90.0 },
-            { date: '2025-12-31', ETHA: -32.4, FETH: -14.2, ETHE: -8.4, others: -3.0, total: -58.0 },
-            { date: '2025-12-30', ETHA: 45.2, FETH: 18.4, ETHE: -3.2, others: 4.6, total: 65.0 },
-            { date: '2025-12-29', ETHA: -5.4, FETH: -2.1, ETHE: -1.2, others: -0.3, total: -9.0 },
-            { date: '2025-12-26', ETHA: 25.2, FETH: 10.4, ETHE: -2.1, others: 2.5, total: 36.0 },
-            // Historical data
-            { date: '2025-12-24', ETHA: -32.7, FETH: 0.0, ETHE: -24.5, others: 0.0, total: -57.0 },
-            { date: '2025-12-23', ETHA: -75.1, FETH: -16.7, ETHE: 2.7, others: -13.0, total: -102.1 },
-            { date: '2025-12-20', ETHA: 0.0, FETH: 0.0, ETHE: 0.0, others: 0.0, total: 0.0 },
-            { date: '2025-12-19', ETHA: -75.9, FETH: 0.0, ETHE: 0.0, others: 0.0, total: -75.9 },
-            { date: '2025-12-18', ETHA: -96.6, FETH: 0.0, ETHE: 0.0, others: 0.0, total: -96.6 },
-            { date: '2025-12-17', ETHA: -19.6, FETH: -2.8, ETHE: 0.0, others: 0.0, total: -22.4 },
-            { date: '2025-12-16', ETHA: -82.4, FETH: -28.6, ETHE: -13.3, others: 0.0, total: -124.3 },
-            { date: '2025-12-15', ETHA: -82.8, FETH: -28.0, ETHE: -14.0, others: 0.0, total: -124.8 },
-            { date: '2025-12-12', ETHA: 102.3, FETH: 19.4, ETHE: -22.8, others: 24.8, total: 123.7 },
-            { date: '2025-12-11', ETHA: -32.4, FETH: -5.2, ETHE: -4.8, others: 0.0, total: -42.4 },
-            { date: '2025-12-10', ETHA: 48.2, FETH: 9.4, ETHE: 0.0, others: 0.0, total: 57.6 },
-            { date: '2025-12-09', ETHA: 89.5, FETH: 15.2, ETHE: -8.4, others: 4.6, total: 100.9 },
-            { date: '2025-12-06', ETHA: 83.8, FETH: 14.2, ETHE: 0.0, others: 0.0, total: 98.0 },
-            { date: '2025-12-05', ETHA: 128.4, FETH: 53.7, ETHE: 0.0, others: 0.0, total: 182.1 },
-            { date: '2025-12-04', ETHA: 81.5, FETH: 28.6, ETHE: -21.4, others: 4.2, total: 92.9 },
-            { date: '2025-12-03', ETHA: 73.8, FETH: 22.4, ETHE: -18.6, others: 2.8, total: 80.4 },
-            { date: '2025-12-02', ETHA: 45.4, FETH: 12.8, ETHE: -8.4, others: 1.4, total: 51.2 },
-            { date: '2025-11-29', ETHA: 53.5, FETH: 18.6, ETHE: -11.2, others: 3.2, total: 64.1 },
-            { date: '2025-11-27', ETHA: 38.4, FETH: 14.2, ETHE: -9.6, others: 2.4, total: 45.4 },
-            { date: '2025-11-26', ETHA: 52.6, FETH: 16.8, ETHE: -10.4, others: 2.8, total: 61.8 },
-            { date: '2025-11-25', ETHA: 21.2, FETH: 8.4, ETHE: -5.2, others: 1.4, total: 25.8 },
-            { date: '2025-11-22', ETHA: 48.4, FETH: 15.6, ETHE: -9.8, others: 2.6, total: 56.8 },
-            { date: '2025-11-21', ETHA: 86.4, FETH: 27.8, ETHE: -16.2, others: 4.8, total: 102.8 },
-            { date: '2025-11-20', ETHA: 74.8, FETH: 25.4, ETHE: -14.8, others: 4.2, total: 89.6 },
-            { date: '2025-11-19', ETHA: 32.6, FETH: 10.8, ETHE: -6.4, others: 1.8, total: 38.8 },
-            { date: '2025-11-18', ETHA: -5.8, FETH: -1.2, ETHE: -8.4, others: -0.4, total: -15.8 },
-            { date: '2025-11-15', ETHA: -18.4, FETH: -3.6, ETHE: -12.6, others: -0.8, total: -35.4 },
-            { date: '2025-11-14', ETHA: -28.6, FETH: -5.8, ETHE: -16.4, others: -1.2, total: -52.0 },
-            { date: '2025-11-13', ETHA: 38.4, FETH: 14.2, ETHE: -8.4, others: 2.4, total: 46.6 },
-            { date: '2025-11-12', ETHA: 52.6, FETH: 18.8, ETHE: -11.2, others: 3.2, total: 63.4 },
-            { date: '2025-11-11', ETHA: 68.4, FETH: 24.2, ETHE: -14.2, others: 4.2, total: 82.6 },
-            { date: '2025-11-08', ETHA: 18.4, FETH: 5.8, ETHE: -3.4, others: 1.0, total: 21.8 },
-            { date: '2025-11-07', ETHA: 28.2, FETH: 9.8, ETHE: -5.8, others: 1.6, total: 33.8 },
-            { date: '2025-11-06', ETHA: 48.4, FETH: 16.2, ETHE: -9.4, others: 2.8, total: 58.0 },
-            { date: '2025-11-05', ETHA: -8.4, FETH: -1.6, ETHE: -12.4, others: -0.4, total: -22.8 },
-            { date: '2025-11-04', ETHA: -22.6, FETH: -8.6, ETHE: -14.2, others: -1.8, total: -47.2 },
-        ];
         
         // ==================== TAB NAVIGATION ====================
         function switchTab(tabName) {
@@ -9245,70 +9130,70 @@
         
         // ==================== ETF FLOWS FUNCTIONS ====================
         
-        // Load ETF data from CoinGlass API (primary) or fallback to manual data
+        // Load ETF data from CoinGlass API ONLY - no fallback
         async function loadETFData() {
-            console.log('Loading ETF data...');
-            console.log('Current date:', new Date().toISOString());
+            console.log('[ETF] Loading ETF data from CoinGlass API...');
             
-            // Try CoinGlass API first
             let btcApiData = null;
             let ethApiData = null;
-            let usedAPI = false;
+            let btcError = null;
+            let ethError = null;
             
+            // Fetch BTC ETF flow history
             try {
-                // Fetch BTC ETF flow history from CoinGlass
                 btcApiData = await coinglassAPI('/etf/bitcoin/flow-history');
-                
-                // Fetch ETH ETF flow history from CoinGlass  
-                ethApiData = await coinglassAPI('/etf/ethereum/flow-history');
-                
                 if (btcApiData && btcApiData.length > 0) {
-                    console.log('CoinGlass BTC ETF data loaded:', btcApiData.length, 'days');
-                    // Log first few items to verify dates
-                    console.log('BTC API first 3 items (raw):', btcApiData.slice(0, 3));
-                    usedAPI = true;
-                }
-                if (ethApiData && ethApiData.length > 0) {
-                    console.log('CoinGlass ETH ETF data loaded:', ethApiData.length, 'days');
-                    console.log('ETH API first 3 items (raw):', ethApiData.slice(0, 3));
+                    console.log('[ETF] BTC data loaded:', btcApiData.length, 'days');
+                    console.log('[ETF] BTC latest item:', JSON.stringify(btcApiData[0]));
+                } else {
+                    btcError = 'No data returned from API';
                 }
             } catch (error) {
-                console.log('CoinGlass API error:', error.message);
+                btcError = error.message;
+                console.error('[ETF] BTC API error:', error.message);
+            }
+            
+            // Fetch ETH ETF flow history
+            try {
+                ethApiData = await coinglassAPI('/etf/ethereum/flow-history');
+                if (ethApiData && ethApiData.length > 0) {
+                    console.log('[ETF] ETH data loaded:', ethApiData.length, 'days');
+                    console.log('[ETF] ETH latest item:', JSON.stringify(ethApiData[0]));
+                } else {
+                    ethError = 'No data returned from API';
+                }
+            } catch (error) {
+                ethError = error.message;
+                console.error('[ETF] ETH API error:', error.message);
             }
             
             // Process BTC data
-            let btcData;
             if (btcApiData && Array.isArray(btcApiData) && btcApiData.length > 0) {
-                btcData = parseCoinglassETFData(btcApiData, 'btc');
-                console.log('Parsed CoinGlass BTC ETF data:', btcData.length, 'days, latest:', btcData[0]?.date);
+                etfData.btc.daily = parseCoinglassETFData(btcApiData, 'btc');
+                console.log('[ETF] Parsed BTC:', etfData.btc.daily.length, 'days, latest:', etfData.btc.daily[0]?.date);
             } else {
-                btcData = FALLBACK_BTC_ETF_DATA;
-                console.log('Using FALLBACK BTC ETF data:', btcData.length, 'days, latest:', btcData[0]?.date);
+                etfData.btc.daily = [];
+                showETFError('btc', btcError || 'Failed to load BTC ETF data');
             }
             
             // Process ETH data
-            let ethData;
             if (ethApiData && Array.isArray(ethApiData) && ethApiData.length > 0) {
-                ethData = parseCoinglassETFData(ethApiData, 'eth');
-                console.log('Parsed CoinGlass ETH ETF data:', ethData.length, 'days, latest:', ethData[0]?.date);
+                etfData.eth.daily = parseCoinglassETFData(ethApiData, 'eth');
+                console.log('[ETF] Parsed ETH:', etfData.eth.daily.length, 'days, latest:', etfData.eth.daily[0]?.date);
             } else {
-                ethData = FALLBACK_ETH_ETF_DATA;
-                console.log('Using FALLBACK ETH ETF data:', ethData.length, 'days, latest:', ethData[0]?.date);
+                etfData.eth.daily = [];
+                showETFError('eth', ethError || 'Failed to load ETH ETF data');
             }
             
-            // Store data
-            etfData.btc.daily = btcData;
-            etfData.eth.daily = ethData;
+            // Calculate cumulative (only if we have data)
+            if (etfData.btc.daily.length > 0) {
+                etfData.btc.cumulative = etfData.btc.daily.reduce((sum, d) => sum + (d.total || 0), 0);
+            }
+            if (etfData.eth.daily.length > 0) {
+                etfData.eth.cumulative = etfData.eth.daily.reduce((sum, d) => sum + (d.total || 0), 0);
+            }
             
-            // Calculate cumulative flows
-            // Base values are set so that cumulative totals match Coinglass totals as of Jan 12, 2026:
-            // BTC: $91.76B total, ETH: $14.97B total
-            // The base represents the cumulative before our fallback data period starts
-            etfData.btc.cumulative = 85000 + btcData.reduce((sum, d) => sum + (d.total || 0), 0);
-            etfData.eth.cumulative = 13500 + ethData.reduce((sum, d) => sum + (d.total || 0), 0);
-            
-            console.log('ETF Data loaded - BTC cumulative:', etfData.btc.cumulative.toFixed(0), 'M, ETH:', etfData.eth.cumulative.toFixed(0), 'M');
-            console.log('Data source:', usedAPI ? 'CoinGlass API' : 'Fallback data');
+            console.log('[ETF] Load complete - BTC days:', etfData.btc.daily.length, ', ETH days:', etfData.eth.daily.length);
             
             // Update UI
             updateETFSummaryCards();
@@ -9324,33 +9209,55 @@
             if (cumLoading) cumLoading.style.display = 'none';
         }
         
-        // Parse CoinGlass ETF API response into our standard format
-        // CoinGlass format: { timestamp: ms, flow_usd: number, etf_flows: [{etf_ticker, flow_usd}] }
-        function parseCoinglassETFData(apiData, type) {
-            console.log('Parsing CoinGlass ETF data:', apiData?.length, 'items');
+        // Show error message in ETF charts
+        function showETFError(type, message) {
+            console.error(`[ETF] ${type.toUpperCase()} Error:`, message);
+            const chartId = type === 'btc' ? 'btcEtfFlowChart' : 'ethEtfFlowChart';
+            const loadingId = type === 'btc' ? 'btcEtfLoading' : 'ethEtfLoading';
             
-            // CoinGlass returns array sorted by date descending (most recent first)
-            return apiData.map(item => {
-                // Convert timestamp (milliseconds) to date string
-                let dateStr;
+            const loading = document.getElementById(loadingId);
+            if (loading) {
+                loading.innerHTML = `
+                    <div style="color: var(--bad); font-size: 14px; font-weight: 600;">⚠️ API Error</div>
+                    <div style="color: var(--text-muted); font-size: 12px; margin-top: 8px;">${message}</div>
+                    <div style="color: var(--text-dim); font-size: 11px; margin-top: 4px;">Check that Cloudflare Worker is deployed correctly</div>
+                `;
+                loading.style.display = 'flex';
+                loading.style.flexDirection = 'column';
+                loading.style.alignItems = 'center';
+                loading.style.justifyContent = 'center';
+                loading.style.height = '200px';
+            }
+        }
+        
+        // Parse CoinGlass ETF API response
+        // CoinGlass format: { timestamp: ms, change_usd: number, etf_flows: [{ticker, change_usd}] }
+        function parseCoinglassETFData(apiData, type) {
+            console.log('[ETF] Parsing', type.toUpperCase(), 'data:', apiData?.length, 'items');
+            
+            // Sort by timestamp descending (most recent first)
+            const sorted = [...apiData].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            
+            return sorted.map(item => {
+                // Convert timestamp to date string
+                let dateStr = 'Unknown';
                 if (item.timestamp) {
                     const date = new Date(item.timestamp);
                     dateStr = date.toISOString().split('T')[0];
-                } else if (item.date) {
-                    dateStr = item.date;
-                } else {
-                    dateStr = 'Unknown';
                 }
                 
-                // Total flow in millions (API returns USD, we display in millions)
-                const totalFlow = (item.flow_usd || 0) / 1000000;
+                // Total flow in millions (API returns USD)
+                // CoinGlass uses 'change_usd' for the total flow
+                const totalFlow = (item.change_usd || item.flow_usd || 0) / 1000000;
                 
                 // Parse individual ETF flows
                 const etfFlows = {};
                 if (item.etf_flows && Array.isArray(item.etf_flows)) {
                     item.etf_flows.forEach(etf => {
-                        if (etf.etf_ticker && etf.flow_usd !== undefined) {
-                            etfFlows[etf.etf_ticker] = (etf.flow_usd || 0) / 1000000;
+                        const ticker = etf.ticker || etf.etf_ticker;
+                        const flow = etf.change_usd || etf.flow_usd || 0;
+                        if (ticker) {
+                            etfFlows[ticker] = flow / 1000000;
                         }
                     });
                 }
@@ -9572,9 +9479,8 @@
             
             const btcData = [...etfData.btc.daily].reverse();
             
-            // BTC ETFs launched Jan 2024, current cumulative ~$91.76B as of Jan 2026
-            // Base value is set to make cumulative match current total
-            let btcCumulative = 85000;
+            // BTC ETFs launched Jan 2024, ~$35B cumulative by late Oct 2024
+            let btcCumulative = 35000;
             const btcCumulativeData = btcData.map(d => {
                 btcCumulative += d.total;
                 return btcCumulative;
@@ -9659,8 +9565,8 @@
             
             const ethData = [...etfData.eth.daily].reverse();
             
-            // ETH ETFs launched Jul 2024, current cumulative ~$14.97B as of Jan 2026
-            let ethCumulative = 13500;
+            // ETH ETFs launched Jul 2024, ~$2.5B cumulative by late Oct 2024
+            let ethCumulative = 2500;
             const ethCumulativeData = ethData.map(d => {
                 ethCumulative += d.total;
                 return ethCumulative;
