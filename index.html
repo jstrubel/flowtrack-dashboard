@@ -3926,13 +3926,17 @@
         // Fear & Greed Index
         async function loadFearGreedIndex() {
             try {
-                const data = await coinglassAPI('/indicator/fear-greed');
+                const data = await coinglassAPI('/index/fear-greed-history');
                 console.log('Fear & Greed response:', data);
                 
-                if (data && Array.isArray(data) && data.length > 0) {
-                    // Get current value (most recent)
-                    const current = data[0];
-                    const value = current.value || current.fgi || 0;
+                // V4 API returns: { data_list: [...], price_list: [...], time_list: [...] }
+                if (data && data.data_list && data.data_list.length > 0) {
+                    const dataList = data.data_list;
+                    const timeList = data.time_list || [];
+                    
+                    // Most recent is at the end of the array
+                    const currentValue = dataList[dataList.length - 1];
+                    const yesterdayValue = dataList.length > 1 ? dataList[dataList.length - 2] : null;
                     
                     // Update display
                     const valueEl = document.getElementById('fearGreedValue');
@@ -3940,29 +3944,38 @@
                     const changeEl = document.getElementById('fearGreedChange');
                     
                     if (valueEl) {
-                        valueEl.textContent = Math.round(value);
-                        valueEl.style.color = getFearGreedColor(value);
+                        valueEl.textContent = Math.round(currentValue);
+                        valueEl.style.color = getFearGreedColor(currentValue);
                     }
                     if (labelEl) {
-                        labelEl.textContent = getFearGreedLabel(value);
-                        labelEl.style.color = getFearGreedColor(value);
+                        labelEl.textContent = getFearGreedLabel(currentValue);
+                        labelEl.style.color = getFearGreedColor(currentValue);
                     }
                     
                     // Calculate change from yesterday
-                    if (changeEl && data.length > 1) {
-                        const yesterday = data[1].value || data[1].fgi || 0;
-                        const change = value - yesterday;
+                    if (changeEl && yesterdayValue !== null) {
+                        const change = currentValue - yesterdayValue;
                         changeEl.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(0)} from yesterday`;
                         changeEl.style.color = change >= 0 ? '#4ade80' : '#f87171';
                     }
                     
-                    // Render chart with last 30 days
-                    renderFearGreedChart(data.slice(0, 30).reverse());
+                    // Build chart data - get last 30 days
+                    const chartData = [];
+                    const startIdx = Math.max(0, dataList.length - 30);
+                    for (let i = startIdx; i < dataList.length; i++) {
+                        chartData.push({
+                            value: dataList[i],
+                            time: timeList[i] || 0
+                        });
+                    }
+                    renderFearGreedChart(chartData);
                 }
             } catch (error) {
                 console.error('Failed to load Fear & Greed:', error);
-                document.getElementById('fearGreedValue').textContent = '--';
-                document.getElementById('fearGreedLabel').textContent = 'API Error';
+                const valueEl = document.getElementById('fearGreedValue');
+                const labelEl = document.getElementById('fearGreedLabel');
+                if (valueEl) valueEl.textContent = '--';
+                if (labelEl) labelEl.textContent = 'API Error';
             }
         }
         
@@ -4039,35 +4052,44 @@
         // CoinGlass Long/Short Ratio
         async function loadCoinglassLongShort() {
             try {
-                const data = await coinglassAPI('/futures/global-long-short-account-ratio?symbol=BTC');
+                const data = await coinglassAPI('/futures/global-long-short-account-ratio/history?symbol=BTC&interval=h1&limit=1');
                 console.log('Long/Short response:', data);
                 
-                if (data && Array.isArray(data) && data.length > 0) {
-                    // Get latest data point
-                    const latest = data[0];
-                    const ratio = latest.longShortRatio || latest.ratio || 1;
-                    const longPct = latest.longAccount || latest.longRate || (ratio / (1 + ratio) * 100);
-                    const shortPct = latest.shortAccount || latest.shortRate || (1 / (1 + ratio) * 100);
-                    
-                    const valueEl = document.getElementById('longShortValue');
-                    const labelEl = document.getElementById('longShortLabel');
-                    const longEl = document.getElementById('longPct');
-                    const shortEl = document.getElementById('shortPct');
-                    
-                    if (valueEl) {
-                        valueEl.textContent = ratio.toFixed(2);
-                        valueEl.style.color = ratio > 1 ? '#4ade80' : '#f87171';
+                // V4 API may return array or object with different field names
+                let ratio = 1, longPct = 50, shortPct = 50;
+                
+                if (data) {
+                    if (Array.isArray(data) && data.length > 0) {
+                        const latest = data[data.length - 1]; // Latest might be at end
+                        ratio = latest.longShortRatio || latest.longAccount / latest.shortAccount || latest.ratio || 1;
+                        longPct = latest.longAccount || latest.longRate || (ratio / (1 + ratio) * 100);
+                        shortPct = latest.shortAccount || latest.shortRate || (1 / (1 + ratio) * 100);
+                    } else if (data.longAccount !== undefined) {
+                        // Direct object response
+                        longPct = data.longAccount;
+                        shortPct = data.shortAccount;
+                        ratio = longPct / shortPct;
                     }
-                    if (labelEl) {
-                        if (ratio > 1.5) labelEl.textContent = 'Very Bullish';
-                        else if (ratio > 1.1) labelEl.textContent = 'Bullish';
-                        else if (ratio > 0.9) labelEl.textContent = 'Neutral';
-                        else if (ratio > 0.67) labelEl.textContent = 'Bearish';
-                        else labelEl.textContent = 'Very Bearish';
-                    }
-                    if (longEl) longEl.textContent = longPct.toFixed(1) + '%';
-                    if (shortEl) shortEl.textContent = shortPct.toFixed(1) + '%';
                 }
+                
+                const valueEl = document.getElementById('longShortValue');
+                const labelEl = document.getElementById('longShortLabel');
+                const longEl = document.getElementById('longPct');
+                const shortEl = document.getElementById('shortPct');
+                
+                if (valueEl) {
+                    valueEl.textContent = ratio.toFixed(2);
+                    valueEl.style.color = ratio > 1 ? '#4ade80' : '#f87171';
+                }
+                if (labelEl) {
+                    if (ratio > 1.5) labelEl.textContent = 'Very Bullish';
+                    else if (ratio > 1.1) labelEl.textContent = 'Bullish';
+                    else if (ratio > 0.9) labelEl.textContent = 'Neutral';
+                    else if (ratio > 0.67) labelEl.textContent = 'Bearish';
+                    else labelEl.textContent = 'Very Bearish';
+                }
+                if (longEl) longEl.textContent = (typeof longPct === 'number' ? longPct.toFixed(1) : longPct) + '%';
+                if (shortEl) shortEl.textContent = (typeof shortPct === 'number' ? shortPct.toFixed(1) : shortPct) + '%';
             } catch (error) {
                 console.error('Failed to load Long/Short:', error);
             }
@@ -4120,36 +4142,40 @@
         // CoinGlass OI-Weighted Funding Rate
         async function loadCoinglassFunding() {
             try {
-                const data = await coinglassAPI('/futures/funding-rate/oi-weight-ohlc-history?symbol=BTC&interval=h8');
+                const data = await coinglassAPI('/futures/fundingRate/oi-weight-ohlc-history?symbol=BTC&interval=h8&limit=1');
                 console.log('Funding response:', data);
                 
-                if (data && Array.isArray(data) && data.length > 0) {
-                    // Get latest funding rate
-                    const latest = data[0];
-                    const rate = (latest.c || latest.close || latest.rate || 0) * 100; // Convert to percentage
-                    
-                    const valueEl = document.getElementById('oiFundingValue');
-                    const annualEl = document.getElementById('oiFundingAnnualized');
-                    const signalEl = document.getElementById('oiFundingSignal');
-                    
-                    if (valueEl) {
-                        valueEl.textContent = rate.toFixed(4) + '%';
-                        valueEl.style.color = rate > 0.02 ? '#f87171' : rate < -0.01 ? '#4ade80' : '#94a3b8';
+                let rate = 0;
+                if (data) {
+                    if (Array.isArray(data) && data.length > 0) {
+                        const latest = data[data.length - 1]; // Latest might be at end
+                        rate = (latest.c || latest.close || latest.rate || latest.fundingRate || 0) * 100;
+                    } else if (data.c !== undefined) {
+                        rate = data.c * 100;
                     }
-                    
-                    // Annualized: rate * 3 (per day) * 365
-                    const annualized = rate * 3 * 365;
-                    if (annualEl) {
-                        annualEl.textContent = `${annualized.toFixed(1)}% annualized`;
-                    }
-                    
-                    if (signalEl) {
-                        if (rate > 0.03) signalEl.textContent = 'Overleveraged longs - correction risk';
-                        else if (rate > 0.01) signalEl.textContent = 'Moderately bullish positioning';
-                        else if (rate > -0.01) signalEl.textContent = 'Neutral positioning';
-                        else if (rate > -0.03) signalEl.textContent = 'Shorts paying longs';
-                        else signalEl.textContent = 'Extreme bearish positioning - bounce risk';
-                    }
+                }
+                
+                const valueEl = document.getElementById('oiFundingValue');
+                const annualEl = document.getElementById('oiFundingAnnualized');
+                const signalEl = document.getElementById('oiFundingSignal');
+                
+                if (valueEl) {
+                    valueEl.textContent = rate.toFixed(4) + '%';
+                    valueEl.style.color = rate > 0.02 ? '#f87171' : rate < -0.01 ? '#4ade80' : '#94a3b8';
+                }
+                
+                // Annualized: rate * 3 (per day) * 365
+                const annualized = rate * 3 * 365;
+                if (annualEl) {
+                    annualEl.textContent = `${annualized.toFixed(1)}% annualized`;
+                }
+                
+                if (signalEl) {
+                    if (rate > 0.03) signalEl.textContent = 'Overleveraged longs - correction risk';
+                    else if (rate > 0.01) signalEl.textContent = 'Moderately bullish positioning';
+                    else if (rate > -0.01) signalEl.textContent = 'Neutral positioning';
+                    else if (rate > -0.03) signalEl.textContent = 'Shorts paying longs';
+                    else signalEl.textContent = 'Extreme bearish positioning - bounce risk';
                 }
             } catch (error) {
                 console.error('Failed to load Funding:', error);
