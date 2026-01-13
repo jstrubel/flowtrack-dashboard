@@ -2484,28 +2484,21 @@
             
             <!-- Key Metrics Row -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;">
-                <!-- Total Supply -->
                 <div class="metric-card" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); text-align: center;">
                     <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">TOTAL STABLECOIN SUPPLY</div>
                     <div id="stableTotalSupply" style="font-size: 36px; font-weight: 700; color: var(--text);">--</div>
                     <div id="stableTotalChange" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">--</div>
                 </div>
-                
-                <!-- USDT Dominance -->
                 <div class="metric-card" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); text-align: center;">
                     <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">USDT MARKET CAP</div>
                     <div id="usdtMarketCap" style="font-size: 36px; font-weight: 700; color: #26A17B;">--</div>
                     <div id="usdtDominance" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">-- dominance</div>
                 </div>
-                
-                <!-- USDC Market Cap -->
                 <div class="metric-card" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); text-align: center;">
                     <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">USDC MARKET CAP</div>
                     <div id="usdcMarketCap" style="font-size: 36px; font-weight: 700; color: #2775CA;">--</div>
                     <div id="usdcDominance" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">-- dominance</div>
                 </div>
-                
-                <!-- Top Chain -->
                 <div class="metric-card" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); text-align: center;">
                     <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">TOP CHAIN BY SUPPLY</div>
                     <div id="topChainName" style="font-size: 24px; font-weight: 700; color: var(--text);">--</div>
@@ -2521,7 +2514,7 @@
                         <div class="card-title">Stablecoin Supply by Chain</div>
                         <div class="card-subtitle">Top chains by stablecoin market cap • Source: DefiLlama</div>
                     </div>
-                    <button class="time-btn" onclick="loadStablecoinData()" style="background: var(--accent); color: white;">↻ Refresh</button>
+                    <button class="time-btn" onclick="loadStablecoinTabData()" style="background: var(--accent); color: white;">↻ Refresh</button>
                 </div>
                 <div class="chart-container" style="height: 350px; position: relative;">
                     <canvas id="stableSupplyByChainChart"></canvas>
@@ -2531,7 +2524,7 @@
                 </div>
             </div>
             
-            <!-- Supply by Issuer (Pie Chart) -->
+            <!-- Two column layout -->
             <div class="grid-2">
                 <div class="card">
                     <div class="card-header">
@@ -2544,8 +2537,6 @@
                         <canvas id="stableIssuerPieChart"></canvas>
                     </div>
                 </div>
-                
-                <!-- Chain Market Share Table -->
                 <div class="card">
                     <div class="card-header">
                         <div>
@@ -2560,11 +2551,10 @@
                                     <th style="text-align: left; padding: 10px; color: var(--text-muted);">Chain</th>
                                     <th style="text-align: right; padding: 10px; color: var(--text-muted);">Supply</th>
                                     <th style="text-align: right; padding: 10px; color: var(--text-muted);">Share</th>
-                                    <th style="text-align: right; padding: 10px; color: var(--text-muted);">7d Δ</th>
                                 </tr>
                             </thead>
                             <tbody id="stableChainTableBody">
-                                <tr><td colspan="4" style="text-align: center; padding: 20px; color: var(--text-muted);">Loading...</td></tr>
+                                <tr><td colspan="3" style="text-align: center; padding: 20px; color: var(--text-muted);">Loading...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -2579,18 +2569,14 @@
                         <div class="card-subtitle">Aggregate supply across all chains • Source: DefiLlama</div>
                     </div>
                     <div class="time-selector">
-                        <button class="time-btn" onclick="updateStableHistoryChart(90)">3M</button>
-                        <button class="time-btn" onclick="updateStableHistoryChart(180)">6M</button>
-                        <button class="time-btn active" onclick="updateStableHistoryChart(365)">1Y</button>
-                        <button class="time-btn" onclick="updateStableHistoryChart(730)">2Y</button>
-                        <button class="time-btn" onclick="updateStableHistoryChart(9999)">ALL</button>
+                        <button class="time-btn" onclick="loadStableTabHistory(90)">3M</button>
+                        <button class="time-btn" onclick="loadStableTabHistory(180)">6M</button>
+                        <button class="time-btn active" onclick="loadStableTabHistory(365)">1Y</button>
+                        <button class="time-btn" onclick="loadStableTabHistory(730)">2Y</button>
                     </div>
                 </div>
                 <div class="chart-container tall" style="height: 350px; position: relative;">
-                    <canvas id="stableHistoryChart"></canvas>
-                    <div id="stableHistoryLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;">
-                        <div style="font-size: 12px; color: var(--text-muted);">Loading historical data...</div>
-                    </div>
+                    <canvas id="stableTabHistoryChart"></canvas>
                 </div>
             </div>
         </div>
@@ -2602,32 +2588,20 @@
                 <div style="font-size: 11px; color: var(--text-muted);">Second largest stablecoin chain • Primary USDT settlement layer</div>
             </div>
             
-            <!-- TRON Key Metrics -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px;">
                 <div class="metric-card" style="background: linear-gradient(135deg, rgba(255, 6, 10, 0.1), rgba(255, 6, 10, 0.05)); padding: 16px; border-radius: 12px; border: 1px solid rgba(255, 6, 10, 0.3); text-align: center;">
                     <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 6px;">TRON STABLECOIN SUPPLY</div>
                     <div id="tronSupply" style="font-size: 28px; font-weight: 700; color: #FF060A;">--</div>
-                    <div id="tronSupplyChange" style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">--</div>
                 </div>
-                
                 <div class="metric-card" style="background: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border); text-align: center;">
                     <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 6px;">TRON MARKET SHARE</div>
                     <div id="tronMarketShare" style="font-size: 28px; font-weight: 700; color: var(--text);">--</div>
-                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">#2 chain by supply</div>
                 </div>
-                
                 <div class="metric-card" style="background: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border); text-align: center;">
                     <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 6px;">MEDIAN TX FEE</div>
                     <div style="font-size: 28px; font-weight: 700; color: var(--good);">$0.09</div>
                     <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">vs $3.73 ETH</div>
                 </div>
-                
-                <div class="metric-card" style="background: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border); text-align: center;">
-                    <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 6px;">CONFIRMATION TIME</div>
-                    <div style="font-size: 28px; font-weight: 700; color: var(--cyan);">3s</div>
-                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">vs 12s ETH</div>
-                </div>
-                
                 <div class="metric-card" style="background: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border); text-align: center;">
                     <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 6px;">TRX PRICE</div>
                     <div id="trxPrice" style="font-size: 28px; font-weight: 700; color: var(--text);">--</div>
@@ -2635,7 +2609,7 @@
                 </div>
             </div>
             
-            <!-- TRON vs Ethereum Comparison -->
+            <!-- TRON vs ETH Chart -->
             <div class="card" style="margin-bottom: 20px;">
                 <div class="card-header">
                     <div>
@@ -2643,61 +2617,51 @@
                         <div class="card-subtitle">Historical comparison of the two largest stablecoin chains</div>
                     </div>
                     <div class="time-selector">
-                        <button class="time-btn" onclick="updateTronVsEthChart(180)">6M</button>
-                        <button class="time-btn active" onclick="updateTronVsEthChart(365)">1Y</button>
-                        <button class="time-btn" onclick="updateTronVsEthChart(730)">2Y</button>
+                        <button class="time-btn" onclick="loadTronVsEth(180)">6M</button>
+                        <button class="time-btn active" onclick="loadTronVsEth(365)">1Y</button>
+                        <button class="time-btn" onclick="loadTronVsEth(730)">2Y</button>
                     </div>
                 </div>
-                <div class="chart-container tall" style="height: 350px; position: relative;">
+                <div class="chart-container tall" style="height: 350px;">
                     <canvas id="tronVsEthChart"></canvas>
-                    <div id="tronVsEthLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;">
-                        <div style="font-size: 12px; color: var(--text-muted);">Loading comparison data...</div>
-                    </div>
                 </div>
             </div>
             
-            <!-- TRON Analysis Box -->
             <div style="padding: 16px; background: rgba(255, 6, 10, 0.08); border-radius: 8px; border-left: 3px solid #FF060A;">
                 <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
                     <strong style="color: var(--text);">TRON Competitive Advantages:</strong><br>
                     <span style="color: #4ade80;">• Deep Tether Integration:</span> TRON is Tether's preferred minting destination for USDT.<br>
                     <span style="color: #4ade80;">• Exchange Dominance:</span> Binance (30-50% of flows), OKX, HTX deeply integrated.<br>
                     <span style="color: #4ade80;">• Bear Market Resilience:</span> Supply grew while Ethereum contracted in 2022-2023.<br>
-                    <span style="color: #4ade80;">• Geographic Strength:</span> ~$341B annual volume concentrated in Asia & emerging markets.<br><br>
-                    <strong style="color: var(--text);">Primary Use Case:</strong> Value transfer infrastructure, CEX settlement, and remittances rather than DeFi activity.
+                    <span style="color: #4ade80;">• Geographic Strength:</span> ~$341B annual volume concentrated in Asia & emerging markets.
                 </div>
             </div>
         </div>
         
-        <!-- Competitor Chain Analysis Section -->
+        <!-- Chain Competition Section -->
         <div class="section" style="margin-top: 30px;">
             <div class="section-header">
                 <div class="section-title">Chain Competition Analysis</div>
-                <div style="font-size: 11px; color: var(--text-muted);">Stablecoin market share trends across major networks</div>
             </div>
             
-            <!-- Market Share Trend Chart -->
             <div class="card" style="margin-bottom: 20px;">
                 <div class="card-header">
                     <div>
-                        <div class="card-title">Stablecoin Market Share by Chain</div>
-                        <div class="card-subtitle">Percentage of total stablecoin supply • Source: DefiLlama</div>
+                        <div class="card-title">Market Share by Chain Over Time</div>
+                        <div class="card-subtitle">Percentage of total stablecoin supply</div>
                     </div>
                     <div class="time-selector">
-                        <button class="time-btn" onclick="updateMarketShareChart(180)">6M</button>
-                        <button class="time-btn active" onclick="updateMarketShareChart(365)">1Y</button>
-                        <button class="time-btn" onclick="updateMarketShareChart(730)">2Y</button>
+                        <button class="time-btn" onclick="loadMarketShareTrend(180)">6M</button>
+                        <button class="time-btn active" onclick="loadMarketShareTrend(365)">1Y</button>
+                        <button class="time-btn" onclick="loadMarketShareTrend(730)">2Y</button>
                     </div>
                 </div>
-                <div class="chart-container tall" style="height: 350px; position: relative;">
-                    <canvas id="stableMarketShareChart"></canvas>
-                    <div id="marketShareLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;">
-                        <div style="font-size: 12px; color: var(--text-muted);">Loading market share data...</div>
-                    </div>
+                <div class="chart-container tall" style="height: 350px;">
+                    <canvas id="stableMarketShareTrendChart"></canvas>
                 </div>
             </div>
             
-            <!-- Chain Comparison Table -->
+            <!-- Competitive Matrix -->
             <div class="card">
                 <div class="card-header">
                     <div>
@@ -2725,7 +2689,7 @@
                                 <td style="padding: 12px; text-align: center; color: var(--good);">$0.05</td>
                             </tr>
                             <tr style="border-bottom: 1px solid var(--border);">
-                                <td style="padding: 12px; color: var(--text);">Speed</td>
+                                <td style="padding: 12px; color: var(--text);">Confirmation</td>
                                 <td style="padding: 12px; text-align: center; color: var(--good);">3s</td>
                                 <td style="padding: 12px; text-align: center; color: var(--bad);">12s</td>
                                 <td style="padding: 12px; text-align: center; color: var(--good);">0.4s</td>
@@ -2738,41 +2702,22 @@
                                 <td style="padding: 12px; text-align: center; color: var(--cyan);">Growing</td>
                                 <td style="padding: 12px; text-align: center; color: var(--warn);">Medium</td>
                             </tr>
-                            <tr style="border-bottom: 1px solid var(--border);">
-                                <td style="padding: 12px; color: var(--text);">Institutional Trust</td>
-                                <td style="padding: 12px; text-align: center; color: var(--bad);">Low</td>
-                                <td style="padding: 12px; text-align: center; color: var(--good);">Highest</td>
-                                <td style="padding: 12px; text-align: center; color: var(--warn);">Medium</td>
-                                <td style="padding: 12px; text-align: center; color: var(--bad);">Low</td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid var(--border);">
+                            <tr>
                                 <td style="padding: 12px; color: var(--text);">Exchange Integration</td>
                                 <td style="padding: 12px; text-align: center; color: var(--good);">Excellent</td>
                                 <td style="padding: 12px; text-align: center; color: var(--good);">Good</td>
                                 <td style="padding: 12px; text-align: center; color: var(--good);">Good</td>
                                 <td style="padding: 12px; text-align: center; color: var(--good);">Excellent</td>
                             </tr>
-                            <tr>
-                                <td style="padding: 12px; color: var(--text);">Bear Market Resilience</td>
-                                <td style="padding: 12px; text-align: center; color: var(--good);">Proven</td>
-                                <td style="padding: 12px; text-align: center; color: var(--warn);">Mixed</td>
-                                <td style="padding: 12px; text-align: center; color: var(--bad);">Unproven</td>
-                                <td style="padding: 12px; text-align: center; color: var(--bad);">Unproven</td>
-                            </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
             
-            <!-- Regulatory Context Box -->
             <div style="margin-top: 20px; padding: 16px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
                 <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
                     <strong style="color: var(--text);">GENIUS Act & Regulatory Tailwinds (2025-2026):</strong><br>
-                    The GENIUS Act represents a watershed moment for stablecoin adoption, providing regulatory clarity that enables:<br><br>
-                    <span style="color: #4ade80;">• Traditional Finance Integration:</span> PayPal, Visa, Mastercard, and Shopify now actively supporting stablecoins.<br>
-                    <span style="color: #4ade80;">• New Stablecoin-First Chains:</span> Plasma ($2B supply), Arc (Circle), Tempo (Stripe) emerging.<br>
-                    <span style="color: #4ade80;">• Institutional Adoption:</span> Banks exploring stablecoin custody and settlement services.<br>
-                    <span style="color: #fbbf24;">• Competitive Pressure:</span> Ethereum L2s (Base, Arbitrum) compressing fees, threatening TRON's cost advantage.
+                    The GENIUS Act provides regulatory clarity enabling traditional finance integration. PayPal, Visa, Mastercard, and Shopify now actively support stablecoins. New stablecoin-first chains (Plasma, Arc, Tempo) are emerging with $2B+ supplies.
                 </div>
             </div>
         </div>
@@ -3687,25 +3632,34 @@
                 }
             }
             
-            // Initialize Stablecoin tab when switching to it
+            // Initialize Stablecoins tab
             if (tabName === 'stablecoins') {
-                if (!stablecoinDataLoaded) {
-                    setTimeout(() => loadStablecoinData(), 500);
+                if (!stableTabDataLoaded) {
+                    setTimeout(() => loadStablecoinTabData(), 300);
                 }
             }
         }
         
-        // ==================== STABLECOIN DATA (DefiLlama API) ====================
-        let stablecoinDataLoaded = false;
+        // ==================== STABLECOIN TAB DATA (DefiLlama) ====================
+        let stableTabDataLoaded = false;
         let stableSupplyByChainChart = null;
         let stableIssuerPieChart = null;
-        let stableHistoryChart = null;
-        let tronVsEthChart = null;
-        let stableMarketShareChart = null;
-        let stablecoinHistoryData = null;
+        let stableTabHistoryChart = null;
+        let tronVsEthChartInstance = null;
+        let stableMarketShareTrendChart = null;
         
-        // Helper to format large numbers (without $ sign for flexibility)
-        function formatLargeNumber(num) {
+        const STABLE_CHAIN_COLORS = {
+            'Ethereum': '#627eea', 'Tron': '#FF060A', 'BSC': '#F0B90B', 'Solana': '#14F195',
+            'Arbitrum': '#28A0F0', 'Base': '#0052FF', 'Polygon': '#8247E5', 'Avalanche': '#E84142',
+            'Optimism': '#FF0420', 'Others': '#6b7280'
+        };
+        
+        const STABLE_ISSUER_COLORS = {
+            'USDT': '#26A17B', 'USDC': '#2775CA', 'DAI': '#F5AC37', 'BUSD': '#F0B90B',
+            'TUSD': '#002868', 'FRAX': '#000000', 'Others': '#6b7280'
+        };
+        
+        function formatStableNum(num) {
             if (num === null || num === undefined || isNaN(num)) return '--';
             if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
             if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
@@ -3714,602 +3668,269 @@
             return num.toFixed(2);
         }
         
-        // Chain colors for consistent styling
-        const CHAIN_COLORS = {
-            'Ethereum': '#627eea',
-            'Tron': '#FF060A',
-            'BSC': '#F0B90B',
-            'Solana': '#14F195',
-            'Arbitrum': '#28A0F0',
-            'Base': '#0052FF',
-            'Polygon': '#8247E5',
-            'Avalanche': '#E84142',
-            'Optimism': '#FF0420',
-            'Others': '#6b7280'
-        };
-        
-        const ISSUER_COLORS = {
-            'USDT': '#26A17B',
-            'USDC': '#2775CA',
-            'DAI': '#F5AC37',
-            'BUSD': '#F0B90B',
-            'TUSD': '#002868',
-            'FRAX': '#000000',
-            'USDP': '#00A478',
-            'Others': '#6b7280'
-        };
-        
-        async function loadStablecoinData() {
-            console.log('[Stablecoins] Loading stablecoin data...');
-            
+        async function loadStablecoinTabData() {
+            console.log('[StableTab] Loading data...');
             try {
-                // Fetch all stablecoin data in parallel
                 const [chainsRes, stablecoinsRes] = await Promise.all([
                     fetch('https://stablecoins.llama.fi/stablecoinchains'),
                     fetch('https://stablecoins.llama.fi/stablecoins?includePrices=true')
                 ]);
-                
                 const chainsData = await chainsRes.json();
                 const stablecoinsData = await stablecoinsRes.json();
                 
-                console.log('[Stablecoins] Chains data:', chainsData);
-                console.log('[Stablecoins] Stablecoins data:', stablecoinsData);
+                const totalSupply = chainsData.reduce((sum, c) => sum + (c.totalCirculatingUSD?.peggedUSD || 0), 0);
+                document.getElementById('stableTotalSupply').textContent = '$' + formatStableNum(totalSupply);
                 
-                // Calculate total supply
-                const totalSupply = chainsData.reduce((sum, chain) => sum + (chain.totalCirculatingUSD?.peggedUSD || 0), 0);
-                
-                // Update total supply display
-                document.getElementById('stableTotalSupply').textContent = formatLargeNumber(totalSupply);
-                
-                // Sort chains by supply
-                const sortedChains = chainsData
-                    .filter(c => c.totalCirculatingUSD?.peggedUSD > 0)
+                const sortedChains = chainsData.filter(c => c.totalCirculatingUSD?.peggedUSD > 0)
                     .sort((a, b) => (b.totalCirculatingUSD?.peggedUSD || 0) - (a.totalCirculatingUSD?.peggedUSD || 0));
                 
-                // Update top chain
-                if (sortedChains.length > 0) {
-                    const top = sortedChains[0];
-                    document.getElementById('topChainName').textContent = top.name;
-                    document.getElementById('topChainSupply').textContent = formatLargeNumber(top.totalCirculatingUSD?.peggedUSD || 0);
-                    document.getElementById('topChainShare').textContent = ((top.totalCirculatingUSD?.peggedUSD || 0) / totalSupply * 100).toFixed(1) + '% share';
+                if (sortedChains[0]) {
+                    document.getElementById('topChainName').textContent = sortedChains[0].name;
+                    document.getElementById('topChainSupply').textContent = '$' + formatStableNum(sortedChains[0].totalCirculatingUSD?.peggedUSD);
+                    document.getElementById('topChainShare').textContent = ((sortedChains[0].totalCirculatingUSD?.peggedUSD / totalSupply) * 100).toFixed(1) + '% share';
                 }
                 
-                // Find TRON data
-                const tronData = sortedChains.find(c => c.name.toLowerCase() === 'tron');
-                if (tronData) {
-                    document.getElementById('tronSupply').textContent = formatLargeNumber(tronData.totalCirculatingUSD?.peggedUSD || 0);
-                    document.getElementById('tronMarketShare').textContent = ((tronData.totalCirculatingUSD?.peggedUSD || 0) / totalSupply * 100).toFixed(1) + '%';
+                const tron = sortedChains.find(c => c.name.toLowerCase() === 'tron');
+                if (tron) {
+                    document.getElementById('tronSupply').textContent = '$' + formatStableNum(tron.totalCirculatingUSD?.peggedUSD);
+                    document.getElementById('tronMarketShare').textContent = ((tron.totalCirculatingUSD?.peggedUSD / totalSupply) * 100).toFixed(1) + '%';
                 }
                 
-                // Process stablecoins by issuer
                 const peggedAssets = stablecoinsData.peggedAssets || [];
-                
-                // Find USDT and USDC
                 const usdt = peggedAssets.find(s => s.symbol === 'USDT');
                 const usdc = peggedAssets.find(s => s.symbol === 'USDC');
                 
                 if (usdt) {
-                    const usdtMcap = usdt.circulating?.peggedUSD || 0;
-                    document.getElementById('usdtMarketCap').textContent = formatLargeNumber(usdtMcap);
-                    document.getElementById('usdtDominance').textContent = (usdtMcap / totalSupply * 100).toFixed(1) + '% dominance';
+                    const cap = usdt.circulating?.peggedUSD || 0;
+                    document.getElementById('usdtMarketCap').textContent = '$' + formatStableNum(cap);
+                    document.getElementById('usdtDominance').textContent = ((cap / totalSupply) * 100).toFixed(1) + '% dominance';
                 }
-                
                 if (usdc) {
-                    const usdcMcap = usdc.circulating?.peggedUSD || 0;
-                    document.getElementById('usdcMarketCap').textContent = formatLargeNumber(usdcMcap);
-                    document.getElementById('usdcDominance').textContent = (usdcMcap / totalSupply * 100).toFixed(1) + '% dominance';
+                    const cap = usdc.circulating?.peggedUSD || 0;
+                    document.getElementById('usdcMarketCap').textContent = '$' + formatStableNum(cap);
+                    document.getElementById('usdcDominance').textContent = ((cap / totalSupply) * 100).toFixed(1) + '% dominance';
                 }
                 
-                // Render Supply by Chain Chart (top 10)
-                renderSupplyByChainChart(sortedChains.slice(0, 10), totalSupply);
+                renderStableSupplyByChain(sortedChains.slice(0, 10), totalSupply);
+                renderStableIssuerPie(peggedAssets, totalSupply);
+                renderStableChainTable(sortedChains.slice(0, 12), totalSupply);
+                loadTrxPriceForTab();
+                loadStableTabHistory(365);
+                loadTronVsEth(365);
+                loadMarketShareTrend(365);
                 
-                // Render Issuer Pie Chart
-                renderIssuerPieChart(peggedAssets, totalSupply);
-                
-                // Render Chain Table
-                renderChainTable(sortedChains.slice(0, 15), totalSupply);
-                
-                // Load TRX price
-                loadTrxPrice();
-                
-                // Load historical data
-                loadStablecoinHistory(365);
-                loadTronVsEthHistory(365);
-                loadMarketShareHistory(365);
-                
-                // Hide loading
                 document.getElementById('stableSupplyLoading').style.display = 'none';
-                
-                stablecoinDataLoaded = true;
-                console.log('[Stablecoins] Data loaded successfully');
-                
-            } catch (error) {
-                console.error('[Stablecoins] Error loading data:', error);
-                document.getElementById('stableSupplyLoading').innerHTML = '<div style="color: var(--bad);">Failed to load data</div>';
+                stableTabDataLoaded = true;
+            } catch (err) {
+                console.error('[StableTab] Error:', err);
+                document.getElementById('stableSupplyLoading').innerHTML = '<div style="color:var(--bad);">Failed to load</div>';
             }
         }
         
-        function renderSupplyByChainChart(chains, totalSupply) {
+        function renderStableSupplyByChain(chains, total) {
             const ctx = document.getElementById('stableSupplyByChainChart');
             if (!ctx) return;
-            
-            if (stableSupplyByChainChart) {
-                stableSupplyByChainChart.destroy();
-            }
-            
-            const labels = chains.map(c => c.name);
-            const data = chains.map(c => c.totalCirculatingUSD?.peggedUSD || 0);
-            const colors = chains.map(c => CHAIN_COLORS[c.name] || '#6b7280');
+            if (stableSupplyByChainChart) stableSupplyByChainChart.destroy();
             
             stableSupplyByChainChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: chains.map(c => c.name),
                     datasets: [{
-                        label: 'Stablecoin Supply',
-                        data: data,
-                        backgroundColor: colors,
-                        borderColor: colors,
-                        borderWidth: 1,
+                        data: chains.map(c => c.totalCirculatingUSD?.peggedUSD || 0),
+                        backgroundColor: chains.map(c => STABLE_CHAIN_COLORS[c.name] || '#6b7280'),
                         borderRadius: 4
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => {
-                                    const value = ctx.raw;
-                                    const pct = (value / totalSupply * 100).toFixed(1);
-                                    return `$${formatLargeNumber(value)} (${pct}%)`;
-                                }
-                            }
-                        }
-                    },
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false },
+                        tooltip: { callbacks: { label: ctx => '$' + formatStableNum(ctx.raw) + ' (' + ((ctx.raw/total)*100).toFixed(1) + '%)' }}},
                     scales: {
-                        x: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: {
-                                color: 'rgba(255,255,255,0.5)',
-                                callback: (v) => '$' + formatLargeNumber(v)
-                            }
-                        },
-                        y: {
-                            grid: { display: false },
-                            ticks: { color: 'rgba(255,255,255,0.7)' }
-                        }
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.5)', callback: v => '$' + formatStableNum(v) }},
+                        y: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.7)' }}
                     }
                 }
             });
         }
         
-        function renderIssuerPieChart(peggedAssets, totalSupply) {
+        function renderStableIssuerPie(assets, total) {
             const ctx = document.getElementById('stableIssuerPieChart');
             if (!ctx) return;
+            if (stableIssuerPieChart) stableIssuerPieChart.destroy();
             
-            if (stableIssuerPieChart) {
-                stableIssuerPieChart.destroy();
-            }
-            
-            // Group by major issuers
             const issuerData = {};
-            peggedAssets.forEach(asset => {
-                const supply = asset.circulating?.peggedUSD || 0;
-                const symbol = asset.symbol;
-                if (['USDT', 'USDC', 'DAI', 'BUSD', 'TUSD', 'FRAX', 'USDP'].includes(symbol)) {
-                    issuerData[symbol] = (issuerData[symbol] || 0) + supply;
-                } else {
-                    issuerData['Others'] = (issuerData['Others'] || 0) + supply;
-                }
+            assets.forEach(a => {
+                const supply = a.circulating?.peggedUSD || 0;
+                const sym = ['USDT','USDC','DAI','BUSD','TUSD','FRAX'].includes(a.symbol) ? a.symbol : 'Others';
+                issuerData[sym] = (issuerData[sym] || 0) + supply;
             });
-            
-            const sortedIssuers = Object.entries(issuerData).sort((a, b) => b[1] - a[1]);
-            const labels = sortedIssuers.map(([name]) => name);
-            const data = sortedIssuers.map(([, value]) => value);
-            const colors = labels.map(l => ISSUER_COLORS[l] || '#6b7280');
+            const sorted = Object.entries(issuerData).sort((a,b) => b[1] - a[1]);
             
             stableIssuerPieChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: colors,
-                        borderColor: 'rgba(0,0,0,0.3)',
-                        borderWidth: 2
-                    }]
+                    labels: sorted.map(([n]) => n),
+                    datasets: [{ data: sorted.map(([,v]) => v), backgroundColor: sorted.map(([n]) => STABLE_ISSUER_COLORS[n] || '#6b7280'), borderWidth: 2, borderColor: 'rgba(0,0,0,0.3)' }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '55%',
+                    responsive: true, maintainAspectRatio: false, cutout: '55%',
                     plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: {
-                                color: 'rgba(255,255,255,0.7)',
-                                padding: 12,
-                                font: { size: 11 }
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => {
-                                    const value = ctx.raw;
-                                    const pct = (value / totalSupply * 100).toFixed(1);
-                                    return `$${formatLargeNumber(value)} (${pct}%)`;
-                                }
-                            }
-                        }
+                        legend: { position: 'right', labels: { color: 'rgba(255,255,255,0.7)', padding: 10, font: { size: 11 }}},
+                        tooltip: { callbacks: { label: ctx => '$' + formatStableNum(ctx.raw) + ' (' + ((ctx.raw/total)*100).toFixed(1) + '%)' }}
                     }
                 }
             });
         }
         
-        function renderChainTable(chains, totalSupply) {
+        function renderStableChainTable(chains, total) {
             const tbody = document.getElementById('stableChainTableBody');
             if (!tbody) return;
-            
-            tbody.innerHTML = chains.map(chain => {
-                const supply = chain.totalCirculatingUSD?.peggedUSD || 0;
-                const share = (supply / totalSupply * 100).toFixed(1);
-                const color = CHAIN_COLORS[chain.name] || '#6b7280';
-                
-                return `
-                    <tr style="border-bottom: 1px solid var(--border);">
-                        <td style="padding: 10px; color: var(--text);">
-                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: ${color}; margin-right: 8px;"></span>
-                            ${chain.name}
-                        </td>
-                        <td style="padding: 10px; text-align: right; color: var(--text);">$${formatLargeNumber(supply)}</td>
-                        <td style="padding: 10px; text-align: right; color: var(--text-muted);">${share}%</td>
-                        <td style="padding: 10px; text-align: right; color: var(--text-muted);">--</td>
-                    </tr>
-                `;
+            tbody.innerHTML = chains.map(c => {
+                const supply = c.totalCirculatingUSD?.peggedUSD || 0;
+                const color = STABLE_CHAIN_COLORS[c.name] || '#6b7280';
+                return `<tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:8px;color:var(--text);"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-right:8px;"></span>${c.name}</td>
+                    <td style="padding:8px;text-align:right;color:var(--text);">$${formatStableNum(supply)}</td>
+                    <td style="padding:8px;text-align:right;color:var(--text-muted);">${((supply/total)*100).toFixed(1)}%</td>
+                </tr>`;
             }).join('');
         }
         
-        async function loadTrxPrice() {
+        async function loadTrxPriceForTab() {
             try {
-                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=tron&vs_currencies=usd&include_24hr_change=true');
-                const data = await response.json();
-                
+                const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=tron&vs_currencies=usd&include_24hr_change=true');
+                const data = await res.json();
                 if (data.tron) {
-                    const price = data.tron.usd;
-                    const change = data.tron.usd_24h_change;
-                    
-                    document.getElementById('trxPrice').textContent = '$' + price.toFixed(4);
-                    document.getElementById('trxChange').textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + '% 24h';
-                    document.getElementById('trxChange').style.color = change >= 0 ? 'var(--good)' : 'var(--bad)';
+                    document.getElementById('trxPrice').textContent = '$' + data.tron.usd.toFixed(4);
+                    const ch = data.tron.usd_24h_change;
+                    document.getElementById('trxChange').textContent = (ch >= 0 ? '+' : '') + ch.toFixed(2) + '% 24h';
+                    document.getElementById('trxChange').style.color = ch >= 0 ? 'var(--good)' : 'var(--bad)';
                 }
-            } catch (error) {
-                console.error('[Stablecoins] Failed to load TRX price:', error);
-            }
+            } catch (e) { console.error('[StableTab] TRX price error:', e); }
         }
         
-        async function loadStablecoinHistory(days = 365) {
-            const loadingEl = document.getElementById('stableHistoryLoading');
-            if (loadingEl) loadingEl.style.display = 'block';
-            
+        async function loadStableTabHistory(days) {
             try {
-                const response = await fetch('https://stablecoins.llama.fi/stablecoincharts/all?stablecoin=1');
-                const data = await response.json();
-                
-                stablecoinHistoryData = data;
-                renderStableHistoryChart(data, days);
-                
-                if (loadingEl) loadingEl.style.display = 'none';
-            } catch (error) {
-                console.error('[Stablecoins] Failed to load history:', error);
-                if (loadingEl) loadingEl.innerHTML = '<div style="color: var(--bad);">Failed to load</div>';
-            }
+                const res = await fetch('https://stablecoins.llama.fi/stablecoincharts/all?stablecoin=1');
+                const data = await res.json();
+                renderStableTabHistoryChart(data, days);
+            } catch (e) { console.error('[StableTab] History error:', e); }
         }
         
-        function updateStableHistoryChart(days) {
-            document.querySelectorAll('#tab-stablecoins .time-selector .time-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            if (stablecoinHistoryData) {
-                renderStableHistoryChart(stablecoinHistoryData, days);
-            } else {
-                loadStablecoinHistory(days);
-            }
-        }
-        
-        function renderStableHistoryChart(data, days) {
-            const ctx = document.getElementById('stableHistoryChart');
+        function renderStableTabHistoryChart(data, days) {
+            const ctx = document.getElementById('stableTabHistoryChart');
             if (!ctx || !data) return;
+            if (stableTabHistoryChart) stableTabHistoryChart.destroy();
             
-            if (stableHistoryChart) {
-                stableHistoryChart.destroy();
-            }
-            
-            // Filter to requested days
-            const cutoff = days === 9999 ? 0 : Date.now() - (days * 24 * 60 * 60 * 1000);
+            const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
             const filtered = data.filter(d => d.date * 1000 >= cutoff);
             
-            const labels = filtered.map(d => new Date(d.date * 1000).toLocaleDateString());
-            const values = filtered.map(d => d.totalCirculating?.peggedUSD || d.totalCirculatingUSD?.peggedUSD || 0);
-            
-            stableHistoryChart = new Chart(ctx, {
+            stableTabHistoryChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels: filtered.map(d => new Date(d.date * 1000).toLocaleDateString()),
                     datasets: [{
-                        label: 'Total Stablecoin Supply',
-                        data: values,
-                        borderColor: '#6366f1',
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 0,
-                        borderWidth: 2
+                        label: 'Total Supply',
+                        data: filtered.map(d => d.totalCirculating?.peggedUSD || d.totalCirculatingUSD?.peggedUSD || 0),
+                        borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { intersect: false, mode: 'index' },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => '$' + formatLargeNumber(ctx.raw)
-                            }
-                        }
-                    },
+                    responsive: true, maintainAspectRatio: false, interaction: { intersect: false, mode: 'index' },
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => '$' + formatStableNum(ctx.raw) }}},
                     scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: {
-                                color: 'rgba(255,255,255,0.5)',
-                                maxTicksLimit: 8
-                            }
-                        },
-                        y: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: {
-                                color: 'rgba(255,255,255,0.5)',
-                                callback: (v) => '$' + formatLargeNumber(v)
-                            }
-                        }
+                        x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.5)', maxTicksLimit: 8 }},
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.5)', callback: v => '$' + formatStableNum(v) }}
                     }
                 }
             });
         }
         
-        // TRON vs ETH comparison data
-        let tronHistoryData = null;
-        let ethHistoryData = null;
-        
-        async function loadTronVsEthHistory(days = 365) {
-            const loadingEl = document.getElementById('tronVsEthLoading');
-            if (loadingEl) loadingEl.style.display = 'block';
-            
+        async function loadTronVsEth(days) {
             try {
                 const [tronRes, ethRes] = await Promise.all([
                     fetch('https://stablecoins.llama.fi/stablecoincharts/Tron'),
                     fetch('https://stablecoins.llama.fi/stablecoincharts/Ethereum')
                 ]);
-                
-                tronHistoryData = await tronRes.json();
-                ethHistoryData = await ethRes.json();
-                
-                renderTronVsEthChart(days);
-                
-                if (loadingEl) loadingEl.style.display = 'none';
-            } catch (error) {
-                console.error('[Stablecoins] Failed to load TRON vs ETH:', error);
-            }
+                const tronData = await tronRes.json();
+                const ethData = await ethRes.json();
+                renderTronVsEthChart(tronData, ethData, days);
+            } catch (e) { console.error('[StableTab] TRON vs ETH error:', e); }
         }
         
-        function updateTronVsEthChart(days) {
-            document.querySelectorAll('#tab-stablecoins .time-selector .time-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            renderTronVsEthChart(days);
-        }
-        
-        function renderTronVsEthChart(days) {
+        function renderTronVsEthChart(tronData, ethData, days) {
             const ctx = document.getElementById('tronVsEthChart');
-            if (!ctx || !tronHistoryData || !ethHistoryData) return;
-            
-            if (tronVsEthChart) {
-                tronVsEthChart.destroy();
-            }
+            if (!ctx) return;
+            if (tronVsEthChartInstance) tronVsEthChartInstance.destroy();
             
             const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
-            
-            const tronFiltered = tronHistoryData.filter(d => d.date * 1000 >= cutoff);
-            const ethFiltered = ethHistoryData.filter(d => d.date * 1000 >= cutoff);
-            
-            // Align by date
             const dateMap = new Map();
-            tronFiltered.forEach(d => {
-                dateMap.set(d.date, { tron: d.totalCirculating?.peggedUSD || d.totalCirculatingUSD?.peggedUSD || 0 });
-            });
-            ethFiltered.forEach(d => {
-                const existing = dateMap.get(d.date) || {};
-                existing.eth = d.totalCirculating?.peggedUSD || d.totalCirculatingUSD?.peggedUSD || 0;
-                dateMap.set(d.date, existing);
-            });
+            tronData.filter(d => d.date * 1000 >= cutoff).forEach(d => dateMap.set(d.date, { tron: d.totalCirculating?.peggedUSD || 0 }));
+            ethData.filter(d => d.date * 1000 >= cutoff).forEach(d => { const e = dateMap.get(d.date) || {}; e.eth = d.totalCirculating?.peggedUSD || 0; dateMap.set(d.date, e); });
+            const sorted = [...dateMap.entries()].sort((a,b) => a[0] - b[0]);
             
-            const sorted = [...dateMap.entries()].sort((a, b) => a[0] - b[0]);
-            const labels = sorted.map(([date]) => new Date(date * 1000).toLocaleDateString());
-            const tronData = sorted.map(([, values]) => values.tron || 0);
-            const ethData = sorted.map(([, values]) => values.eth || 0);
-            
-            tronVsEthChart = new Chart(ctx, {
+            tronVsEthChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels: sorted.map(([d]) => new Date(d * 1000).toLocaleDateString()),
                     datasets: [
-                        {
-                            label: 'Ethereum',
-                            data: ethData,
-                            borderColor: '#627eea',
-                            backgroundColor: 'rgba(98, 126, 234, 0.1)',
-                            fill: true,
-                            tension: 0.3,
-                            pointRadius: 0,
-                            borderWidth: 2
-                        },
-                        {
-                            label: 'TRON',
-                            data: tronData,
-                            borderColor: '#FF060A',
-                            backgroundColor: 'rgba(255, 6, 10, 0.1)',
-                            fill: true,
-                            tension: 0.3,
-                            pointRadius: 0,
-                            borderWidth: 2
-                        }
+                        { label: 'Ethereum', data: sorted.map(([,v]) => v.eth || 0), borderColor: '#627eea', backgroundColor: 'rgba(98,126,234,0.1)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 },
+                        { label: 'TRON', data: sorted.map(([,v]) => v.tron || 0), borderColor: '#FF060A', backgroundColor: 'rgba(255,6,10,0.1)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 }
                     ]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { intersect: false, mode: 'index' },
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: { color: 'rgba(255,255,255,0.7)' }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => ctx.dataset.label + ': $' + formatLargeNumber(ctx.raw)
-                            }
-                        }
-                    },
+                    responsive: true, maintainAspectRatio: false, interaction: { intersect: false, mode: 'index' },
+                    plugins: { legend: { display: true, position: 'top', labels: { color: 'rgba(255,255,255,0.7)' }}, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + formatStableNum(ctx.raw) }}},
                     scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: 'rgba(255,255,255,0.5)', maxTicksLimit: 8 }
-                        },
-                        y: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: {
-                                color: 'rgba(255,255,255,0.5)',
-                                callback: (v) => '$' + formatLargeNumber(v)
-                            }
-                        }
+                        x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.5)', maxTicksLimit: 8 }},
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.5)', callback: v => '$' + formatStableNum(v) }}
                     }
                 }
             });
         }
         
-        // Market share history
-        let chainHistoryData = {};
-        
-        async function loadMarketShareHistory(days = 365) {
-            const loadingEl = document.getElementById('marketShareLoading');
-            if (loadingEl) loadingEl.style.display = 'block';
-            
+        async function loadMarketShareTrend(days) {
             try {
                 const chains = ['Ethereum', 'Tron', 'Solana', 'BSC', 'Arbitrum'];
-                const results = await Promise.all(
-                    chains.map(chain => fetch(`https://stablecoins.llama.fi/stablecoincharts/${chain}`).then(r => r.json()))
-                );
-                
-                chains.forEach((chain, i) => {
-                    chainHistoryData[chain] = results[i];
-                });
-                
-                renderMarketShareChart(days);
-                
-                if (loadingEl) loadingEl.style.display = 'none';
-            } catch (error) {
-                console.error('[Stablecoins] Failed to load market share:', error);
-            }
+                const results = await Promise.all(chains.map(c => fetch(`https://stablecoins.llama.fi/stablecoincharts/${c}`).then(r => r.json())));
+                renderMarketShareTrendChart(chains, results, days);
+            } catch (e) { console.error('[StableTab] Market share error:', e); }
         }
         
-        function updateMarketShareChart(days) {
-            document.querySelectorAll('#tab-stablecoins .time-selector .time-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            renderMarketShareChart(days);
-        }
-        
-        function renderMarketShareChart(days) {
-            const ctx = document.getElementById('stableMarketShareChart');
+        function renderMarketShareTrendChart(chains, results, days) {
+            const ctx = document.getElementById('stableMarketShareTrendChart');
             if (!ctx) return;
-            
-            if (stableMarketShareChart) {
-                stableMarketShareChart.destroy();
-            }
+            if (stableMarketShareTrendChart) stableMarketShareTrendChart.destroy();
             
             const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
-            const chains = ['Ethereum', 'Tron', 'Solana', 'BSC', 'Arbitrum'];
-            
-            // Build date-aligned data
             const dateMap = new Map();
-            
-            chains.forEach(chain => {
-                const data = chainHistoryData[chain] || [];
-                data.forEach(d => {
-                    if (d.date * 1000 >= cutoff) {
-                        const existing = dateMap.get(d.date) || { total: 0 };
-                        const supply = d.totalCirculating?.peggedUSD || d.totalCirculatingUSD?.peggedUSD || 0;
-                        existing[chain] = supply;
-                        existing.total += supply;
-                        dateMap.set(d.date, existing);
-                    }
+            chains.forEach((chain, i) => {
+                results[i].filter(d => d.date * 1000 >= cutoff).forEach(d => {
+                    const e = dateMap.get(d.date) || { total: 0 };
+                    const supply = d.totalCirculating?.peggedUSD || 0;
+                    e[chain] = supply; e.total += supply;
+                    dateMap.set(d.date, e);
                 });
             });
+            const sorted = [...dateMap.entries()].sort((a,b) => a[0] - b[0]);
             
-            const sorted = [...dateMap.entries()].sort((a, b) => a[0] - b[0]);
-            const labels = sorted.map(([date]) => new Date(date * 1000).toLocaleDateString());
-            
-            const datasets = chains.map(chain => ({
-                label: chain,
-                data: sorted.map(([, values]) => {
-                    const supply = values[chain] || 0;
-                    const total = values.total || 1;
-                    return (supply / total * 100);
-                }),
-                borderColor: CHAIN_COLORS[chain],
-                backgroundColor: 'transparent',
-                tension: 0.3,
-                pointRadius: 0,
-                borderWidth: 2
-            }));
-            
-            stableMarketShareChart = new Chart(ctx, {
+            stableMarketShareTrendChart = new Chart(ctx, {
                 type: 'line',
-                data: { labels, datasets },
+                data: {
+                    labels: sorted.map(([d]) => new Date(d * 1000).toLocaleDateString()),
+                    datasets: chains.map(chain => ({
+                        label: chain,
+                        data: sorted.map(([,v]) => ((v[chain] || 0) / (v.total || 1)) * 100),
+                        borderColor: STABLE_CHAIN_COLORS[chain], backgroundColor: 'transparent', tension: 0.3, pointRadius: 0, borderWidth: 2
+                    }))
+                },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { intersect: false, mode: 'index' },
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: { color: 'rgba(255,255,255,0.7)', padding: 15 }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) => ctx.dataset.label + ': ' + ctx.raw.toFixed(1) + '%'
-                            }
-                        }
-                    },
+                    responsive: true, maintainAspectRatio: false, interaction: { intersect: false, mode: 'index' },
+                    plugins: { legend: { display: true, position: 'top', labels: { color: 'rgba(255,255,255,0.7)', padding: 12 }}, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.raw.toFixed(1) + '%' }}},
                     scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: 'rgba(255,255,255,0.5)', maxTicksLimit: 8 }
-                        },
-                        y: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: {
-                                color: 'rgba(255,255,255,0.5)',
-                                callback: (v) => v.toFixed(0) + '%'
-                            },
-                            min: 0,
-                            max: 70
-                        }
+                        x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.5)', maxTicksLimit: 8 }},
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.5)', callback: v => v.toFixed(0) + '%' }, min: 0, max: 70 }
                     }
                 }
             });
@@ -4871,7 +4492,6 @@
             
             loadOIDominanceData(days);
         }
-        
         
         // ==================== LONG/SHORT RATIO CHART ====================
         let longShortChart = null;
