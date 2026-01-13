@@ -9672,7 +9672,9 @@
             const ctx = document.getElementById('btcEtfFlowChart');
             if (!ctx) return;
             
-            const data = etfData.btc.daily.slice(0, days).reverse();
+            // Sort data by date (oldest first) and take the last N days
+            const sortedData = [...etfData.btc.daily].sort((a, b) => new Date(a.date) - new Date(b.date));
+            const data = sortedData.slice(-days);
             
             if (btcEtfFlowChart) {
                 btcEtfFlowChart.destroy();
@@ -9726,7 +9728,9 @@
             const ctx = document.getElementById('ethEtfFlowChart');
             if (!ctx) return;
             
-            const data = etfData.eth.daily.slice(0, days).reverse();
+            // Sort data by date (oldest first) and take the last N days
+            const sortedData = [...etfData.eth.daily].sort((a, b) => new Date(a.date) - new Date(b.date));
+            const data = sortedData.slice(-days);
             
             if (ethEtfFlowChart) {
                 ethEtfFlowChart.destroy();
@@ -9785,7 +9789,8 @@
             const ctx = document.getElementById('btcCumulativeChart');
             if (!ctx) return;
             
-            const btcData = [...etfData.btc.daily].reverse();
+            // Sort data by date (oldest first)
+            const btcData = [...etfData.btc.daily].sort((a, b) => new Date(a.date) - new Date(b.date));
             
             // BTC ETFs launched Jan 2024, ~$35B cumulative by late Oct 2024
             let btcCumulative = 35000;
@@ -9871,7 +9876,8 @@
             const ctx = document.getElementById('ethCumulativeChart');
             if (!ctx) return;
             
-            const ethData = [...etfData.eth.daily].reverse();
+            // Sort data by date (oldest first)
+            const ethData = [...etfData.eth.daily].sort((a, b) => new Date(a.date) - new Date(b.date));
             
             // ETH ETFs launched Jul 2024, ~$2.5B cumulative by late Oct 2024
             let ethCumulative = 2500;
