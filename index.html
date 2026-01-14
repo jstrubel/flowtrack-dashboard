@@ -2627,12 +2627,12 @@
                 </div>
             </div>
             
-            <!-- TRX Price vs Stablecoin Supply Chart -->
+            <!-- TRON Stablecoin Supply History Chart -->
             <div class="card" style="margin-bottom: 20px;">
                 <div class="card-header">
                     <div>
-                        <div class="card-title">TRX Price vs TRON Stablecoin Supply</div>
-                        <div class="card-subtitle">Correlation between TRX price and stablecoin adoption • DefiLlama + CoinGecko</div>
+                        <div class="card-title">TRON Stablecoin Supply History</div>
+                        <div class="card-subtitle">Historical growth of stablecoins on TRON • DefiLlama</div>
                     </div>
                     <div class="time-selector">
                         <button class="time-btn" onclick="loadTrxVsSupply(365)">1Y</button>
@@ -2643,7 +2643,7 @@
                 <div class="chart-container tall" style="height: 380px; position: relative;">
                     <canvas id="trxVsSupplyChart"></canvas>
                     <div id="trxVsSupplyLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                        <div style="font-size: 12px; color: var(--text-muted);">Loading TRX price history...</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">Loading supply history...</div>
                     </div>
                 </div>
             </div>
@@ -3922,134 +3922,75 @@
         
         // TRX Price vs TRON Stablecoin Supply
         let trxVsSupplyChartInstance = null;
-        let trxPriceHistoryData = null;
-        let tronSupplyHistoryData = null;
         
         async function loadTrxVsSupply(days) {
             const loadingEl = document.getElementById('trxVsSupplyLoading');
             if (loadingEl) loadingEl.style.display = 'block';
             
             try {
-                // Fetch TRON stablecoin supply from DefiLlama first (more reliable)
+                // Fetch TRON stablecoin supply history from DefiLlama
                 const supplyRes = await fetch('https://stablecoins.llama.fi/stablecoincharts/Tron');
+                if (!supplyRes.ok) throw new Error('Supply fetch failed');
                 const supplyData = await supplyRes.json();
-                tronSupplyHistoryData = supplyData;
                 
-                // Try to fetch TRX price history - use a shorter timeframe to avoid rate limits
-                let priceData = null;
-                try {
-                    // Try CoinGecko with a reasonable day limit
-                    const priceDays = Math.min(days === 9999 ? 1825 : days, 1825); // Max 5 years
-                    const priceRes = await fetch(`https://api.coingecko.com/api/v3/coins/tron/market_chart?vs_currency=usd&days=${priceDays}`);
-                    if (priceRes.ok) {
-                        priceData = await priceRes.json();
-                        trxPriceHistoryData = priceData.prices;
-                    }
-                } catch (priceErr) {
-                    console.warn('[StableTab] CoinGecko price fetch failed, trying alternative:', priceErr);
-                }
+                console.log('[StableTab] TRON supply data points:', supplyData.length);
                 
-                // If CoinGecko failed, try to get at least current price and estimate historical
-                if (!trxPriceHistoryData || trxPriceHistoryData.length === 0) {
-                    // Use DefiLlama prices endpoint as backup
-                    try {
-                        const llamaPriceRes = await fetch('https://coins.llama.fi/chart/coingecko:tron?period=4w');
-                        if (llamaPriceRes.ok) {
-                            const llamaPriceData = await llamaPriceRes.json();
-                            if (llamaPriceData.coins && llamaPriceData.coins['coingecko:tron']) {
-                                trxPriceHistoryData = llamaPriceData.coins['coingecko:tron'].prices.map(p => [p.timestamp * 1000, p.price]);
-                            }
-                        }
-                    } catch (llamaErr) {
-                        console.warn('[StableTab] DefiLlama price fetch also failed:', llamaErr);
-                    }
-                }
+                // Filter by days and render
+                renderTrxVsSupplyChart(supplyData, days);
                 
-                if (trxPriceHistoryData && trxPriceHistoryData.length > 0) {
-                    renderTrxVsSupplyChart(days);
-                    if (loadingEl) loadingEl.style.display = 'none';
-                } else {
-                    throw new Error('No price data available');
-                }
+                if (loadingEl) loadingEl.style.display = 'none';
                 
             } catch (e) {
                 console.error('[StableTab] TRX vs Supply error:', e);
-                if (loadingEl) loadingEl.innerHTML = '<div style="color:var(--warn);">Price data unavailable - CoinGecko rate limited</div>';
+                if (loadingEl) loadingEl.innerHTML = '<div style="color:var(--bad);">Failed to load data</div>';
             }
         }
         
-        function renderTrxVsSupplyChart(days) {
+        function renderTrxVsSupplyChart(supplyData, days) {
             const ctx = document.getElementById('trxVsSupplyChart');
-            if (!ctx || !trxPriceHistoryData || !tronSupplyHistoryData) return;
+            if (!ctx || !supplyData || supplyData.length === 0) {
+                console.warn('[StableTab] No data for TRX vs Supply chart');
+                return;
+            }
             
             if (trxVsSupplyChartInstance) trxVsSupplyChartInstance.destroy();
             
-            // Build date-aligned data
-            const cutoff = days === 9999 ? 0 : Date.now() - (days * 24 * 60 * 60 * 1000);
+            // Filter by days
+            const cutoffTime = days === 9999 ? 0 : (Date.now() / 1000) - (days * 24 * 60 * 60);
+            let chartData = supplyData.filter(d => d.date >= cutoffTime);
             
-            // Create a map of supply data by date (YYYY-MM-DD)
-            const supplyMap = new Map();
-            tronSupplyHistoryData.forEach(d => {
-                const dateStr = new Date(d.date * 1000).toISOString().split('T')[0];
-                supplyMap.set(dateStr, d.totalCirculating?.peggedUSD || 0);
-            });
-            
-            // Align price data with supply data
-            const alignedData = [];
-            trxPriceHistoryData.forEach(([timestamp, price]) => {
-                if (timestamp < cutoff) return;
-                const dateStr = new Date(timestamp).toISOString().split('T')[0];
-                const supply = supplyMap.get(dateStr);
-                if (supply !== undefined) {
-                    alignedData.push({
-                        date: dateStr,
-                        timestamp: timestamp,
-                        price: price,
-                        supply: supply
-                    });
-                }
-            });
-            
-            // Sort by date
-            alignedData.sort((a, b) => a.timestamp - b.timestamp);
-            
-            // Sample data if too many points (for performance)
-            let chartData = alignedData;
-            if (chartData.length > 500) {
-                const step = Math.ceil(chartData.length / 500);
+            // Sample if too many points
+            if (chartData.length > 300) {
+                const step = Math.ceil(chartData.length / 300);
                 chartData = chartData.filter((_, i) => i % step === 0);
             }
             
+            console.log('[StableTab] Chart data points after filtering:', chartData.length);
+            
             const labels = chartData.map(d => {
-                const date = new Date(d.timestamp);
+                const date = new Date(d.date * 1000);
                 return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
             });
             
+            // Extract supply values
+            const supplyValues = chartData.map(d => d.totalCirculating?.peggedUSD || 0);
+            
+            // For now, just show supply growth over time (single axis)
+            // TRX price correlation would require CoinGecko which rate limits
             trxVsSupplyChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [
                         {
-                            label: 'TRX Price',
-                            data: chartData.map(d => d.price),
-                            borderColor: '#FF060A',
-                            backgroundColor: 'transparent',
-                            borderWidth: 2,
-                            tension: 0.3,
-                            pointRadius: 0,
-                            yAxisID: 'y'
-                        },
-                        {
                             label: 'TRON Stablecoin Supply',
-                            data: chartData.map(d => d.supply),
+                            data: supplyValues,
                             borderColor: '#ec4899',
                             backgroundColor: 'rgba(236, 72, 153, 0.15)',
                             fill: true,
                             borderWidth: 2,
                             tension: 0.3,
-                            pointRadius: 0,
-                            yAxisID: 'y1'
+                            pointRadius: 0
                         }
                     ]
                 },
@@ -4065,38 +4006,17 @@
                         },
                         tooltip: {
                             callbacks: {
-                                label: (ctx) => {
-                                    if (ctx.dataset.label === 'TRX Price') {
-                                        return 'TRX: $' + ctx.raw.toFixed(4);
-                                    } else {
-                                        return 'Supply: $' + formatStableNum(ctx.raw);
-                                    }
-                                }
+                                label: (ctx) => 'Supply: $' + formatStableNum(ctx.raw)
                             }
                         }
                     },
                     scales: {
                         x: {
                             grid: { display: false },
-                            ticks: { color: 'rgba(255,255,255,0.5)', maxTicksLimit: 10 }
+                            ticks: { color: 'rgba(255,255,255,0.5)', maxTicksLimit: 12 }
                         },
                         y: {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                            title: { display: true, text: 'TRX Price', color: '#FF060A' },
                             grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: {
-                                color: '#FF060A',
-                                callback: v => '$' + v.toFixed(2)
-                            }
-                        },
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            title: { display: true, text: 'Stablecoin Supply', color: '#ec4899' },
-                            grid: { drawOnChartArea: false },
                             ticks: {
                                 color: '#ec4899',
                                 callback: v => '$' + formatStableNum(v)
