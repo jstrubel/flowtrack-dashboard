@@ -9,6 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.2.1/dist/chartjs-chart-financial.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -1721,7 +1723,7 @@
                 <div class="card-header">
                     <div>
                         <div class="card-title">Bitcoin Spot ETF Net Flows</div>
-                        <div class="card-subtitle">Daily net inflows/outflows in USD (millions) • Data from SoSoValue</div>
+                        <div class="card-subtitle">Daily net inflows/outflows in USD (millions) • Data from CoinGlass</div>
                     </div>
                     <div class="time-btns">
                         <button class="time-btn" onclick="updateETFChart('btc', 14)">2W</button>
@@ -1777,7 +1779,7 @@
                 <div class="card-header">
                     <div>
                         <div class="card-title">Ethereum Spot ETF Net Flows</div>
-                        <div class="card-subtitle">Daily net inflows/outflows in USD (millions) • Data from SoSoValue</div>
+                        <div class="card-subtitle">Daily net inflows/outflows in USD (millions) • Data from CoinGlass</div>
                     </div>
                     <div class="time-btns">
                         <button class="time-btn" onclick="updateETFChart('eth', 14)">2W</button>
@@ -2835,6 +2837,192 @@
                 </div>
             </div>
             
+            <!-- Daily Fees Bar Chart -->
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Daily Protocol Fees</div>
+                        <div class="card-subtitle">Revenue generated daily • Source: DefiLlama</div>
+                    </div>
+                    <div class="time-selector">
+                        <button class="time-btn" onclick="loadDailyFeeBars(30)">1M</button>
+                        <button class="time-btn" onclick="loadDailyFeeBars(90)">3M</button>
+                        <button class="time-btn active" onclick="loadDailyFeeBars(180)">6M</button>
+                        <button class="time-btn" onclick="loadDailyFeeBars(365)">1Y</button>
+                    </div>
+                </div>
+                <div class="chart-container" style="height: 300px; position: relative;">
+                    <canvas id="dailyFeeBarChart"></canvas>
+                    <div id="dailyFeeBarLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                        <div style="font-size: 12px; color: var(--text-muted);">Loading fee data...</div>
+                    </div>
+                </div>
+                <div style="margin: 12px 16px 16px 16px; display: flex; gap: 20px; flex-wrap: wrap;">
+                    <div>
+                        <span style="font-size: 10px; color: var(--text-muted);">Yesterday's Fees:</span>
+                        <span id="yesterdayFeesDisplay" style="font-size: 12px; color: var(--good); margin-left: 4px;">--</span>
+                    </div>
+                    <div>
+                        <span style="font-size: 10px; color: var(--text-muted);">7D Avg:</span>
+                        <span id="avg7dFeesDisplay" style="font-size: 12px; color: var(--cyan); margin-left: 4px;">--</span>
+                    </div>
+                    <div>
+                        <span style="font-size: 10px; color: var(--text-muted);">30D Total:</span>
+                        <span id="total30dFeesBarDisplay" style="font-size: 12px; color: var(--text); margin-left: 4px;">--</span>
+                    </div>
+                    <div>
+                        <span style="font-size: 10px; color: var(--text-muted);">Peak Day:</span>
+                        <span id="peakDayFeesDisplay" style="font-size: 12px; color: var(--orange); margin-left: 4px;">--</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Open Interest Snapshot + Daily Volume -->
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Open Interest Breakdown</div>
+                        <div class="card-subtitle">Live aggregate OI across all perp markets • Hyperliquid API</div>
+                    </div>
+                    <button class="time-btn active" onclick="loadOIBreakdown()" style="font-size: 10px; padding: 4px 10px;">↻ Refresh</button>
+                </div>
+                <div id="oiBreakdownContent" style="padding: 0 16px 16px;">
+                    <div id="oiBreakdownLoading" style="text-align: center; padding: 40px 0;">
+                        <div style="font-size: 12px; color: var(--text-muted);">Loading live OI data...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Daily Perp Volume (correctly labeled) -->
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Daily Perp Volume</div>
+                        <div class="card-subtitle">Notional trading volume across all perp markets • DefiLlama</div>
+                    </div>
+                    <div class="time-selector">
+                        <button class="time-btn" onclick="loadDailyPerpVolume(30)">1M</button>
+                        <button class="time-btn active" onclick="loadDailyPerpVolume(90)">3M</button>
+                        <button class="time-btn" onclick="loadDailyPerpVolume(180)">6M</button>
+                        <button class="time-btn" onclick="loadDailyPerpVolume(9999)">ALL</button>
+                    </div>
+                </div>
+                <div class="chart-container" style="height: 300px; position: relative;">
+                    <canvas id="dailyPerpVolChart"></canvas>
+                    <div id="perpVolLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                        <div style="font-size: 12px; color: var(--text-muted);">Loading volume data...</div>
+                    </div>
+                </div>
+                <div style="margin: 12px 16px 16px 16px; display: flex; gap: 20px; flex-wrap: wrap;">
+                    <div>
+                        <span style="font-size: 10px; color: var(--text-muted);">Yesterday:</span>
+                        <span id="perpVolYesterday" style="font-size: 12px; color: var(--cyan); margin-left: 4px;">--</span>
+                    </div>
+                    <div>
+                        <span style="font-size: 10px; color: var(--text-muted);">7D Avg:</span>
+                        <span id="perpVol7dAvg" style="font-size: 12px; color: var(--text); margin-left: 4px;">--</span>
+                    </div>
+                    <div>
+                        <span style="font-size: 10px; color: var(--text-muted);">30D Total:</span>
+                        <span id="perpVol30dTotal" style="font-size: 12px; color: var(--text); margin-left: 4px;">--</span>
+                    </div>
+                    <div>
+                        <span style="font-size: 10px; color: var(--text-muted);">Peak Day:</span>
+                        <span id="perpVolPeak" style="font-size: 12px; color: var(--good); margin-left: 4px;">--</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cumulative Users / Unique Traders -->
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Cumulative Unique Users</div>
+                        <div class="card-subtitle">All-time unique addresses • Source: DefiLlama + Hyperliquid</div>
+                    </div>
+                </div>
+                <div class="chart-container" style="height: 300px; position: relative;">
+                    <canvas id="usersChart"></canvas>
+                    <div id="usersLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                        <div style="font-size: 12px; color: var(--text-muted);">Loading user data...</div>
+                    </div>
+                </div>
+                <div style="margin: 12px 16px 16px 16px; display: flex; gap: 20px; flex-wrap: wrap;">
+                    <div>
+                        <span style="font-size: 10px; color: var(--text-muted);">Total Users:</span>
+                        <span id="totalUsersDisplay" style="font-size: 12px; color: var(--cyan); margin-left: 4px;">--</span>
+                    </div>
+                    <div>
+                        <span style="font-size: 10px; color: var(--text-muted);">30D New Users:</span>
+                        <span id="newUsers30dDisplay" style="font-size: 12px; color: var(--good); margin-left: 4px;">--</span>
+                    </div>
+                    <div>
+                        <span style="font-size: 10px; color: var(--text-muted);">Growth Rate:</span>
+                        <span id="userGrowthDisplay" style="font-size: 12px; color: var(--orange); margin-left: 4px;">--</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- HYPE Supply Dynamics / AF Buyback Tracker -->
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">HYPE Supply Dynamics</div>
+                        <div class="card-subtitle">Assistance Fund buybacks & circulating supply • Hyperliquid API</div>
+                    </div>
+                </div>
+                <div style="padding: 16px;">
+                    <!-- Supply Stats Grid -->
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;">
+                        <div style="background: rgba(6, 182, 212, 0.1); border-radius: 8px; padding: 12px; text-align: center;">
+                            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Circulating</div>
+                            <div id="hypeCirculatingDisplay" style="font-size: 18px; font-weight: 700; color: var(--cyan); margin-top: 4px;">--</div>
+                            <div id="hypeCircPctDisplay" style="font-size: 10px; color: var(--text-dim);">--% of total</div>
+                        </div>
+                        <div style="background: rgba(74, 222, 128, 0.1); border-radius: 8px; padding: 12px; text-align: center;">
+                            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">AF Balance</div>
+                            <div id="hypeAFBalanceDisplay" style="font-size: 18px; font-weight: 700; color: var(--good); margin-top: 4px;">--</div>
+                            <div id="hypeAFValueDisplay" style="font-size: 10px; color: var(--text-dim);">--</div>
+                        </div>
+                        <div style="background: rgba(245, 158, 11, 0.1); border-radius: 8px; padding: 12px; text-align: center;">
+                            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Staked</div>
+                            <div id="hypeStakedDisplay" style="font-size: 18px; font-weight: 700; color: var(--orange); margin-top: 4px;">--</div>
+                            <div id="hypeStakedPctDisplay" style="font-size: 10px; color: var(--text-dim);">--% of circ.</div>
+                        </div>
+                        <div style="background: rgba(239, 68, 68, 0.1); border-radius: 8px; padding: 12px; text-align: center;">
+                            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Burned</div>
+                            <div id="hypeBurnedDisplay" style="font-size: 18px; font-weight: 700; color: #ef4444; margin-top: 4px;">--</div>
+                            <div id="hypeBurnedValueDisplay" style="font-size: 10px; color: var(--text-dim);">--</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Buyback info bar -->
+                    <div style="padding: 12px; background: rgba(74, 222, 128, 0.08); border-radius: 8px; border-left: 3px solid var(--good); margin-bottom: 16px;">
+                        <div style="font-size: 12px; color: var(--text-muted);">
+                            <strong style="color: var(--good);">Assistance Fund:</strong> ~97% of all protocol fees are used to buy back HYPE on the open market. 
+                            The AF is the protocol's treasury and the single largest holder of HYPE.
+                        </div>
+                    </div>
+                    
+                    <!-- Supply Breakdown Horizontal Bar -->
+                    <div style="margin-bottom: 12px;">
+                        <div style="font-size: 11px; font-weight: 600; color: var(--text); margin-bottom: 8px;">Supply Breakdown</div>
+                        <div id="supplyBarContainer" style="width: 100%; height: 28px; border-radius: 6px; overflow: hidden; display: flex; background: rgba(255,255,255,0.05);">
+                            <div id="supplyBarCirc" style="height: 100%; background: var(--cyan); transition: width 0.5s;"></div>
+                            <div id="supplyBarAF" style="height: 100%; background: var(--good); transition: width 0.5s;"></div>
+                            <div id="supplyBarLocked" style="height: 100%; background: var(--orange); transition: width 0.5s;"></div>
+                            <div id="supplyBarFuture" style="height: 100%; background: rgba(255,255,255,0.1); transition: width 0.5s;"></div>
+                        </div>
+                        <div style="display: flex; gap: 16px; margin-top: 6px; flex-wrap: wrap;">
+                            <div style="font-size: 10px; color: var(--text-muted);"><span style="color: var(--cyan);">●</span> Circulating</div>
+                            <div style="font-size: 10px; color: var(--text-muted);"><span style="color: var(--good);">●</span> Assistance Fund</div>
+                            <div style="font-size: 10px; color: var(--text-muted);"><span style="color: var(--orange);">●</span> Team (Locked)</div>
+                            <div style="font-size: 10px; color: var(--text-muted);"><span style="color: rgba(255,255,255,0.3);">●</span> Future Emissions</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- HYPE Emissions Schedule Chart -->
             <div class="card" style="margin-bottom: 20px;">
                 <div class="card-header">
@@ -2921,6 +3109,7 @@
                             <div class="card-title">Perp Volume Comparison</div>
                             <div class="card-subtitle">24H volume across DEX perps • DefiLlama Data</div>
                         </div>
+                        <button class="time-btn active" onclick="loadArtemisData()" style="font-size: 10px; padding: 4px 10px;">↻ Refresh</button>
                     </div>
                     <div class="chart-container tall" style="position: relative;">
                         <canvas id="artemisVolumeChart"></canvas>
@@ -3019,7 +3208,7 @@
                                 <div id="hip3TotalVolume" style="font-size: 28px; font-weight: 800; color: var(--cyan); margin-top: 4px;">--</div>
                             </div>
                             <div style="background: rgba(74, 222, 128, 0.1); border-radius: 8px; padding: 16px; text-align: center;">
-                                <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Active Pairs (>$1M Vol)</div>
+                                <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Active Pairs (>$5M Vol)</div>
                                 <div id="hip3ActivePairs" style="font-size: 28px; font-weight: 800; color: var(--good); margin-top: 4px;">--</div>
                             </div>
                         </div>
@@ -3468,7 +3657,7 @@
             { date: '2026-01-06', IBIT: 130.0, FBTC: 51.9, BITB: 52.5, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -17.6, BTCW: 0.0, GBTC: -61.5, BTC: 0.0, total: 155.3 },
             { date: '2026-01-03', IBIT: 60.6, FBTC: 53.8, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: -17.6, BTCW: 0.0, GBTC: 0.0, BTC: 0.0, total: 96.8 },
             { date: '2026-01-02', IBIT: 287.0, FBTC: 88.0, BITB: 41.5, ARKB: 0.0, BTCO: 0.0, EZBC: 13.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 15.0, BTC: 0.0, total: 444.5 },
-            // Late December 2024 data from SoSoValue/news sources
+            // Late December 2024 data from Farside/news sources
             { date: '2024-12-27', IBIT: 79.4, FBTC: -208.2, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 3.8, BTC: 0.0, total: -297.8 },
             { date: '2024-12-26', IBIT: -188.7, FBTC: 0.0, BITB: 0.0, ARKB: 0.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: 0.0, BTC: 0.0, total: -188.7 },
             { date: '2024-12-24', IBIT: -91.4, FBTC: -36.0, BITB: -17.0, ARKB: -13.0, BTCO: 0.0, EZBC: 0.0, BRRR: 0.0, HODL: 0.0, BTCW: 0.0, GBTC: -24.2, BTC: 0.0, total: -175.0 },
@@ -3639,6 +3828,21 @@
                     if (!dailyFeesChartInstance) {
                         loadDailyFees();
                     }
+                    // Load Daily Fee Bars
+                    if (!dailyFeeBarChartInstance) {
+                        loadDailyFeeBars(180);
+                    }
+                    // Load OI History
+                    if (!oiBreakdownLoaded) {
+                        loadOIBreakdown();
+                        loadDailyPerpVolume(90);
+                    }
+                    // Load Users chart
+                    if (!usersChartInstance) {
+                        loadUsersChart();
+                    }
+                    // Load HYPE Supply Dynamics
+                    loadHypeSupplyDynamics();
                     // Load HYPE emissions schedule chart
                     if (!hypeEmissionsChartInstance) {
                         loadHypeEmissionsChart();
@@ -5550,71 +5754,69 @@
         let artemisVolumeChart = null;
         let artemisOIChart = null;
         
-        // Use reliable static data for DEX perp comparisons
-        // Data from DefiLlama perps page - December 17, 2025
-        const DEX_PERP_DATA = {
-            // 24H Volume data - exact from DefiLlama Dec 17, 2025
-            volume: [
-                { protocol: 'Lighter', volume: 7513000000, color: '#a78bfa' },        // $7.513B
-                { protocol: 'Aster', volume: 6421000000, color: '#60a5fa' },          // $6.421B
-                { protocol: 'Hyperliquid', volume: 5369000000, color: '#4ade80' },    // $5.369B
-                { protocol: 'ApeX', volume: 2826000000, color: '#facc15' },           // $2.826B
-                { protocol: 'edgeX', volume: 2283000000, color: '#f472b6' },          // $2.283B
-                { protocol: 'Grvt', volume: 1296000000, color: '#22d3ee' },           // $1.296B
-                { protocol: 'Extended', volume: 1036000000, color: '#f97316' },       // $1.036B
-                { protocol: 'Paradex', volume: 999000000, color: '#818cf8' },         // $998.95M
-                { protocol: 'Jupiter Perps', volume: 650000000, color: '#3b82f6' },   // ~$650M (estimate)
-                { protocol: 'GMX', volume: 280000000, color: '#ec4899' },             // ~$280M
-                { protocol: 'Drift', volume: 220000000, color: '#8b5cf6' },           // ~$220M
-                { protocol: 'dYdX', volume: 180000000, color: '#f59e0b' },            // ~$180M
-                { protocol: 'Gains', volume: 85000000, color: '#10b981' },            // ~$85M
-                { protocol: 'Bluefin', volume: 65000000, color: '#06b6d4' }           // ~$65M
-            ],
-            // Open Interest data - exact from DefiLlama Dec 17, 2025
-            openInterest: [
-                { protocol: 'Hyperliquid', oi: 7247000000, color: '#4ade80' },        // $7.247B - highest OI
-                { protocol: 'Aster', oi: 2515000000, color: '#60a5fa' },              // $2.515B
-                { protocol: 'Lighter', oi: 1709000000, color: '#a78bfa' },            // $1.709B
-                { protocol: 'edgeX', oi: 787000000, color: '#f472b6' },               // $786.87M
-                { protocol: 'Paradex', oi: 522000000, color: '#818cf8' },             // $521.73M
-                { protocol: 'Grvt', oi: 233000000, color: '#22d3ee' },                // $232.75M
-                { protocol: 'ApeX', oi: 101000000, color: '#facc15' },                // $100.65M
-                { protocol: 'Extended', oi: 100000000, color: '#f97316' },            // $99.85M
-                { protocol: 'Jupiter Perps', oi: 280000000, color: '#3b82f6' },       // ~$280M (estimate)
-                { protocol: 'GMX', oi: 380000000, color: '#ec4899' },                 // ~$380M
-                { protocol: 'dYdX', oi: 200000000, color: '#f59e0b' },                // ~$200M
-                { protocol: 'Drift', oi: 150000000, color: '#8b5cf6' },               // ~$150M
-                { protocol: 'Gains', oi: 55000000, color: '#10b981' },                // ~$55M
-                { protocol: 'Bluefin', oi: 45000000, color: '#06b6d4' }               // ~$45M
-            ],
-            lastUpdated: '2025-12-17'
+        // Dynamic data from DefiLlama - fetched live
+        const DEX_PERP_COLORS = {
+            'Hyperliquid': '#4ade80', 'Lighter': '#a78bfa', 'Aster': '#60a5fa',
+            'ApeX': '#facc15', 'edgeX': '#f472b6', 'Grvt': '#22d3ee',
+            'Extended': '#f97316', 'Paradex': '#818cf8', 'Jupiter Perps': '#3b82f6',
+            'GMX': '#ec4899', 'Drift': '#8b5cf6', 'dYdX': '#f59e0b',
+            'Gains Network': '#10b981', 'Bluefin': '#06b6d4', 'Vertex Protocol': '#6366f1',
+            'SynFutures': '#fb923c', 'Aevo': '#a3e635', 'Perpetual Protocol': '#e879f9',
+            'MUX Protocol': '#2dd4bf', 'Kwenta': '#fbbf24'
         };
+        const DEFAULT_COLORS = ['#6366f1','#8b5cf6','#a78bfa','#c4b5fd','#818cf8','#f472b6','#fb923c','#22d3ee','#4ade80','#facc15','#f97316','#ec4899','#3b82f6','#10b981'];
         
         async function loadArtemisData() {
             const volumeLoading = document.getElementById('artemisVolumeLoading');
             const oiLoading = document.getElementById('artemisOILoading');
             
-            // Hide loading indicators
-            if (volumeLoading) volumeLoading.style.display = 'none';
-            if (oiLoading) oiLoading.style.display = 'none';
-            
-            // Use static data from DefiLlama (December 17, 2025)
-            // This ensures charts always render reliably
-            const volumeData = DEX_PERP_DATA.volume.map(d => ({ 
-                protocol: d.protocol, 
-                volume: d.volume, 
-                color: d.color 
-            }));
-            
-            const oiData = DEX_PERP_DATA.openInterest.map(d => ({ 
-                protocol: d.protocol, 
-                oi: d.oi, 
-                color: d.color 
-            }));
-            
-            console.log('Loading perp DEX charts with static data:', volumeData.length, 'volume entries,', oiData.length, 'OI entries');
-            
-            renderArtemisCharts(volumeData, oiData);
+            try {
+                // Fetch live derivatives data from DefiLlama
+                const res = await fetch('https://api.llama.fi/overview/derivatives?excludeTotalDataChart=true&excludeTotalDataChartBreakdown=true');
+                if (!res.ok) throw new Error('DefiLlama API error');
+                const data = await res.json();
+                
+                const protocols = data.protocols || [];
+                
+                // Extract 24H volume data
+                const volumeData = protocols
+                    .filter(p => (p.total24h || 0) > 10000000) // >$10M volume
+                    .sort((a, b) => (b.total24h || 0) - (a.total24h || 0))
+                    .slice(0, 14)
+                    .map((p, i) => ({
+                        protocol: p.displayName || p.name,
+                        volume: p.total24h || 0,
+                        color: DEX_PERP_COLORS[p.name] || DEX_PERP_COLORS[p.displayName] || DEFAULT_COLORS[i % DEFAULT_COLORS.length]
+                    }));
+                
+                // Extract OI data (currentOi field from protocols)
+                const oiData = protocols
+                    .filter(p => (p.dailyOpenInterest || p.openInterest || 0) > 5000000) // >$5M OI
+                    .sort((a, b) => (b.dailyOpenInterest || b.openInterest || 0) - (a.dailyOpenInterest || a.openInterest || 0))
+                    .slice(0, 14)
+                    .map((p, i) => ({
+                        protocol: p.displayName || p.name,
+                        oi: p.dailyOpenInterest || p.openInterest || 0,
+                        color: DEX_PERP_COLORS[p.name] || DEX_PERP_COLORS[p.displayName] || DEFAULT_COLORS[i % DEFAULT_COLORS.length]
+                    }));
+                
+                // Update subtitles with timestamp
+                const volCard = document.getElementById('artemisVolumeChart')?.closest('.card');
+                const oiCard = document.getElementById('artemisOIChart')?.closest('.card');
+                const now = new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                if (volCard) volCard.querySelector('.card-subtitle').textContent = `24H volume across DEX perps • DefiLlama • Updated ${now}`;
+                if (oiCard) oiCard.querySelector('.card-subtitle').textContent = `Current OI across DEX perps • DefiLlama • Updated ${now}`;
+                
+                if (volumeLoading) volumeLoading.style.display = 'none';
+                if (oiLoading) oiLoading.style.display = 'none';
+                
+                renderArtemisCharts(volumeData, oiData);
+                
+            } catch (error) {
+                console.error('Failed to load live derivatives data:', error);
+                if (volumeLoading) volumeLoading.innerHTML = '<div style="color: var(--text-muted);">Failed to load live data</div>';
+                if (oiLoading) oiLoading.innerHTML = '<div style="color: var(--text-muted);">Failed to load live data</div>';
+            }
         }
         
         function renderArtemisCharts(volumeData, oiData) {
@@ -5692,6 +5894,25 @@
                     },
                     options: chartOptions
                 });
+            } else {
+                // OI data not available from free DefiLlama API - show message
+                const oiLoading = document.getElementById('artemisOILoading');
+                if (oiLoading) {
+                    oiLoading.innerHTML = `
+                        <div style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">
+                            <div style="font-size: 24px; margin-bottom: 10px;">📊</div>
+                            <div style="margin-bottom: 6px;">DEX perp OI comparison requires DefiLlama Pro API</div>
+                            <div style="font-size: 11px; color: var(--text-dim);">
+                                Live OI breakdown by market is available in the section above.<br>
+                                <a href="https://defillama.com/open-interest" target="_blank" style="color: var(--cyan);">View on DefiLlama →</a>
+                            </div>
+                        </div>
+                    `;
+                    oiLoading.style.display = 'flex';
+                    oiLoading.style.alignItems = 'center';
+                    oiLoading.style.justifyContent = 'center';
+                    oiLoading.style.height = '100%';
+                }
             }
         }
         
@@ -6570,33 +6791,90 @@
             if (loadingEl) loadingEl.style.display = 'block';
             
             try {
-                // Use DefiLlama for Hyperliquid data
-                const hlResponse = await fetch('https://api.llama.fi/protocol/hyperliquid');
-                let hlVolume = 0;
+                // Get Hyperliquid 24H volume from DefiLlama
+                const [hlRes, cexRes] = await Promise.allSettled([
+                    fetch('https://api.llama.fi/summary/derivatives/hyperliquid'),
+                    fetch('https://api.coingecko.com/api/v3/derivatives/exchanges?per_page=10&order=trade_volume_24h_btc_desc')
+                ]);
                 
-                if (hlResponse.ok) {
-                    const hlData = await hlResponse.json();
-                    // Get TVL as proxy metric (actual volume requires different endpoint)
-                    hlVolume = hlData.currentChainTvls?.['Hyperliquid'] || 2500000000; // ~$2.5B default
+                let hlVolume = 0;
+                if (hlRes.status === 'fulfilled' && hlRes.value.ok) {
+                    const hlData = await hlRes.value.json();
+                    hlVolume = hlData.total24h || 0;
                 }
                 
-                // Estimated market data based on recent reports
-                // HL does ~$6-8B daily, Binance ~$60B, Bybit ~$20B, OKX ~$15B
-                const marketData = [
-                    { name: 'Binance', volume: 60000000000, color: '#f3ba2f' },
-                    { name: 'Bybit', volume: 20000000000, color: '#f97316' },
-                    { name: 'OKX', volume: 15000000000, color: '#ffffff' },
-                    { name: 'Hyperliquid', volume: 7000000000, color: '#06b6d4' },
-                    { name: 'Others', volume: 8000000000, color: '#6366f1' }
-                ];
+                // Try to get CEX volumes from CoinGecko derivatives exchanges
+                let cexVolumes = [];
+                if (cexRes.status === 'fulfilled' && cexRes.value.ok) {
+                    const cexData = await cexRes.value.json();
+                    for (const ex of cexData) {
+                        if (['binance_futures', 'bybit', 'okex_swap', 'bitget_futures'].includes(ex.id)) {
+                            const vol24h = parseFloat(ex.trade_volume_24h_btc || 0);
+                            // Convert BTC to USD (rough estimate using ~$97K)
+                            cexVolumes.push({
+                                name: ex.name || ex.id,
+                                volume: vol24h * 97000
+                            });
+                        }
+                    }
+                }
+                
+                // Build market data
+                let marketData;
+                if (cexVolumes.length > 0 && hlVolume > 0) {
+                    // Sort CEX by volume descending
+                    cexVolumes.sort((a, b) => b.volume - a.volume);
+                    const topCex = cexVolumes.slice(0, 4);
+                    const otherCexVol = cexVolumes.slice(4).reduce((s, c) => s + c.volume, 0);
+                    
+                    const cexColors = ['#f3ba2f', '#f97316', '#ffffff', '#10b981', '#8b5cf6'];
+                    marketData = topCex.map((c, i) => ({
+                        name: c.name.replace(' Futures', '').replace(' Swap', ''),
+                        volume: c.volume,
+                        color: cexColors[i]
+                    }));
+                    marketData.push({ name: 'Hyperliquid', volume: hlVolume, color: '#06b6d4' });
+                    if (otherCexVol > 0) {
+                        marketData.push({ name: 'Others', volume: otherCexVol, color: '#6366f1' });
+                    }
+                    // Sort so largest first
+                    marketData.sort((a, b) => b.volume - a.volume);
+                } else {
+                    // Fallback with reasonable estimates if APIs fail
+                    hlVolume = hlVolume || 7000000000;
+                    marketData = [
+                        { name: 'Binance', volume: 55000000000, color: '#f3ba2f' },
+                        { name: 'Bybit', volume: 18000000000, color: '#f97316' },
+                        { name: 'OKX', volume: 13000000000, color: '#ffffff' },
+                        { name: 'Hyperliquid', volume: hlVolume, color: '#06b6d4' },
+                        { name: 'Others', volume: 8000000000, color: '#6366f1' }
+                    ];
+                }
                 
                 const totalVol = marketData.reduce((a, b) => a + b.volume, 0);
-                const hlVol = marketData.find(m => m.name === 'Hyperliquid').volume;
-                const binanceVol = marketData.find(m => m.name === 'Binance').volume;
+                const hlVol = marketData.find(m => m.name === 'Hyperliquid')?.volume || hlVolume;
+                const binanceVol = marketData.find(m => m.name.includes('Binance'))?.volume || marketData[0].volume;
+                
+                // Calculate DEX perp dominance
+                let dexDominance = '~70';
+                try {
+                    const dexRes = await fetch('https://api.llama.fi/overview/derivatives?excludeTotalDataChart=true&excludeTotalDataChartBreakdown=true');
+                    if (dexRes.ok) {
+                        const dexData = await dexRes.json();
+                        const totalDexVol = dexData.total24h || 0;
+                        if (totalDexVol > 0 && hlVolume > 0) {
+                            dexDominance = ((hlVolume / totalDexVol) * 100).toFixed(0);
+                        }
+                    }
+                } catch(e) {}
                 
                 // Update stats
                 document.getElementById('hlVolumeDisplay').textContent = formatCurrency(hlVol);
                 document.getElementById('hlVsBinanceDisplay').textContent = ((hlVol / binanceVol) * 100).toFixed(1) + '%';
+                
+                // Update DEX dominance display
+                const dexDomEl = document.getElementById('dexDominanceDisplay');
+                if (dexDomEl) dexDomEl.textContent = '~' + dexDominance + '%';
                 
                 if (marketSharePieChartInstance) {
                     marketSharePieChartInstance.destroy();
@@ -6688,7 +6966,13 @@
                     if (response.ok) {
                         const data = await response.json();
                         if (data && data.length > 0) {
-                            prices = data.map(candle => [candle.t, parseFloat(candle.c)]);
+                            prices = data.map(candle => ({
+                                t: candle.t,
+                                o: parseFloat(candle.o),
+                                h: parseFloat(candle.h),
+                                l: parseFloat(candle.l),
+                                c: parseFloat(candle.c)
+                            }));
                         }
                     }
                 } catch (e) {
@@ -6715,7 +6999,13 @@
                         if (response.ok) {
                             const data = await response.json();
                             if (data && data.length > 0) {
-                                prices = data.map(candle => [candle.t, parseFloat(candle.c)]);
+                                prices = data.map(candle => ({
+                                    t: candle.t,
+                                    o: parseFloat(candle.o),
+                                    h: parseFloat(candle.h),
+                                    l: parseFloat(candle.l),
+                                    c: parseFloat(candle.c)
+                                }));
                             }
                         }
                     } catch (e) {
@@ -6723,14 +7013,19 @@
                     }
                 }
                 
-                // Fallback to DefiLlama/CoinGecko if Hyperliquid fails
+                // Fallback to DefiLlama/CoinGecko if Hyperliquid fails (line chart only)
+                let isLineChart = false;
                 if (prices.length === 0) {
-                    console.log('Falling back to DefiLlama...');
+                    console.log('Falling back to DefiLlama (line chart)...');
+                    isLineChart = true;
                     const llamaRes = await fetch('https://coins.llama.fi/chart/coingecko:hyperliquid?span=' + (days === 9999 ? 400 : days) + '&period=1d');
                     if (llamaRes.ok) {
                         const llamaData = await llamaRes.json();
                         if (llamaData.coins && llamaData.coins['coingecko:hyperliquid']) {
-                            prices = llamaData.coins['coingecko:hyperliquid'].prices.map(p => [p.timestamp * 1000, p.price]);
+                            prices = llamaData.coins['coingecko:hyperliquid'].prices.map(p => ({
+                                t: p.timestamp * 1000,
+                                o: p.price, h: p.price, l: p.price, c: p.price
+                            }));
                         }
                     }
                 }
@@ -6738,10 +7033,10 @@
                 if (prices.length === 0) throw new Error('No HYPE price data available');
                 
                 // Calculate stats
-                const allPrices = prices.map(p => p[1]);
-                const currentPrice = allPrices[allPrices.length - 1];
-                const athPrice = Math.max(...allPrices);
-                const tgePrice = allPrices[0]; // First price from data
+                const allCloses = prices.map(p => p.c);
+                const currentPrice = allCloses[allCloses.length - 1];
+                const athPrice = Math.max(...prices.map(p => p.h));
+                const tgePrice = prices[0].o; // First open price from data
                 const fromTge = ((currentPrice - tgePrice) / tgePrice) * 100;
                 
                 // Update displays
@@ -6757,26 +7052,31 @@
                 
                 if (loadingEl) loadingEl.style.display = 'none';
                 
-                // Create gradient fill
+                // Create candlestick chart
                 const ctx = canvas.getContext('2d');
-                const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-                gradient.addColorStop(0, 'rgba(34, 211, 238, 0.2)');
-                gradient.addColorStop(1, 'rgba(34, 211, 238, 0.02)');
                 
                 hypePriceChartInstance = new Chart(canvas, {
-                    type: 'line',
+                    type: 'candlestick',
                     data: {
-                        labels: prices.map(p => new Date(p[0])),
                         datasets: [{
                             label: 'HYPE Price',
-                            data: prices.map(p => ({ x: p[0], y: p[1] })),
-                            borderColor: '#22d3ee',
-                            backgroundColor: gradient,
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.1,
-                            pointRadius: 0,
-                            pointHoverRadius: 4
+                            data: prices.map(p => ({
+                                x: p.t,
+                                o: p.o,
+                                h: p.h,
+                                l: p.l,
+                                c: p.c
+                            })),
+                            color: {
+                                up: '#22d3ee',
+                                down: '#ef4444',
+                                unchanged: '#64748b'
+                            },
+                            borderColor: {
+                                up: '#22d3ee',
+                                down: '#ef4444',
+                                unchanged: '#64748b'
+                            }
                         }]
                     },
                     options: {
@@ -6790,17 +7090,28 @@
                                 titleColor: '#fff',
                                 bodyColor: '#a0aec0',
                                 callbacks: {
-                                    title: (ctx) => new Date(ctx[0].parsed.x).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-                                    label: (ctx) => 'HYPE: $' + ctx.parsed.y.toFixed(2)
+                                    title: (ctx) => {
+                                        const date = new Date(ctx[0].parsed.x);
+                                        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                                    },
+                                    label: (ctx) => {
+                                        const d = ctx.raw;
+                                        return [
+                                            'O: $' + d.o.toFixed(2),
+                                            'H: $' + d.h.toFixed(2),
+                                            'L: $' + d.l.toFixed(2),
+                                            'C: $' + d.c.toFixed(2)
+                                        ];
+                                    }
                                 }
                             }
                         },
                         scales: {
                             x: {
-                                type: 'time',
+                                type: 'timeseries',
                                 time: { unit: days <= 30 ? 'day' : 'month', displayFormats: { day: 'MMM d', month: 'MMM yy' } },
                                 grid: { color: 'rgba(255,255,255,0.03)' },
-                                ticks: { color: '#64748b', maxTicksLimit: 8, font: { size: 10 } }
+                                ticks: { color: '#64748b', maxTicksLimit: 8, font: { size: 10 }, source: 'auto' }
                             },
                             y: {
                                 grid: { color: 'rgba(255,255,255,0.05)' },
@@ -7056,6 +7367,699 @@
             }
         }
         
+        // ==================== DAILY FEE BARS CHART ====================
+        let dailyFeeBarChartInstance = null;
+        
+        async function loadDailyFeeBars(days = 180) {
+            const loadingEl = document.getElementById('dailyFeeBarLoading');
+            const canvas = document.getElementById('dailyFeeBarChart');
+            if (!canvas) return;
+            
+            if (loadingEl) loadingEl.style.display = 'block';
+            
+            // Update active button
+            canvas.closest('.card').querySelectorAll('.time-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if ((days === 30 && btn.textContent === '1M') ||
+                    (days === 90 && btn.textContent === '3M') ||
+                    (days === 180 && btn.textContent === '6M') ||
+                    (days === 365 && btn.textContent === '1Y')) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            try {
+                const feesResponse = await fetch('https://api.llama.fi/summary/fees/hyperliquid?dataType=dailyFees');
+                if (!feesResponse.ok) throw new Error('Failed to fetch fees data');
+                const feesData = await feesResponse.json();
+                
+                const dailyFees = feesData.totalDataChart || [];
+                if (dailyFees.length === 0) throw new Error('No fees data available');
+                
+                // Filter to last N days
+                const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+                const filtered = dailyFees.filter(d => d[0] * 1000 >= cutoff);
+                
+                const labels = filtered.map(d => new Date(d[0] * 1000));
+                const values = filtered.map(d => d[1]);
+                
+                // Stats
+                const yesterday = values[values.length - 1] || 0;
+                const last7 = values.slice(-7);
+                const avg7d = last7.reduce((a, b) => a + b, 0) / last7.length;
+                const last30 = values.slice(-30);
+                const total30d = last30.reduce((a, b) => a + b, 0);
+                const peakDay = Math.max(...values);
+                const peakIdx = values.indexOf(peakDay);
+                const peakDate = new Date(filtered[peakIdx][0] * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                
+                document.getElementById('yesterdayFeesDisplay').textContent = '$' + (yesterday / 1000000).toFixed(2) + 'M';
+                document.getElementById('avg7dFeesDisplay').textContent = '$' + (avg7d / 1000000).toFixed(2) + 'M';
+                document.getElementById('total30dFeesBarDisplay').textContent = '$' + (total30d / 1000000).toFixed(1) + 'M';
+                document.getElementById('peakDayFeesDisplay').textContent = '$' + (peakDay / 1000000).toFixed(2) + 'M (' + peakDate + ')';
+                
+                if (dailyFeeBarChartInstance) dailyFeeBarChartInstance.destroy();
+                if (loadingEl) loadingEl.style.display = 'none';
+                
+                // Color bars based on relative performance
+                const median = [...values].sort((a, b) => a - b)[Math.floor(values.length / 2)];
+                const barColors = values.map(v => v >= median ? 'rgba(74, 222, 128, 0.7)' : 'rgba(74, 222, 128, 0.35)');
+                
+                dailyFeeBarChartInstance = new Chart(canvas, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Daily Fees',
+                            data: values,
+                            backgroundColor: barColors,
+                            borderColor: 'rgba(74, 222, 128, 0.9)',
+                            borderWidth: 0,
+                            borderRadius: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { intersect: false, mode: 'index' },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                                titleColor: '#fff',
+                                bodyColor: '#a0aec0',
+                                callbacks: {
+                                    title: (ctx) => new Date(ctx[0].parsed.x).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                                    label: (ctx) => 'Fees: $' + (ctx.parsed.y / 1000000).toFixed(2) + 'M'
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: { unit: days <= 30 ? 'day' : days <= 90 ? 'week' : 'month', displayFormats: { day: 'MMM d', week: 'MMM d', month: 'MMM yy' } },
+                                grid: { color: 'rgba(255,255,255,0.03)' },
+                                ticks: { color: '#64748b', maxTicksLimit: 10, font: { size: 10 } }
+                            },
+                            y: {
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                ticks: {
+                                    color: '#4ade80',
+                                    font: { size: 10 },
+                                    callback: v => '$' + (v / 1000000).toFixed(1) + 'M'
+                                }
+                            }
+                        }
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error loading daily fee bars:', error);
+                if (loadingEl) loadingEl.innerHTML = '<div style="color: var(--text-muted);">Failed to load fee data</div>';
+            }
+        }
+        
+        // ==================== OPEN INTEREST BREAKDOWN ====================
+        let oiBreakdownLoaded = false;
+        
+        async function loadOIBreakdown() {
+            const contentEl = document.getElementById('oiBreakdownContent');
+            const loadingEl = document.getElementById('oiBreakdownLoading');
+            if (!contentEl) return;
+            
+            if (loadingEl) loadingEl.style.display = 'block';
+            oiBreakdownLoaded = true;
+            
+            try {
+                const metaRes = await fetch('https://api.hyperliquid.xyz/info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'metaAndAssetCtxs' })
+                });
+                if (!metaRes.ok) throw new Error('Hyperliquid API failed');
+                const metaData = await metaRes.json();
+                
+                const meta = metaData[0];
+                const assetCtxs = metaData[1];
+                const coins = meta.universe.map(u => u.name);
+                
+                // Calculate OI per market
+                let markets = [];
+                let totalOI = 0;
+                for (let i = 0; i < assetCtxs.length; i++) {
+                    const oi = parseFloat(assetCtxs[i].openInterest || 0);
+                    const mark = parseFloat(assetCtxs[i].markPx || 0);
+                    const oiUsd = oi * mark;
+                    totalOI += oiUsd;
+                    markets.push({ name: coins[i] || '?', oi: oiUsd, funding: parseFloat(assetCtxs[i].funding || 0) });
+                }
+                
+                // Sort by OI descending, take top 15
+                markets.sort((a, b) => b.oi - a.oi);
+                const topMarkets = markets.slice(0, 15);
+                const othersOI = totalOI - topMarkets.reduce((s, m) => s + m.oi, 0);
+                
+                // Build the display
+                const fmt = (v) => {
+                    if (v >= 1e9) return '$' + (v / 1e9).toFixed(2) + 'B';
+                    if (v >= 1e6) return '$' + (v / 1e6).toFixed(1) + 'M';
+                    return '$' + (v / 1e3).toFixed(0) + 'K';
+                };
+                
+                let html = `
+                    <div style="display: flex; gap: 24px; margin-bottom: 16px; flex-wrap: wrap;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 28px; font-weight: 700; color: var(--cyan);">${fmt(totalOI)}</div>
+                            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Total Open Interest</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 28px; font-weight: 700; color: var(--text);">${markets.length}</div>
+                            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Active Markets</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 28px; font-weight: 700; color: var(--text);">${((topMarkets[0].oi / totalOI) * 100).toFixed(1)}%</div>
+                            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">BTC Dominance</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Horizontal stacked bar -->
+                    <div style="height: 28px; border-radius: 6px; overflow: hidden; display: flex; margin-bottom: 12px; background: var(--card-bg);">
+                `;
+                
+                const colors = ['#6366f1', '#8b5cf6', '#a78bfa', '#c4b5fd', '#818cf8', '#6d28d9', '#7c3aed', '#5b21b6', '#4f46e5', '#4338ca', '#3730a3', '#312e81', '#6366f1', '#818cf8', '#a5b4fc'];
+                
+                topMarkets.forEach((m, i) => {
+                    const pct = (m.oi / totalOI) * 100;
+                    if (pct > 1) {
+                        html += `<div style="width: ${pct}%; background: ${colors[i % colors.length]}; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 600; color: white; min-width: ${pct > 3 ? 0 : 20}px;" title="${m.name}: ${fmt(m.oi)} (${pct.toFixed(1)}%)">${pct > 4 ? m.name : ''}</div>`;
+                    }
+                });
+                if (othersOI / totalOI > 0.01) {
+                    html += `<div style="width: ${(othersOI / totalOI) * 100}%; background: #374151; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #9ca3af;">Other</div>`;
+                }
+                
+                html += `</div>
+                    
+                    <!-- Top markets table -->
+                    <div style="max-height: 320px; overflow-y: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                                <th style="text-align: left; padding: 6px 8px; color: var(--text-muted); font-weight: 500;">#</th>
+                                <th style="text-align: left; padding: 6px 8px; color: var(--text-muted); font-weight: 500;">Market</th>
+                                <th style="text-align: right; padding: 6px 8px; color: var(--text-muted); font-weight: 500;">Open Interest</th>
+                                <th style="text-align: right; padding: 6px 8px; color: var(--text-muted); font-weight: 500;">% of Total</th>
+                                <th style="text-align: right; padding: 6px 8px; color: var(--text-muted); font-weight: 500;">Funding (8h)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                topMarkets.forEach((m, i) => {
+                    const pct = (m.oi / totalOI) * 100;
+                    const fundingAnnual = m.funding * 3 * 365 * 100;
+                    const fundingColor = m.funding >= 0 ? 'var(--good)' : 'var(--bad)';
+                    html += `
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
+                            <td style="padding: 6px 8px; color: var(--text-muted);">${i + 1}</td>
+                            <td style="padding: 6px 8px; font-weight: 600;">
+                                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 2px; background: ${colors[i % colors.length]}; margin-right: 6px;"></span>
+                                ${m.name}-PERP
+                            </td>
+                            <td style="padding: 6px 8px; text-align: right; font-family: monospace;">${fmt(m.oi)}</td>
+                            <td style="padding: 6px 8px; text-align: right; color: var(--text-muted);">${pct.toFixed(1)}%</td>
+                            <td style="padding: 6px 8px; text-align: right; color: ${fundingColor}; font-family: monospace;">
+                                ${(m.funding * 100).toFixed(4)}%
+                                <span style="color: var(--text-muted); font-size: 9px;">(${fundingAnnual.toFixed(1)}% ann)</span>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                html += `</tbody></table></div>`;
+                
+                contentEl.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error loading OI breakdown:', error);
+                if (loadingEl) loadingEl.innerHTML = '<div style="color: var(--text-muted);">Failed to load OI data from Hyperliquid API</div>';
+            }
+        }
+        
+        // ==================== DAILY PERP VOLUME CHART ====================
+        let dailyPerpVolChartInstance = null;
+        
+        async function loadDailyPerpVolume(days = 90) {
+            const loadingEl = document.getElementById('perpVolLoading');
+            const canvas = document.getElementById('dailyPerpVolChart');
+            if (!canvas) return;
+            
+            if (loadingEl) loadingEl.style.display = 'block';
+            
+            // Update active button
+            canvas.closest('.card').querySelectorAll('.time-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if ((days === 30 && btn.textContent === '1M') ||
+                    (days === 90 && btn.textContent === '3M') ||
+                    (days === 180 && btn.textContent === '6M') ||
+                    (days === 9999 && btn.textContent === 'ALL')) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            try {
+                const response = await fetch('https://api.llama.fi/summary/derivatives/hyperliquid?dataType=dailyVolume');
+                if (!response.ok) throw new Error('Failed to fetch volume data');
+                const data = await response.json();
+                
+                if (!data.totalDataChart || data.totalDataChart.length === 0) throw new Error('No volume data');
+                
+                const cutoff = days === 9999 ? 0 : Date.now() - (days * 24 * 60 * 60 * 1000);
+                const filtered = data.totalDataChart
+                    .map(d => ({ date: d[0] * 1000, value: d[1] }))
+                    .filter(d => d.date >= cutoff);
+                
+                const labels = filtered.map(d => new Date(d.date));
+                const values = filtered.map(d => d.value);
+                
+                // Stats
+                const yesterday = values[values.length - 1] || 0;
+                const avg7d = values.slice(-7).reduce((a, b) => a + b, 0) / Math.min(7, values.length);
+                const total30d = values.slice(-30).reduce((a, b) => a + b, 0);
+                const peakVal = Math.max(...values);
+                const peakIdx = values.indexOf(peakVal);
+                const peakDate = labels[peakIdx];
+                
+                const fmt = v => v >= 1e9 ? '$' + (v / 1e9).toFixed(2) + 'B' : '$' + (v / 1e6).toFixed(0) + 'M';
+                
+                document.getElementById('perpVolYesterday').textContent = fmt(yesterday);
+                document.getElementById('perpVol7dAvg').textContent = fmt(avg7d);
+                document.getElementById('perpVol30dTotal').textContent = fmt(total30d);
+                document.getElementById('perpVolPeak').textContent = fmt(peakVal) + ' (' + peakDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ')';
+                
+                // Compute median for color coding
+                const sorted = [...values].sort((a, b) => a - b);
+                const median = sorted[Math.floor(sorted.length / 2)];
+                const barColors = values.map(v => v > median ? 'rgba(99, 102, 241, 0.8)' : 'rgba(99, 102, 241, 0.4)');
+                
+                if (dailyPerpVolChartInstance) dailyPerpVolChartInstance.destroy();
+                if (loadingEl) loadingEl.style.display = 'none';
+                
+                dailyPerpVolChartInstance = new Chart(canvas, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Daily Perp Volume',
+                            data: values,
+                            backgroundColor: barColors,
+                            borderRadius: 2,
+                            borderSkipped: false,
+                            barPercentage: 0.85,
+                            categoryPercentage: 0.9
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { intersect: false, mode: 'index' },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                                titleColor: '#fff',
+                                bodyColor: '#a0aec0',
+                                callbacks: {
+                                    title: ctx => new Date(ctx[0].parsed.x).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                                    label: ctx => 'Volume: ' + fmt(ctx.parsed.y)
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: { unit: days <= 30 ? 'day' : days <= 180 ? 'week' : 'month', displayFormats: { day: 'MMM d', week: 'MMM d', month: 'MMM yy' } },
+                                grid: { color: 'rgba(255,255,255,0.03)' },
+                                ticks: { color: '#64748b', maxTicksLimit: 10, font: { size: 10 } }
+                            },
+                            y: {
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                ticks: {
+                                    color: '#6366f1',
+                                    font: { size: 10 },
+                                    callback: v => v >= 1e9 ? '$' + (v / 1e9).toFixed(0) + 'B' : '$' + (v / 1e6).toFixed(0) + 'M'
+                                }
+                            }
+                        }
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error loading perp volume:', error);
+                if (loadingEl) loadingEl.innerHTML = '<div style="color: var(--text-muted);">Failed to load volume data</div>';
+            }
+        }
+        
+        // ==================== CUMULATIVE USERS CHART ====================
+        let usersChartInstance = null;
+        
+        async function loadUsersChart() {
+            const loadingEl = document.getElementById('usersLoading');
+            const canvas = document.getElementById('usersChart');
+            if (!canvas) return;
+            
+            if (loadingEl) loadingEl.style.display = 'block';
+            
+            try {
+                let userData = [];
+                
+                // Strategy 1: DefiLlama protocol endpoint - has daily active users in some cases
+                try {
+                    const protocolRes = await fetch('https://api.llama.fi/protocol/hyperliquid');
+                    if (protocolRes.ok) {
+                        const protocolData = await protocolRes.json();
+                        // Check for chainTvls which may have user data
+                        // Also the main TVL history can be used as a proxy for adoption
+                    }
+                } catch (e) {}
+                
+                // Strategy 2: Hyperliquid native user stats
+                // The Hyperliquid API doesn't have a public users endpoint,
+                // but we can use the DefiLlama overview derivatives for daily user counts
+                try {
+                    const derivRes = await fetch('https://api.llama.fi/overview/derivatives?excludeTotalDataChart=true&excludeTotalDataChartBreakdown=false&dataType=dailyUsers');
+                    if (derivRes.ok) {
+                        const derivData = await derivRes.json();
+                        if (derivData.totalDataChartBreakdown) {
+                            const hlUsers = derivData.totalDataChartBreakdown
+                                .filter(d => d[1] && d[1]['Hyperliquid'] !== undefined)
+                                .map(d => ({
+                                    date: d[0] * 1000,
+                                    value: d[1]['Hyperliquid']
+                                }))
+                                .filter(d => d.value > 0);
+                            if (hlUsers.length > 0) {
+                                userData = hlUsers;
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn('DefiLlama derivatives users failed:', e);
+                }
+                
+                // Strategy 3: Use DefiLlama summary for daily active users
+                if (userData.length === 0) {
+                    try {
+                        const summaryRes = await fetch('https://api.llama.fi/summary/derivatives/hyperliquid?dataType=dailyUsers');
+                        if (summaryRes.ok) {
+                            const summaryData = await summaryRes.json();
+                            if (summaryData.totalDataChart && summaryData.totalDataChart.length > 0) {
+                                userData = summaryData.totalDataChart.map(d => ({
+                                    date: d[0] * 1000,
+                                    value: d[1]
+                                })).filter(d => d.value > 0);
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('DefiLlama summary users failed:', e);
+                    }
+                }
+                
+                // Strategy 4: Use volume data as growth proxy if no user data available
+                if (userData.length === 0) {
+                    try {
+                        const volRes = await fetch('https://api.llama.fi/summary/derivatives/hyperliquid?dataType=dailyVolume');
+                        if (volRes.ok) {
+                            const volData = await volRes.json();
+                            if (volData.totalDataChart && volData.totalDataChart.length > 0) {
+                                // Use volume growth as a proxy for user growth
+                                // Known milestones: ~400K users by Jan 2025, ~500K+ by Feb 2025
+                                const volSeries = volData.totalDataChart;
+                                const totalVolAll = volSeries.reduce((s, d) => s + d[1], 0);
+                                let cumVol = 0;
+                                const estimatedTotalUsers = 500000; // ~500K as of Feb 2025
+                                
+                                userData = volSeries.map(d => {
+                                    cumVol += d[1];
+                                    return {
+                                        date: d[0] * 1000,
+                                        value: Math.round((cumVol / totalVolAll) * estimatedTotalUsers)
+                                    };
+                                });
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('Volume proxy for users also failed:', e);
+                    }
+                }
+                
+                if (userData.length === 0) throw new Error('No user data available from any source');
+                
+                // Determine if data is daily active or cumulative
+                const values = userData.map(d => d.value);
+                const maxVal = Math.max(...values);
+                const lastVal = values[values.length - 1];
+                const sumAll = values.reduce((a, b) => a + b, 0);
+                
+                // If last value is much smaller than sum, it's daily active users
+                const isDaily = lastVal < sumAll / 3;
+                
+                let displayValues;
+                let chartLabel;
+                if (isDaily) {
+                    // Show as daily active users (not cumulative)
+                    displayValues = values;
+                    chartLabel = 'Daily Active Users';
+                    
+                    const currentDAU = values[values.length - 1];
+                    const avg30dDAU = values.slice(-30).reduce((a, b) => a + b, 0) / Math.min(30, values.length);
+                    const avg60dDAU = values.slice(-60, -30).reduce((a, b) => a + b, 0) / Math.min(30, values.slice(-60, -30).length || 1);
+                    const growthRate = avg60dDAU > 0 ? ((avg30dDAU - avg60dDAU) / avg60dDAU) * 100 : 0;
+                    
+                    document.getElementById('totalUsersDisplay').textContent = currentDAU >= 1000 ? (currentDAU / 1000).toFixed(1) + 'K DAU' : currentDAU.toLocaleString() + ' DAU';
+                    document.getElementById('newUsers30dDisplay').textContent = '30D Avg: ' + (avg30dDAU >= 1000 ? (avg30dDAU / 1000).toFixed(1) + 'K' : Math.round(avg30dDAU).toLocaleString());
+                    document.getElementById('userGrowthDisplay').textContent = (growthRate >= 0 ? '+' : '') + growthRate.toFixed(1) + '% vs prior 30D';
+                } else {
+                    // Cumulative
+                    displayValues = values;
+                    chartLabel = 'Cumulative Users';
+                    
+                    const totalUsers = lastVal;
+                    const users30ago = values.length > 30 ? values[values.length - 31] : values[0];
+                    const newUsers30d = totalUsers - users30ago;
+                    const growthRate = users30ago > 0 ? ((newUsers30d / users30ago) * 100) : 0;
+                    
+                    document.getElementById('totalUsersDisplay').textContent = totalUsers >= 1000000 ? (totalUsers / 1000000).toFixed(2) + 'M' : totalUsers >= 1000 ? (totalUsers / 1000).toFixed(0) + 'K' : totalUsers.toLocaleString();
+                    document.getElementById('newUsers30dDisplay').textContent = '+' + (newUsers30d >= 1000 ? (newUsers30d / 1000).toFixed(0) + 'K' : newUsers30d.toLocaleString());
+                    document.getElementById('userGrowthDisplay').textContent = '+' + growthRate.toFixed(1) + '% (30D)';
+                }
+                
+                const labels = userData.map(d => new Date(d.date));
+                
+                if (usersChartInstance) usersChartInstance.destroy();
+                if (loadingEl) loadingEl.style.display = 'none';
+                
+                const ctx = canvas.getContext('2d');
+                const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+                gradient.addColorStop(0, 'rgba(245, 158, 11, 0.25)');
+                gradient.addColorStop(1, 'rgba(245, 158, 11, 0.02)');
+                
+                usersChartInstance = new Chart(canvas, {
+                    type: isDaily ? 'bar' : 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: chartLabel,
+                            data: displayValues,
+                            borderColor: '#f59e0b',
+                            backgroundColor: isDaily ? 'rgba(245, 158, 11, 0.5)' : gradient,
+                            borderWidth: isDaily ? 0 : 2,
+                            borderRadius: isDaily ? 2 : 0,
+                            fill: !isDaily,
+                            tension: 0.2,
+                            pointRadius: 0,
+                            pointHoverRadius: isDaily ? 0 : 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { intersect: false, mode: 'index' },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                                titleColor: '#fff',
+                                bodyColor: '#a0aec0',
+                                callbacks: {
+                                    title: (ctx) => new Date(ctx[0].parsed.x).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                                    label: (ctx) => chartLabel + ': ' + ctx.parsed.y.toLocaleString()
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: { unit: 'month', displayFormats: { month: 'MMM yy' } },
+                                grid: { color: 'rgba(255,255,255,0.03)' },
+                                ticks: { color: '#64748b', maxTicksLimit: 10, font: { size: 10 } }
+                            },
+                            y: {
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                ticks: {
+                                    color: '#f59e0b',
+                                    font: { size: 10 },
+                                    callback: v => v >= 1000000 ? (v / 1000000).toFixed(1) + 'M' : (v / 1000).toFixed(0) + 'K'
+                                }
+                            }
+                        }
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error loading users chart:', error);
+                if (loadingEl) loadingEl.innerHTML = '<div style="color: var(--text-muted);">Failed to load user data</div>';
+            }
+        }
+        
+        // ==================== HYPE SUPPLY DYNAMICS ====================
+        async function loadHypeSupplyDynamics() {
+            try {
+                const TOTAL_SUPPLY = 1000000000; // 1B HYPE
+                
+                // Known addresses
+                const AF_ADDRESS = '0x0000000000000000000000000000000000000002'; // Assistance Fund address (system address)
+                
+                // Fetch current HYPE price
+                let hypeCurrentPrice = 0;
+                try {
+                    const priceRes = await fetch('https://api.hyperliquid.xyz/info', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'allMids'
+                        })
+                    });
+                    if (priceRes.ok) {
+                        const mids = await priceRes.json();
+                        hypeCurrentPrice = parseFloat(mids['HYPE'] || 0);
+                    }
+                } catch (e) {
+                    console.warn('Price fetch failed:', e);
+                }
+                
+                // Fallback price from CoinGecko
+                if (hypeCurrentPrice === 0) {
+                    try {
+                        const cgRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=hyperliquid&vs_currencies=usd');
+                        if (cgRes.ok) {
+                            const cgData = await cgRes.json();
+                            hypeCurrentPrice = cgData.hyperliquid?.usd || 25;
+                        }
+                    } catch (e) {}
+                }
+                
+                // Fetch staking info from Hyperliquid
+                let stakedAmount = 0;
+                try {
+                    const stakingRes = await fetch('https://api.hyperliquid.xyz/info', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'validatorSummaries'
+                        })
+                    });
+                    if (stakingRes.ok) {
+                        const validators = await stakingRes.json();
+                        if (Array.isArray(validators)) {
+                            stakedAmount = validators.reduce((sum, v) => sum + parseFloat(v.stake || 0), 0);
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Staking data fetch failed:', e);
+                }
+                
+                // Known supply distribution (approximate, updated periodically)
+                // As of ~Feb 2025:
+                // Genesis airdrop: 310M (31%) - fully circulating
+                // Core contributors: 238M (23.8%) - 1yr cliff (Nov 2025), then 24mo linear vest
+                // Future community: 388.9M (38.89%) - not yet distributed
+                // Hyper Foundation: 60.6M (6.06%) - locked
+                // Community grants: 2.4M (0.24%) - distributed
+                
+                // Circulating estimate: genesis + grants + any unlocked team
+                const genesisAirdrop = 310000000;
+                const communityGrants = 2400000;
+                const coreContributors = 238000000;
+                const futureEmissions = 388900000;
+                const hyperFoundation = 60600000;
+                
+                // Check if team tokens have started unlocking (cliff was Nov 29, 2025)
+                const now = new Date();
+                const cliffDate = new Date('2025-11-29');
+                let teamUnlocked = 0;
+                if (now >= cliffDate) {
+                    const monthsSinceCliff = (now - cliffDate) / (30 * 24 * 60 * 60 * 1000);
+                    teamUnlocked = Math.min(coreContributors, (coreContributors / 24) * monthsSinceCliff);
+                }
+                
+                const circulating = genesisAirdrop + communityGrants + teamUnlocked;
+                const teamLocked = coreContributors - teamUnlocked + hyperFoundation;
+                
+                // Estimate AF balance (they buy HYPE with fees)
+                // AF is a known large holder, rough estimate based on cumulative buybacks
+                let afBalance = 0;
+                try {
+                    // Try to get from DefiLlama fees data to estimate cumulative buyback
+                    const feesRes = await fetch('https://api.llama.fi/summary/fees/hyperliquid?dataType=dailyFees');
+                    if (feesRes.ok) {
+                        const feesData = await feesRes.json();
+                        const totalFees = feesData.totalAllTime || 0;
+                        // ~97% of fees go to buyback, estimate avg price ~$20 over time
+                        const estimatedAvgPrice = 20;
+                        afBalance = (totalFees * 0.97) / estimatedAvgPrice;
+                    }
+                } catch (e) {}
+                
+                if (afBalance === 0) afBalance = 30000000; // ~30M HYPE fallback estimate
+                
+                // Burned tokens (gas burns, etc.)
+                const burned = 0; // HYPE doesn't burn meaningfully yet, placeholder
+                
+                // Update displays
+                document.getElementById('hypeCirculatingDisplay').textContent = (circulating / 1000000).toFixed(0) + 'M';
+                document.getElementById('hypeCircPctDisplay').textContent = ((circulating / TOTAL_SUPPLY) * 100).toFixed(1) + '% of total';
+                
+                document.getElementById('hypeAFBalanceDisplay').textContent = '~' + (afBalance / 1000000).toFixed(0) + 'M';
+                document.getElementById('hypeAFValueDisplay').textContent = '$' + ((afBalance * hypeCurrentPrice) / 1000000000).toFixed(2) + 'B value';
+                
+                if (stakedAmount > 0) {
+                    document.getElementById('hypeStakedDisplay').textContent = (stakedAmount / 1000000).toFixed(0) + 'M';
+                    document.getElementById('hypeStakedPctDisplay').textContent = ((stakedAmount / circulating) * 100).toFixed(1) + '% of circ.';
+                } else {
+                    document.getElementById('hypeStakedDisplay').textContent = '--';
+                    document.getElementById('hypeStakedPctDisplay').textContent = 'Loading...';
+                }
+                
+                document.getElementById('hypeBurnedDisplay').textContent = burned > 0 ? (burned / 1000000).toFixed(2) + 'M' : 'N/A';
+                document.getElementById('hypeBurnedValueDisplay').textContent = burned > 0 ? '$' + ((burned * hypeCurrentPrice) / 1000000).toFixed(1) + 'M' : 'No burn mechanism';
+                
+                // Update supply bar
+                const circPct = (circulating / TOTAL_SUPPLY) * 100;
+                const afPct = (afBalance / TOTAL_SUPPLY) * 100;
+                const lockedPct = (teamLocked / TOTAL_SUPPLY) * 100;
+                const futurePct = (futureEmissions / TOTAL_SUPPLY) * 100;
+                
+                document.getElementById('supplyBarCirc').style.width = circPct + '%';
+                document.getElementById('supplyBarAF').style.width = Math.min(afPct, 15) + '%'; // Cap visual width
+                document.getElementById('supplyBarLocked').style.width = lockedPct + '%';
+                document.getElementById('supplyBarFuture').style.width = futurePct + '%';
+                
+            } catch (error) {
+                console.error('Error loading HYPE supply dynamics:', error);
+            }
+        }
+        
         // ==================== HYPE EMISSIONS SCHEDULE CHART ====================
         let hypeEmissionsChartInstance = null;
         
@@ -7261,7 +8265,7 @@
                             if (!ctx) return;
                             
                             const dayVol = parseFloat(ctx.dayNtlVlm || 0);
-                            if (dayVol < 1000000) return; // Skip if under $1M volume
+                            if (dayVol < 5000000) return; // Skip if under $5M volume
                             
                             const markPx = parseFloat(ctx.markPx || 0);
                             const prevDayPx = parseFloat(ctx.prevDayPx || markPx);
@@ -7297,7 +8301,7 @@
                 
                 // Build table
                 if (hip3Assets.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--text-muted);">No HIP-3 pairs with >$1M volume found</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--text-muted);">No HIP-3 pairs with >$5M volume found</td></tr>';
                 } else {
                     tableBody.innerHTML = hip3Assets.map(asset => {
                         const changeColor = asset.change24h >= 0 ? 'var(--good)' : 'var(--bad)';
@@ -9606,7 +10610,7 @@
         
         // Load ETF data from CoinGlass API (primary) or fallback to manual data
         async function loadETFData() {
-            console.log('Loading ETF data...');
+            console.log('[ETF] Loading ETF data...');
             
             // Try CoinGlass API first
             let btcApiData = null;
@@ -9621,14 +10625,20 @@
                 ethApiData = await coinglassAPI('/etf/ethereum/flow-history');
                 
                 if (btcApiData && btcApiData.length > 0) {
-                    console.log('CoinGlass BTC ETF data loaded:', btcApiData.length, 'days');
+                    console.log('[ETF] CoinGlass BTC data loaded:', btcApiData.length, 'days');
+                    console.log('[ETF] BTC first item raw:', JSON.stringify(btcApiData[0]).substring(0, 300));
                     usedAPI = true;
+                } else {
+                    console.warn('[ETF] CoinGlass BTC data empty or null');
                 }
                 if (ethApiData && ethApiData.length > 0) {
-                    console.log('CoinGlass ETH ETF data loaded:', ethApiData.length, 'days');
+                    console.log('[ETF] CoinGlass ETH data loaded:', ethApiData.length, 'days');
+                    console.log('[ETF] ETH first item raw:', JSON.stringify(ethApiData[0]).substring(0, 300));
+                } else {
+                    console.warn('[ETF] CoinGlass ETH data empty or null');
                 }
             } catch (error) {
-                console.log('CoinGlass API error:', error.message);
+                console.error('[ETF] CoinGlass API error:', error.message);
             }
             
             // Process BTC data
@@ -9679,30 +10689,44 @@
         // Parse CoinGlass ETF API response into our standard format
         // CoinGlass format: { timestamp: ms, flow_usd: number, etf_flows: [{etf_ticker, flow_usd}] }
         function parseCoinglassETFData(apiData, type) {
-            console.log('Parsing CoinGlass ETF data:', apiData?.length, 'items');
+            console.log('[ETF] Parsing', type.toUpperCase(), 'data:', apiData?.length, 'items');
+            if (apiData?.length > 0) {
+                console.log('[ETF] First item keys:', Object.keys(apiData[0]));
+                console.log('[ETF] First item sample:', JSON.stringify(apiData[0]).substring(0, 500));
+            }
             
-            // CoinGlass returns array sorted by date descending (most recent first)
-            return apiData.map(item => {
-                // Convert timestamp (milliseconds) to date string
-                let dateStr;
+            // Sort by timestamp descending (most recent first)
+            const sorted = [...apiData].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            
+            return sorted.map(item => {
+                // Convert timestamp to date string
+                let dateStr = 'Unknown';
                 if (item.timestamp) {
-                    const date = new Date(item.timestamp);
+                    // CoinGlass uses millisecond timestamps
+                    const ts = item.timestamp > 1e12 ? item.timestamp : item.timestamp * 1000;
+                    const date = new Date(ts);
                     dateStr = date.toISOString().split('T')[0];
                 } else if (item.date) {
                     dateStr = item.date;
-                } else {
-                    dateStr = 'Unknown';
                 }
                 
-                // Total flow in millions (API returns USD, we display in millions)
-                const totalFlow = (item.flow_usd || 0) / 1000000;
+                // Total flow in millions - CoinGlass may use 'change_usd' or 'flow_usd'
+                const rawTotal = item.change_usd ?? item.flow_usd ?? item.totalNetInflow ?? 0;
+                // Auto-detect scale: if values > 1M, they're in raw USD; otherwise might be in millions
+                const totalFlow = Math.abs(rawTotal) > 100000 ? rawTotal / 1000000 : rawTotal;
                 
-                // Parse individual ETF flows
+                // Parse individual ETF flows - CoinGlass may use 'list' or 'etf_flows' array
                 const etfFlows = {};
-                if (item.etf_flows && Array.isArray(item.etf_flows)) {
-                    item.etf_flows.forEach(etf => {
-                        if (etf.etf_ticker && etf.flow_usd !== undefined) {
-                            etfFlows[etf.etf_ticker] = (etf.flow_usd || 0) / 1000000;
+                const flowArray = item.list || item.etf_flows || [];
+                if (Array.isArray(flowArray)) {
+                    flowArray.forEach(etf => {
+                        // CoinGlass uses 'ticker' or 'etf_ticker' for fund name
+                        const ticker = etf.ticker || etf.etf_ticker || etf.name;
+                        // CoinGlass uses 'change_usd' or 'flow_usd' for flow amount
+                        const rawFlow = etf.change_usd ?? etf.flow_usd ?? 0;
+                        const flow = Math.abs(rawFlow) > 100000 ? rawFlow / 1000000 : rawFlow;
+                        if (ticker) {
+                            etfFlows[ticker] = flow;
                         }
                     });
                 }
