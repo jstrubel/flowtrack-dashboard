@@ -1380,41 +1380,6 @@
             </div>
         </div>
         
-        <!-- Top Performers Section -->
-        <div class="section">
-            <div class="section-header">
-                <div class="section-title">Top Performers</div>
-            </div>
-            
-            <div class="grid-2">
-                <!-- 7D Top Gainers -->
-                <div class="card">
-                    <div class="card-header">
-                        <div>
-                            <div class="card-title">7D Top Gainers</div>
-                            <div class="card-subtitle">Best performing assets in top 300 by market cap</div>
-                        </div>
-                    </div>
-                    <div id="topGainers7dTable" style="margin-top: 12px;">
-                        <div style="text-align: center; padding: 40px; color: var(--text-muted);">Loading...</div>
-                    </div>
-                </div>
-                
-                <!-- 30D Top Gainers -->
-                <div class="card">
-                    <div class="card-header">
-                        <div>
-                            <div class="card-title">30D Top Gainers</div>
-                            <div class="card-subtitle">Best performing assets in top 300 by market cap</div>
-                        </div>
-                    </div>
-                    <div id="topGainers30dTable" style="margin-top: 12px;">
-                        <div style="text-align: center; padding: 40px; color: var(--text-muted);">Loading...</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
         <!-- Market Structure Charts -->
         <div class="section">
             <div class="section-header">
@@ -3580,8 +3545,49 @@
         // Coinalyze API Configuration
         const COINALYZE_API_KEY = '206ab6db-6464-46b6-84da-782d2a74a807';
         const COINALYZE_BASE = 'https://api.coinalyze.net/v1';
-        // CORS proxy for browser-based requests (Coinalyze doesn't support CORS)
-        const CORS_PROXY = 'https://corsproxy.io/?';
+        // CORS proxy fallback chain for browser-based requests (Coinalyze doesn't support CORS)
+        const CORS_PROXIES = [
+            { name: 'corsproxy.io', build: (url) => 'https://corsproxy.io/?' + encodeURIComponent(url) },
+            { name: 'allorigins', build: (url) => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url) },
+            { name: 'corsproxy.org', build: (url) => 'https://corsproxy.org/?' + encodeURIComponent(url) },
+        ];
+        let CORS_PROXY = 'https://corsproxy.io/?'; // legacy compat
+        let activeCorsProxy = null; // cache which proxy works
+        
+        // Fetch with automatic CORS proxy fallback
+        async function fetchWithProxy(url) {
+            // Try direct first
+            try {
+                const res = await fetch(url);
+                if (res.ok) return res;
+            } catch (e) { /* expected CORS block */ }
+            
+            // If we have a known working proxy, try it first
+            if (activeCorsProxy) {
+                try {
+                    const res = await fetch(activeCorsProxy.build(url));
+                    if (res.ok) return res;
+                } catch (e) { /* proxy failed */ }
+                activeCorsProxy = null; // reset if it stopped working
+            }
+            
+            // Try each proxy in order
+            for (const proxy of CORS_PROXIES) {
+                try {
+                    const res = await fetch(proxy.build(url));
+                    if (res.ok) {
+                        console.log(`CORS proxy working: ${proxy.name}`);
+                        activeCorsProxy = proxy;
+                        CORS_PROXY = proxy.build('').replace(encodeURIComponent(''), ''); // legacy compat
+                        return res;
+                    }
+                } catch (e) {
+                    console.warn(`CORS proxy ${proxy.name} failed:`, e.message);
+                }
+            }
+            
+            throw new Error('All CORS proxies failed');
+        }
         let coinalyzePriceChart = null;
         let coinalyzeFundingChart = null;
         let coinalyzeOIChart = null;
@@ -4297,24 +4303,12 @@
             };
             
             try {
-                // Try direct request first
-                let priceRes, fundingRes, oiRes;
-                
-                try {
-                    [priceRes, fundingRes, oiRes] = await Promise.all([
-                        fetch(buildUrl('ohlcv-history', '')),
-                        fetch(buildUrl('funding-rate-history', '')),
-                        fetch(buildUrl('open-interest-history', '&convert_to_usd=true'))
-                    ]);
-                } catch (directError) {
-                    console.log('Direct request failed, trying CORS proxy...');
-                    // Fall back to CORS proxy
-                    [priceRes, fundingRes, oiRes] = await Promise.all([
-                        fetch(CORS_PROXY + encodeURIComponent(buildUrl('ohlcv-history', ''))),
-                        fetch(CORS_PROXY + encodeURIComponent(buildUrl('funding-rate-history', ''))),
-                        fetch(CORS_PROXY + encodeURIComponent(buildUrl('open-interest-history', '&convert_to_usd=true')))
-                    ]);
-                }
+                // Use fetchWithProxy for automatic CORS proxy fallback
+                let [priceRes, fundingRes, oiRes] = await Promise.all([
+                    fetchWithProxy(buildUrl('ohlcv-history', '')),
+                    fetchWithProxy(buildUrl('funding-rate-history', '')),
+                    fetchWithProxy(buildUrl('open-interest-history', '&convert_to_usd=true'))
+                ]);
                 
                 // Check for HTTP errors
                 if (!priceRes.ok || !fundingRes.ok || !oiRes.ok) {
@@ -4384,11 +4378,12 @@
                     errorEl.innerHTML = `
                         <div style="color: var(--bad); font-size: 13px;">Failed to load Coinalyze data</div>
                         <div style="color: var(--text-muted); font-size: 11px; margin-top: 4px;">
-                            ${error.message || 'CORS may be blocking the request'}
+                            ${error.message || 'All CORS proxies failed'}
                         </div>
                         <div style="color: var(--text-dim); font-size: 10px; margin-top: 8px;">
-                            Check browser console for details
+                            Proxy: ${activeCorsProxy ? activeCorsProxy.name : 'none working'} • Check console for details
                         </div>
+                        <button onclick="loadCoinalyzeData(365)" style="margin-top: 12px; padding: 6px 16px; background: var(--panel-hover); border: 1px solid var(--border); border-radius: 6px; color: var(--text); cursor: pointer; font-size: 11px;">↻ Retry</button>
                     `;
                 }
             }
@@ -4606,20 +4601,10 @@
             
             try {
                 // Fetch BTC and ETH OI data
-                let btcRes, ethRes;
-                
-                try {
-                    [btcRes, ethRes] = await Promise.all([
-                        fetch(buildUrl('BTCUSDT_PERP.A')),
-                        fetch(buildUrl('ETHUSDT_PERP.A'))
-                    ]);
-                } catch (directError) {
-                    console.log('Direct request failed, trying CORS proxy for OI dominance...');
-                    [btcRes, ethRes] = await Promise.all([
-                        fetch(CORS_PROXY + encodeURIComponent(buildUrl('BTCUSDT_PERP.A'))),
-                        fetch(CORS_PROXY + encodeURIComponent(buildUrl('ETHUSDT_PERP.A')))
-                    ]);
-                }
+                let [btcRes, ethRes] = await Promise.all([
+                    fetchWithProxy(buildUrl('BTCUSDT_PERP.A')),
+                    fetchWithProxy(buildUrl('ETHUSDT_PERP.A'))
+                ]);
                 
                 if (!btcRes.ok || !ethRes.ok) {
                     throw new Error('OI API error');
@@ -4849,12 +4834,7 @@
             const url = `${COINALYZE_BASE}/long-short-ratio-history?symbols=${symbol}&interval=daily&from=${from}&to=${now}&api_key=${COINALYZE_API_KEY}`;
             
             try {
-                let response;
-                try {
-                    response = await fetch(url);
-                } catch (e) {
-                    response = await fetch(CORS_PROXY + encodeURIComponent(url));
-                }
+                let response = await fetchWithProxy(url);
                 
                 if (!response.ok) throw new Error(`API error: ${response.status}`);
                 
@@ -4986,12 +4966,7 @@
             const url = `${COINALYZE_BASE}/ohlcv-history?symbols=${symbol}&interval=daily&from=${from}&to=${now}&api_key=${COINALYZE_API_KEY}`;
             
             try {
-                let response;
-                try {
-                    response = await fetch(url);
-                } catch (e) {
-                    response = await fetch(CORS_PROXY + encodeURIComponent(url));
-                }
+                let response = await fetchWithProxy(url);
                 
                 if (!response.ok) throw new Error(`API error: ${response.status}`);
                 
@@ -5141,12 +5116,7 @@
                 // Deribit public API - get book summary for all BTC options
                 const url = 'https://www.deribit.com/api/v2/public/get_book_summary_by_currency?currency=BTC&kind=option';
                 
-                let response;
-                try {
-                    response = await fetch(url);
-                } catch (e) {
-                    response = await fetch(CORS_PROXY + encodeURIComponent(url));
-                }
+                let response = await fetchWithProxy(url);
                 
                 if (!response.ok) throw new Error(`Deribit API error: ${response.status}`);
                 
@@ -5176,12 +5146,7 @@
                 const url = 'https://www.deribit.com/api/v2/public/get_volatility_index_data?currency=BTC&resolution=3600&start_timestamp=' + 
                     (Date.now() - 24 * 60 * 60 * 1000) + '&end_timestamp=' + Date.now();
                 
-                let response;
-                try {
-                    response = await fetch(url);
-                } catch (e) {
-                    response = await fetch(CORS_PROXY + encodeURIComponent(url));
-                }
+                let response = await fetchWithProxy(url);
                 
                 if (response.ok) {
                     const data = await response.json();
@@ -5417,12 +5382,7 @@
                 const symbol = 'BTCUSDT_PERP.A';
                 const url = `${COINALYZE_BASE}/ohlcv-history?symbols=${symbol}&interval=daily&from=${from}&to=${now}&api_key=${COINALYZE_API_KEY}`;
                 
-                let response;
-                try {
-                    response = await fetch(url);
-                } catch (e) {
-                    response = await fetch(CORS_PROXY + encodeURIComponent(url));
-                }
+                let response = await fetchWithProxy(url);
                 
                 let priceData = [];
                 if (response.ok) {
@@ -5620,12 +5580,7 @@
             const url = `${COINALYZE_BASE}/funding-rate-history?symbols=${symbol}&interval=daily&from=${from}&to=${now}&api_key=${COINALYZE_API_KEY}`;
             
             try {
-                let response;
-                try {
-                    response = await fetch(url);
-                } catch (e) {
-                    response = await fetch(CORS_PROXY + encodeURIComponent(url));
-                }
+                let response = await fetchWithProxy(url);
                 
                 if (!response.ok) throw new Error(`API error: ${response.status}`);
                 
@@ -5914,122 +5869,6 @@
                     oiLoading.style.height = '100%';
                 }
             }
-        }
-        
-        // ==================== TOP PERFORMERS ====================
-        async function loadTopPerformers() {
-            const gainers7dEl = document.getElementById('topGainers7dTable');
-            const gainers30dEl = document.getElementById('topGainers30dTable');
-            
-            if (gainers7dEl) gainers7dEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">Loading...</div>';
-            if (gainers30dEl) gainers30dEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">Loading...</div>';
-            
-            // Load both periods
-            await Promise.all([
-                loadGainersForPeriod('7d', gainers7dEl),
-                loadGainersForPeriod('30d', gainers30dEl)
-            ]);
-        }
-        
-        async function loadGainersForPeriod(period, targetEl) {
-            if (!targetEl) return;
-            
-            try {
-                // Use CoinGecko top gainers/losers endpoint
-                const res = await fetch(`https://api.coingecko.com/api/v3/coins/top_gainers_losers?vs_currency=usd&duration=${period}&top_coins=300`);
-                
-                if (!res.ok) throw new Error('API error');
-                
-                const data = await res.json();
-                
-                if (data.top_gainers) {
-                    const gainers = data.top_gainers.slice(0, 10);
-                    targetEl.innerHTML = renderPerformersTable(gainers, period);
-                }
-                
-            } catch (error) {
-                console.error(`Top performers ${period} error:`, error);
-                // Fallback: use coins/markets with sorting
-                await loadGainersFallback(period, targetEl);
-            }
-        }
-        
-        async function loadGainersFallback(period, targetEl) {
-            if (!targetEl) return;
-            
-            try {
-                const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false&price_change_percentage=${period}`);
-                
-                if (!res.ok) throw new Error('Fallback API error');
-                
-                const coins = await res.json();
-                const changeKey = period === '30d' ? 'price_change_percentage_30d_in_currency' : 'price_change_percentage_7d_in_currency';
-                
-                // Filter out coins without valid change data
-                const validCoins = coins.filter(c => c[changeKey] !== null && c[changeKey] !== undefined);
-                
-                // Sort for gainers (descending)
-                const sortedByGain = [...validCoins].sort((a, b) => (b[changeKey] || 0) - (a[changeKey] || 0));
-                const gainers = sortedByGain.slice(0, 10).map(c => ({
-                    id: c.id,
-                    symbol: c.symbol,
-                    name: c.name,
-                    image: c.image,
-                    usd: c.current_price,
-                    [`usd_${period}_change`]: c[changeKey],
-                    market_cap_rank: c.market_cap_rank
-                }));
-                
-                targetEl.innerHTML = renderPerformersTable(gainers, period);
-                
-            } catch (error) {
-                console.error(`Fallback performers ${period} error:`, error);
-                targetEl.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--bad);">Failed to load data</div>';
-            }
-        }
-        
-        function renderPerformersTable(coins, period) {
-            const changeKey = period === '30d' ? 'usd_30d_change' : 'usd_7d_change';
-            
-            let html = `
-                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-                    <thead>
-                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            <th style="text-align: left; padding: 8px 4px; color: var(--text-muted); font-weight: 500;">#</th>
-                            <th style="text-align: left; padding: 8px 4px; color: var(--text-muted); font-weight: 500;">Coin</th>
-                            <th style="text-align: right; padding: 8px 4px; color: var(--text-muted); font-weight: 500;">Price</th>
-                            <th style="text-align: right; padding: 8px 4px; color: var(--text-muted); font-weight: 500;">${period.toUpperCase()}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-            
-            coins.forEach((coin, idx) => {
-                const change = coin[changeKey] || 0;
-                const changeColor = change >= 0 ? 'var(--good)' : 'var(--bad)';
-                const changeSign = change >= 0 ? '+' : '';
-                const price = coin.usd < 0.01 ? coin.usd.toFixed(6) : coin.usd < 1 ? coin.usd.toFixed(4) : coin.usd.toFixed(2);
-                
-                html += `
-                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        <td style="padding: 10px 4px; color: var(--text-muted);">${coin.market_cap_rank || idx + 1}</td>
-                        <td style="padding: 10px 4px;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <img src="${coin.image}" alt="${coin.symbol}" style="width: 24px; height: 24px; border-radius: 50%;" onerror="this.style.display='none'">
-                                <div>
-                                    <div style="font-weight: 600; color: var(--text);">${coin.symbol.toUpperCase()}</div>
-                                    <div style="font-size: 11px; color: var(--text-muted);">${coin.name.length > 15 ? coin.name.substring(0, 15) + '...' : coin.name}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td style="padding: 10px 4px; text-align: right; color: var(--text);">$${price}</td>
-                        <td style="padding: 10px 4px; text-align: right; color: ${changeColor}; font-weight: 600;">${changeSign}${change.toFixed(1)}%</td>
-                    </tr>
-                `;
-            });
-            
-            html += '</tbody></table>';
-            return html;
         }
         
         // ==================== FEAR & GREED HISTORY CHART ====================
@@ -11401,7 +11240,7 @@
                 try {
                     console.log('Trying CoinGecko via CORS proxy...');
                     const url = `${COINGECKO_API}/coins/markets?vs_currency=usd&ids=${cgIds}&order=market_cap_desc&sparkline=false`;
-                    const response = await fetch(CORS_PROXY + encodeURIComponent(url));
+                    const response = await fetchWithProxy(url);
                     
                     if (response.ok) {
                         const data = await response.json();
@@ -12526,9 +12365,6 @@
             
             // Initialize TradingView charts
             setTimeout(initTradingViewCharts, 500);
-            
-            // Initialize Top Performers
-            setTimeout(() => loadTopPerformers(), 1200);
             
             // Initialize Fear & Greed chart
             setTimeout(() => loadFearGreedHistory(730), 2000);
