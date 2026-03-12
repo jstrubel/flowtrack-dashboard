@@ -1340,6 +1340,7 @@
         <!-- Tab Navigation -->
         <div class="tab-nav">
             <button class="tab-btn active" onclick="switchTab('dashboard')">Crypto Dashboard</button>
+            <button class="tab-btn" onclick="switchTab('orion')">ORION</button>
             <button class="tab-btn" onclick="switchTab('macro')">Macro Dashboard</button>
             <button class="tab-btn" onclick="switchTab('derivatives')">Derivatives Data</button>
             <button class="tab-btn" onclick="switchTab('stablecoins')">Stablecoins</button>
@@ -1811,6 +1812,54 @@
         </div>
 
         </div><!-- END DASHBOARD TAB -->
+
+        <!-- ORION TAB -->
+        <div id="tab-orion" class="tab-content">
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">ORION Risk Dashboard</div>
+                <div style="font-size: 11px; color: var(--text-muted);">
+                    Live embedded ORION build
+                </div>
+            </div>
+
+            <div class="card" style="padding: 14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px;">
+                    <div style="font-size:12px; color:var(--text-muted);">
+                        Source:
+                        <a href="https://orion.flowtrackdata.xyz" target="_blank" rel="noopener noreferrer" style="color: var(--cyan); text-decoration: none;">
+                            orion.flowtrackdata.xyz
+                        </a>
+                    </div>
+                    <a href="https://orion.flowtrackdata.xyz" target="_blank" rel="noopener noreferrer" class="refresh-btn" style="text-decoration:none;">
+                        Open in New Tab
+                    </a>
+                </div>
+
+                <div style="height: calc(100vh - 260px); min-height: 900px; border:1px solid var(--border); border-radius:12px; overflow:hidden; background: rgba(10,18,30,0.9);">
+                    <iframe
+                        id="orionEmbedFrame"
+                        src="https://orion.flowtrackdata.xyz"
+                        title="ORION Risk Dashboard"
+                        loading="lazy"
+                        referrerpolicy="strict-origin-when-cross-origin"
+                        style="width:100%; height:100%; border:0; background:#0b1120;"
+                    ></iframe>
+                </div>
+
+                <div id="orionEmbedStatus" style="margin-top:10px; font-size:12px; color:var(--text-muted);">
+                    Loading ORION embed...
+                </div>
+
+                <div style="margin-top:10px; font-size:11px; color:var(--text-muted);">
+                    If the embed is blocked by browser/site policy, use
+                    <a href="https://orion.flowtrackdata.xyz" target="_blank" rel="noopener noreferrer" style="color: var(--cyan); text-decoration: none;">
+                        Open in New Tab
+                    </a>.
+                </div>
+            </div>
+        </div>
+        </div><!-- END ORION TAB -->
 
         <!-- MACRO DASHBOARD TAB -->
         <div id="tab-macro" class="tab-content">
@@ -3877,6 +3926,48 @@
                     setTimeout(() => loadStablecoinTabData(), 300);
                 }
             }
+
+            if (tabName === 'orion') {
+                initOrionEmbedStatus();
+            }
+        }
+
+        let orionEmbedStatusInitialized = false;
+        function initOrionEmbedStatus() {
+            if (orionEmbedStatusInitialized) return;
+            orionEmbedStatusInitialized = true;
+
+            const frame = document.getElementById('orionEmbedFrame');
+            const status = document.getElementById('orionEmbedStatus');
+            if (!frame || !status) return;
+
+            let timeoutId = setTimeout(() => {
+                status.innerHTML = 'Embed is still loading. If this stays blank, click <a href="https://orion.flowtrackdata.xyz" target="_blank" rel="noopener noreferrer" style="color: var(--cyan); text-decoration: none;">Open in New Tab</a>.';
+            }, 7000);
+
+            frame.addEventListener('load', () => {
+                clearTimeout(timeoutId);
+                let isBrowserErrorPage = false;
+                try {
+                    const currentHref = String(frame.contentWindow?.location?.href || '');
+                    if (currentHref.startsWith('chrome-error://') || currentHref === 'about:blank') {
+                        isBrowserErrorPage = true;
+                    }
+                } catch (_error) {
+                    // Cross-origin success is expected; ignore access errors.
+                }
+
+                if (isBrowserErrorPage) {
+                    status.innerHTML = 'Embed was blocked or failed to load. Use <a href="https://orion.flowtrackdata.xyz" target="_blank" rel="noopener noreferrer" style="color: var(--cyan); text-decoration: none;">Open in New Tab</a>.';
+                } else {
+                    status.textContent = 'ORION embed connected.';
+                }
+            });
+
+            frame.addEventListener('error', () => {
+                clearTimeout(timeoutId);
+                status.innerHTML = 'Embed failed to load. Use <a href="https://orion.flowtrackdata.xyz" target="_blank" rel="noopener noreferrer" style="color: var(--cyan); text-decoration: none;">Open in New Tab</a>.';
+            });
         }
         
         // ==================== STABLECOIN TAB DATA (DefiLlama) ====================
