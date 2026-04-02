@@ -2500,22 +2500,22 @@
             
             <!-- Key Metrics Row -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;">
-                <div class="metric-card" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); text-align: center;">
+                <div class="metric-card" style="background: var(--panel); padding: 20px; border-radius: 12px; border: 1px solid var(--border); text-align: center;">
                     <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">TOTAL STABLECOIN SUPPLY</div>
                     <div id="stableTotalSupply" style="font-size: 36px; font-weight: 700; color: var(--text);">--</div>
-                    <div id="stableTotalChange" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">--</div>
+                    <div id="stableTabTotalChange" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">--</div>
                 </div>
-                <div class="metric-card" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); text-align: center;">
+                <div class="metric-card" style="background: var(--panel); padding: 20px; border-radius: 12px; border: 1px solid var(--border); text-align: center;">
                     <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">USDT MARKET CAP</div>
                     <div id="usdtMarketCap" style="font-size: 36px; font-weight: 700; color: #26A17B;">--</div>
                     <div id="usdtDominance" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">-- dominance</div>
                 </div>
-                <div class="metric-card" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); text-align: center;">
+                <div class="metric-card" style="background: var(--panel); padding: 20px; border-radius: 12px; border: 1px solid var(--border); text-align: center;">
                     <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">USDC MARKET CAP</div>
                     <div id="usdcMarketCap" style="font-size: 36px; font-weight: 700; color: #2775CA;">--</div>
                     <div id="usdcDominance" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">-- dominance</div>
                 </div>
-                <div class="metric-card" style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); text-align: center;">
+                <div class="metric-card" style="background: var(--panel); padding: 20px; border-radius: 12px; border: 1px solid var(--border); text-align: center;">
                     <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">TOP CHAIN BY SUPPLY</div>
                     <div id="topChainName" style="font-size: 24px; font-weight: 700; color: var(--text);">--</div>
                     <div id="topChainSupply" style="font-size: 18px; color: var(--cyan); margin-top: 4px;">--</div>
@@ -4010,6 +4010,8 @@
                 
                 const totalSupply = chainsData.reduce((sum, c) => sum + (c.totalCirculatingUSD?.peggedUSD || 0), 0);
                 document.getElementById('stableTotalSupply').textContent = '$' + formatStableNum(totalSupply);
+                const tabChangeEl = document.getElementById('stableTabTotalChange');
+                if (tabChangeEl) tabChangeEl.textContent = 'Total across all chains';
                 
                 const sortedChains = chainsData.filter(c => c.totalCirculatingUSD?.peggedUSD > 0)
                     .sort((a, b) => (b.totalCirculatingUSD?.peggedUSD || 0) - (a.totalCirculatingUSD?.peggedUSD || 0));
@@ -9595,23 +9597,34 @@
         
         async function fetchStablecoinHistory(days = 'all') {
             try {
-                const response = await fetch(`${DEFILLAMA_STABLES}/stablecoincharts/all`);
-                if (!response.ok) throw new Error('DefiLlama history API error');
-                const data = await response.json();
+                // Try the aggregated endpoint first (returns array of {date, totalCirculatingUSD: {peggedUSD}})
+                let data = null;
+                
+                const attempts = [
+                    `${DEFILLAMA_STABLES}/stablecoincharts/all`,
+                    `${DEFILLAMA_STABLES}/stablecoincharts/all?stablecoin=1`,
+                ];
+                
+                for (const url of attempts) {
+                    try {
+                        const response = await fetch(url);
+                        if (!response.ok) continue;
+                        const json = await response.json();
+                        // Validate we have usable array data with date fields
+                        if (Array.isArray(json) && json.length > 0 && json[0].date) {
+                            data = json;
+                            break;
+                        }
+                    } catch (e) { /* try next */ }
+                }
+                
+                if (!data || data.length === 0) throw new Error('No stablecoin history data returned');
                 
                 stablecoinHistoryData = data;
                 updateStablecoinChartDisplay(days);
                 
-                // Also render ROC chart
-                setTimeout(() => {
-                    const rocData = stablecoinHistoryData.map(d => ({
-                        date: new Date(d.date * 1000),
-                        total: d.totalCirculating?.peggedUSD || d.totalCirculatingUSD?.peggedUSD || 0
-                    }));
-                    // Store for ROC chart
-                    window.stablecoinHistoryForROC = rocData;
-                    renderStablecoinROCChart(365);
-                }, 500);
+                // Also render ROC chart after short delay
+                setTimeout(() => renderStablecoinROCChart(365), 500);
                 
             } catch (error) {
                 console.error('Error fetching stablecoin history:', error);
@@ -9633,13 +9646,20 @@
                 total: d.totalCirculating?.peggedUSD || d.totalCirculatingUSD?.peggedUSD || 0
             })));
             
-            // Update button states
-            document.querySelectorAll('.time-selector .time-btn').forEach(btn => {
-                const btnDays = btn.textContent === 'ALL' ? 'all' : 
-                               btn.textContent === '1Y' ? '365' :
-                               btn.textContent === '90D' ? '90' : '30';
-                btn.classList.toggle('active', btnDays === days);
-            });
+            // Update button states - scope to the stablecoin history card only
+            const historyCanvas = document.getElementById('stablecoinChart');
+            if (historyCanvas) {
+                const container = historyCanvas.closest('.card');
+                if (container) {
+                    container.querySelectorAll('.time-btn').forEach(btn => {
+                        const btnText = btn.textContent.trim();
+                        const btnDays = btnText === 'ALL' ? 'all' : 
+                                       btnText === '1Y' ? '365' :
+                                       btnText === '90D' ? '90' : '30';
+                        btn.classList.toggle('active', btnDays === String(days));
+                    });
+                }
+            }
         }
         
         function updateStablecoinChart(days) {
@@ -9797,17 +9817,18 @@
         
         function updateStablecoinROCChart(days) {
             renderStablecoinROCChart(days);
-            // Update button states
-            document.querySelectorAll('#stablecoinROCChart').forEach(chart => {
-                const container = chart.closest('.card');
+            // Update button states - find the card containing the ROC canvas
+            const rocCanvas = document.getElementById('stablecoinROCChart');
+            if (rocCanvas) {
+                const container = rocCanvas.closest('.card');
                 if (container) {
                     container.querySelectorAll('.time-btn').forEach(btn => {
-                        const btnDays = btn.textContent === '1Y' ? '365' : 
-                                       btn.textContent === '180D' ? '180' : '90';
+                        const btnDays = btn.textContent.trim() === '1Y' ? '365' : 
+                                       btn.textContent.trim() === '180D' ? '180' : '90';
                         btn.classList.toggle('active', btnDays === String(days));
                     });
                 }
-            });
+            }
         }
         
         // ==================== BINANCE FUTURES API ====================
