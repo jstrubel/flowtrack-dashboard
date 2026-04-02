@@ -3574,7 +3574,10 @@
     <script>
         // ==================== CONFIGURATION ====================
         const BINANCE_FAPI = 'https://fapi.binance.com/fapi/v1';
-        const COINGECKO_API = 'https://api.coingecko.com/api/v3';
+        // CoinGecko Analyst tier - use pro-api endpoint with key header
+        const COINGECKO_API_KEY = 'CG-sCiNPcrVp2DemhsR82mHYnjp'; // <-- Paste your Analyst API key here
+        const COINGECKO_API = COINGECKO_API_KEY ? 'https://pro-api.coingecko.com/api/v3' : 'https://api.coingecko.com/api/v3';
+        const COINGECKO_HEADERS = COINGECKO_API_KEY ? { 'x-cg-pro-api-key': COINGECKO_API_KEY } : {};
         const FEAR_GREED_API = 'https://api.alternative.me/fng';
         
         // Top perpetual contracts to track
@@ -4002,8 +4005,8 @@
             console.log('[StableTab] Loading data...');
             try {
                 const [chainsRes, stablecoinsRes] = await Promise.all([
-                    fetch('https://stablecoins.llama.fi/stablecoinchains'),
-                    fetch('https://stablecoins.llama.fi/stablecoins?includePrices=true')
+                    fetch('https://api.llama.fi/stablecoinchains'),
+                    fetch('https://api.llama.fi/stablecoins?includePrices=true')
                 ]);
                 const chainsData = await chainsRes.json();
                 const stablecoinsData = await stablecoinsRes.json();
@@ -4145,7 +4148,7 @@
         
         async function loadStableTabHistory(days) {
             try {
-                const res = await fetch('https://stablecoins.llama.fi/stablecoincharts/all?stablecoin=1');
+                const res = await fetch('https://api.llama.fi/stablecoincharts/all?stablecoin=1');
                 const data = await res.json();
                 renderStableTabHistoryChart(data, days);
             } catch (e) { console.error('[StableTab] History error:', e); }
@@ -4183,8 +4186,8 @@
         async function loadTronVsEth(days) {
             try {
                 const [tronRes, ethRes] = await Promise.all([
-                    fetch('https://stablecoins.llama.fi/stablecoincharts/Tron'),
-                    fetch('https://stablecoins.llama.fi/stablecoincharts/Ethereum')
+                    fetch('https://api.llama.fi/stablecoincharts/Tron'),
+                    fetch('https://api.llama.fi/stablecoincharts/Ethereum')
                 ]);
                 const tronData = await tronRes.json();
                 const ethData = await ethRes.json();
@@ -4232,7 +4235,7 @@
             
             try {
                 // Fetch TRON stablecoin supply history from DefiLlama
-                const supplyRes = await fetch('https://stablecoins.llama.fi/stablecoincharts/Tron');
+                const supplyRes = await fetch('https://api.llama.fi/stablecoincharts/Tron');
                 if (!supplyRes.ok) throw new Error('Supply fetch failed');
                 const supplyData = await supplyRes.json();
                 
@@ -4333,7 +4336,7 @@
         async function loadMarketShareTrend(days) {
             try {
                 const chains = ['Ethereum', 'Tron', 'Solana', 'BSC', 'Arbitrum'];
-                const results = await Promise.all(chains.map(c => fetch(`https://stablecoins.llama.fi/stablecoincharts/${c}`).then(r => r.json())));
+                const results = await Promise.all(chains.map(c => fetch(`https://api.llama.fi/stablecoincharts/${c}`).then(r => r.json())));
                 renderMarketShareTrendChart(chains, results, days);
             } catch (e) { console.error('[StableTab] Market share error:', e); }
         }
@@ -9516,59 +9519,94 @@
         }
         
         // ==================== DEFILLAMA STABLECOINS API ====================
-        const DEFILLAMA_STABLES = 'https://stablecoins.llama.fi';
+        const DEFILLAMA_STABLES = 'https://api.llama.fi';
         let stablecoinChart = null;
         window.stablecoinChart = null;
         let stablecoinHistoryData = [];
         
         async function fetchStablecoinData() {
+            let stables = [];
+
+            // --- Attempt 1: DefiLlama (free, best granularity) ---
             try {
-                // Fetch all stablecoins
                 const response = await fetch(`${DEFILLAMA_STABLES}/stablecoins?includePrices=true`);
-                if (!response.ok) throw new Error('DefiLlama API error');
-                const data = await response.json();
-                
-                // Sort by circulating supply
-                const stables = data.peggedAssets
-                    .filter(s => s.circulating && s.circulating.peggedUSD)
-                    .map(s => ({
-                        name: s.name,
-                        symbol: s.symbol,
-                        mcap: s.circulating.peggedUSD,
-                        mechanism: s.pegMechanism || 'unknown'
-                    }))
-                    .sort((a, b) => b.mcap - a.mcap);
-                
-                // Calculate totals
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.peggedAssets && data.peggedAssets.length > 0) {
+                        stables = data.peggedAssets
+                            .filter(s => s.circulating && s.circulating.peggedUSD > 0)
+                            .map(s => ({
+                                name: s.name,
+                                symbol: s.symbol,
+                                mcap: s.circulating.peggedUSD,
+                            }))
+                            .sort((a, b) => b.mcap - a.mcap);
+                        console.log('[Stables] Loaded from DefiLlama:', stables.length, 'assets');
+                    }
+                }
+            } catch (e) {
+                console.warn('[Stables] DefiLlama fetch failed:', e.message);
+            }
+
+            // --- Attempt 2: CoinGecko stablecoins category (works with Analyst key) ---
+            if (stables.length === 0) {
+                try {
+                    console.log('[Stables] Falling back to CoinGecko...');
+                    const cgUrl = `${COINGECKO_API}/coins/markets?vs_currency=usd&category=stablecoins&order=market_cap_desc&per_page=50&sparkline=false`;
+                    const cgRes = await fetch(cgUrl, { headers: COINGECKO_HEADERS });
+                    if (cgRes.ok) {
+                        const cgData = await cgRes.json();
+                        if (Array.isArray(cgData) && cgData.length > 0) {
+                            stables = cgData
+                                .filter(s => s.market_cap > 0)
+                                .map(s => ({
+                                    name: s.name,
+                                    symbol: s.symbol.toUpperCase(),
+                                    mcap: s.market_cap,
+                                }));
+                            console.log('[Stables] Loaded from CoinGecko:', stables.length, 'assets');
+                        }
+                    }
+                } catch (e) {
+                    console.warn('[Stables] CoinGecko fallback failed:', e.message);
+                }
+            }
+
+            if (stables.length === 0) {
+                console.error('[Stables] All sources failed');
+                document.getElementById('stableTotalMcap').textContent = 'Unavailable';
+                return;
+            }
+
+            try {
                 const totalMcap = stables.reduce((sum, s) => sum + s.mcap, 0);
                 const usdt = stables.find(s => s.symbol === 'USDT');
                 const usdc = stables.find(s => s.symbol === 'USDC');
                 const dai = stables.find(s => s.symbol === 'DAI');
-                
+
                 // Update summary cards
                 document.getElementById('stableTotalMcap').textContent = formatCurrency(totalMcap);
                 document.getElementById('stableTotalChange').textContent = '~$' + formatNumber(totalMcap / 1e9, 1) + 'B in circulation';
                 document.getElementById('stableTotalChange').className = 'market-subtitle';
-                
+
                 if (usdt) {
                     document.getElementById('stableUSDT').textContent = formatCurrency(usdt.mcap);
                     document.getElementById('stableUSDTDom').textContent = formatNumber(usdt.mcap / totalMcap * 100, 1) + '% dominance';
                 }
-                
                 if (usdc) {
                     document.getElementById('stableUSDC').textContent = formatCurrency(usdc.mcap);
                     document.getElementById('stableUSDCDom').textContent = formatNumber(usdc.mcap / totalMcap * 100, 1) + '% dominance';
                 }
-                
+
                 const othersMcap = totalMcap - (usdt?.mcap || 0) - (usdc?.mcap || 0);
                 document.getElementById('stableOthers').textContent = formatCurrency(othersMcap);
-                
+
                 // Update dominance bar
                 const usdtPct = usdt ? usdt.mcap / totalMcap * 100 : 0;
                 const usdcPct = usdc ? usdc.mcap / totalMcap * 100 : 0;
                 const daiPct = dai ? dai.mcap / totalMcap * 100 : 0;
                 const otherPct = 100 - usdtPct - usdcPct - daiPct;
-                
+
                 document.getElementById('stableBarUSDT').style.width = usdtPct + '%';
                 document.getElementById('stableBarUSDT').textContent = `USDT ${formatNumber(usdtPct, 0)}%`;
                 document.getElementById('stableBarUSDC').style.width = usdcPct + '%';
@@ -9577,10 +9615,10 @@
                 document.getElementById('stableBarDAI').textContent = daiPct > 3 ? `DAI ${formatNumber(daiPct, 0)}%` : '';
                 document.getElementById('stableBarOther').style.width = otherPct + '%';
                 document.getElementById('stableBarOther').textContent = `Other ${formatNumber(otherPct, 0)}%`;
-                
+
                 // Update table (top 10)
                 const tableBody = document.getElementById('stablecoinTable');
-                tableBody.innerHTML = stables.slice(0, 10).map((s, i) => `
+                tableBody.innerHTML = stables.slice(0, 10).map(s => `
                     <tr style="border-bottom: 1px solid var(--border);">
                         <td style="padding: 10px 12px; font-weight: 600;">${s.name}</td>
                         <td style="padding: 10px 12px; text-align: right; color: var(--text-muted);">${s.symbol}</td>
@@ -9588,9 +9626,9 @@
                         <td style="padding: 10px 12px; text-align: right; color: var(--text-muted);">${formatNumber(s.mcap / totalMcap * 100, 2)}%</td>
                     </tr>
                 `).join('');
-                
+
             } catch (error) {
-                console.error('Error fetching stablecoin data:', error);
+                console.error('[Stables] Error rendering stablecoin data:', error);
                 document.getElementById('stableTotalMcap').textContent = 'Error';
             }
         }
@@ -11320,7 +11358,7 @@
             try {
                 console.log('Trying direct CoinGecko API...');
                 const url = `${COINGECKO_API}/coins/markets?vs_currency=usd&ids=${cgIds}&order=market_cap_desc&sparkline=false`;
-                const response = await fetch(url);
+                const response = await fetch(url, { headers: COINGECKO_HEADERS });
                 
                 if (response.ok) {
                     const data = await response.json();
@@ -11381,7 +11419,7 @@
                 try {
                     console.log('Trying CoinGecko simple price endpoint...');
                     const url = `${COINGECKO_API}/simple/price?ids=${cgIds}&vs_currencies=usd&include_market_cap=true`;
-                    const response = await fetch(url);
+                    const response = await fetch(url, { headers: COINGECKO_HEADERS });
                     
                     if (response.ok) {
                         const data = await response.json();
