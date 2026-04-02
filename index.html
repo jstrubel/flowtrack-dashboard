@@ -4208,11 +4208,25 @@
         
         async function loadStableTabHistory(days) {
             try {
-                const data = await fetchFirstSuccess([
-                    'https://stablecoins.llama.fi/stablecoincharts/all',
-                    'https://api.llama.fi/stablecoincharts/all',
-                ], d => Array.isArray(d) && d.length > 0 && d[0].date);
-                if (data) renderStableTabHistoryChart(data, days);
+                // DefiLlama stablecoincharts is CORS-blocked; use same CoinGecko approach
+                const cgDays = (days >= 730 || !days) ? 'max' : String(days);
+                const stableIds = ['tether', 'usd-coin', 'susds'];
+                const charts = await Promise.all(stableIds.map(id =>
+                    fetch(`${COINGECKO_API}/coins/${id}/market_chart?vs_currency=usd&days=${cgDays}&interval=daily`, { headers: COINGECKO_HEADERS })
+                        .then(r => r.ok ? r.json() : null).catch(() => null)
+                ));
+                const dayMap = new Map();
+                charts.forEach(chart => {
+                    if (!chart?.market_caps) return;
+                    chart.market_caps.forEach(([ts, mcap]) => {
+                        const dayKey = Math.floor(ts / 86400000) * 86400000;
+                        dayMap.set(dayKey, (dayMap.get(dayKey) || 0) + (mcap || 0));
+                    });
+                });
+                if (dayMap.size === 0) throw new Error('No data');
+                const data = [...dayMap.entries()].sort((a, b) => a[0] - b[0])
+                    .map(([ts, total]) => ({ date: ts / 1000, _total: total }));
+                renderStableTabHistoryChart(data, days);
             } catch (e) { console.error('[StableTab] History error:', e); }
         }
         
@@ -4230,7 +4244,7 @@
                     labels: filtered.map(d => new Date(d.date * 1000).toLocaleDateString()),
                     datasets: [{
                         label: 'Total Supply',
-                        data: filtered.map(d => extractStableTotal(d)),
+                        data: filtered.map(d => d._total !== undefined ? d._total : extractStableTotal(d)),
                         borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2
                     }]
                 },
@@ -9695,90 +9709,88 @@
         // Handles all known response formats from /stablecoincharts/* endpoints
         function extractStableTotal(d) {
             if (!d) return 0;
-            // Format 1: {totalCirculatingUSD: {peggedUSD: number}} — /stablecoincharts/all
             if (d.totalCirculatingUSD?.peggedUSD) return d.totalCirculatingUSD.peggedUSD;
-            // Format 2: {totalCirculating: {peggedUSD: number}} — /stablecoincharts/{chain}
             if (d.totalCirculating?.peggedUSD) return d.totalCirculating.peggedUSD;
-            // Format 3: flat top-level fields
             if (typeof d.peggedUSD === 'number' && d.peggedUSD > 0) return d.peggedUSD;
             if (typeof d.totalUSD === 'number' && d.totalUSD > 0) return d.totalUSD;
             if (typeof d.total === 'number' && d.total > 0) return d.total;
-            // Format 4: sum all numeric pegged values at top level
             const summed = Object.values(d).reduce((acc, v) => {
-                if (typeof v === 'object' && v !== null && typeof v.peggedUSD === 'number') {
-                    return acc + v.peggedUSD;
-                }
+                if (typeof v === 'object' && v !== null && typeof v.peggedUSD === 'number') return acc + v.peggedUSD;
                 return acc;
             }, 0);
-            if (summed > 0) return summed;
-            return 0;
+            return summed > 0 ? summed : 0;
         }
 
         async function fetchStablecoinHistory(days = 'all') {
+            // DefiLlama stablecoincharts/* endpoints are CORS-blocked in browsers.
+            // Instead, fetch top-3 stablecoin market_chart data from CoinGecko and sum.
+            // USDT + USDC + USDS represent ~92% of total supply — accurate enough for chart purposes.
             try {
-                let data = null;
+                const cgDays = days === 'all' ? 'max' : String(days);
+                const stableIds = ['tether', 'usd-coin', 'susds']; // USDT, USDC, USDS
 
-                const attempts = [
-                    'https://stablecoins.llama.fi/stablecoincharts/all',
-                    `${DEFILLAMA_STABLES}/stablecoincharts/all`,
-                    'https://stablecoins.llama.fi/stablecoincharts/all?stablecoin=1',
-                    `${DEFILLAMA_STABLES}/stablecoincharts/all?stablecoin=1`,
-                ];
+                const charts = await Promise.all(stableIds.map(id =>
+                    fetch(`${COINGECKO_API}/coins/${id}/market_chart?vs_currency=usd&days=${cgDays}&interval=daily`, { headers: COINGECKO_HEADERS })
+                        .then(r => r.ok ? r.json() : null)
+                        .catch(() => null)
+                ));
 
-                for (const url of attempts) {
-                    try {
-                        const response = await fetch(url);
-                        if (!response.ok) continue;
-                        const json = await response.json();
-                        if (Array.isArray(json) && json.length > 0 && json[0].date) {
-                            data = json;
-                            // Debug: log the first item to see actual field structure
-                            console.log('[StableHistory] First data point keys:', Object.keys(json[0]));
-                            console.log('[StableHistory] First data point sample:', JSON.stringify(json[0]).substring(0, 200));
-                            console.log('[StableHistory] Extracted total from first point:', extractStableTotal(json[0]));
-                            break;
-                        }
-                    } catch (e) {
-                        console.warn('[StableHistory] Attempt failed for', url, e.message);
-                    }
-                }
+                // Merge by timestamp - sum market caps across all coins per day
+                const dayMap = new Map();
+                charts.forEach(chart => {
+                    if (!chart?.market_caps) return;
+                    chart.market_caps.forEach(([ts, mcap]) => {
+                        // Normalize to midnight UTC
+                        const dayKey = Math.floor(ts / 86400000) * 86400000;
+                        dayMap.set(dayKey, (dayMap.get(dayKey) || 0) + (mcap || 0));
+                    });
+                });
 
-                if (!data || data.length === 0) throw new Error('No stablecoin history data returned');
+                if (dayMap.size === 0) throw new Error('No CoinGecko market chart data');
 
-                stablecoinHistoryData = data;
+                // Convert to sorted array in the same format as stablecoinHistoryData
+                // We store as objects with date (unix seconds) and total (raw USD)
+                const sortedData = [...dayMap.entries()]
+                    .sort((a, b) => a[0] - b[0])
+                    .map(([ts, total]) => ({
+                        date: ts / 1000, // store as unix seconds (string-coercible, like DefiLlama)
+                        _total: total    // pre-computed, bypasses extractStableTotal lookup
+                    }));
+
+                console.log('[StableHistory] Loaded from CoinGecko:', sortedData.length, 'days, latest total:', formatCurrency(sortedData[sortedData.length - 1]?._total));
+
+                stablecoinHistoryData = sortedData;
                 updateStablecoinChartDisplay(days);
-
-                // Render ROC chart after short delay
-                setTimeout(() => renderStablecoinROCChart(365), 500);
+                setTimeout(() => renderStablecoinROCChart(days === 'all' ? 365 : parseInt(days) || 365), 500);
 
             } catch (error) {
-                console.error('Error fetching stablecoin history:', error);
+                console.error('[StableHistory] Failed:', error);
             }
         }
         
         function updateStablecoinChartDisplay(days) {
             if (!stablecoinHistoryData.length) return;
-            
+
             let filteredData = stablecoinHistoryData;
-            
+
             if (days !== 'all') {
-                const cutoff = Date.now() / 1000 - (parseInt(days) * 24 * 60 * 60);
-                filteredData = stablecoinHistoryData.filter(d => d.date >= cutoff);
+                const cutoffSec = Date.now() / 1000 - (parseInt(days) * 86400);
+                filteredData = stablecoinHistoryData.filter(d => Number(d.date) >= cutoffSec);
             }
-            
+
             createStablecoinChart(filteredData.map(d => ({
-                date: new Date(d.date * 1000),
-                total: extractStableTotal(d)
+                date: new Date(Number(d.date) * 1000),
+                total: d._total !== undefined ? d._total : extractStableTotal(d)
             })));
-            
-            // Update button states - scope to the stablecoin history card only
+
+            // Update button states scoped to the history card
             const historyCanvas = document.getElementById('stablecoinChart');
             if (historyCanvas) {
                 const container = historyCanvas.closest('.card');
                 if (container) {
                     container.querySelectorAll('.time-btn').forEach(btn => {
                         const btnText = btn.textContent.trim();
-                        const btnDays = btnText === 'ALL' ? 'all' : 
+                        const btnDays = btnText === 'ALL' ? 'all' :
                                        btnText === '1Y' ? '365' :
                                        btnText === '90D' ? '90' : '30';
                         btn.classList.toggle('active', btnDays === String(days));
@@ -9865,12 +9877,10 @@
             if (!ctx) return;
             
             // Transform stablecoin data
-            let normalizedData = stablecoinHistoryData.map(d => {
-                return {
-                    date: new Date(d.date * 1000),
-                    total: extractStableTotal(d)
-                };
-            }).filter(d => d.total > 0);
+            let normalizedData = stablecoinHistoryData.map(d => ({
+                date: new Date(Number(d.date) * 1000),
+                total: d._total !== undefined ? d._total : extractStableTotal(d)
+            })).filter(d => d.total > 0);
             
             // Sort by date
             normalizedData.sort((a, b) => a.date - b.date);
