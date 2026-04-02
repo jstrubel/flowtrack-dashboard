@@ -4001,66 +4001,126 @@
             return num.toFixed(2);
         }
         
+        // Helper: fetch from multiple URL candidates, return first successful JSON result
+        async function fetchFirstSuccess(urls, validator) {
+            for (const url of urls) {
+                try {
+                    const res = await fetch(url);
+                    if (!res.ok) continue;
+                    const json = await res.json();
+                    if (!validator || validator(json)) return json;
+                } catch (e) {
+                    console.warn('[StableTab] Failed:', url, e.message);
+                }
+            }
+            return null;
+        }
+
         async function loadStablecoinTabData() {
             console.log('[StableTab] Loading data...');
+
+            // ── Section 1: Chain breakdown (stablecoinchains) ──────────────────
+            let chainsData = null;
             try {
-                const [chainsRes, stablecoinsRes] = await Promise.all([
-                    fetch('https://api.llama.fi/stablecoinchains'),
-                    fetch('https://api.llama.fi/stablecoins?includePrices=true')
-                ]);
-                const chainsData = await chainsRes.json();
-                const stablecoinsData = await stablecoinsRes.json();
-                
-                const totalSupply = chainsData.reduce((sum, c) => sum + (c.totalCirculatingUSD?.peggedUSD || 0), 0);
+                chainsData = await fetchFirstSuccess([
+                    'https://stablecoins.llama.fi/stablecoinchains',
+                    'https://api.llama.fi/stablecoinchains',
+                ], d => Array.isArray(d) && d.length > 0);
+            } catch(e) {}
+
+            if (chainsData && Array.isArray(chainsData)) {
+                // Normalize: some items use totalCirculatingUSD, others totalCirculating
+                const extractChainUSD = c => c.totalCirculatingUSD?.peggedUSD || c.totalCirculating?.peggedUSD || 0;
+                const totalSupply = chainsData.reduce((sum, c) => sum + extractChainUSD(c), 0);
+
                 document.getElementById('stableTotalSupply').textContent = '$' + formatStableNum(totalSupply);
                 const tabChangeEl = document.getElementById('stableTabTotalChange');
                 if (tabChangeEl) tabChangeEl.textContent = 'Total across all chains';
-                
-                const sortedChains = chainsData.filter(c => c.totalCirculatingUSD?.peggedUSD > 0)
-                    .sort((a, b) => (b.totalCirculatingUSD?.peggedUSD || 0) - (a.totalCirculatingUSD?.peggedUSD || 0));
-                
+
+                const sortedChains = chainsData
+                    .filter(c => extractChainUSD(c) > 0)
+                    .sort((a, b) => extractChainUSD(b) - extractChainUSD(a))
+                    .map(c => ({ ...c, _usd: extractChainUSD(c) })); // cache extracted value
+
                 if (sortedChains[0]) {
                     document.getElementById('topChainName').textContent = sortedChains[0].name;
-                    document.getElementById('topChainSupply').textContent = '$' + formatStableNum(sortedChains[0].totalCirculatingUSD?.peggedUSD);
-                    document.getElementById('topChainShare').textContent = ((sortedChains[0].totalCirculatingUSD?.peggedUSD / totalSupply) * 100).toFixed(1) + '% share';
+                    document.getElementById('topChainSupply').textContent = '$' + formatStableNum(sortedChains[0]._usd);
+                    document.getElementById('topChainShare').textContent = ((sortedChains[0]._usd / totalSupply) * 100).toFixed(1) + '% share';
                 }
-                
-                const tron = sortedChains.find(c => c.name.toLowerCase() === 'tron');
+
+                const tron = sortedChains.find(c => c.name?.toLowerCase() === 'tron');
                 if (tron) {
-                    document.getElementById('tronSupply').textContent = '$' + formatStableNum(tron.totalCirculatingUSD?.peggedUSD);
-                    document.getElementById('tronMarketShare').textContent = ((tron.totalCirculatingUSD?.peggedUSD / totalSupply) * 100).toFixed(1) + '%';
+                    document.getElementById('tronSupply').textContent = '$' + formatStableNum(tron._usd);
+                    document.getElementById('tronMarketShare').textContent = ((tron._usd / totalSupply) * 100).toFixed(1) + '%';
                 }
-                
-                const peggedAssets = stablecoinsData.peggedAssets || [];
+
+                renderStableSupplyByChain(sortedChains.slice(0, 10).map(c => ({ ...c, totalCirculatingUSD: { peggedUSD: c._usd } })), totalSupply);
+                renderStableChainTable(sortedChains.slice(0, 12).map(c => ({ ...c, totalCirculatingUSD: { peggedUSD: c._usd } })), totalSupply);
+
+                document.getElementById('stableSupplyLoading').style.display = 'none';
+            } else {
+                document.getElementById('stableSupplyLoading').innerHTML = '<div style="color:var(--bad);">Chain data unavailable</div>';
+            }
+
+            // ── Section 2: Issuer breakdown (peggedAssets) ─────────────────────
+            let peggedAssets = [];
+            try {
+                // Primary: DefiLlama stablecoins list
+                const stablecoinsData = await fetchFirstSuccess([
+                    'https://stablecoins.llama.fi/stablecoins?includePrices=true',
+                    'https://api.llama.fi/stablecoins?includePrices=true',
+                ], d => Array.isArray(d?.peggedAssets) && d.peggedAssets.length > 0);
+
+                if (stablecoinsData?.peggedAssets) {
+                    peggedAssets = stablecoinsData.peggedAssets;
+                }
+            } catch(e) {}
+
+            // Fallback: CoinGecko stablecoins category
+            if (peggedAssets.length === 0) {
+                try {
+                    const cgUrl = `${COINGECKO_API}/coins/markets?vs_currency=usd&category=stablecoins&order=market_cap_desc&per_page=30&sparkline=false`;
+                    const cgRes = await fetch(cgUrl, { headers: COINGECKO_HEADERS });
+                    if (cgRes.ok) {
+                        const cgData = await cgRes.json();
+                        // Convert to DefiLlama peggedAssets format
+                        peggedAssets = cgData.filter(c => c.market_cap > 0).map(c => ({
+                            name: c.name,
+                            symbol: c.symbol.toUpperCase(),
+                            circulating: { peggedUSD: c.market_cap }
+                        }));
+                        console.log('[StableTab] Using CoinGecko issuer fallback:', peggedAssets.length, 'assets');
+                    }
+                } catch(e) { console.warn('[StableTab] CoinGecko issuer fallback failed:', e.message); }
+            }
+
+            if (peggedAssets.length > 0) {
+                const totalFromIssuers = peggedAssets.reduce((s, a) => s + (a.circulating?.peggedUSD || 0), 0);
                 const usdt = peggedAssets.find(s => s.symbol === 'USDT');
                 const usdc = peggedAssets.find(s => s.symbol === 'USDC');
-                
+                const total = totalFromIssuers || parseFloat(document.getElementById('stableTotalSupply').textContent.replace(/[^0-9.]/g, '')) * 1e9 || 1;
+
                 if (usdt) {
                     const cap = usdt.circulating?.peggedUSD || 0;
                     document.getElementById('usdtMarketCap').textContent = '$' + formatStableNum(cap);
-                    document.getElementById('usdtDominance').textContent = ((cap / totalSupply) * 100).toFixed(1) + '% dominance';
+                    document.getElementById('usdtDominance').textContent = ((cap / total) * 100).toFixed(1) + '% dominance';
                 }
                 if (usdc) {
                     const cap = usdc.circulating?.peggedUSD || 0;
                     document.getElementById('usdcMarketCap').textContent = '$' + formatStableNum(cap);
-                    document.getElementById('usdcDominance').textContent = ((cap / totalSupply) * 100).toFixed(1) + '% dominance';
+                    document.getElementById('usdcDominance').textContent = ((cap / total) * 100).toFixed(1) + '% dominance';
                 }
-                
-                renderStableSupplyByChain(sortedChains.slice(0, 10), totalSupply);
-                renderStableIssuerPie(peggedAssets, totalSupply);
-                renderStableChainTable(sortedChains.slice(0, 12), totalSupply);
-                loadTrxPriceForTab();
-                loadStableTabHistory(365);
-                loadTronVsEth(365);
-                loadTrxVsSupply(730);  // TRX Price vs Stablecoin Supply (default 2Y)
-                loadMarketShareTrend(365);
-                
-                document.getElementById('stableSupplyLoading').style.display = 'none';
-                stableTabDataLoaded = true;
-            } catch (err) {
-                console.error('[StableTab] Error:', err);
-                document.getElementById('stableSupplyLoading').innerHTML = '<div style="color:var(--bad);">Failed to load</div>';
+                renderStableIssuerPie(peggedAssets, total);
             }
+
+            // ── Section 3: Historical charts (independent) ─────────────────────
+            loadTrxPriceForTab();
+            loadStableTabHistory(365);
+            loadTronVsEth(365);
+            loadTrxVsSupply(730);
+            loadMarketShareTrend(365);
+
+            stableTabDataLoaded = true;
         }
         
         function renderStableSupplyByChain(chains, total) {
@@ -4148,9 +4208,11 @@
         
         async function loadStableTabHistory(days) {
             try {
-                const res = await fetch('https://api.llama.fi/stablecoincharts/all?stablecoin=1');
-                const data = await res.json();
-                renderStableTabHistoryChart(data, days);
+                const data = await fetchFirstSuccess([
+                    'https://stablecoins.llama.fi/stablecoincharts/all',
+                    'https://api.llama.fi/stablecoincharts/all',
+                ], d => Array.isArray(d) && d.length > 0 && d[0].date);
+                if (data) renderStableTabHistoryChart(data, days);
             } catch (e) { console.error('[StableTab] History error:', e); }
         }
         
@@ -4185,13 +4247,11 @@
         
         async function loadTronVsEth(days) {
             try {
-                const [tronRes, ethRes] = await Promise.all([
-                    fetch('https://api.llama.fi/stablecoincharts/Tron'),
-                    fetch('https://api.llama.fi/stablecoincharts/Ethereum')
+                const [tronData, ethData] = await Promise.all([
+                    fetchFirstSuccess(['https://stablecoins.llama.fi/stablecoincharts/Tron', 'https://api.llama.fi/stablecoincharts/Tron'], d => Array.isArray(d)),
+                    fetchFirstSuccess(['https://stablecoins.llama.fi/stablecoincharts/Ethereum', 'https://api.llama.fi/stablecoincharts/Ethereum'], d => Array.isArray(d)),
                 ]);
-                const tronData = await tronRes.json();
-                const ethData = await ethRes.json();
-                renderTronVsEthChart(tronData, ethData, days);
+                if (tronData && ethData) renderTronVsEthChart(tronData, ethData, days);
             } catch (e) { console.error('[StableTab] TRON vs ETH error:', e); }
         }
         
@@ -4235,7 +4295,7 @@
             
             try {
                 // Fetch TRON stablecoin supply history from DefiLlama
-                const supplyRes = await fetch('https://api.llama.fi/stablecoincharts/Tron');
+                const supplyRes = await fetchFirstSuccess(['https://stablecoins.llama.fi/stablecoincharts/Tron','https://api.llama.fi/stablecoincharts/Tron'], d => Array.isArray(d));
                 if (!supplyRes.ok) throw new Error('Supply fetch failed');
                 const supplyData = await supplyRes.json();
                 
@@ -4336,7 +4396,7 @@
         async function loadMarketShareTrend(days) {
             try {
                 const chains = ['Ethereum', 'Tron', 'Solana', 'BSC', 'Arbitrum'];
-                const results = await Promise.all(chains.map(c => fetch(`https://api.llama.fi/stablecoincharts/${c}`).then(r => r.json())));
+                const results = await Promise.all(chains.map(c => fetchFirstSuccess([`https://stablecoins.llama.fi/stablecoincharts/${c}`,`https://api.llama.fi/stablecoincharts/${c}`], d => Array.isArray(d))));
                 renderMarketShareTrendChart(chains, results, days);
             } catch (e) { console.error('[StableTab] Market share error:', e); }
         }
@@ -9528,21 +9588,19 @@
             let stables = [];
 
             // --- Attempt 1: DefiLlama (free, best granularity) ---
+            // stablecoins.llama.fi is the dedicated subdomain; api.llama.fi as fallback
             try {
-                const response = await fetch(`${DEFILLAMA_STABLES}/stablecoins?includePrices=true`);
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.peggedAssets && data.peggedAssets.length > 0) {
-                        stables = data.peggedAssets
-                            .filter(s => s.circulating && s.circulating.peggedUSD > 0)
-                            .map(s => ({
-                                name: s.name,
-                                symbol: s.symbol,
-                                mcap: s.circulating.peggedUSD,
-                            }))
-                            .sort((a, b) => b.mcap - a.mcap);
-                        console.log('[Stables] Loaded from DefiLlama:', stables.length, 'assets');
-                    }
+                const dlData = await fetchFirstSuccess([
+                    'https://stablecoins.llama.fi/stablecoins?includePrices=true',
+                    'https://api.llama.fi/stablecoins?includePrices=true',
+                ], d => Array.isArray(d?.peggedAssets) && d.peggedAssets.length > 0);
+
+                if (dlData?.peggedAssets) {
+                    stables = dlData.peggedAssets
+                        .filter(s => s.circulating && s.circulating.peggedUSD > 0)
+                        .map(s => ({ name: s.name, symbol: s.symbol, mcap: s.circulating.peggedUSD }))
+                        .sort((a, b) => b.mcap - a.mcap);
+                    console.log('[Stables] Loaded from DefiLlama:', stables.length, 'assets');
                 }
             } catch (e) {
                 console.warn('[Stables] DefiLlama fetch failed:', e.message);
@@ -9661,7 +9719,9 @@
                 let data = null;
 
                 const attempts = [
+                    'https://stablecoins.llama.fi/stablecoincharts/all',
                     `${DEFILLAMA_STABLES}/stablecoincharts/all`,
+                    'https://stablecoins.llama.fi/stablecoincharts/all?stablecoin=1',
                     `${DEFILLAMA_STABLES}/stablecoincharts/all?stablecoin=1`,
                 ];
 
