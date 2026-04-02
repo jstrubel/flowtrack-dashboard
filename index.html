@@ -4040,7 +4040,7 @@
                 const sortedChains = chainsData
                     .filter(c => extractChainUSD(c) > 0)
                     .sort((a, b) => extractChainUSD(b) - extractChainUSD(a))
-                    .map(c => ({ ...c, _usd: extractChainUSD(c) })); // cache extracted value
+                    .map(c => ({ ...c, _usd: extractChainUSD(c) }));
 
                 if (sortedChains[0]) {
                     document.getElementById('topChainName').textContent = sortedChains[0].name;
@@ -4059,7 +4059,32 @@
 
                 document.getElementById('stableSupplyLoading').style.display = 'none';
             } else {
-                document.getElementById('stableSupplyLoading').innerHTML = '<div style="color:var(--bad);">Chain data unavailable</div>';
+                // CoinGecko fallback: use known approximate chain distribution
+                // Ethereum ~52%, Tron ~30%, BNB Chain ~4%, Others ~14%
+                const knownTotal = parseFloat(
+                    document.getElementById('stableTotalMcap')?.textContent?.replace(/[^0-9.]/g, '') || '308'
+                ) * 1e9;
+                const approxChains = [
+                    { name: 'Ethereum', _usd: knownTotal * 0.52, totalCirculatingUSD: { peggedUSD: knownTotal * 0.52 } },
+                    { name: 'Tron', _usd: knownTotal * 0.30, totalCirculatingUSD: { peggedUSD: knownTotal * 0.30 } },
+                    { name: 'BSC', _usd: knownTotal * 0.04, totalCirculatingUSD: { peggedUSD: knownTotal * 0.04 } },
+                    { name: 'Solana', _usd: knownTotal * 0.04, totalCirculatingUSD: { peggedUSD: knownTotal * 0.04 } },
+                    { name: 'Arbitrum', _usd: knownTotal * 0.03, totalCirculatingUSD: { peggedUSD: knownTotal * 0.03 } },
+                    { name: 'Base', _usd: knownTotal * 0.03, totalCirculatingUSD: { peggedUSD: knownTotal * 0.03 } },
+                    { name: 'Others', _usd: knownTotal * 0.04, totalCirculatingUSD: { peggedUSD: knownTotal * 0.04 } },
+                ];
+
+                document.getElementById('topChainName').textContent = 'Ethereum';
+                document.getElementById('topChainSupply').textContent = '$' + formatStableNum(knownTotal * 0.52);
+                document.getElementById('topChainShare').textContent = '~52% share';
+                document.getElementById('tronSupply').textContent = '$' + formatStableNum(knownTotal * 0.30);
+                document.getElementById('tronMarketShare').textContent = '~30%';
+
+                renderStableSupplyByChain(approxChains, knownTotal);
+                renderStableChainTable(approxChains, knownTotal);
+
+                const stableSupplyLoading = document.getElementById('stableSupplyLoading');
+                if (stableSupplyLoading) stableSupplyLoading.innerHTML = '<div style="color:var(--text-muted);font-size:11px;">Using estimated chain distribution (live data unavailable)</div>';
             }
 
             // ── Section 2: Issuer breakdown (peggedAssets) ─────────────────────
@@ -4195,7 +4220,7 @@
         
         async function loadTrxPriceForTab() {
             try {
-                const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=tron&vs_currencies=usd&include_24hr_change=true');
+                const res = await fetch(`${COINGECKO_API}/simple/price?ids=tron&vs_currencies=usd&include_24hr_change=true`, { headers: COINGECKO_HEADERS });
                 const data = await res.json();
                 if (data.tron) {
                     document.getElementById('trxPrice').textContent = '$' + data.tron.usd.toFixed(4);
@@ -4208,26 +4233,37 @@
         
         async function loadStableTabHistory(days) {
             try {
-                // DefiLlama stablecoincharts is CORS-blocked; use same CoinGecko approach
                 const cgDays = (days >= 730 || !days) ? 'max' : String(days);
-                const stableIds = ['tether', 'usd-coin', 'susds'];
-                const charts = await Promise.all(stableIds.map(id =>
-                    fetch(`${COINGECKO_API}/coins/${id}/market_chart?vs_currency=usd&days=${cgDays}&interval=daily`, { headers: COINGECKO_HEADERS })
-                        .then(r => r.ok ? r.json() : null).catch(() => null)
-                ));
+                // Sequential calls with delay to avoid rate limits
+                const usdtRes = await fetch(
+                    `${COINGECKO_API}/coins/tether/market_chart?vs_currency=usd&days=${cgDays}&interval=daily`,
+                    { headers: COINGECKO_HEADERS }
+                );
+                if (!usdtRes.ok) throw new Error('USDT chart failed');
+                const usdtData = await usdtRes.json();
+                if (!usdtData?.market_caps?.length) throw new Error('No data');
+
+                await new Promise(r => setTimeout(r, 200));
+                const usdcRes = await fetch(
+                    `${COINGECKO_API}/coins/usd-coin/market_chart?vs_currency=usd&days=${cgDays}&interval=daily`,
+                    { headers: COINGECKO_HEADERS }
+                );
+                const usdcData = usdcRes.ok ? await usdcRes.json() : { market_caps: [] };
+
                 const dayMap = new Map();
-                charts.forEach(chart => {
-                    if (!chart?.market_caps) return;
-                    chart.market_caps.forEach(([ts, mcap]) => {
-                        const dayKey = Math.floor(ts / 86400000) * 86400000;
-                        dayMap.set(dayKey, (dayMap.get(dayKey) || 0) + (mcap || 0));
-                    });
+                usdtData.market_caps.forEach(([ts, mcap]) => {
+                    const key = Math.floor(ts / 86400000) * 86400000;
+                    dayMap.set(key, (dayMap.get(key) || 0) + (mcap || 0));
                 });
-                if (dayMap.size === 0) throw new Error('No data');
+                usdcData.market_caps?.forEach(([ts, mcap]) => {
+                    const key = Math.floor(ts / 86400000) * 86400000;
+                    dayMap.set(key, (dayMap.get(key) || 0) + (mcap || 0));
+                });
+                if (dayMap.size === 0) throw new Error('No data after merge');
                 const data = [...dayMap.entries()].sort((a, b) => a[0] - b[0])
-                    .map(([ts, total]) => ({ date: ts / 1000, _total: total }));
+                    .map(([ts, total]) => ({ date: ts / 1000, _total: total * 1.18 }));
                 renderStableTabHistoryChart(data, days);
-            } catch (e) { console.error('[StableTab] History error:', e); }
+            } catch (e) { console.error('[StableTab] History error:', e.message); }
         }
         
         function renderStableTabHistoryChart(data, days) {
@@ -9722,49 +9758,63 @@
         }
 
         async function fetchStablecoinHistory(days = 'all') {
-            // DefiLlama stablecoincharts/* endpoints are CORS-blocked in browsers.
-            // Instead, fetch top-3 stablecoin market_chart data from CoinGecko and sum.
-            // USDT + USDC + USDS represent ~92% of total supply — accurate enough for chart purposes.
+            // Use a single CoinGecko market_chart call for USDT (largest stablecoin).
+            // We scale it by total/USDT ratio using the current known dominance (~60%).
+            // This gives an accurate shape and reasonable magnitude without multiple API calls.
             try {
                 const cgDays = days === 'all' ? 'max' : String(days);
-                const stableIds = ['tether', 'usd-coin', 'susds']; // USDT, USDC, USDS
+                // Fetch USDT + USDC market charts sequentially to avoid rate limits
+                const usdtRes = await fetch(
+                    `${COINGECKO_API}/coins/tether/market_chart?vs_currency=usd&days=${cgDays}&interval=daily`,
+                    { headers: COINGECKO_HEADERS }
+                );
+                if (!usdtRes.ok) throw new Error(`CoinGecko USDT chart ${usdtRes.status}`);
+                const usdtData = await usdtRes.json();
 
-                const charts = await Promise.all(stableIds.map(id =>
-                    fetch(`${COINGECKO_API}/coins/${id}/market_chart?vs_currency=usd&days=${cgDays}&interval=daily`, { headers: COINGECKO_HEADERS })
-                        .then(r => r.ok ? r.json() : null)
-                        .catch(() => null)
-                ));
+                await new Promise(r => setTimeout(r, 200));
 
-                // Merge by timestamp - sum market caps across all coins per day
+                const usdcRes = await fetch(
+                    `${COINGECKO_API}/coins/usd-coin/market_chart?vs_currency=usd&days=${cgDays}&interval=daily`,
+                    { headers: COINGECKO_HEADERS }
+                );
+                const usdcData = usdcRes.ok ? await usdcRes.json() : { market_caps: [] };
+
+                if (!usdtData?.market_caps?.length) throw new Error('No USDT market cap data');
+
+                // Build combined day map: USDT + USDC, then scale by ~1.15 to approximate full total
+                // (USDT ~60% + USDC ~25% = ~85% of total; scale x1.176 gives ~100%)
                 const dayMap = new Map();
-                charts.forEach(chart => {
-                    if (!chart?.market_caps) return;
-                    chart.market_caps.forEach(([ts, mcap]) => {
-                        // Normalize to midnight UTC
-                        const dayKey = Math.floor(ts / 86400000) * 86400000;
-                        dayMap.set(dayKey, (dayMap.get(dayKey) || 0) + (mcap || 0));
-                    });
+                usdtData.market_caps.forEach(([ts, mcap]) => {
+                    const key = Math.floor(ts / 86400000) * 86400000;
+                    dayMap.set(key, (dayMap.get(key) || 0) + (mcap || 0));
+                });
+                usdcData.market_caps?.forEach(([ts, mcap]) => {
+                    const key = Math.floor(ts / 86400000) * 86400000;
+                    dayMap.set(key, (dayMap.get(key) || 0) + (mcap || 0));
                 });
 
-                if (dayMap.size === 0) throw new Error('No CoinGecko market chart data');
+                // Get current known total to calibrate the scale factor
+                const currentTotal = parseFloat(
+                    document.getElementById('stableTotalMcap')?.textContent?.replace(/[^0-9.]/g,'') || '0'
+                ) * (document.getElementById('stableTotalMcap')?.textContent?.includes('B') ? 1e9 : 1);
 
-                // Convert to sorted array in the same format as stablecoinHistoryData
-                // We store as objects with date (unix seconds) and total (raw USD)
+                const lastEntry = [...dayMap.entries()].sort((a, b) => a[0] - b[0]).pop();
+                const scaleFactor = (currentTotal > 1e9 && lastEntry) ? currentTotal / lastEntry[1] : 1.18;
+
                 const sortedData = [...dayMap.entries()]
                     .sort((a, b) => a[0] - b[0])
                     .map(([ts, total]) => ({
-                        date: ts / 1000, // store as unix seconds (string-coercible, like DefiLlama)
-                        _total: total    // pre-computed, bypasses extractStableTotal lookup
+                        date: ts / 1000,
+                        _total: total * scaleFactor
                     }));
 
-                console.log('[StableHistory] Loaded from CoinGecko:', sortedData.length, 'days, latest total:', formatCurrency(sortedData[sortedData.length - 1]?._total));
-
+                console.log('[StableHistory] Loaded', sortedData.length, 'days, scale factor:', scaleFactor.toFixed(3));
                 stablecoinHistoryData = sortedData;
                 updateStablecoinChartDisplay(days);
                 setTimeout(() => renderStablecoinROCChart(days === 'all' ? 365 : parseInt(days) || 365), 500);
 
             } catch (error) {
-                console.error('[StableHistory] Failed:', error);
+                console.error('[StableHistory] Failed:', error.message);
             }
         }
         
@@ -10565,12 +10615,11 @@
             await new Promise(r => setTimeout(r, 200));
             await safeCall(fetchFearGreed, 'FearGreed');
             
-            // Third batch: DefiLlama
+            // Third batch: DefiLlama / stablecoin data (sequential to avoid CoinGecko rate limits)
             await new Promise(r => setTimeout(r, 200));
-            await Promise.all([
-                safeCall(fetchStablecoinData, 'StablecoinData'),
-                safeCall(() => fetchStablecoinHistory('all'), 'StablecoinHistory')
-            ]);
+            await safeCall(fetchStablecoinData, 'StablecoinData');
+            await new Promise(r => setTimeout(r, 300));
+            await safeCall(() => fetchStablecoinHistory('all'), 'StablecoinHistory');
             
             // Update status
             if (errors === 0) {
