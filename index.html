@@ -3918,19 +3918,23 @@
         async function loadStablecoinTabData() {
             console.log('[StableTab] Loading...');
 
-            // Fetch from CoinGecko stablecoins category
+            // Fetch from CoinGecko stablecoins category with retry
             let stables = [];
-            try {
-                const res = await fetch(
-                    `${COINGECKO_API}/coins/markets?vs_currency=usd&category=stablecoins&order=market_cap_desc&per_page=30&sparkline=false&price_change_percentage=24h`,
-                    { headers: COINGECKO_HEADERS }
-                );
-                if (res.ok) {
-                    const data = await res.json();
-                    stables = data.filter(s => s.market_cap > 5e7);
-                    console.log('[StableTab] CoinGecko loaded:', stables.length, 'stablecoins');
-                }
-            } catch (e) { console.error('[StableTab] CoinGecko error:', e.message); }
+            for (let attempt = 0; attempt < 2 && stables.length === 0; attempt++) {
+                if (attempt > 0) await new Promise(r => setTimeout(r, 2000));
+                try {
+                    const res = await fetch(
+                        `${COINGECKO_API}/coins/markets?vs_currency=usd&category=stablecoins&order=market_cap_desc&per_page=30&sparkline=false&price_change_percentage=24h`,
+                        { headers: COINGECKO_HEADERS }
+                    );
+                    if (res.status === 429) { console.warn('[StableTab] Rate limited, retry', attempt+1); continue; }
+                    if (res.ok) {
+                        const data = await res.json();
+                        stables = data.filter(s => s.market_cap > 5e7);
+                        console.log('[StableTab] CoinGecko loaded:', stables.length, 'stablecoins');
+                    }
+                } catch (e) { console.error('[StableTab] CoinGecko error:', e.message); }
+            }
 
             if (stables.length === 0) {
                 document.getElementById('stableTabTableBody').innerHTML =
@@ -4015,8 +4019,8 @@
 
             stableTabDataLoaded = true;
 
-            // Load history chart after a short delay (avoids rate limit)
-            setTimeout(() => loadStableTabHistory(365), 400);
+            // Load history chart after a longer delay (avoids CoinGecko rate limit)
+            setTimeout(() => loadStableTabHistory(365), 1500);
         }
         
         function renderStableSupplyByChain(chains, total) {
@@ -4105,21 +4109,30 @@
         async function loadStableTabHistory(days) {
             try {
                 const cgDays = (days >= 730 || !days) ? 'max' : String(days);
+                
+                // Helper: fetch with retry for rate limits
+                async function fetchChartRetry(url, retries = 2) {
+                    for (let i = 0; i <= retries; i++) {
+                        if (i > 0) await new Promise(r => setTimeout(r, 1500 * i));
+                        try {
+                            const res = await fetch(url, { headers: COINGECKO_HEADERS });
+                            if (res.status === 429) { console.warn('[StableTab] Rate limited, retry', i+1); continue; }
+                            if (res.ok) return await res.json();
+                        } catch (e) { if (i === retries) throw e; }
+                    }
+                    return null;
+                }
+                
                 // Sequential calls with delay to avoid rate limits
-                const usdtRes = await fetch(
-                    `${COINGECKO_API}/coins/tether/market_chart?vs_currency=usd&days=${cgDays}&interval=daily`,
-                    { headers: COINGECKO_HEADERS }
+                const usdtData = await fetchChartRetry(
+                    `${COINGECKO_API}/coins/tether/market_chart?vs_currency=usd&days=${cgDays}&interval=daily`
                 );
-                if (!usdtRes.ok) throw new Error('USDT chart failed');
-                const usdtData = await usdtRes.json();
-                if (!usdtData?.market_caps?.length) throw new Error('No data');
+                if (!usdtData?.market_caps?.length) throw new Error('No USDT data');
 
-                await new Promise(r => setTimeout(r, 200));
-                const usdcRes = await fetch(
-                    `${COINGECKO_API}/coins/usd-coin/market_chart?vs_currency=usd&days=${cgDays}&interval=daily`,
-                    { headers: COINGECKO_HEADERS }
-                );
-                const usdcData = usdcRes.ok ? await usdcRes.json() : { market_caps: [] };
+                await new Promise(r => setTimeout(r, 500));
+                const usdcData = await fetchChartRetry(
+                    `${COINGECKO_API}/coins/usd-coin/market_chart?vs_currency=usd&days=${cgDays}&interval=daily`
+                ) || { market_caps: [] };
 
                 const dayMap = new Map();
                 usdtData.market_caps.forEach(([ts, mcap]) => {
@@ -4134,13 +4147,24 @@
                 const data = [...dayMap.entries()].sort((a, b) => a[0] - b[0])
                     .map(([ts, total]) => ({ date: ts / 1000, _total: total * 1.18 }));
                 renderStableTabHistoryChart(data, days);
-            } catch (e) { console.error('[StableTab] History error:', e.message); }
+                // Hide loading indicator on success
+                const loadingEl = document.getElementById('stableTabHistoryLoading');
+                if (loadingEl) loadingEl.style.display = 'none';
+            } catch (e) {
+                console.error('[StableTab] History error:', e.message);
+                const loadingEl = document.getElementById('stableTabHistoryLoading');
+                if (loadingEl) loadingEl.textContent = 'Failed to load chart data. Try refreshing.';
+            }
         }
         
         function renderStableTabHistoryChart(data, days) {
             const ctx = document.getElementById('stableTabHistoryChart');
             if (!ctx || !data) return;
             if (stableTabHistoryChart) stableTabHistoryChart.destroy();
+            
+            // Hide loading indicator
+            const loadingEl = document.getElementById('stableTabHistoryLoading');
+            if (loadingEl) loadingEl.style.display = 'none';
             
             const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
             const filtered = data.filter(d => d.date * 1000 >= cutoff);
@@ -4216,9 +4240,8 @@
             
             try {
                 // Fetch TRON stablecoin supply history from DefiLlama
-                const supplyRes = await fetchFirstSuccess(['https://stablecoins.llama.fi/stablecoincharts/Tron','https://api.llama.fi/stablecoincharts/Tron'], d => Array.isArray(d));
-                if (!supplyRes.ok) throw new Error('Supply fetch failed');
-                const supplyData = await supplyRes.json();
+                const supplyData = await fetchFirstSuccess(['https://stablecoins.llama.fi/stablecoincharts/Tron','https://api.llama.fi/stablecoincharts/Tron'], d => Array.isArray(d));
+                if (!supplyData || supplyData.length === 0) throw new Error('Supply fetch failed');
                 
                 console.log('[StableTab] TRON supply data points:', supplyData.length);
                 
@@ -9509,23 +9532,28 @@
             let stables = [];
 
             // Primary: CoinGecko stablecoins category — reliable, CORS-enabled
-            try {
-                const cgUrl = `${COINGECKO_API}/coins/markets?vs_currency=usd&category=stablecoins&order=market_cap_desc&per_page=20&sparkline=false&price_change_percentage=24h`;
-                const cgRes = await fetch(cgUrl, { headers: COINGECKO_HEADERS });
-                if (cgRes.ok) {
-                    const cgData = await cgRes.json();
-                    if (Array.isArray(cgData) && cgData.length > 0) {
-                        stables = cgData.filter(s => s.market_cap > 1e8).map(s => ({
-                            name: s.name,
-                            symbol: s.symbol.toUpperCase(),
-                            mcap: s.market_cap || 0,
-                            change24h: s.price_change_percentage_24h || 0,
-                        }));
-                        console.log('[Stables] Loaded from CoinGecko:', stables.length, 'assets');
+            // Try up to 2 times with increasing delay for rate limit resilience
+            for (let attempt = 0; attempt < 2 && stables.length === 0; attempt++) {
+                if (attempt > 0) await new Promise(r => setTimeout(r, 2000));
+                try {
+                    const cgUrl = `${COINGECKO_API}/coins/markets?vs_currency=usd&category=stablecoins&order=market_cap_desc&per_page=20&sparkline=false&price_change_percentage=24h`;
+                    const cgRes = await fetch(cgUrl, { headers: COINGECKO_HEADERS });
+                    if (cgRes.status === 429) { console.warn('[Stables] Rate limited, attempt', attempt+1); continue; }
+                    if (cgRes.ok) {
+                        const cgData = await cgRes.json();
+                        if (Array.isArray(cgData) && cgData.length > 0) {
+                            stables = cgData.filter(s => s.market_cap > 1e8).map(s => ({
+                                name: s.name,
+                                symbol: s.symbol.toUpperCase(),
+                                mcap: s.market_cap || 0,
+                                change24h: s.price_change_percentage_24h || 0,
+                            }));
+                            console.log('[Stables] Loaded from CoinGecko:', stables.length, 'assets');
+                        }
                     }
+                } catch (e) {
+                    console.warn('[Stables] CoinGecko fetch failed (attempt ' + (attempt+1) + '):', e.message);
                 }
-            } catch (e) {
-                console.warn('[Stables] CoinGecko fetch failed:', e.message);
             }
 
             // Fallback: DefiLlama
@@ -9545,7 +9573,11 @@
             }
 
             if (stables.length === 0) {
-                document.getElementById('stableTotalMcap').textContent = 'Unavailable';
+                // Only show Unavailable if no previous data was loaded
+                const current = document.getElementById('stableTotalMcap')?.textContent;
+                if (!current || current === '--') {
+                    document.getElementById('stableTotalMcap').textContent = 'Unavailable';
+                }
                 return;
             }
 
@@ -9623,21 +9655,30 @@
             // This gives an accurate shape and reasonable magnitude without multiple API calls.
             try {
                 const cgDays = days === 'all' ? 'max' : String(days);
+                
+                // Helper: fetch with retry for rate limits
+                async function fetchWithRetry(url, maxRetries = 2) {
+                    for (let i = 0; i <= maxRetries; i++) {
+                        if (i > 0) await new Promise(r => setTimeout(r, 1500 * i));
+                        try {
+                            const res = await fetch(url, { headers: COINGECKO_HEADERS });
+                            if (res.status === 429) { console.warn('[StableHistory] Rate limited, retry', i+1); continue; }
+                            if (res.ok) return await res.json();
+                        } catch (e) { if (i === maxRetries) throw e; }
+                    }
+                    return null;
+                }
+                
                 // Fetch USDT + USDC market charts sequentially to avoid rate limits
-                const usdtRes = await fetch(
-                    `${COINGECKO_API}/coins/tether/market_chart?vs_currency=usd&days=${cgDays}&interval=daily`,
-                    { headers: COINGECKO_HEADERS }
+                const usdtData = await fetchWithRetry(
+                    `${COINGECKO_API}/coins/tether/market_chart?vs_currency=usd&days=${cgDays}&interval=daily`
                 );
-                if (!usdtRes.ok) throw new Error(`CoinGecko USDT chart ${usdtRes.status}`);
-                const usdtData = await usdtRes.json();
 
-                await new Promise(r => setTimeout(r, 200));
+                await new Promise(r => setTimeout(r, 500));
 
-                const usdcRes = await fetch(
-                    `${COINGECKO_API}/coins/usd-coin/market_chart?vs_currency=usd&days=${cgDays}&interval=daily`,
-                    { headers: COINGECKO_HEADERS }
-                );
-                const usdcData = usdcRes.ok ? await usdcRes.json() : { market_caps: [] };
+                const usdcData = await fetchWithRetry(
+                    `${COINGECKO_API}/coins/usd-coin/market_chart?vs_currency=usd&days=${cgDays}&interval=daily`
+                ) || { market_caps: [] };
 
                 if (!usdtData?.market_caps?.length) throw new Error('No USDT market cap data');
 
@@ -9654,9 +9695,15 @@
                 });
 
                 // Get current known total to calibrate the scale factor
-                const currentTotal = parseFloat(
-                    document.getElementById('stableTotalMcap')?.textContent?.replace(/[^0-9.]/g,'') || '0'
-                ) * (document.getElementById('stableTotalMcap')?.textContent?.includes('B') ? 1e9 : 1);
+                const mcapText = document.getElementById('stableTotalMcap')?.textContent || '';
+                let currentTotal = 0;
+                const mcapNum = parseFloat(mcapText.replace(/[^0-9.]/g, ''));
+                if (!isNaN(mcapNum) && mcapNum > 0) {
+                    if (mcapText.includes('T')) currentTotal = mcapNum * 1e12;
+                    else if (mcapText.includes('B')) currentTotal = mcapNum * 1e9;
+                    else if (mcapText.includes('M')) currentTotal = mcapNum * 1e6;
+                    else currentTotal = mcapNum;
+                }
 
                 const lastEntry = [...dayMap.entries()].sort((a, b) => a[0] - b[0]).pop();
                 const scaleFactor = (currentTotal > 1e9 && lastEntry) ? currentTotal / lastEntry[1] : 1.18;
@@ -10476,9 +10523,9 @@
             await safeCall(fetchFearGreed, 'FearGreed');
             
             // Third batch: DefiLlama / stablecoin data (sequential to avoid CoinGecko rate limits)
-            await new Promise(r => setTimeout(r, 200));
+            await new Promise(r => setTimeout(r, 500));
             await safeCall(fetchStablecoinData, 'StablecoinData');
-            await new Promise(r => setTimeout(r, 300));
+            await new Promise(r => setTimeout(r, 1500));
             await safeCall(() => fetchStablecoinHistory('all'), 'StablecoinHistory');
             
             // Update status
