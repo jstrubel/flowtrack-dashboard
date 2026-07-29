@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flowtrack | Crypto Market Intelligence v18.4</title>
+    <title>Flowtrack | Crypto Market Intelligence v18.5</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -2721,7 +2721,7 @@
     </div>
 
     <footer>
-        <p><strong>FLOWTRACK v18.4</strong> — Crypto Derivatives Intelligence</p>
+        <p><strong>FLOWTRACK v18.5</strong> — Crypto Derivatives Intelligence</p>
         <p style="margin-top: 6px;">Data from CoinGlass API, Binance Futures, CoinGecko, Coinalyze, TradingView</p>
         <p style="margin-top: 6px;">Auto-refreshes every 60 seconds • Not financial advice</p>
     </footer>
@@ -5681,16 +5681,8 @@
                 
                 // Helper function to fetch with timeout
                 const fetchWithTimeout = async (url, timeout = 8000) => {
-                    const controller = new AbortController();
-                    const id = setTimeout(() => controller.abort(), timeout);
-                    try {
-                        const response = await fetch(url, { signal: controller.signal });
-                        clearTimeout(id);
-                        return response;
-                    } catch (e) {
-                        clearTimeout(id);
-                        throw e;
-                    }
+                    const opts = url.includes('coingecko.com') ? { headers: COINGECKO_HEADERS } : {};
+                    return fetchT(url, opts, timeout);
                 };
                 
                 // Try Binance first
@@ -10470,25 +10462,18 @@
                 
                 // Helper function to fetch with timeout
                 const fetchWithTimeout = async (url, timeout = 8000) => {
-                    const controller = new AbortController();
-                    const id = setTimeout(() => controller.abort(), timeout);
-                    try {
-                        const response = await fetch(url, { signal: controller.signal });
-                        clearTimeout(id);
-                        return response;
-                    } catch (e) {
-                        clearTimeout(id);
-                        throw e;
-                    }
+                    const opts = url.includes('coingecko.com') ? { headers: COINGECKO_HEADERS } : {};
+                    return fetchT(url, opts, timeout);
                 };
                 
-                // Strategy 1: Binance for BTC, ETH, SOL + CoinGecko for HYPE
-                if (!success) {
+                // Strategy 1: Binance for BTC, ETH, SOL (.com is geo-blocked for US IPs -> try .us too)
+                for (const host of ['https://api.binance.com', 'https://api.binance.us']) {
+                    if (success) break;
                     try {
                         const [btcRes, ethRes, solRes] = await Promise.all([
-                            fetchWithTimeout('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT'),
-                            fetchWithTimeout('https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT'),
-                            fetchWithTimeout('https://api.binance.com/api/v3/ticker/24hr?symbol=SOLUSDT')
+                            fetchWithTimeout(`${host}/api/v3/ticker/24hr?symbol=BTCUSDT`),
+                            fetchWithTimeout(`${host}/api/v3/ticker/24hr?symbol=ETHUSDT`),
+                            fetchWithTimeout(`${host}/api/v3/ticker/24hr?symbol=SOLUSDT`)
                         ]);
                         
                         if (btcRes.ok && ethRes.ok && solRes.ok) {
@@ -10505,29 +10490,37 @@
                             const btcMcap = btcPrice * 19800000;
                             totalMcap = btcMcap / 0.57;
                             success = true;
-                            source = 'Binance';
+                            source = 'Binance (' + host.replace('https://api.', '') + ')';
                         }
-                    } catch (e) { console.log('Binance failed:', e.message); }
+                    } catch (e) { console.log('Binance', host, 'failed:', e.message); }
                 }
                 
                 // Fetch HYPE from CoinGecko (not on Binance)
                 try {
-                    const hypeRes = await fetchWithTimeout('https://api.coingecko.com/api/v3/simple/price?ids=hyperliquid&vs_currencies=usd&include_24hr_change=true');
+                    const hypeRes = await fetchWithTimeout(`${COINGECKO_API}/simple/price?ids=hyperliquid&vs_currencies=usd&include_24hr_change=true`);
                     if (hypeRes.ok) {
                         const hypeData = await hypeRes.json();
                         hypePrice = hypeData.hyperliquid?.usd || 0;
                         hypeChange = hypeData.hyperliquid?.usd_24h_change || 0;
                     }
-                } catch (e) { 
-                    console.log('HYPE price failed:', e.message);
-                    hypePrice = 0;
-                    hypeChange = 0;
+                } catch (e) {
+                    console.log('HYPE via CoinGecko failed:', e.message);
+                }
+                // Fallback: HYPE mid straight from Hyperliquid (no rate limits)
+                if (!hypePrice) {
+                    try {
+                        const mids = await hlInfo({ type: 'allMids' });
+                        if (mids && mids.HYPE) {
+                            hypePrice = parseFloat(mids.HYPE);
+                            hypeChange = null;  // change unknown from mids
+                        }
+                    } catch (e) { console.log('HYPE via Hyperliquid failed:', e.message); }
                 }
                 
                 // Strategy 2: CoinGecko for all
                 if (!success) {
                     try {
-                        const priceRes = await fetchWithTimeout('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,hyperliquid&vs_currencies=usd&include_24hr_change=true');
+                        const priceRes = await fetchWithTimeout(`${COINGECKO_API}/simple/price?ids=bitcoin,ethereum,solana,hyperliquid&vs_currencies=usd&include_24hr_change=true`);
                         if (priceRes.ok) {
                             const priceData = await priceRes.json();
                             btcPrice = priceData.bitcoin?.usd || 0;
@@ -10594,8 +10587,13 @@
                 // HYPE Price
                 if (hypePrice) {
                     document.getElementById('hypePrice').textContent = '$' + formatNumber(hypePrice, 2);
-                    document.getElementById('hypeChange').textContent = formatPercent(hypeChange, true);
-                    document.getElementById('hypeChange').className = 'market-change ' + (hypeChange >= 0 ? 'positive' : 'negative');
+                    if (hypeChange !== null && hypeChange !== undefined) {
+                        document.getElementById('hypeChange').textContent = formatPercent(hypeChange, true);
+                        document.getElementById('hypeChange').className = 'market-change ' + (hypeChange >= 0 ? 'positive' : 'negative');
+                    } else {
+                        document.getElementById('hypeChange').textContent = 'via HL mid';
+                        document.getElementById('hypeChange').className = 'market-change';
+                    }
                 }
                 
                 // Total market cap
@@ -11861,7 +11859,7 @@
             }, { passive: true });
         });
         
-        console.log('%cFLOWTRACK v18.4', 'color:#50d2c1;font-weight:bold;font-size:14px;', 'build 2026-07-28');
+        console.log('%cFLOWTRACK v18.5', 'color:#50d2c1;font-weight:bold;font-size:14px;', 'build 2026-07-28');
         // UTC clock in top bar
         setInterval(() => {
             const el = document.getElementById('utcClock');
