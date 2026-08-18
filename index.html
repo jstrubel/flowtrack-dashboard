@@ -1,9 +1,56 @@
+Everything else is public, no key: Hyperliquid, DefiLlama, Binance (spot + US + futures), Alternative.me fear/greed, Coin Metrics, CryptoCompare, Kraken, Deribit, Farside, Yahoo via CORS proxies, TradingView embeds.
+
+Paste a CoinGecko key if you have one. That is the one that will actually change the live page. Twelve Data is the other useful one. I’ll start the upgrade now and fall back to Hyperliquid mid / other publics so those cards don’t die when CoinGecko rate-limits.
+
+Upgrade is underway. First pass is the dead cards and the stuck refresh, not a restyle.
+
+v18.6 is on disk. Checking it actually has the fixes, then I’ll send the file.
+
+v18.6 is ready. Same single-file dashboard, no restyle. Header no longer sticks on UPDATING. HYPE on the Hyperliquid tab uses HL mid. Altseason can fall back to Binance. Equities try Yahoo then Stooq instead of dying. TradingView remounts when the tab is actually visible. MVRV ratio is honest if only Z exists. HIP-3 retry actually retries.
+
+
+index
+.html
+631 KB
+
+Drop that in as index.html and ship it. If you have a CoinGecko key, paste it in the existing COINGECKO_API_KEY slot (keep type demo unless it’s a pro key). That is the last real gap. Twelve Data is optional and only helps SPY/QQQ/IWM.
+
+22baaf6e13c74eb79e1b0d3fe096ae29
+
+Here is the CoinGlass API key
+
+Got it. I won’t paste that into the public page. CoinGlass already goes through your Cloudflare worker so the key stays off the site. Checking whether that worker is the right place to put it.
+
+I did not put that key in the dashboard. CoinGlass already works through your worker at coinglass-proxy.justin-strubel.workers.dev. I just hit it. ETF flow history comes back live (code: 0). The key on that worker is doing the job.
+
+Leave it off the public HTML. Anyone can view-source the site. If this is a new key and not the one already on the worker, swap it in Cloudflare, not in index.html.
+
+CoinGecko is still the empty slot. That is the one that fixes Altseason / stables 429s. Same rule: paste it here or in the COINGECKO_API_KEY slot, not as a second public key.
+
+CG-sCiNPcrVp2DemhsR82mHYnjp
+
+Here is the CoinGecko API key.
+
+Got it. Putting it in the CoinGecko slot on v18.6 and sending the file back. I won’t repeat the key.
+
+It’s in. COINGECKO_API_KEY is set as a demo key, which matches the CG- prefix. Same v18.6 file, ready to drop in as index.html.
+
+
+index
+.html
+631 KB
+
+This one has to live in the page, so it will be visible in view-source, same as Coinalyze. If you later stand up a worker for CoinGecko we can pull it out. Ship this and Altseason / stables / HYPE 24h should stop dying on the free-tier 429.
+
+
+
+No file chosen
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flowtrack | Crypto Market Intelligence v18.5</title>
+    <title>Flowtrack | Crypto Market Intelligence v18.6</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -116,6 +163,19 @@
         
         .status-dot.error { background: var(--bad); box-shadow: 0 0 12px var(--bad); }
         .status-dot.loading { background: var(--warn); box-shadow: 0 0 12px var(--warn); }
+        .status-dot.warn { background: var(--warn); box-shadow: 0 0 12px var(--warn); }
+        .src-tag {
+            display: inline-block;
+            margin-left: 6px;
+            font-family: var(--mono);
+            font-size: 8px;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            vertical-align: middle;
+            opacity: 0.85;
+        }
         
         @keyframes pulse {
             0%, 100% { opacity: 1; }
@@ -1068,7 +1128,7 @@
                 <span class="utc-clock" id="utcClock">--:--:-- UTC</span>
                 <div class="status-pill">
                     <span class="status-dot" id="statusDot"></span>
-                    <span id="lastUpdate">Loading...</span>
+                    <span id="lastUpdate">—</span>
                 </div>
                 <button class="refresh-btn" onclick="refreshAllData()" id="refreshBtn">
                     ↻ Refresh
@@ -1474,7 +1534,7 @@
                 <div class="card-header">
                     <div>
                         <div class="card-title">Altcoin Season Index</div>
-                        <div class="card-subtitle">% of top 50 coins (ex-stables &amp; wrapped) outperforming BTC &bull; CoinGecko</div>
+                        <div class="card-subtitle">% of top 50 coins (ex-stables &amp; wrapped) outperforming BTC &bull; CoinGecko / Binance fallback</div>
                     </div>
                     <div class="time-btns">
                         <button class="time-btn" onclick="updateAltseasonWindow('7d')">7D</button>
@@ -2647,7 +2707,7 @@
                         <div class="card-title">HIP-3 Token Volumes (XYZ Perps)</div>
                         <div class="card-subtitle">Builder-deployed perpetuals • 24H volume from Hyperliquid API</div>
                     </div>
-                    <button onclick="loadHIP3Volumes()" style="background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; cursor: pointer;">
+                    <button onclick="loadHIP3Volumes(true)" style="background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; cursor: pointer;">
                         ↻ Refresh
                     </button>
                 </div>
@@ -2698,12 +2758,13 @@
                                     </tr>
                                 </thead>
                                 <tbody id="hip3TableBody">
+                                    <tr><td colspan="6" style="padding:20px;text-align:center;color:var(--text-muted);">Waiting for Hyperliquid API…</td></tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                     <div id="hip3Error" style="display: none; text-align: center; padding: 20px; color: var(--bad);">
-                        Failed to load HIP-3 data. <button onclick="loadHIP3Volumes()" style="color: var(--accent); background: none; border: none; cursor: pointer; text-decoration: underline;">Retry</button>
+                        Failed to load HIP-3 data. <button onclick="loadHIP3Volumes(true)" style="color: var(--accent); background: none; border: none; cursor: pointer; text-decoration: underline;">Retry</button>
                     </div>
                 </div>
                 <div style="margin: 0 16px 16px 16px; padding: 12px; background: rgba(6, 182, 212, 0.1); border-radius: 8px; border-left: 3px solid var(--cyan);">
@@ -2721,7 +2782,7 @@
     </div>
 
     <footer>
-        <p><strong>FLOWTRACK v18.5</strong> — Crypto Derivatives Intelligence</p>
+        <p><strong>FLOWTRACK v18.6</strong> — Crypto Derivatives Intelligence</p>
         <p style="margin-top: 6px;">Data from CoinGlass API, Binance Futures, CoinGecko, Coinalyze, TradingView</p>
         <p style="margin-top: 6px;">Auto-refreshes every 60 seconds • Not financial advice</p>
     </footer>
@@ -2736,7 +2797,7 @@
         // ============ SPEED: paste a CoinGecko key here to stop rate-limit stalls ============
         // Free "Demo" key (from coingecko.com/en/api -> Demo plan): set type to 'demo'
         // Paid Analyst/Pro key: set type to 'pro'
-        const COINGECKO_API_KEY = ''; // <-- Paste key here
+        const COINGECKO_API_KEY = 'CG-sCiNPcrVp2DemhsR82mHYnjp'; // <-- Paste key here
         const COINGECKO_KEY_TYPE = 'demo'; // 'demo' | 'pro'
         const COINGECKO_API = (COINGECKO_API_KEY && COINGECKO_KEY_TYPE === 'pro')
             ? 'https://pro-api.coingecko.com/api/v3' : 'https://api.coingecko.com/api/v3';
@@ -2758,6 +2819,205 @@
             const timer = setTimeout(() => ctrl.abort(), ms);
             return fetch(resource, { ...opts, signal: ctrl.signal }).finally(() => clearTimeout(timer));
         }
+
+        // ==================== v18.6 RESILIENCE (CG / HYPE / TV) ====================
+        const FT_CG_LS_PREFIX = 'ft_cg_v186_';
+        const _cgMem = new Map();
+        let _cgBackoffUntil = 0;
+        let _cgBackoffMs = 15000;
+
+        function _cgLsGet(key) {
+            try {
+                const raw = localStorage.getItem(FT_CG_LS_PREFIX + key);
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                if (parsed && parsed.data !== undefined) return parsed;
+            } catch (e) {}
+            return null;
+        }
+        function _cgLsSet(key, data) {
+            try { localStorage.setItem(FT_CG_LS_PREFIX + key, JSON.stringify({ at: Date.now(), data })); }
+            catch (e) {}
+        }
+        function _cgCacheGet(key) {
+            const mem = _cgMem.get(key);
+            if (mem) return mem;
+            return _cgLsGet(key);
+        }
+
+        async function cgFetch(path, { cacheKey, ttlMs = 900000, timeout = 9000 } = {}) {
+            const key = cacheKey || String(path).split('?')[0];
+            const cached = _cgCacheGet(key);
+            if (cached && (Date.now() - cached.at < ttlMs)) return { data: cached.data, source: 'cache', cached: true };
+            if (Date.now() < _cgBackoffUntil && cached) return { data: cached.data, source: 'cache', cached: true, backoff: true };
+            const url = String(path).startsWith('http') ? path : (COINGECKO_API + (String(path).startsWith('/') ? path : '/' + path));
+            try {
+                const res = await fetchT(url, { headers: COINGECKO_HEADERS }, timeout);
+                if (res.status === 429) {
+                    _cgBackoffMs = Math.min(_cgBackoffMs * 2, 180000);
+                    _cgBackoffUntil = Date.now() + _cgBackoffMs;
+                    console.warn('[cgFetch] 429 backoff', _cgBackoffMs, 'ms');
+                    if (cached) return { data: cached.data, source: 'cache', cached: true, backoff: true };
+                    throw new Error('CoinGecko 429');
+                }
+                if (!res.ok) throw new Error('CoinGecko HTTP ' + res.status);
+                const data = await res.json();
+                _cgMem.set(key, { at: Date.now(), data });
+                _cgLsSet(key, data);
+                _cgBackoffMs = 15000;
+                _cgBackoffUntil = 0;
+                return { data, source: 'coingecko', cached: false };
+            } catch (e) {
+                if (cached) {
+                    console.warn('[cgFetch] last-good cache for', key, e.message);
+                    return { data: cached.data, source: 'cache', cached: true };
+                }
+                throw e;
+            }
+        }
+
+        function setSourceTag(el, text) {
+            if (!el) return;
+            const parent = el.parentElement;
+            let tag = parent ? parent.querySelector(':scope > .src-tag') : null;
+            if (!text) { if (tag) tag.remove(); return; }
+            if (!tag) {
+                tag = document.createElement('span');
+                tag.className = 'src-tag';
+                el.insertAdjacentElement('afterend', tag);
+            }
+            tag.textContent = text;
+        }
+
+        const hypeQuote = { px: null, chg: null, mcap: null, source: null, at: 0 };
+
+        function writeHypePrice(px, chg, source) {
+            if (px && isFinite(px) && px > 0) { hypeQuote.px = px; hypeQuote.at = Date.now(); }
+            if (chg !== null && chg !== undefined && isFinite(chg)) hypeQuote.chg = chg;
+            if (source) hypeQuote.source = source;
+            if (!hypeQuote.px) return;
+            const pxTxt = '$' + formatNumber(hypeQuote.px, 2);
+            ['hypePrice', 'hlHypePrice', 'hypeTokPrice'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = pxTxt;
+            });
+            const chgVal = hypeQuote.chg;
+            const srcLabel = (source === 'hl' || source === 'hl+cg') ? 'via HL mid'
+                : (source === 'cache' ? 'cached' : (source === 'cg' ? '' : (source || '')));
+            const paintChg = (id, suffix) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (chgVal !== null && chgVal !== undefined) {
+                    const txt = (chgVal >= 0 ? '+' : '') + Number(chgVal).toFixed(2) + '%' + suffix;
+                    el.textContent = txt;
+                    el.className = 'market-change ' + (chgVal >= 0 ? 'positive' : 'negative');
+                    if (id === 'hypeTokChange') el.style.color = chgVal >= 0 ? 'var(--good)' : 'var(--bad)';
+                } else {
+                    el.textContent = 'via HL mid';
+                    el.className = 'market-change';
+                }
+            };
+            paintChg('hypeChange', '');
+            paintChg('hlHypeChange', ' 24h');
+            paintChg('hypeTokChange', ' 24h');
+            setSourceTag(document.getElementById('hypePrice'), srcLabel);
+            setSourceTag(document.getElementById('hlHypePrice'), srcLabel);
+        }
+
+        async function refreshHypeQuote() {
+            let mid = null;
+            try {
+                const mids = await hlInfo({ type: 'allMids' });
+                const raw = mids && (mids.HYPE || mids['@HYPE'] || mids['HYPE/USDC']);
+                mid = parseFloat(raw);
+                if (!(isFinite(mid) && mid > 0)) mid = null;
+            } catch (e) { console.warn('[HYPE] HL mid failed:', e.message); }
+            let chg = null, cgLive = false;
+            try {
+                const got = await cgFetch('/simple/price?ids=hyperliquid&vs_currencies=usd&include_24hr_change=true&include_market_cap=true', { cacheKey: 'hype_simple', ttlMs: 300000 });
+                const h = got.data && got.data.hyperliquid;
+                if (h) {
+                    if (typeof h.usd_24h_change === 'number') chg = h.usd_24h_change;
+                    if (h.usd_market_cap) {
+                        hypeQuote.mcap = h.usd_market_cap;
+                        if (typeof hlHypeMcap !== 'undefined') hlHypeMcap = h.usd_market_cap;
+                    }
+                    if (!mid && h.usd) mid = h.usd;
+                    cgLive = !got.cached;
+                }
+            } catch (e) { console.warn('[HYPE] CoinGecko change/mcap failed:', e.message); }
+            const source = mid ? ((mid && cgLive) ? 'hl+cg' : (mid ? 'hl' : 'cg')) : (cgLive ? 'cg' : 'cache');
+            if (mid) writeHypePrice(mid, chg, source);
+            return hypeQuote;
+        }
+
+        const _tvMounts = {};
+        const _tvRetry = {};
+        const _tvConfigs = {};
+
+        function waitForElWidth(id, tries = 30, ms = 50) {
+            return new Promise(resolve => {
+                const tick = n => {
+                    const el = document.getElementById(id);
+                    if (el && el.offsetWidth > 0) return resolve(el);
+                    if (n <= 0) return resolve(el || null);
+                    setTimeout(() => tick(n - 1), ms);
+                };
+                tick(tries);
+            });
+        }
+
+        async function mountTVWidget(containerId, config, remount) {
+            if (typeof TradingView === 'undefined' || !TradingView.widget) {
+                console.warn('[TV] script not ready for', containerId);
+                return;
+            }
+            _tvConfigs[containerId] = config;
+            const el = await waitForElWidth(containerId);
+            if (!el) return;
+            if (el.offsetWidth <= 0) {
+                if (!_tvRetry[containerId]) {
+                    _tvRetry[containerId] = true;
+                    setTimeout(() => mountTVWidget(containerId, config, true), 500);
+                }
+                return;
+            }
+            if (_tvMounts[containerId] && !remount) return;
+            try { el.innerHTML = ''; } catch (e) {}
+            try {
+                _tvMounts[containerId] = new TradingView.widget(Object.assign({}, config, { container_id: containerId }));
+            } catch (e) {
+                console.warn('[TV] mount failed', containerId, e.message);
+            }
+            if (!_tvRetry[containerId]) {
+                setTimeout(() => {
+                    const now = document.getElementById(containerId);
+                    if (!now) return;
+                    const iframe = now.querySelector('iframe');
+                    const empty = now.offsetWidth > 0 && (!iframe || iframe.offsetWidth === 0 || iframe.offsetHeight === 0);
+                    if (empty) {
+                        _tvRetry[containerId] = true;
+                        mountTVWidget(containerId, config, true);
+                    }
+                }, 1400);
+            }
+        }
+
+        function remountVisibleTV() {
+            Object.keys(_tvConfigs).forEach(id => {
+                const el = document.getElementById(id);
+                if (el && el.offsetWidth > 0) {
+                    _tvRetry[id] = false;
+                    mountTVWidget(id, _tvConfigs[id], true);
+                }
+            });
+        }
+
+        function tvWidget(cfg) {
+            if (!cfg || !cfg.container_id) return;
+            mountTVWidget(cfg.container_id, cfg, false);
+        }
+
         const FEAR_GREED_API = 'https://api.alternative.me/fng';
         
         // Top perpetual contracts to track
@@ -3004,7 +3264,7 @@
             
             // Re-initialize TradingView charts if switching to dashboard (they may not render when hidden)
             if (tabName === 'dashboard') {
-                setTimeout(initTradingViewCharts, 100);
+                setTimeout(() => initTradingViewCharts({ remount: true }), 150);
                 // Load Fear & Greed history on dashboard
                 if (fearGreedData.labels.length === 0) {
                     loadFearGreedHistory(730);
@@ -3013,7 +3273,8 @@
             
             // Initialize macro charts when switching to macro tab
             if (tabName === 'macro') {
-                setTimeout(initMacroCharts, 100);
+                if (!macroChartsInitialized) setTimeout(initMacroCharts, 100);
+                else setTimeout(() => remountVisibleTV(), 150);
             }
             
             // Initialize HYPE chart when switching to hyperliquid tab
@@ -3077,7 +3338,7 @@
         async function fetchFirstSuccess(urls, validator) {
             for (const url of urls) {
                 try {
-                    const res = await fetch(url);
+                    const res = await fetchT(url, {}, 10000);
                     if (!res.ok) continue;
                     const json = await res.json();
                     if (!validator || validator(json)) return json;
@@ -3136,21 +3397,16 @@
 
             // Fetch from CoinGecko stablecoins category with retry
             let stables = [];
-            for (let attempt = 0; attempt < 2 && stables.length === 0; attempt++) {
-                if (attempt > 0) await new Promise(r => setTimeout(r, 2000));
-                try {
-                    const res = await fetch(
-                        `${COINGECKO_API}/coins/markets?vs_currency=usd&category=stablecoins&order=market_cap_desc&per_page=30&sparkline=false&price_change_percentage=24h`,
-                        { headers: COINGECKO_HEADERS }
-                    );
-                    if (res.status === 429) { console.warn('[StableTab] Rate limited, retry', attempt+1); continue; }
-                    if (res.ok) {
-                        const data = await res.json();
-                        stables = data.filter(s => s.market_cap > 5e7);
-                        console.log('[StableTab] CoinGecko loaded:', stables.length, 'stablecoins');
-                    }
-                } catch (e) { console.error('[StableTab] CoinGecko error:', e.message); }
-            }
+            try {
+                const got = await cgFetch(
+                    '/coins/markets?vs_currency=usd&category=stablecoins&order=market_cap_desc&per_page=30&sparkline=false&price_change_percentage=24h',
+                    { cacheKey: 'stables_markets_30', ttlMs: 15 * 60 * 1000 }
+                );
+                if (Array.isArray(got.data)) {
+                    stables = got.data.filter(s => s.market_cap > 5e7);
+                    console.log('[StableTab] CoinGecko loaded' + (got.cached ? ' (cached)' : '') + ':', stables.length, 'stablecoins');
+                }
+            } catch (e) { console.error('[StableTab] CoinGecko error:', e.message); }
 
             if (stables.length === 0) {
                 // CoinGecko rate-limited: rebuild rankings from the DefiLlama payload we already requested
@@ -3409,8 +3665,8 @@
         
         async function loadTrxPriceForTab() {
             try {
-                const res = await fetch(`${COINGECKO_API}/simple/price?ids=tron&vs_currencies=usd&include_24hr_change=true`, { headers: COINGECKO_HEADERS });
-                const data = await res.json();
+                const got = await cgFetch('/simple/price?ids=tron&vs_currencies=usd&include_24hr_change=true', { cacheKey: 'trx_simple', ttlMs: 300000 });
+                const data = got.data || {};
                 if (data.tron) {
                     document.getElementById('trxPrice').textContent = '$' + data.tron.usd.toFixed(4);
                     const ch = data.tron.usd_24h_change;
@@ -7600,101 +7856,71 @@
         }
         
         // ==================== HIP-3 / XYZ VOLUME TRACKER ====================
-        async function loadHIP3Volumes() {
+        let _hip3Inflight = false;
+        async function loadHIP3Volumes(force) {
+            if (_hip3Inflight && !force) return;
+            _hip3Inflight = true;
             const loadingEl = document.getElementById('hip3Loading');
             const containerEl = document.getElementById('hip3Container');
             const errorEl = document.getElementById('hip3Error');
             const tableBody = document.getElementById('hip3TableBody');
-            
+
             if (loadingEl) loadingEl.style.display = 'block';
-            if (containerEl) containerEl.style.display = 'none';
+            if (force && containerEl) containerEl.style.display = 'none';
             if (errorEl) errorEl.style.display = 'none';
-            
+            if (tableBody && force) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--text-muted);">Retrying Hyperliquid API\u2026</td></tr>';
+            }
+
             try {
-                // First, get the list of HIP-3 perp DEXes
-                const dexResponse = await fetch('https://api.hyperliquid.xyz/info', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: 'perpDexs' })
-                });
-                
-                if (!dexResponse.ok) throw new Error('Failed to fetch perpDexs');
-                const perpDexs = await dexResponse.json();
-                
-                // Filter to get active HIP-3 DEXes (non-null entries with name)
-                const activeDexes = perpDexs.filter(d => d && d.name).map(d => d.name);
+                const perpDexs = await hlInfo({ type: 'perpDexs' });
+                const activeDexes = (Array.isArray(perpDexs) ? perpDexs : []).filter(d => d && d.name).map(d => d.name);
                 console.log('Active HIP-3 DEXes:', activeDexes);
-                
-                // Now fetch meta and asset contexts for each DEX
+
                 const hip3Assets = [];
-                
-                for (const dexName of activeDexes) {
-                    try {
-                        const metaResponse = await fetch('https://api.hyperliquid.xyz/info', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ type: 'metaAndAssetCtxs', dex: dexName })
+                const results = await Promise.allSettled(activeDexes.map(dexName => hlInfo({ type: 'metaAndAssetCtxs', dex: dexName })));
+                results.forEach((r, idx) => {
+                    if (r.status !== 'fulfilled') return;
+                    const data = r.value;
+                    if (!data || !Array.isArray(data) || data.length < 2) return;
+                    const meta = data[0];
+                    const assetCtxs = data[1];
+                    if (!meta || !meta.universe) return;
+                    const dexName = activeDexes[idx];
+                    meta.universe.forEach((asset, index) => {
+                        const ctx = assetCtxs[index];
+                        if (!ctx) return;
+                        const dayVol = parseFloat(ctx.dayNtlVlm || 0);
+                        if (dayVol < 5000000) return;
+                        const markPx = parseFloat(ctx.markPx || 0);
+                        const prevDayPx = parseFloat(ctx.prevDayPx || markPx);
+                        const change24h = prevDayPx > 0 ? ((markPx - prevDayPx) / prevDayPx) * 100 : 0;
+                        const oi = parseFloat(ctx.openInterest || 0) * markPx;
+                        const funding = parseFloat(ctx.funding || 0) * 100;
+                        hip3Assets.push({
+                            name: asset.name, dex: dexName, price: markPx,
+                            change24h: change24h, volume: dayVol, oi: oi, funding: funding,
+                            maxLeverage: asset.maxLeverage || 10
                         });
-                        
-                        if (!metaResponse.ok) continue;
-                        const data = await metaResponse.json();
-                        
-                        if (!data || !Array.isArray(data) || data.length < 2) continue;
-                        
-                        const meta = data[0];
-                        const assetCtxs = data[1];
-                        
-                        if (!meta || !meta.universe) continue;
-                        
-                        meta.universe.forEach((asset, index) => {
-                            const ctx = assetCtxs[index];
-                            if (!ctx) return;
-                            
-                            const dayVol = parseFloat(ctx.dayNtlVlm || 0);
-                            if (dayVol < 5000000) return; // Skip if under $5M volume
-                            
-                            const markPx = parseFloat(ctx.markPx || 0);
-                            const prevDayPx = parseFloat(ctx.prevDayPx || markPx);
-                            const change24h = prevDayPx > 0 ? ((markPx - prevDayPx) / prevDayPx) * 100 : 0;
-                            const oi = parseFloat(ctx.openInterest || 0) * markPx;
-                            const funding = parseFloat(ctx.funding || 0) * 100;
-                            
-                            hip3Assets.push({
-                                name: asset.name,
-                                dex: dexName,
-                                price: markPx,
-                                change24h: change24h,
-                                volume: dayVol,
-                                oi: oi,
-                                funding: funding,
-                                maxLeverage: asset.maxLeverage || 10
-                            });
-                        });
-                    } catch (e) {
-                        console.log(`Error fetching ${dexName}:`, e.message);
-                    }
-                }
-                
-                // Sort by volume descending
+                    });
+                });
+
                 hip3Assets.sort((a, b) => b.volume - a.volume);
-                
-                // Calculate totals
                 const totalVolume = hip3Assets.reduce((sum, a) => sum + a.volume, 0);
-                
-                // Update UI
-                document.getElementById('hip3TotalVolume').textContent = formatCurrency(totalVolume);
-                document.getElementById('hip3ActivePairs').textContent = hip3Assets.length;
-                
-                // Build table
-                if (hip3Assets.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--text-muted);">No HIP-3 pairs with >$5M volume found</td></tr>';
-                } else {
-                    tableBody.innerHTML = hip3Assets.map(asset => {
-                        const changeColor = asset.change24h >= 0 ? 'var(--good)' : 'var(--bad)';
-                        const changeSign = asset.change24h >= 0 ? '+' : '';
-                        const fundingColor = asset.funding >= 0 ? 'var(--good)' : 'var(--bad)';
-                        
-                        return `
+                const totEl = document.getElementById('hip3TotalVolume');
+                const pairEl = document.getElementById('hip3ActivePairs');
+                if (totEl) totEl.textContent = formatCurrency(totalVolume);
+                if (pairEl) pairEl.textContent = hip3Assets.length;
+
+                if (tableBody) {
+                    if (hip3Assets.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--text-muted);">No HIP-3 pairs with >$5M volume right now \u2014 API is live, filters just empty.</td></tr>';
+                    } else {
+                        tableBody.innerHTML = hip3Assets.map(asset => {
+                            const changeColor = asset.change24h >= 0 ? 'var(--good)' : 'var(--bad)';
+                            const changeSign = asset.change24h >= 0 ? '+' : '';
+                            const fundingColor = asset.funding >= 0 ? 'var(--good)' : 'var(--bad)';
+                            return `
                             <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                                 <td style="padding: 10px 8px;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
@@ -7708,29 +7934,29 @@
                                 <td style="text-align: right; padding: 10px 8px; color: var(--text); font-weight: 500;">${formatCurrency(asset.volume)}</td>
                                 <td style="text-align: right; padding: 10px 8px; color: var(--text-muted);">${formatCurrency(asset.oi)}</td>
                                 <td style="text-align: right; padding: 10px 8px; color: ${fundingColor};">${asset.funding >= 0 ? '+' : ''}${asset.funding.toFixed(4)}%</td>
-                            </tr>
-                        `;
-                    }).join('');
+                            </tr>`;
+                        }).join('');
+                    }
                 }
-                
+
                 if (loadingEl) loadingEl.style.display = 'none';
                 if (containerEl) containerEl.style.display = 'block';
-                
-                console.log(`Loaded ${hip3Assets.length} HIP-3 pairs from ${activeDexes.length} DEXes. Total volume: $${(totalVolume/1e6).toFixed(1)}M`);
-                
-                // Store today's volume for history tracking
+                if (errorEl) errorEl.style.display = 'none';
+                console.log('Loaded ' + hip3Assets.length + ' HIP-3 pairs from ' + activeDexes.length + ' DEXes. Total volume: $' + (totalVolume/1e6).toFixed(1) + 'M');
                 storeHIP3DailyVolume(totalVolume);
-                
-                // Load and display volume history chart
                 loadHIP3VolumeHistory();
-                
             } catch (error) {
                 console.error('Error loading HIP-3 volumes:', error);
                 if (loadingEl) loadingEl.style.display = 'none';
-                if (errorEl) errorEl.style.display = 'block';
+                if (errorEl) {
+                    errorEl.style.display = 'block';
+                    errorEl.innerHTML = 'Failed to load HIP-3 data. <button onclick="loadHIP3Volumes(true)" style="color: var(--accent); background: none; border: none; cursor: pointer; text-decoration: underline;">Retry</button>';
+                }
+            } finally {
+                _hip3Inflight = false;
             }
         }
-        
+
         // ==================== HIP-3 VOLUME HISTORY ====================
         let hip3VolumeHistoryChart = null;
         
@@ -7935,7 +8161,7 @@
             // Path 1: Twelve Data - supports browser CORS directly, no proxy involved.
             if (TWELVEDATA_API_KEY) {
                 try {
-                    const n = Math.min(days * 7 + 10, 5000); // ~6.5 trading hours/day
+                    const n = Math.min(days * 7 + 10, 5000);
                     const url = `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1h&outputsize=${n}&apikey=${TWELVEDATA_API_KEY}`;
                     const json = await (await fetchT(url, {}, 7000)).json();
                     if (Array.isArray(json?.values) && json.values.length > 3) {
@@ -7949,15 +8175,17 @@
                     console.warn('[Compare]', symbol, 'TwelveData:', json?.message || 'empty');
                 } catch (e) { console.warn('[Compare]', symbol, 'TwelveData failed:', e.message); }
             }
-            
+
             const p2 = Math.floor(Date.now() / 1000);
             const p1 = p2 - days * 86400;
-            // Yahoo rate-limits datacenter IPs (which CORS proxies are), so try both hosts,
-            // then fall back to Stooq daily CSV, which tolerates proxies.
+            const yahooUrls = [];
             for (const host of ['query1', 'query2']) {
+                yahooUrls.push(`https://${host}.finance.yahoo.com/v8/finance/chart/${symbol}?interval=60m&period1=${p1}&period2=${p2}`);
+                yahooUrls.push(`https://${host}.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=${Math.max(days, 5)}d`);
+            }
+            for (const url of yahooUrls) {
                 try {
-                    const url = `https://${host}.finance.yahoo.com/v8/finance/chart/${symbol}?interval=60m&period1=${p1}&period2=${p2}`;
-                    const json = await fetchJsonResilient(url);
+                    const json = await fetchJsonResilient(url, 180000);
                     const r = json?.chart?.result?.[0];
                     if (!r?.timestamp) throw new Error('no data');
                     const closes = r.indicators?.quote?.[0]?.close || [];
@@ -7965,37 +8193,60 @@
                     r.timestamp.forEach((ts, i) => {
                         if (closes[i] !== null && closes[i] !== undefined) out.push({ x: ts * 1000, p: closes[i] });
                     });
-                    if (out.length > 3) return out;
+                    if (out.length > 3) {
+                        console.log('[Compare]', symbol, 'via Yahoo', url.includes('60m') ? 'hourly' : 'daily');
+                        return out;
+                    }
                 } catch (e) {
-                    console.warn('[Compare]', symbol, host, 'failed:', e.message);
+                    console.warn('[Compare]', symbol, 'Yahoo failed:', e.message);
                 }
             }
             return fetchStooqDaily(symbol, days);
         }
-        
+
+        async function fetchTextResilient(url) {
+            try {
+                const res = await fetchT(url, {}, 6000);
+                if (res.ok) {
+                    const t = await res.text();
+                    if (t && t.length > 20) return t;
+                }
+            } catch (e) {}
+            try {
+                const res = await fetchWithProxy(url);
+                return await res.text();
+            } catch (e) {
+                throw new Error('text fetch failed: ' + e.message);
+            }
+        }
+
         async function fetchStooqDaily(symbol, days) {
             const fmt = d => d.toISOString().slice(0, 10).replace(/-/g, '');
-            const d2 = new Date(), d1 = new Date(Date.now() - (days + 5) * 86400e3);
-            const url = `https://stooq.com/q/d/l/?s=${symbol.toLowerCase()}.us&d1=${fmt(d1)}&d2=${fmt(d2)}&i=d`;
+            const d2 = new Date(), d1 = new Date(Date.now() - (days + 10) * 86400e3);
+            const sym = symbol.toLowerCase();
+            const urls = [
+                `https://stooq.com/q/d/l/?s=${sym}.us&d1=${fmt(d1)}&d2=${fmt(d2)}&i=d`,
+                `https://stooq.com/q/d/l/?s=${sym}.us&i=d`,
+                `https://stooq.pl/q/d/l/?s=${sym}.us&i=d`
+            ];
             let text = null;
-            for (const proxy of CORS_PROXIES) {
+            for (const url of urls) {
                 try {
-                    const res = await fetchT(proxy.build(url), {}, 10000);
-                    if (!res.ok) continue;
-                    const t = await res.text();
-                    if (t && t.startsWith('Date,')) { text = t; break; }
-                } catch (e) { /* next proxy */ }
+                    const t = await fetchTextResilient(url);
+                    if (t && /Date/i.test(t) && t.indexOf(',') >= 0) { text = t; break; }
+                } catch (e) { /* next */ }
             }
             if (!text) throw new Error(symbol + ': Stooq unavailable');
             const out = text.trim().split('\n').slice(1).map(line => {
-                const [date, , , , close] = line.split(',');
+                const parts = line.split(',');
+                const date = parts[0], close = parts[4] || parts[parts.length - 2];
                 return { x: new Date(date + 'T21:00:00Z').getTime(), p: parseFloat(close) };
-            }).filter(r => isFinite(r.p));
+            }).filter(r => isFinite(r.p) && isFinite(r.x));
             if (out.length === 0) throw new Error(symbol + ': empty Stooq series');
             console.log('[Compare]', symbol, 'served daily via Stooq fallback');
             return out;
         }
-        
+
         function normalizeSeries(points) {
             const base = points[0].p;
             return points.map(pt => ({ x: pt.x, y: ((pt.p - base) / base) * 100 }));
@@ -8100,7 +8351,10 @@
                 const okList = wanted.filter(k => got[k]);
                 const missing = wanted.filter(k => !got[k]);
                 el.innerHTML = 'Normalized performance \u2022 ' + okList.join(' \u2022 ') + ' \u2022 Hourly' +
-                    (missing.length ? ` <span style="color:var(--warn);">\u2014 loading/unavailable: ${missing.join(', ')}</span>` : '');
+                    (missing.length === 0 ? ''
+                        : (elId === 'crossAssetSubtitle' && missing.every(k => ['SPY','QQQ','IWM'].includes(k))
+                            ? ` <span style="color:var(--warn);">\u2014 equities unavailable</span>`
+                            : ` <span style="color:var(--warn);">\u2014 loading/unavailable: ${missing.join(', ')}</span>`));
             };
             subtitle('crossAssetSubtitle', ['BTC', 'ETH', 'SPY', 'QQQ', 'IWM']);
             subtitle('cryptoLeadersSubtitle', ['BTC', 'ETH', 'SOL', 'HYPE']);
@@ -8128,27 +8382,35 @@
         async function loadHypeTokenomics() {
             let price = null, circ = null, af = null, staked = null;
             
-            // Market data (CoinGecko)
+            // Price from shared HL-mid path first so the card never waits on CoinGecko
+            try { await refreshHypeQuote(); price = hypeQuote.px; } catch (e) {}
+
             try {
-                const rows = await (await fetch(`${COINGECKO_API}/coins/markets?vs_currency=usd&ids=hyperliquid`, { headers: COINGECKO_HEADERS })).json();
-                const c = Array.isArray(rows) ? rows[0] : null;
+                const got = await cgFetch('/coins/markets?vs_currency=usd&ids=hyperliquid', { cacheKey: 'hype_markets', ttlMs: 600000 });
+                const c = Array.isArray(got.data) ? got.data[0] : null;
                 if (c) {
-                    price = c.current_price;
+                    if (!price && c.current_price) {
+                        price = c.current_price;
+                        writeHypePrice(price, c.price_change_percentage_24h, got.cached ? 'cache' : 'cg');
+                    } else if (typeof c.price_change_percentage_24h === 'number') {
+                        writeHypePrice(price || c.current_price, c.price_change_percentage_24h, price ? 'hl+cg' : 'cg');
+                    }
                     circ = c.circulating_supply;
                     if (c.market_cap) hlHypeMcap = c.market_cap;
-                    document.getElementById('hypeTokPrice').textContent = '$' + price.toFixed(2);
-                    const chg = c.price_change_percentage_24h;
-                    if (typeof chg === 'number') {
-                        const el = document.getElementById('hypeTokChange');
-                        el.textContent = (chg >= 0 ? '+' : '') + chg.toFixed(2) + '% 24h';
-                        el.style.color = chg >= 0 ? 'var(--good)' : 'var(--bad)';
-                    }
                     document.getElementById('hypeTokMcap').textContent = hlFmt(c.market_cap);
-                    document.getElementById('hypeTokFdv').textContent = hlFmt(c.fully_diluted_valuation || price * HYPE_TOTAL_SUPPLY);
-                    document.getElementById('hypeTokCirc').textContent = (circ / 1e6).toFixed(1) + 'M';
-                    document.getElementById('hypeTokCircPct').textContent = (circ / HYPE_TOTAL_SUPPLY * 100).toFixed(1) + '% of total';
+                    document.getElementById('hypeTokFdv').textContent = hlFmt(c.fully_diluted_valuation || (price || c.current_price || 0) * HYPE_TOTAL_SUPPLY);
+                    if (circ) {
+                        document.getElementById('hypeTokCirc').textContent = (circ / 1e6).toFixed(1) + 'M';
+                        document.getElementById('hypeTokCircPct').textContent = (circ / HYPE_TOTAL_SUPPLY * 100).toFixed(1) + '% of total';
+                    }
+                    if (got.cached) setSourceTag(document.getElementById('hypeTokPrice'), 'cached');
                 }
             } catch (e) { console.error('[Tokenomics] market data:', e.message); }
+            if (price) {
+                const el = document.getElementById('hypeTokPrice');
+                if (el) el.textContent = '$' + Number(price).toFixed(2);
+                if (!hypeQuote.chg) setSourceTag(el, 'via HL mid');
+            }
             
             // Assistance Fund HYPE balance (spot clearinghouse of the AF address)
             try {
@@ -8515,21 +8777,9 @@
                 }
             } catch (e) { console.warn('[HL Glance] EVM TVL:', e.message); }
             
-            // HYPE price
-            try {
-                const p = await (await fetch(`${COINGECKO_API}/simple/price?ids=hyperliquid&vs_currencies=usd&include_24hr_change=true&include_market_cap=true`, { headers: COINGECKO_HEADERS })).json();
-                if (p?.hyperliquid?.usd_market_cap) hlHypeMcap = p.hyperliquid.usd_market_cap;
-                const px = p?.hyperliquid?.usd;
-                const chg = p?.hyperliquid?.usd_24h_change;
-                if (px) {
-                    document.getElementById('hlHypePrice').textContent = '$' + px.toFixed(2);
-                    const chgEl = document.getElementById('hlHypeChange');
-                    if (typeof chg === 'number') {
-                        chgEl.textContent = (chg >= 0 ? '+' : '') + chg.toFixed(2) + '% 24h';
-                        chgEl.className = 'market-change ' + (chg >= 0 ? 'positive' : 'negative');
-                    }
-                }
-            } catch (e) { console.warn('[HL Glance] HYPE price:', e.message); }
+            // HYPE price — same write path as header (HL mid primary)
+            try { await refreshHypeQuote(); }
+            catch (e) { console.warn('[HL Glance] HYPE price:', e.message); }
             
             // Totals + business mix
             const coreVol = core?.vol || 0, spotVol = spot?.vol || 0, hip3Vol = hip3.vol || 0;
@@ -8592,7 +8842,8 @@
             document.getElementById('hlBizRows').innerHTML = rowsHtml;
         }
         
-        function initTradingViewCharts() {
+        function initTradingViewCharts(opts) {
+            const remount = !!(opts && opts.remount);
             const chartConfig = {
                 "autosize": true,
                 "timezone": "Etc/UTC",
@@ -8608,75 +8859,24 @@
                 "gridColor": "rgba(255, 255, 255, 0.05)",
                 "hide_volume": true
             };
-            
-            // BTC Dominance Chart
-            new TradingView.widget({
-                ...chartConfig,
-                "container_id": "btc-dominance-chart",
-                "symbol": "CRYPTOCAP:BTC.D",
-                "interval": "W"
-            });
-            
-            // ETH/BTC Chart
-            new TradingView.widget({
-                ...chartConfig,
-                "container_id": "eth-btc-chart",
-                "symbol": "BINANCE:ETHBTC",
-                "interval": "W"
-            });
-            
-            // BTC/USD Chart - Full history, weekly timeframe
-            new TradingView.widget({
-                ...chartConfig,
-                "container_id": "btc-usd-chart",
-                "symbol": "INDEX:BTCUSD",
-                "interval": "W"
-            });
-            
-            // ETH/USD Chart - Full history, weekly timeframe
-            new TradingView.widget({
-                ...chartConfig,
-                "container_id": "eth-usd-chart",
-                "symbol": "INDEX:ETHUSD",
-                "interval": "W"
-            });
-            
-            // USDT Dominance Chart - Weekly, all history
+
+            mountTVWidget("btc-dominance-chart", Object.assign({}, chartConfig, { "symbol": "CRYPTOCAP:BTC.D", "interval": "W" }), remount);
+            mountTVWidget("eth-btc-chart", Object.assign({}, chartConfig, { "symbol": "BINANCE:ETHBTC", "interval": "W" }), remount);
+            mountTVWidget("btc-usd-chart", Object.assign({}, chartConfig, { "symbol": "INDEX:BTCUSD", "interval": "W" }), remount);
+            mountTVWidget("eth-usd-chart", Object.assign({}, chartConfig, { "symbol": "INDEX:ETHUSD", "interval": "W" }), remount);
             if (document.getElementById('usdt-dominance-chart')) {
-                new TradingView.widget({
-                    ...chartConfig,
-                    "container_id": "usdt-dominance-chart",
-                    "symbol": "CRYPTOCAP:USDT.D",
-                    "interval": "W",
-                    "range": "ALL"
-                });
+                mountTVWidget("usdt-dominance-chart", Object.assign({}, chartConfig, { "symbol": "CRYPTOCAP:USDT.D", "interval": "W", "range": "ALL" }), remount);
             }
-            
-            // USDC Dominance Chart - Weekly, all history
             if (document.getElementById('usdc-dominance-chart')) {
-                new TradingView.widget({
-                    ...chartConfig,
-                    "container_id": "usdc-dominance-chart",
-                    "symbol": "CRYPTOCAP:USDC.D",
-                    "interval": "W",
-                    "range": "ALL"
-                });
+                mountTVWidget("usdc-dominance-chart", Object.assign({}, chartConfig, { "symbol": "CRYPTOCAP:USDC.D", "interval": "W", "range": "ALL" }), remount);
             }
-            
-            // HYPE/USDT Chart - Daily, full history
             if (document.getElementById('hype-chart')) {
-                new TradingView.widget({
-                    ...chartConfig,
-                    "container_id": "hype-chart",
-                    "symbol": "BYBIT:HYPEUSDT.P",
-                    "interval": "D"
-                });
+                mountTVWidget("hype-chart", Object.assign({}, chartConfig, { "symbol": "BYBIT:HYPEUSDT.P", "interval": "D" }), remount);
             }
-            
-// Native comparison charts (replaces TradingView compare widgets)
+
             if (!compareChartsLoaded) loadComparisonCharts(7);
         }
-        
+
         // Initialize Macro Dashboard charts (separate to avoid loading when not visible)
         let macroChartsInitialized = false;
         function initMacroCharts() {
@@ -8690,7 +8890,7 @@
             setTimeout(() => renderLiquidityROCChart('all'), 300);
             
             // Fed Balance Sheet Chart (WALCL)
-            new TradingView.widget({
+            tvWidget({
                 "autosize": true,
                 "symbol": "FRED:WALCL",
                 "interval": "W",
@@ -8710,7 +8910,7 @@
             });
             
             // Treasury General Account (TGA)
-            new TradingView.widget({
+            tvWidget({
                 "autosize": true,
                 "symbol": "FRED:WTREGEN",
                 "interval": "W",
@@ -8730,7 +8930,7 @@
             });
             
             // Reverse Repo Facility (RRP)
-            new TradingView.widget({
+            tvWidget({
                 "autosize": true,
                 "symbol": "FRED:RRPONTSYD",
                 "interval": "D",
@@ -8750,7 +8950,7 @@
             });
             
             // M2 Money Supply
-            new TradingView.widget({
+            tvWidget({
                 "autosize": true,
                 "symbol": "FRED:M2SL",
                 "interval": "M",
@@ -8770,7 +8970,7 @@
             });
             
             // Yield Curve (10Y-2Y Spread) - FRED data works
-            new TradingView.widget({
+            tvWidget({
                 "autosize": true,
                 "symbol": "FRED:T10Y2Y",
                 "interval": "D",
@@ -8790,7 +8990,7 @@
             });
             
             // Gold - Weekly chart with full history
-            new TradingView.widget({
+            tvWidget({
                 "autosize": true,
                 "symbol": "TVC:GOLD",
                 "interval": "W",
@@ -8811,7 +9011,7 @@
             });
             
             // USD/JPY Chart
-            new TradingView.widget({
+            tvWidget({
                 "autosize": true,
                 "symbol": "FX:USDJPY",
                 "interval": "D",
@@ -8832,7 +9032,7 @@
             
             // DXY Alternative - Using EURUSD inverted as proxy (strong correlation)
             // UUP ETF or other DXY symbols often restricted in free widget
-            new TradingView.widget({
+            tvWidget({
                 "autosize": true,
                 "symbol": "FX:EURUSD",
                 "interval": "D",
@@ -8852,7 +9052,7 @@
             });
             
             // Treasury Bonds - TLT ETF (inverse of yields)
-            new TradingView.widget({
+            tvWidget({
                 "autosize": true,
                 "symbol": "NASDAQ:TLT",
                 "interval": "D",
@@ -9624,27 +9824,24 @@
 
             // Primary: CoinGecko stablecoins category — reliable, CORS-enabled
             // Try up to 2 times with increasing delay for rate limit resilience
-            for (let attempt = 0; attempt < 2 && stables.length === 0; attempt++) {
-                if (attempt > 0) await new Promise(r => setTimeout(r, 2000));
-                try {
-                    const cgUrl = `${COINGECKO_API}/coins/markets?vs_currency=usd&category=stablecoins&order=market_cap_desc&per_page=20&sparkline=false&price_change_percentage=24h`;
-                    const cgRes = await fetch(cgUrl, { headers: COINGECKO_HEADERS });
-                    if (cgRes.status === 429) { console.warn('[Stables] Rate limited, attempt', attempt+1); continue; }
-                    if (cgRes.ok) {
-                        const cgData = await cgRes.json();
-                        if (Array.isArray(cgData) && cgData.length > 0) {
-                            stables = cgData.filter(s => s.market_cap > 1e8).map(s => ({
-                                name: s.name,
-                                symbol: s.symbol.toUpperCase(),
-                                mcap: s.market_cap || 0,
-                                change24h: s.market_cap_change_percentage_24h ?? 0,  // supply change, not price (price is always ~0 for stables)
-                            }));
-                            console.log('[Stables] Loaded from CoinGecko:', stables.length, 'assets');
-                        }
-                    }
-                } catch (e) {
-                    console.warn('[Stables] CoinGecko fetch failed (attempt ' + (attempt+1) + '):', e.message);
+            try {
+                const got = await cgFetch(
+                    '/coins/markets?vs_currency=usd&category=stablecoins&order=market_cap_desc&per_page=20&sparkline=false&price_change_percentage=24h',
+                    { cacheKey: 'stables_markets_20', ttlMs: 15 * 60 * 1000 }
+                );
+                const cgData = got.data;
+                if (Array.isArray(cgData) && cgData.length > 0) {
+                    stables = cgData.filter(s => s.market_cap > 1e8).map(s => ({
+                        name: s.name,
+                        symbol: s.symbol.toUpperCase(),
+                        mcap: s.market_cap || 0,
+                        change24h: s.market_cap_change_percentage_24h ?? 0,
+                    }));
+                    console.log('[Stables] Loaded from CoinGecko' + (got.cached ? ' (cached)' : '') + ':', stables.length, 'assets');
+                    if (got.cached) setSourceTag(document.getElementById('stableTotalMcap'), 'cached');
                 }
+            } catch (e) {
+                console.warn('[Stables] CoinGecko fetch failed:', e.message);
             }
 
             // Fallback: DefiLlama
@@ -10495,27 +10692,14 @@
                     } catch (e) { console.log('Binance', host, 'failed:', e.message); }
                 }
                 
-                // Fetch HYPE from CoinGecko (not on Binance)
+                // HYPE: HL mid is primary (shared write path). CG only for 24h / mcap.
                 try {
-                    const hypeRes = await fetchWithTimeout(`${COINGECKO_API}/simple/price?ids=hyperliquid&vs_currencies=usd&include_24hr_change=true`);
-                    if (hypeRes.ok) {
-                        const hypeData = await hypeRes.json();
-                        hypePrice = hypeData.hyperliquid?.usd || 0;
-                        hypeChange = hypeData.hyperliquid?.usd_24h_change || 0;
+                    await refreshHypeQuote();
+                    if (hypeQuote.px) {
+                        hypePrice = hypeQuote.px;
+                        hypeChange = hypeQuote.chg;
                     }
-                } catch (e) {
-                    console.log('HYPE via CoinGecko failed:', e.message);
-                }
-                // Fallback: HYPE mid straight from Hyperliquid (no rate limits)
-                if (!hypePrice) {
-                    try {
-                        const mids = await hlInfo({ type: 'allMids' });
-                        if (mids && mids.HYPE) {
-                            hypePrice = parseFloat(mids.HYPE);
-                            hypeChange = null;  // change unknown from mids
-                        }
-                    } catch (e) { console.log('HYPE via Hyperliquid failed:', e.message); }
-                }
+                } catch (e) { console.log('HYPE quote failed:', e.message); }
                 
                 // Strategy 2: CoinGecko for all
                 if (!success) {
@@ -10584,17 +10768,8 @@
                     document.getElementById('solChange').className = 'market-change ' + (solChange >= 0 ? 'positive' : 'negative');
                 }
                 
-                // HYPE Price
-                if (hypePrice) {
-                    document.getElementById('hypePrice').textContent = '$' + formatNumber(hypePrice, 2);
-                    if (hypeChange !== null && hypeChange !== undefined) {
-                        document.getElementById('hypeChange').textContent = formatPercent(hypeChange, true);
-                        document.getElementById('hypeChange').className = 'market-change ' + (hypeChange >= 0 ? 'positive' : 'negative');
-                    } else {
-                        document.getElementById('hypeChange').textContent = 'via HL mid';
-                        document.getElementById('hypeChange').className = 'market-change';
-                    }
-                }
+                // HYPE Price — shared path already painted header + HL + tokenomics
+                if (hypePrice && !hypeQuote.px) writeHypePrice(hypePrice, hypeChange, 'hl');
                 
                 // Total market cap
                 document.getElementById('totalMcap').textContent = formatCurrency(totalMcap);
@@ -10616,51 +10791,46 @@
         
         // ==================== MAIN REFRESH ====================
         async function refreshAllData() {
+            if (window._ftRefreshing) return;
+            window._ftRefreshing = true;
             const btn = document.getElementById('refreshBtn');
-            btn.disabled = true;
-            btn.textContent = '↻Loading...';
-            setStatus('loading', 'Updating...');
+            if (btn) { btn.disabled = true; btn.textContent = '↻ Refresh'; }
+            // Keep last LIVE text during the cycle — do not flicker UPDATING/LOADING
             
             let errors = 0;
-            
-            // Helper to run async function and catch errors
-            const safeCall = async (fn, name) => {
+            const safeCall = async (fn, name, ms = 18000) => {
                 try {
-                    await fn();
+                    await Promise.race([
+                        Promise.resolve().then(fn),
+                        new Promise((_, rej) => setTimeout(() => rej(new Error(name + ' timeout')), ms))
+                    ]);
                 } catch (e) {
                     console.error(`${name} failed:`, e);
                     errors++;
                 }
             };
             
-            // First batch: Binance APIs (no rate limit issues)
-            await Promise.all([
-                safeCall(fetchFundingRates, 'FundingRates'),
-                safeCall(fetchOpenInterest, 'OpenInterest'),
-                safeCall(fetchLongShortRatio, 'LongShort'),
-                safeCall(() => fetchFundingHistory(100), 'FundingHistory'),
-                safeCall(fetchMarketData, 'MarketData')
-            ]);
-            
-            // Second batch: External APIs
-            await new Promise(r => setTimeout(r, 200));
-            await safeCall(fetchFearGreed, 'FearGreed');
-            
-            // Third batch: DefiLlama / stablecoin data (sequential to avoid CoinGecko rate limits)
-            await new Promise(r => setTimeout(r, 500));
-            await safeCall(fetchStablecoinData, 'StablecoinData');
-            await new Promise(r => setTimeout(r, 1500));
-            await safeCall(() => fetchStablecoinHistory('all'), 'StablecoinHistory');
-            
-            // Update status
-            if (errors === 0) {
-                setStatus('', new Date().toLocaleTimeString());
-            } else {
-                setStatus('', new Date().toLocaleTimeString() + ` (${errors} warnings)`);
+            try {
+                await Promise.all([
+                    safeCall(fetchFundingRates, 'FundingRates', 12000),
+                    safeCall(fetchOpenInterest, 'OpenInterest', 12000),
+                    safeCall(fetchLongShortRatio, 'LongShort', 12000),
+                    safeCall(() => fetchFundingHistory(100), 'FundingHistory', 12000),
+                    safeCall(fetchMarketData, 'MarketData', 15000)
+                ]);
+                await safeCall(fetchFearGreed, 'FearGreed', 8000);
+                await safeCall(fetchStablecoinData, 'StablecoinData', 15000);
+                // History is slow / CG-prone — do not block the header on it
+                safeCall(() => fetchStablecoinHistory('all'), 'StablecoinHistory', 25000);
+                safeCall(loadAltseason, 'Altseason', 20000);
+                safeCall(refreshHypeQuote, 'HypeQuote', 10000);
+            } finally {
+                window._ftRefreshing = false;
+                if (btn) { btn.disabled = false; btn.textContent = '↻ Refresh'; }
+                const t = new Date().toLocaleTimeString();
+                if (errors === 0) setStatus('', 'LIVE · ' + t);
+                else setStatus('warn', 'LIVE · ' + errors + ' warn');
             }
-            
-            btn.disabled = false;
-            btn.textContent = '↻Refresh';
         }
         
         // ==================== PDF EXPORT ====================
@@ -11365,7 +11535,7 @@
             // IBIT Chart
             const ibitContainer = document.getElementById('ibit-chart');
             if (ibitContainer && !ibitContainer.hasChildNodes()) {
-                new TradingView.widget({
+                tvWidget({
                     "autosize": true,
                     "symbol": "NASDAQ:IBIT",
                     "interval": "D",
@@ -11387,7 +11557,7 @@
             // ETHA Chart
             const ethaContainer = document.getElementById('etha-chart');
             if (ethaContainer && !ethaContainer.hasChildNodes()) {
-                new TradingView.widget({
+                tvWidget({
                     "autosize": true,
                     "symbol": "NASDAQ:ETHA",
                     "interval": "D",
@@ -11545,10 +11715,14 @@
             const zMap = parseSeriesLoose(zRaw);
             if (zMap.size < 400) throw new Error('MVRV fallback source returned ' + zMap.size + ' rows');
             let rpMap = new Map();
+            let ratioMap = new Map();
             try {
                 rpMap = parseSeriesLoose(await fetchJsonResilient('https://bitcoin-data.com/v1/realized-price'));
             } catch (e) { console.warn('[Cycle] realized-price fallback failed:', e.message); }
-            return { zMap, rpMap };
+            try {
+                ratioMap = parseSeriesLoose(await fetchJsonResilient('https://bitcoin-data.com/v1/mvrv'));
+            } catch (e) { console.warn('[Cycle] mvrv-ratio fallback failed:', e.message); }
+            return { zMap, rpMap, ratioMap };
         }
         
         async function loadCycleData() {
@@ -11586,6 +11760,7 @@
             const price = dates.map(d => priceMap.has(d) ? priceMap.get(d) : null);
             const mvrvZ = dates.map(d => mvrvMaps && mvrvMaps.zMap.has(d) ? mvrvMaps.zMap.get(d) : null);
             const realized = dates.map(d => mvrvMaps && mvrvMaps.rpMap.has(d) ? mvrvMaps.rpMap.get(d) : null);
+            const ratioFromSrc = dates.map(d => mvrvMaps && mvrvMaps.ratioMap && mvrvMaps.ratioMap.has(d) ? mvrvMaps.ratioMap.get(d) : null);
             
             let dma111 = dates.map(() => null), dma350x2 = dates.map(() => null);
             if (priceRows) {
@@ -11596,7 +11771,12 @@
                 });
             }
             
-            cycleData = { dates, price, mvrv: dates.map(() => null), mvrvZ, realized, dma111, dma350x2 };
+            const mvrv = dates.map((d, i) => {
+                if (ratioFromSrc[i] != null) return ratioFromSrc[i];
+                const px = price[i], rp = realized[i];
+                return (px && rp && rp > 0) ? px / rp : null;
+            });
+            cycleData = { dates, price, mvrv, mvrvZ, realized, dma111, dma350x2 };
             updateCycleCards();
             if (mvrvMaps) renderMvrvChart(); else showCycleError('mvrvLoading', 'On-chain valuation data unavailable.');
             if (priceRows) renderPiCycleChart(); else showCycleError('piCycleLoading', 'Price history unavailable.');
@@ -11633,8 +11813,19 @@
             
             const ratioEl = document.getElementById('mvrvRatioValue');
             const rpEl = document.getElementById('mvrvRealizedPrice');
-            ratioEl.textContent = ratio !== null ? ratio.toFixed(2) + 'x' : 'N/A';
-            rpEl.textContent = rp !== null ? 'Realized price: $' + Math.round(rp).toLocaleString() : 'Realized price: unavailable';
+            if (ratio !== null) {
+                ratioEl.textContent = ratio.toFixed(2) + 'x';
+                rpEl.textContent = rp !== null ? 'Realized price: $' + Math.round(rp).toLocaleString() : 'Realized price: unavailable';
+            } else if (z !== null) {
+                ratioEl.textContent = 'Z-only';
+                rpEl.textContent = rp !== null
+                    ? ('Realized $' + Math.round(rp).toLocaleString() + ' — ratio not in this source')
+                    : 'Z-score source has no MVRV ratio';
+                setSourceTag(ratioEl, 'no ratio field');
+            } else {
+                ratioEl.textContent = 'unavailable';
+                rpEl.textContent = 'Realized price: unavailable';
+            }
             
             const d111 = lastNonNull(cycleData.dma111), d350x2 = lastNonNull(cycleData.dma350x2);
             const gapEl = document.getElementById('piCycleGap');
@@ -11758,21 +11949,41 @@
         ]);
         
         async function loadAltseason() {
-            try {
-                const url = `${COINGECKO_API}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=80&page=1&price_change_percentage=7d%2C30d`;
-                const res = await fetch(url, { headers: COINGECKO_HEADERS });
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                const coins = await res.json();
-                
-                const btc = coins.find(c => c.id === 'bitcoin');
+            const ALT_LS = 'ft_altseason_v186';
+            const restoreCache = () => {
+                try {
+                    const raw = localStorage.getItem(ALT_LS);
+                    if (!raw) return false;
+                    const parsed = JSON.parse(raw);
+                    if (parsed && parsed['30d'] && parsed['30d'].score != null) {
+                        altseasonData = parsed;
+                        altseasonData._source = parsed._source || 'cache';
+                        renderAltseason();
+                        return true;
+                    }
+                } catch (e) {}
+                return false;
+            };
+            const persist = (src) => {
+                try {
+                    const copy = JSON.parse(JSON.stringify(altseasonData));
+                    copy._source = src;
+                    localStorage.setItem(ALT_LS, JSON.stringify(copy));
+                } catch (e) {}
+            };
+            const fromCoins = (coins, src) => {
+                const btc = coins.find(c => c.id === 'bitcoin' || c.symbol === 'btc' || c.symbol === 'BTC');
                 if (!btc) throw new Error('BTC missing from market data');
-                
                 const alts = coins
-                    .filter(c => c.id !== 'bitcoin' && !ALTSEASON_EXCLUDE.has((c.symbol || '').toLowerCase())
-                        && !/wrapped|staked|bridged|restaked/i.test(c.name || ''))
+                    .filter(c => {
+                        const id = (c.id || '').toLowerCase();
+                        const sym = (c.symbol || '').toLowerCase();
+                        return id !== 'bitcoin' && sym !== 'btc'
+                            && !ALTSEASON_EXCLUDE.has(sym)
+                            && !/wrapped|staked|bridged|restaked/i.test(c.name || '');
+                    })
                     .slice(0, 50);
-                
-                altseasonData = {};
+                const out = {};
                 for (const w of ['7d', '30d']) {
                     const key = `price_change_percentage_${w}_in_currency`;
                     const btcChg = btc[key];
@@ -11780,16 +11991,121 @@
                     const winners = valid.filter(c => c[key] > btcChg);
                     const score = valid.length ? Math.round((winners.length / valid.length) * 100) : null;
                     const leaders = valid.slice().sort((a, b) => b[key] - a[key]).slice(0, 5)
-                        .map(c => ({ symbol: c.symbol.toUpperCase(), rel: c[key] - btcChg }));
-                    altseasonData[w] = { score, leaders, n: valid.length, btcChg };
+                        .map(c => ({ symbol: String(c.symbol).toUpperCase(), rel: c[key] - btcChg }));
+                    out[w] = { score, leaders, n: valid.length, btcChg, source: src };
                 }
-                renderAltseason();
+                return out;
+            };
+
+            try {
+                const got = await cgFetch(
+                    '/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=80&page=1&price_change_percentage=7d%2C30d',
+                    { cacheKey: 'altseason_markets', ttlMs: 20 * 60 * 1000 }
+                );
+                if (Array.isArray(got.data) && got.data.length > 10) {
+                    altseasonData = fromCoins(got.data, got.cached ? 'cache' : 'coingecko');
+                    persist(got.cached ? 'cache' : 'coingecko');
+                    renderAltseason();
+                    return;
+                }
             } catch (e) {
-                console.error('Altseason failed:', e);
-                document.getElementById('altseasonSummary').textContent = 'Altseason data unavailable \u2014 CoinGecko rate limit likely. Retry with Refresh.';
+                console.warn('[Altseason] CoinGecko failed:', e.message);
+            }
+
+            if (restoreCache()) {
+                console.warn('[Altseason] served last-good cache');
+            }
+
+            try {
+                const data = await loadAltseasonFromBinance();
+                if (data && data['30d'] && data['30d'].score != null) {
+                    altseasonData = data;
+                    persist('binance');
+                    renderAltseason();
+                    return;
+                }
+            } catch (e) {
+                console.warn('[Altseason] Binance fallback failed:', e.message);
+            }
+
+            if (!altseasonData && !restoreCache()) {
+                document.getElementById('altseasonSummary').textContent =
+                    'Altseason data unavailable — CoinGecko rate limit and Binance fallback both failed. Retry with Refresh.';
             }
         }
-        
+
+        const ALTSEASON_BINANCE = [
+            'ETHUSDT','SOLUSDT','BNBUSDT','XRPUSDT','DOGEUSDT','ADAUSDT','AVAXUSDT','LINKUSDT',
+            'DOTUSDT','LTCUSDT','BCHUSDT','NEARUSDT','APTUSDT','ARBUSDT','OPUSDT','SUIUSDT',
+            'TONUSDT','TRXUSDT','ATOMUSDT','UNIUSDT','FILUSDT','ICPUSDT','INJUSDT','SEIUSDT',
+            'TIAUSDT','RENDERUSDT','FETUSDT','TAOUSDT','AAVEUSDT','ENAUSDT','WIFUSDT','PEPEUSDT'
+        ];
+
+        async function loadAltseasonFromBinance() {
+            let tickers = null;
+            for (const host of ['https://api.binance.com', 'https://api.binance.us']) {
+                try {
+                    const res = await fetchT(host + '/api/v3/ticker/24hr', {}, 8000);
+                    if (res.ok) {
+                        const j = await res.json();
+                        if (Array.isArray(j) && j.length > 20) { tickers = j; break; }
+                    }
+                } catch (e) { console.warn('[Altseason] ticker', host, e.message); }
+            }
+            if (!tickers) throw new Error('Binance 24hr ticker unavailable');
+            const bySym = {};
+            tickers.forEach(t => { bySym[t.symbol] = t; });
+            const btc = bySym.BTCUSDT;
+            if (!btc) throw new Error('BTCUSDT missing');
+            const alts = ALTSEASON_BINANCE.map(s => bySym[s]).filter(Boolean);
+            const scoreFrom = (btcChg, rows, getChg) => {
+                const valid = rows.map(r => ({ r, chg: getChg(r) })).filter(x => typeof x.chg === 'number' && isFinite(x.chg));
+                const winners = valid.filter(x => x.chg > btcChg);
+                const score = valid.length ? Math.round((winners.length / valid.length) * 100) : null;
+                const leaders = valid.slice().sort((a, b) => b.chg - a.chg).slice(0, 5)
+                    .map(x => ({ symbol: String(x.r.symbol || x.r).replace('USDT',''), rel: x.chg - btcChg }));
+                return { score, leaders, n: valid.length, btcChg, source: 'binance' };
+            };
+            const btc24 = parseFloat(btc.priceChangePercent);
+            const s24 = scoreFrom(btc24, alts, r => parseFloat(r.priceChangePercent));
+
+            const subset = alts.slice().sort((a, b) => parseFloat(b.quoteVolume || 0) - parseFloat(a.quoteVolume || 0)).slice(0, 16);
+            const pctFromKlines = (closes, days) => {
+                if (!closes || closes.length < 2) return null;
+                const last = closes[closes.length - 1];
+                const prev = closes[Math.max(0, closes.length - 1 - days)];
+                if (!prev) return null;
+                return ((last - prev) / prev) * 100;
+            };
+            const fetchDaily = async (symbol) => {
+                for (const host of ['https://api.binance.com', 'https://api.binance.us']) {
+                    try {
+                        const res = await fetchT(`${host}/api/v3/klines?symbol=${symbol}&interval=1d&limit=35`, {}, 7000);
+                        if (!res.ok) continue;
+                        const k = await res.json();
+                        if (Array.isArray(k) && k.length > 5) return k.map(c => parseFloat(c[4]));
+                    } catch (e) {}
+                }
+                return null;
+            };
+            const btcCloses = await fetchDaily('BTCUSDT');
+            const rows = [{ symbol: 'BTCUSDT', closes: btcCloses }];
+            const more = await Promise.allSettled(subset.map(async t => ({ symbol: t.symbol, closes: await fetchDaily(t.symbol) })));
+            more.forEach(r => { if (r.status === 'fulfilled' && r.value.closes) rows.push(r.value); });
+            const out = { '7d': Object.assign({}, s24, { source: 'binance-24h' }), '30d': Object.assign({}, s24, { source: 'binance-24h' }) };
+            if (btcCloses) {
+                for (const pair of [['7d', 7], ['30d', 30]]) {
+                    const w = pair[0], days = pair[1];
+                    const btcChg = pctFromKlines(btcCloses, days);
+                    if (btcChg == null) continue;
+                    const altsK = rows.filter(r => r.symbol !== 'BTCUSDT');
+                    const scored = scoreFrom(btcChg, altsK, r => pctFromKlines(r.closes, days));
+                    if (scored.score != null) out[w] = Object.assign(scored, { source: 'binance' });
+                }
+            }
+            return out;
+        }
+
         function renderAltseason() {
             const d = altseasonData && altseasonData[altseasonWindow];
             if (!d || d.score === null) return;
@@ -11805,11 +12121,17 @@
             valEl.style.color = color;
             
             document.getElementById('altseasonMarker').style.left = d.score + '%';
+            const src = d.source || (altseasonData && altseasonData._source) || 'coingecko';
+            const srcNote = src === 'coingecko' ? ''
+                : src === 'cache' ? ' <span class="src-tag">cached</span>'
+                : src === 'binance-24h' ? ' <span class="src-tag">via Binance 24h</span>'
+                : (src.indexOf('binance') === 0 ? ' <span class="src-tag">via Binance</span>' : ' <span class="src-tag">' + src + '</span>');
             document.getElementById('altseasonSummary').innerHTML =
                 `<strong style="color:var(--text);">${d.score}/100</strong> \u2014 ` +
                 `${Math.round(d.score * d.n / 100)} of ${d.n} top alts beat BTC over ${altseasonWindow} ` +
-                `(BTC ${altseasonWindow}: ${d.btcChg >= 0 ? '+' : ''}${d.btcChg.toFixed(1)}%)`;
-            
+                `(BTC ${altseasonWindow}: ${d.btcChg >= 0 ? '+' : ''}${Number(d.btcChg).toFixed(1)}%)` + srcNote;
+            setSourceTag(document.getElementById('altseasonValue'), src === 'coingecko' ? '' : (src === 'cache' ? 'cached' : (src.indexOf('binance') === 0 ? 'via Binance' : src)));
+
             document.getElementById('altseasonLeaders').innerHTML = d.leaders.map(l =>
                 `<span style="padding:4px 10px;background:var(--panel-hover);border:1px solid var(--border);border-radius:12px;font-size:11px;">` +
                 `<strong>${l.symbol}</strong> <span style="color:${l.rel >= 0 ? 'var(--good)' : 'var(--bad)'};">${l.rel >= 0 ? '+' : ''}${l.rel.toFixed(1)}% vs BTC</span></span>`
@@ -11859,7 +12181,7 @@
             }, { passive: true });
         });
         
-        console.log('%cFLOWTRACK v18.5', 'color:#50d2c1;font-weight:bold;font-size:14px;', 'build 2026-07-28');
+        console.log('%cFLOWTRACK v18.6', 'color:#50d2c1;font-weight:bold;font-size:14px;', 'build 2026-08-18');
         // UTC clock in top bar
         setInterval(() => {
             const el = document.getElementById('utcClock');
@@ -11869,8 +12191,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             refreshAllData();
             
-            // Initialize TradingView charts
-            setTimeout(initTradingViewCharts, 500);
+            // Initialize TradingView charts (wait for container width; retry once)
+            setTimeout(() => initTradingViewCharts({ remount: false }), 500);
             
             // Initialize Fear & Greed chart
             setTimeout(() => loadFearGreedHistory(730), 2000);
@@ -11890,8 +12212,14 @@
             // Initialize Altseason Index (CoinGecko - staggered after breadth/market data)
             setTimeout(() => loadAltseason(), 7000);
             
-            // Auto refresh every 60 seconds
+            // Auto refresh every 60 seconds — refreshAllData no-ops if a cycle is still running
             setInterval(refreshAllData, 60000);
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    remountVisibleTV();
+                }
+            });
         });
     </script>
 </body>
