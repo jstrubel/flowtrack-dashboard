@@ -1,9 +1,52 @@
+flowtrack-v19.0
+.html
+619 KB
+
+can you change the naming convention from now on to reflect the version numbers so that I can save them accordingly?
+
+Got it. I'll name drops like flowtrack-v19.0.html from now on so you can save them as-is. Renaming this one now.
+
+Saved. This drop is flowtrack-v19.0.html. Next one will be flowtrack-v19.1.html or flowtrack-v20.0.html, matching whatever’s in the footer.
+
+
+flowtrack-v19.0
+.html
+619 KB
+
+
+
+some of the charts are weird now. Can you fix that?
+
+Also, I would like you to add content to the macro, stablecoins, and Hyperliquid tabs. Make it look like a professional dashboard for a crypto trader to monitor the market. Remember to use that Hyperliquid financials dashboard for inspiration for the Hyperliquid tab
+
+Yeah, those TradingView tiles are stacking labels on top of the numbers, and the China bars look blown out. I’ll fix the chart layout first, then add real trader content to Macro, Stables, and Hyperliquid.
+
+Those tiles are 128px with the TradingView toolbar still on, so the last print sits on top of the ticker. China is stacked yuan bars labeled as dollars. Fixing that, then adding peg tape, a real risk strip, and an hl.eco-style volume/fees chapter.
+
+Working through the Macro tiles first, then Stables peg/dominance and the Hyperliquid fees/volume chapters. I’ll drop flowtrack-v19.1.html when it’s ready.
+
+v19.1 is written. Checking the chart fix and the new chapters, then I’ll send the file.
+
+v19.1 is ready: flowtrack-v19.1.html. Same keys, not deployed.
+
+Macro charts: TradingView toolbar/legend are off, tiles are 220px, scoreboard is 3-wide so labels stop stacking. China is net CNY injection + BTC, not stacked bars labeled as dollars. New risk tape is DXY, VIX, 10Y, 2Y. Calendar is high-impact only.
+
+Stables got a peg tape (bps off $1) and USDT.D / USDC.D / BTC.D tiles. Hyperliquid picked up volume-by-source, cumulative fees with a peak print, quarterly fee history, Assistance Fund, and funding extremes. No invented buybacks or CEX OI.
+
+
+flowtrack-v19.1
+.html
+640 KB
+
+
+
+No file chosen
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flowtrack | Crypto Market Intelligence v19.0</title>
+    <title>Flowtrack | Crypto Market Intelligence v19.1</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1036,6 +1079,7 @@
 
 
         /* ==================== v19 TERMINAL LAYER ==================== */
+        /* v19.1: clean TV chrome, 220px meters, China CNY net, risk/peg/HL chapters */
         :root {
             --ft-ink: #08090C;
             --ft-cyan: #00E5C7;
@@ -1151,7 +1195,7 @@
         .rail-kpi { background: var(--panel); padding: 14px 14px 13px; flex: 1; }
         .scoreboard {
             display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 1px;
             background: var(--border);
             border: 1px solid var(--border);
@@ -1166,7 +1210,7 @@
         .score-cell .score-read {
             font-size: 10px; color: var(--text-dim); margin: 3px 0 8px; line-height: 1.35;
         }
-        .score-cell .tv { height: 148px; margin: 0 -10px; }
+        .score-cell .tv { height: 220px; margin: 0 -10px; }
         .meter-row {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1182,7 +1226,7 @@
             text-transform: uppercase; color: var(--text);
         }
         .meter .meter-read { font-size: 10px; color: var(--text-dim); margin: 3px 0 6px; }
-        .meter .tv { height: 128px; margin: 0 -12px; }
+        .meter .tv { height: 220px; margin: 0 -12px; }
         .ft-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 11px; }
         .ft-table thead th {
             position: sticky; top: 0; z-index: 2;
@@ -1234,15 +1278,38 @@
         #tab-stablecoins .section-header,
         #tab-hyperliquid .section-header { display: none; }
         .hidden-id { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+        .risk-tape, .dom-tape {
+            display: grid;
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .risk-tape { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .dom-tape { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .risk-tape .tv { height: 240px; margin: 0 -12px; }
+        .dom-tape .tv { height: 220px; margin: 0 -12px; }
+        .peak-note {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--text-dim);
+            margin-top: 8px;
+            letter-spacing: 0.04em;
+        }
+        .bps-muted { color: var(--text-dim); }
+        .bps-amber { color: var(--warn); }
+        .bps-red { color: var(--bad); font-weight: 600; }
         @media (max-width: 1300px) {
             .kpi-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
             .hero-liq { grid-template-columns: 1fr; }
             .hero-liq-num { border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 14px; }
             .rail { grid-template-columns: 1fr; }
-            .scoreboard { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .scoreboard { grid-template-columns: repeat(3, 1fr); }
+            .risk-tape { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
         @media (max-width: 800px) {
-            .kpi-strip, .meter-row, .scoreboard, .pane-pair { grid-template-columns: 1fr; }
+            .kpi-strip, .meter-row, .scoreboard, .pane-pair, .risk-tape, .dom-tape { grid-template-columns: 1fr; }
             .chapter-title { font-size: 18px; }
             .hero-liq-num .kpi-xl-val { font-size: 32px; }
             .chart-compare { height: 260px !important; }
@@ -1952,8 +2019,8 @@
                         <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
                             <div class="time-btns">
                                 <button class="time-btn period-btn" data-global-liquidity-period="1y">1Y</button>
-                                <button class="time-btn period-btn" data-global-liquidity-period="2y">2Y</button>
-                                <button class="time-btn period-btn active" data-global-liquidity-period="all">ALL</button>
+                                <button class="time-btn period-btn active" data-global-liquidity-period="2y">2Y</button>
+                                <button class="time-btn period-btn" data-global-liquidity-period="all">ALL</button>
                             </div>
                         </div>
                         <div style="height: 280px;">
@@ -2001,7 +2068,7 @@
             <div class="chapter-head">
                 <div class="chapter-kicker">02 · China</div>
                 <h2 class="chapter-title">PBoC Liquidity</h2>
-                <p class="chapter-sub">MLF + reverse-repo injections vs Bitcoin. Same timeframe chips as US.</p>
+                <p class="chapter-sub">Net MLF + reverse-repo injections in CNY billions vs Bitcoin. Same timeframe chips as US. Default 2Y so 2020 bars do not flatten recent prints.</p>
             </div>
             <div class="card" style="padding: 14px 16px 10px;">
                 <div style="height: 320px;">
@@ -2055,9 +2122,47 @@
             </div>
         </div>
 
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">05 · Risk tape</div>
+                <h2 class="chapter-title">Risk tape</h2>
+                <p class="chapter-sub">Dollar, equity vol, and the actual Treasury yield. TLT stays on the scoreboard as the bond ETF.</p>
+            </div>
+            <div class="risk-tape">
+                <div class="meter">
+                    <div class="meter-name">DXY</div>
+                    <div class="meter-read">Dollar index</div>
+                    <div class="tradingview-widget-container tv">
+                        <div id="risk-dxy-chart" style="height:100%;"></div>
+                    </div>
+                </div>
+                <div class="meter">
+                    <div class="meter-name">VIX</div>
+                    <div class="meter-read">Equity vol</div>
+                    <div class="tradingview-widget-container tv">
+                        <div id="risk-vix-chart" style="height:100%;"></div>
+                    </div>
+                </div>
+                <div class="meter">
+                    <div class="meter-name">US10Y</div>
+                    <div class="meter-read">10-year yield</div>
+                    <div class="tradingview-widget-container tv">
+                        <div id="risk-us10y-chart" style="height:100%;"></div>
+                    </div>
+                </div>
+                <div class="meter">
+                    <div class="meter-name">US02Y</div>
+                    <div class="meter-read">2-year yield</div>
+                    <div class="tradingview-widget-container tv">
+                        <div id="risk-us02y-chart" style="height:100%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="chapter ft-quiet">
             <div class="chapter-head">
-                <div class="chapter-kicker">04 · Calendar</div>
+                <div class="chapter-kicker">06 · Calendar</div>
                 <h2 class="chapter-title">Economic Calendar</h2>
                 <p class="chapter-sub">FOMC · CPI · NFP · high-impact US / EU / JP releases</p>
             </div>
@@ -2072,7 +2177,7 @@
                           "width": "100%",
                           "height": "100%",
                           "locale": "en",
-                          "importanceFilter": "0,1",
+                          "importanceFilter": "1",
                           "countryFilter": "us,eu,gb,jp,cn,au,ca,ch"
                         }
                         </script>
@@ -2263,6 +2368,63 @@
             </div>
         </div>
 
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">07 · Peg tape</div>
+                <h2 class="chapter-title">Peg tape</h2>
+                <p class="chapter-sub">Deviation from $1 in basis points. Prices from the ranking payload — missing names are skipped, not invented.</p>
+            </div>
+            <div class="card" style="padding:0;">
+                <div class="ft-table-wrap">
+                    <table class="ft-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">Name</th>
+                                <th style="text-align:right;">Price</th>
+                                <th style="text-align:right;">Dev (bps)</th>
+                                <th style="text-align:right;">24h Δ</th>
+                                <th style="text-align:right;">Mcap</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stablePegBody">
+                            <tr><td colspan="5" style="padding:16px;text-align:center;color:var(--text-muted);">Loading peg tape…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">08 · Dominance tape</div>
+                <h2 class="chapter-title">Dominance tape</h2>
+                <p class="chapter-sub">USDT.D, USDC.D, BTC.D — clean TradingView tiles. Separate from the Crypto-tab widgets.</p>
+            </div>
+            <div class="dom-tape">
+                <div class="meter">
+                    <div class="meter-name">USDT.D</div>
+                    <div class="meter-read">Tether share of crypto mcap</div>
+                    <div class="tradingview-widget-container tv">
+                        <div id="stable-usdt-d-chart" style="height:100%;"></div>
+                    </div>
+                </div>
+                <div class="meter">
+                    <div class="meter-name">USDC.D</div>
+                    <div class="meter-read">Circle share of crypto mcap</div>
+                    <div class="tradingview-widget-container tv">
+                        <div id="stable-usdc-d-chart" style="height:100%;"></div>
+                    </div>
+                </div>
+                <div class="meter">
+                    <div class="meter-name">BTC.D</div>
+                    <div class="meter-read">Bitcoin dominance</div>
+                    <div class="tradingview-widget-container tv">
+                        <div id="stable-btc-d-chart" style="height:100%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         </div><!-- END STABLECOINS TAB -->
 
 
@@ -2321,11 +2483,6 @@
                 <span id="hlHip3OI">--</span>
                 <span id="hlHip3TopDex">--</span>
                 <span id="hlTotalVol24h">--</span>
-            </div>
-            <div class="card" style="padding: 14px 16px;">
-                <div class="kpi-xl-label" style="margin-bottom:10px;">24h volume mix</div>
-                <div id="hlBizRows"><div style="padding:12px 0;color:var(--text-muted);font-size:12px;">Loading...</div></div>
-                <div style="height:0;overflow:hidden;"><canvas id="hlBizMixChart"></canvas><div id="hlBizMixLoading"></div></div>
             </div>
         </div>
 
@@ -2436,6 +2593,7 @@
                         <canvas id="hlFeesChart"></canvas>
                         <div id="hlFeesLoading" class="ft-chart-load">Loading fee data...</div>
                     </div>
+                    <div class="peak-note" id="hlFeesBarPeak">Peak · —</div>
                 </div>
                 <div class="rail-side">
                     <div class="rail-kpi">
@@ -2475,6 +2633,7 @@
                     <canvas id="hlVolChart"></canvas>
                     <div id="hlVolLoading" class="ft-chart-load">Loading volume data...</div>
                 </div>
+                <div class="peak-note" id="hlVolPeakNote">Peak · —</div>
                 <div class="kpi-strip" style="grid-template-columns:repeat(4,minmax(0,1fr));margin:12px 0 0;border-radius:0;">
                     <div class="kpi-xl"><div class="kpi-xl-label">Yesterday</div><div class="kpi-xl-val" id="hlVolYesterday" style="font-size:16px;">--</div></div>
                     <div class="kpi-xl"><div class="kpi-xl-label">7d Avg</div><div class="kpi-xl-val" id="hlVol7dAvg" style="font-size:16px;">--</div></div>
@@ -2602,6 +2761,169 @@
             </div>
         </div>
 
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">08 · Volume by source</div>
+                <h2 class="chapter-title">Volume by source</h2>
+                <p class="chapter-sub">24h notional mix — Core perps, HIP-3 builder perps, Spot. Same Hyperliquid info API as glance.</p>
+            </div>
+            <div class="kpi-strip" style="grid-template-columns:repeat(4,minmax(0,1fr));">
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">Core perps 24h</div>
+                    <div class="kpi-xl-val" id="hlSrcPerp">--</div>
+                    <div class="kpi-xl-sub" id="hlSrcPerpPct">mix</div>
+                </div>
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">HIP-3 24h</div>
+                    <div class="kpi-xl-val" id="hlSrcHip3">--</div>
+                    <div class="kpi-xl-sub" id="hlSrcHip3Pct">mix</div>
+                </div>
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">Spot 24h</div>
+                    <div class="kpi-xl-val" id="hlSrcSpot">--</div>
+                    <div class="kpi-xl-sub" id="hlSrcSpotPct">mix</div>
+                </div>
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">Total 24h</div>
+                    <div class="kpi-xl-val" id="hlSrcTotal">--</div>
+                    <div class="kpi-xl-sub">core + HIP-3 + spot</div>
+                </div>
+            </div>
+            <div class="card" style="padding: 14px 16px;">
+                <div class="kpi-xl-label" style="margin-bottom:10px;">24h volume mix</div>
+                <div id="hlBizRows"><div style="padding:12px 0;color:var(--text-muted);font-size:12px;">Loading...</div></div>
+                <div style="height:0;overflow:hidden;"><canvas id="hlBizMixChart"></canvas><div id="hlBizMixLoading"></div></div>
+            </div>
+        </div>
+
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">09 · Cumulative fees</div>
+                <h2 class="chapter-title">Cumulative fees</h2>
+                <p class="chapter-sub">Running sum of DefiLlama daily fees in the selected window. Peak is the max daily print, not a valuation.</p>
+            </div>
+            <div class="kpi-strip" style="grid-template-columns:repeat(4,minmax(0,1fr));">
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">Last daily</div>
+                    <div class="kpi-xl-val" id="hlFeesCumLast">--</div>
+                    <div class="kpi-xl-sub">DefiLlama</div>
+                </div>
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">30d annualized</div>
+                    <div class="kpi-xl-val" id="hlFeesCumAnn">--</div>
+                    <div class="kpi-xl-sub">30d avg × 365</div>
+                </div>
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">Cumulative in window</div>
+                    <div class="kpi-xl-val" id="hlFeesCumTotal">--</div>
+                    <div class="kpi-xl-sub" id="hlFeesCumWindow">--</div>
+                </div>
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">Peak daily</div>
+                    <div class="kpi-xl-val" id="hlFeesCumPeakVal">--</div>
+                    <div class="kpi-xl-sub" id="hlFeesCumPeak">--</div>
+                </div>
+            </div>
+            <div class="card" style="padding: 14px 16px 10px;">
+                <div style="height:260px;position:relative;">
+                    <canvas id="hlFeesCumChart"></canvas>
+                </div>
+                <div class="peak-note" id="hlFeesPeakNote">Peak · —</div>
+            </div>
+        </div>
+
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">10 · Fee history</div>
+                <h2 class="chapter-title">Fee history by quarter</h2>
+                <p class="chapter-sub">Calendar-quarter buckets of the same daily fees series. Fees only — not net income, not operating margin.</p>
+            </div>
+            <div class="card" style="padding:0;">
+                <div class="ft-table-wrap">
+                    <table class="ft-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">Quarter</th>
+                                <th style="text-align:right;">Fees</th>
+                                <th style="text-align:right;">QoQ %</th>
+                                <th style="text-align:right;">Share of last-4Q</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hlFeesQBody">
+                            <tr><td colspan="4" style="padding:16px;text-align:center;color:var(--text-muted);">Loading quarterly fees…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">11 · Assistance Fund</div>
+                <h2 class="chapter-title">Assistance Fund</h2>
+                <p class="chapter-sub">On-chain buyback wallet. AF HYPE from Hyperliquid spot clearinghouse. We do not invent retired or burned totals.</p>
+            </div>
+            <div class="kpi-strip" style="grid-template-columns:repeat(3,minmax(0,1fr));">
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">AF HYPE</div>
+                    <div class="kpi-xl-val" id="hlAfHype" style="color:#50d2c1;">--</div>
+                    <div class="kpi-xl-sub">spot balance</div>
+                </div>
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">AF USD</div>
+                    <div class="kpi-xl-val" id="hlAfUsd">--</div>
+                    <div class="kpi-xl-sub">mark × holdings</div>
+                </div>
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">% of circulating</div>
+                    <div class="kpi-xl-val" id="hlAfCircPct">--</div>
+                    <div class="kpi-xl-sub">AF / circ supply</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">12 · Funding extremes</div>
+                <h2 class="chapter-title">Funding extremes</h2>
+                <p class="chapter-sub">Highest and lowest annualized funding among markets with 24h volume &gt; 0. Same metaAndAssetCtxs call as the perps table.</p>
+            </div>
+            <div class="pane-pair">
+                <div class="card" style="padding:0;">
+                    <div class="kpi-xl-label" style="padding:10px 12px 0;">Highest funding APR</div>
+                    <div class="ft-table-wrap">
+                        <table class="ft-table">
+                            <thead>
+                                <tr>
+                                    <th style="text-align:left;">Market</th>
+                                    <th style="text-align:right;">Funding APR</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hlFundHotBody">
+                                <tr><td colspan="2" style="padding:16px;text-align:center;color:var(--text-muted);">Loading…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card" style="padding:0;">
+                    <div class="kpi-xl-label" style="padding:10px 12px 0;">Lowest funding APR</div>
+                    <div class="ft-table-wrap">
+                        <table class="ft-table">
+                            <thead>
+                                <tr>
+                                    <th style="text-align:left;">Market</th>
+                                    <th style="text-align:right;">Funding APR</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hlFundColdBody">
+                                <tr><td colspan="2" style="padding:16px;text-align:center;color:var(--text-muted);">Loading…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         </div><!-- END HYPERLIQUID TAB -->
 
 
@@ -2609,7 +2931,7 @@
     </div>
 
     <footer>
-        <p><strong>FLOWTRACK v19.0</strong> — Crypto Derivatives Intelligence</p>
+        <p><strong>FLOWTRACK v19.1</strong> — Crypto Derivatives Intelligence</p>
         <p style="margin-top: 6px;">Data from CoinGlass API, Binance Futures, CoinGecko, Coinalyze, TradingView</p>
         <p style="margin-top: 6px;">Auto-refreshes every 60 seconds • Not financial advice</p>
     </footer>
@@ -2843,6 +3165,60 @@
         function tvWidget(cfg) {
             if (!cfg || !cfg.container_id) return;
             mountTVWidget(cfg.container_id, cfg, false);
+        }
+
+        const MACRO_TV_FRED_AREA = {
+            'FRED:WALCL': 1, 'FRED:WTREGEN': 1, 'FRED:RRPONTSYD': 1,
+            'FRED:M2SL': 1, 'FRED:T10Y2Y': 1
+        };
+        function macroTV(containerId, extra) {
+            extra = extra || {};
+            const symbol = extra.symbol || '';
+            const isFredArea = !!MACRO_TV_FRED_AREA[symbol] || (symbol.indexOf('FRED:') === 0 && extra.style == null);
+            const cfg = {
+                autosize: true,
+                timezone: 'Etc/UTC',
+                theme: 'dark',
+                style: extra.style != null ? extra.style : (isFredArea || MACRO_TV_FRED_AREA[symbol] ? '3' : '1'),
+                locale: 'en',
+                toolbar_bg: '#08090C',
+                enable_publishing: false,
+                hide_top_toolbar: true,
+                hide_side_toolbar: true,
+                hide_legend: true,
+                details: false,
+                allow_symbol_change: false,
+                withdateranges: false,
+                save_image: false,
+                hide_volume: true,
+                backgroundColor: '#08090C',
+                gridColor: 'rgba(255,255,255,0.04)',
+                container_id: containerId
+            };
+            Object.keys(extra).forEach(k => { cfg[k] = extra[k]; });
+            if (MACRO_TV_FRED_AREA[symbol] && extra.style == null) cfg.style = '3';
+            cfg.hide_top_toolbar = true;
+            cfg.hide_side_toolbar = true;
+            cfg.hide_legend = true;
+            cfg.details = false;
+            cfg.allow_symbol_change = false;
+            cfg.withdateranges = false;
+            cfg.save_image = false;
+            cfg.enable_publishing = false;
+            cfg.hide_volume = true;
+            cfg.theme = 'dark';
+            cfg.backgroundColor = extra.backgroundColor || '#08090C';
+            mountTVWidget(containerId, cfg, false);
+        }
+
+        let stableTvInitialized = false;
+        function initStableTV() {
+            if (stableTvInitialized) return;
+            if (!document.getElementById('stable-usdt-d-chart')) return;
+            stableTvInitialized = true;
+            macroTV('stable-usdt-d-chart', { symbol: 'CRYPTOCAP:USDT.D', interval: 'W', range: 'ALL' });
+            macroTV('stable-usdc-d-chart', { symbol: 'CRYPTOCAP:USDC.D', interval: 'W', range: 'ALL' });
+            macroTV('stable-btc-d-chart', { symbol: 'CRYPTOCAP:BTC.D', interval: 'W', range: 'ALL' });
         }
 
         const FEAR_GREED_API = 'https://api.alternative.me/fng';
@@ -3131,6 +3507,7 @@
                 if (!stableTabDataLoaded) {
                     setTimeout(() => loadStablecoinTabData(), 300);
                 }
+                if (!stableTvInitialized) setTimeout(initStableTV, 150);
             }
 
         }
@@ -3432,10 +3809,62 @@
                     <td style="padding:8px 10px;text-align:right;color:var(--cyan);">${c.fee}</td>
                 </tr>`).join('');
 
+            renderStablePegTape(stables);
+
             stableTabDataLoaded = true;
 
             // Load history chart after a longer delay (avoids CoinGecko rate limit)
             setTimeout(() => loadStableTabHistory(365), 1500);
+        }
+
+        function renderStablePegTape(stables) {
+            const tbody = document.getElementById('stablePegBody');
+            if (!tbody) return;
+            const want = [
+                { keys: ['usdt'], label: 'USDT' },
+                { keys: ['usdc'], label: 'USDC' },
+                { keys: ['dai'], label: 'DAI' },
+                { keys: ['usde'], label: 'USDe' },
+                { keys: ['pyusd'], label: 'PYUSD' },
+                { keys: ['fdusd'], label: 'FDUSD' },
+                { keys: ['usds'], label: 'USDS' }
+            ];
+            const rows = [];
+            want.forEach(w => {
+                const s = (stables || []).find(c => {
+                    const sym = (c.symbol || '').toLowerCase();
+                    const name = (c.name || '').toLowerCase();
+                    if (w.keys.some(k => sym === k)) return true;
+                    if (w.label === 'USDe' && (name.includes('ethena') || name.includes('usde'))) return true;
+                    return false;
+                });
+                if (!s || typeof s.current_price !== 'number') return;
+                const price = s.current_price;
+                const bps = (price - 1) * 10000;
+                const abs = Math.abs(bps);
+                const bpsClass = abs < 10 ? 'bps-muted' : (abs <= 50 ? 'bps-amber' : 'bps-red');
+                const chg = (typeof s.price_change_percentage_24h === 'number')
+                    ? s.price_change_percentage_24h
+                    : s.market_cap_change_percentage_24h;
+                rows.push({ s, price, bps, bpsClass, chg });
+            });
+            if (!rows.length) {
+                tbody.innerHTML = '<tr><td colspan="5" style="padding:16px;text-align:center;color:var(--text-muted);">Peg names not in ranking payload.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = rows.map(r => {
+                const chgTxt = (r.chg == null || !isFinite(r.chg)) ? '\u2014' : ((r.chg >= 0 ? '+' : '') + r.chg.toFixed(2) + '%');
+                const chgColor = (r.chg == null || !isFinite(r.chg)) ? 'var(--text-dim)'
+                    : (Math.abs(r.chg) < 0.1 ? 'var(--text-muted)' : (r.chg >= 0 ? 'var(--good)' : 'var(--bad)'));
+                const mcap = (typeof formatCurrency === 'function') ? formatCurrency(r.s.market_cap) : ('$' + formatStableNum(r.s.market_cap));
+                return '<tr>' +
+                    '<td>' + r.s.name + '<div style="font-size:10px;color:var(--text-dim);">' + (r.s.symbol || '').toUpperCase() + '</div></td>' +
+                    '<td style="text-align:right;">$' + r.price.toFixed(4) + '</td>' +
+                    '<td style="text-align:right;" class="' + r.bpsClass + '">' + (r.bps >= 0 ? '+' : '') + r.bps.toFixed(1) + '</td>' +
+                    '<td style="text-align:right;color:' + chgColor + ';">' + chgTxt + '</td>' +
+                    '<td style="text-align:right;">' + mcap + '</td>' +
+                    '</tr>';
+            }).join('');
         }
         
         function renderStableSupplyByChain(chains, total) {
@@ -8392,6 +8821,10 @@
                     af = parseFloat(bal.total);
                     document.getElementById('hypeTokAF').textContent = (af / 1e6).toFixed(1) + 'M HYPE';
                     if (price) document.getElementById('hypeTokAFVal').textContent = hlFmt(af * price) + ' \u2022 largest holder';
+                    const afH = document.getElementById('hlAfHype');
+                    if (afH) afH.textContent = (af / 1e6).toFixed(1) + 'M HYPE';
+                    const afU = document.getElementById('hlAfUsd');
+                    if (afU && price) afU.textContent = hlFmt(af * price);
                 }
             } catch (e) { console.warn('[Tokenomics] AF balance:', e.message); }
             
@@ -8406,6 +8839,8 @@
                 }
             } catch (e) { console.warn('[Tokenomics] staking:', e.message); }
             
+            const afPct = document.getElementById('hlAfCircPct');
+            if (afPct && af && circ) afPct.textContent = (af / circ * 100).toFixed(1) + '%';
             renderHypeTokBar(circ, af);
         }
         
@@ -8433,6 +8868,7 @@
         
         // ==================== HYPERLIQUID REBUILT LOADERS (v17) ====================
         let hlFeesData = null, hlFeesChartInstance = null, hlFeesDays = 90;
+        let hlFeesCumChartInstance = null;
         let hlVolData = null, hlVolChartInstance = null, hlVolDays = 90;
         let hlDexLeadersChartInstance = null;
         let hlHypeMcap = null;
@@ -8464,6 +8900,100 @@
             });
         }
         
+        function hlAnnotatePeak(data, elId) {
+            const el = document.getElementById(elId);
+            if (!el || !data || !data.length) return;
+            let peak = data[0];
+            for (let i = 1; i < data.length; i++) if (data[i].v > peak.v) peak = data[i];
+            const ymd = new Date(peak.t * 1000).toISOString().slice(0, 10);
+            el.textContent = 'Peak · ' + ymd + ' · ' + hlFmt(peak.v);
+            return peak;
+        }
+
+        function renderHLFeesCumulative(sliced) {
+            const canvas = document.getElementById('hlFeesCumChart');
+            if (!canvas || !sliced || !sliced.length) return;
+            let run = 0;
+            const cum = sliced.map(d => { run += d.v; return { t: d.t, v: run }; });
+            const ctx = canvas.getContext('2d');
+            if (hlFeesCumChartInstance) hlFeesCumChartInstance.destroy();
+            hlFeesCumChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: cum.map(d => new Date(d.t * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+                    datasets: [{
+                        data: cum.map(d => d.v / 1e6),
+                        borderColor: '#50d2c1',
+                        backgroundColor: 'rgba(80,210,193,0.16)',
+                        fill: true,
+                        borderWidth: 1.5,
+                        pointRadius: 0,
+                        tension: 0.2
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: c => ' $' + (c.parsed.y >= 1000 ? (c.parsed.y / 1000).toFixed(2) + 'B' : c.parsed.y.toFixed(1) + 'M') } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#545c69', maxTicksLimit: 8, font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+                        y: { ticks: { color: '#8b93a2', font: { size: 10, family: "'IBM Plex Mono', monospace" },
+                                callback: v => '$' + (v >= 1000 ? (v / 1000).toFixed(1) + 'B' : v + 'M') },
+                            grid: { color: 'rgba(40,46,58,0.3)' } }
+                    }
+                }
+            });
+        }
+
+        function renderHLFeesQuarterly(data) {
+            const tbody = document.getElementById('hlFeesQBody');
+            if (!tbody || !data || !data.length) return;
+            const map = new Map();
+            data.forEach(d => {
+                const dt = new Date(d.t * 1000);
+                const key = dt.getUTCFullYear() + '-Q' + (Math.floor(dt.getUTCMonth() / 3) + 1);
+                map.set(key, (map.get(key) || 0) + d.v);
+            });
+            const all = [...map.entries()].map(([q, fees]) => ({ q, fees }));
+            const shown = all.slice(-8);
+            const last4 = all.slice(-4);
+            const last4sum = last4.reduce((s, r) => s + r.fees, 0);
+            tbody.innerHTML = shown.map((r, i) => {
+                const idx = all.findIndex(x => x.q === r.q);
+                const prev = idx > 0 ? all[idx - 1].fees : null;
+                const qoq = (prev && prev > 0) ? ((r.fees - prev) / prev) * 100 : null;
+                const share = last4sum > 0 ? (r.fees / last4sum * 100) : null;
+                const qoqTxt = qoq == null ? '\u2014' : ((qoq >= 0 ? '+' : '') + qoq.toFixed(1) + '%');
+                const qoqColor = qoq == null ? 'var(--text-dim)' : (qoq >= 0 ? 'var(--good)' : 'var(--bad)');
+                return '<tr>' +
+                    '<td>' + r.q + '</td>' +
+                    '<td style="text-align:right;">' + hlFmt(r.fees) + '</td>' +
+                    '<td style="text-align:right;color:' + qoqColor + ';">' + qoqTxt + '</td>' +
+                    '<td style="text-align:right;color:var(--text-muted);">' + (share == null ? '\u2014' : share.toFixed(1) + '%') + '</td>' +
+                    '</tr>';
+            }).join('');
+        }
+
+        function renderHLFeesExtras(sliced, last, annualized) {
+            const winSum = (sliced || []).reduce((s, d) => s + d.v, 0);
+            const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+            if (last) setTxt('hlFeesCumLast', hlFmt(last.v));
+            if (annualized) setTxt('hlFeesCumAnn', hlFmt(annualized));
+            setTxt('hlFeesCumTotal', hlFmt(winSum));
+            const winEl = document.getElementById('hlFeesCumWindow');
+            if (winEl) winEl.textContent = hlFeesDays > 0 ? (hlFeesDays + 'd window') : 'all history';
+            const peak = hlAnnotatePeak(sliced, 'hlFeesPeakNote');
+            hlAnnotatePeak(sliced, 'hlFeesBarPeak');
+            if (peak) {
+                setTxt('hlFeesCumPeakVal', hlFmt(peak.v));
+                setTxt('hlFeesCumPeak', new Date(peak.t * 1000).toISOString().slice(0, 10));
+            }
+            renderHLFeesCumulative(sliced);
+            renderHLFeesQuarterly(hlFeesData);
+        }
+
         async function loadHLFees() {
             try {
                 if (!hlFeesData) {
@@ -8492,6 +9022,7 @@
                     const gPs = document.getElementById('hlGlancePS');
                     if (gPs) gPs.textContent = ps;
                 }
+                renderHLFeesExtras(sliced, last, annualized);
             } catch (e) {
                 console.error('[HL Fees]', e.message);
                 const el = document.getElementById('hlFeesLoading');
@@ -8551,6 +9082,7 @@
                 document.getElementById('hlVol7dAvg').textContent = hlFmt(last7.reduce((s, d) => s + d.v, 0) / last7.length);
                 document.getElementById('hlVol30dTotal').textContent = hlFmt(last30.reduce((s, d) => s + d.v, 0));
                 document.getElementById('hlVolPeak').textContent = hlFmt(Math.max(...hlVolData.map(d => d.v)));
+                hlAnnotatePeak(sliced, 'hlVolPeakNote');
             } catch (e) {
                 console.error('[HL Volume]', e.message);
                 const el = document.getElementById('hlVolLoading');
@@ -8566,6 +9098,20 @@
             loadHLVolume();
         }
         
+        function renderHLFundingExtremes(rows) {
+            const funded = (rows || []).filter(r => r.vol > 0 && isFinite(r.fundingApr));
+            const hot = [...funded].sort((a, b) => b.fundingApr - a.fundingApr).slice(0, 8);
+            const cold = [...funded].sort((a, b) => a.fundingApr - b.fundingApr).slice(0, 8);
+            const line = r => '<tr><td>' + r.coin + '</td><td style="text-align:right;color:' +
+                (r.fundingApr >= 0 ? 'var(--good)' : 'var(--bad)') + ';">' +
+                (r.fundingApr >= 0 ? '+' : '') + r.fundingApr.toFixed(1) + '%</td></tr>';
+            const empty = '<tr><td colspan="2" style="padding:16px;text-align:center;color:var(--text-muted);">No markets with volume.</td></tr>';
+            const hotBody = document.getElementById('hlFundHotBody');
+            const coldBody = document.getElementById('hlFundColdBody');
+            if (hotBody) hotBody.innerHTML = hot.length ? hot.map(line).join('') : empty;
+            if (coldBody) coldBody.innerHTML = cold.length ? cold.map(line).join('') : empty;
+        }
+
         async function loadHLTopMarkets() {
             const tbody = document.getElementById('hlTopMarketsBody');
             try {
@@ -8581,11 +9127,13 @@
                         fundingApr: (parseFloat(c.funding) || 0) * 24 * 365 * 100,
                         premium: (parseFloat(c.premium) || 0) * 100
                     };
-                }).filter(r => r.vol > 0).sort((a, b) => b.vol - a.vol).slice(0, 12);
+                }).filter(r => r.vol > 0).sort((a, b) => b.vol - a.vol);
                 if (rows.length === 0) throw new Error('No market data');
+                renderHLFundingExtremes(rows);
+                const top = rows.slice(0, 12);
                 
                 const px = v => v >= 1000 ? v.toLocaleString('en-US', { maximumFractionDigits: 0 }) : v >= 1 ? v.toFixed(2) : v.toPrecision(4);
-                tbody.innerHTML = rows.map((r, i) => `
+                tbody.innerHTML = top.map((r, i) => `
                     <tr style="border-bottom:1px solid var(--border);">
                         <td style="padding:8px 10px;color:var(--text-dim);">${i + 1}</td>
                         <td style="padding:8px 10px;font-weight:600;color:${i === 0 ? '#50d2c1' : 'var(--text)'};">${r.coin}</td>
@@ -8836,6 +9384,14 @@
                 </div>`;
             }
             document.getElementById('hlBizRows').innerHTML = rowsHtml;
+            const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+            setTxt('hlSrcPerp', hlFmt(coreVol));
+            setTxt('hlSrcHip3', hlFmt(hip3Vol));
+            setTxt('hlSrcSpot', hlFmt(spotVol));
+            setTxt('hlSrcTotal', hlFmt(total));
+            setTxt('hlSrcPerpPct', (coreVol / total * 100).toFixed(1) + '% of mix');
+            setTxt('hlSrcHip3Pct', (hip3Vol / total * 100).toFixed(1) + '% of mix');
+            setTxt('hlSrcSpotPct', (spotVol / total * 100).toFixed(1) + '% of mix');
         }
         
         function initTradingViewCharts(opts) {
@@ -8880,195 +9436,27 @@
             macroChartsInitialized = true;
             
             // Initialize Global Liquidity vs BTC chart
-            renderLiquidityBTCChart('all');
+            renderLiquidityBTCChart('2y');
             
             // Initialize Liquidity Rate of Change chart
-            setTimeout(() => renderLiquidityROCChart('all'), 300);
+            setTimeout(() => renderLiquidityROCChart('2y'), 300);
             
-            // Fed Balance Sheet Chart (WALCL)
-            tvWidget({
-                "autosize": true,
-                "symbol": "FRED:WALCL",
-                "interval": "W",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "3",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "rgba(10, 14, 23, 1)",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "container_id": "fed-balance-sheet-chart",
-                "hide_volume": true
-            });
-            
-            // Treasury General Account (TGA)
-            tvWidget({
-                "autosize": true,
-                "symbol": "FRED:WTREGEN",
-                "interval": "W",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "3",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "rgba(10, 14, 23, 1)",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "container_id": "tga-chart",
-                "hide_volume": true
-            });
-            
-            // Reverse Repo Facility (RRP)
-            tvWidget({
-                "autosize": true,
-                "symbol": "FRED:RRPONTSYD",
-                "interval": "D",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "3",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "rgba(10, 14, 23, 1)",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "container_id": "rrp-chart",
-                "hide_volume": true
-            });
-            
-            // M2 Money Supply
-            tvWidget({
-                "autosize": true,
-                "symbol": "FRED:M2SL",
-                "interval": "M",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "3",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "rgba(10, 14, 23, 1)",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "container_id": "m2-chart",
-                "hide_volume": true
-            });
-            
-            // Yield Curve (10Y-2Y Spread) - FRED data works
-            tvWidget({
-                "autosize": true,
-                "symbol": "FRED:T10Y2Y",
-                "interval": "D",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "rgba(10, 14, 23, 1)",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "container_id": "yield-curve-chart",
-                "hide_volume": true
-            });
-            
-            // Gold - Weekly chart with full history
-            tvWidget({
-                "autosize": true,
-                "symbol": "TVC:GOLD",
-                "interval": "W",
-                "range": "ALL",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "rgba(10, 14, 23, 1)",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "container_id": "gold-chart",
-                "hide_volume": true
-            });
-            
-            // USD/JPY Chart
-            tvWidget({
-                "autosize": true,
-                "symbol": "FX:USDJPY",
-                "interval": "D",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "rgba(10, 14, 23, 1)",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "container_id": "usdjpy-chart",
-                "hide_volume": true
-            });
-            
-            // DXY Alternative - Using EURUSD inverted as proxy (strong correlation)
-            // UUP ETF or other DXY symbols often restricted in free widget
-            tvWidget({
-                "autosize": true,
-                "symbol": "FX:EURUSD",
-                "interval": "D",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "rgba(10, 14, 23, 1)",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "container_id": "dxy-chart",
-                "hide_volume": true
-            });
-            
-            // Treasury Bonds - TLT ETF (inverse of yields)
-            tvWidget({
-                "autosize": true,
-                "symbol": "NASDAQ:TLT",
-                "interval": "D",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "toolbar_bg": "#0a0e17",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "backgroundColor": "rgba(10, 14, 23, 1)",
-                "gridColor": "rgba(255, 255, 255, 0.05)",
-                "container_id": "us10y-chart",
-                "hide_volume": true
-            });
+            macroTV('fed-balance-sheet-chart', { symbol: 'FRED:WALCL', interval: 'W' });
+            macroTV('tga-chart', { symbol: 'FRED:WTREGEN', interval: 'W' });
+            macroTV('rrp-chart', { symbol: 'FRED:RRPONTSYD', interval: 'D' });
+            macroTV('m2-chart', { symbol: 'FRED:M2SL', interval: 'M' });
+            macroTV('yield-curve-chart', { symbol: 'FRED:T10Y2Y', interval: 'D' });
+            macroTV('gold-chart', { symbol: 'TVC:GOLD', interval: 'W', range: 'ALL' });
+            macroTV('usdjpy-chart', { symbol: 'FX:USDJPY', interval: 'D' });
+            macroTV('dxy-chart', { symbol: 'FX:EURUSD', interval: 'D' });
+            macroTV('us10y-chart', { symbol: 'NASDAQ:TLT', interval: 'D' });
+            macroTV('risk-dxy-chart', { symbol: 'TVC:DXY', interval: 'D' });
+            macroTV('risk-vix-chart', { symbol: 'TVC:VIX', interval: 'D' });
+            macroTV('risk-us10y-chart', { symbol: 'TVC:US10Y', interval: 'D' });
+            macroTV('risk-us02y-chart', { symbol: 'TVC:US02Y', interval: 'D' });
             
             // Initialize China Liquidity Chart
-            setTimeout(() => renderChinaLiquidityChart('all'), 400);
+            setTimeout(() => renderChinaLiquidityChart('2y'), 400);
         }
         
         // ==================== GLOBAL LIQUIDITY VS BITCOIN CHART ====================
@@ -9411,8 +9799,8 @@
         });
         
         // ==================== CHINA LIQUIDITY DATA & CHART ====================
-        // PBoC Liquidity Injections - MLF + Reverse Repo (in billions USD)
-        // Data from PBoC announcements, converted to USD at approximate rates
+        // PBoC Liquidity Injections - MLF + Reverse Repo (CNY billions, not USD)
+        // Data from PBoC announcements. Do not treat these as dollar figures.
         const chinaLiquidityData = [
             // 2020 - COVID stimulus
             { date: '2020-01-15', mlf: 300, rr: 100, btc: 8800 },
@@ -9499,7 +9887,7 @@
         window.chinaLiquidityChart = null;
         
         
-        function renderChinaLiquidityChart(period = 'all') {
+        function renderChinaLiquidityChart(period = '2y') {
             const ctx = document.getElementById('chinaLiquidityChart');
             if (!ctx) return;
             
@@ -9515,26 +9903,17 @@
             
             if (chinaLiquidityChart) chinaLiquidityChart.destroy();
             
+            const net = data.map(d => (d.mlf || 0) + (d.rr || 0));
             chinaLiquidityChart = new Chart(ctx, {
                 data: {
                     labels: data.map(d => d.date),
                     datasets: [
                         {
                             type: 'bar',
-                            label: 'MLF Injections ($B)',
-                            data: data.map(d => d.mlf),
-                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                            borderColor: '#3b82f6',
-                            borderWidth: 1,
-                            yAxisID: 'y',
-                            order: 3
-                        },
-                        {
-                            type: 'bar',
-                            label: 'Reverse Repo Net ($B)',
-                            data: data.map(d => d.rr),
-                            backgroundColor: data.map(d => d.rr >= 0 ? 'rgba(245, 158, 11, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
-                            borderColor: data.map(d => d.rr >= 0 ? '#f59e0b' : '#ef4444'),
+                            label: 'Net injection (CNY bn)',
+                            data: net,
+                            backgroundColor: net.map(v => v >= 0 ? 'rgba(0, 229, 199, 0.50)' : 'rgba(239, 68, 68, 0.50)'),
+                            borderColor: net.map(v => v >= 0 ? '#00E5C7' : '#ef4444'),
                             borderWidth: 1,
                             yAxisID: 'y',
                             order: 2
@@ -9545,7 +9924,7 @@
                             data: data.map(d => d.btc),
                             borderColor: '#f7931a',
                             backgroundColor: 'transparent',
-                            borderWidth: 2,
+                            borderWidth: 1.5,
                             pointRadius: 0,
                             tension: 0.3,
                             yAxisID: 'y1',
@@ -9565,19 +9944,21 @@
                             display: true,
                             position: 'top',
                             labels: {
-                                color: '#9ca3af',
+                                color: '#8b93a2',
                                 usePointStyle: true,
-                                padding: 15
+                                boxWidth: 8,
+                                padding: 10,
+                                font: { size: 10, family: "'IBM Plex Mono', monospace" }
                             }
                         },
                         tooltip: {
                             callbacks: {
                                 label: (ctx) => {
                                     if (ctx.dataset.label === 'Bitcoin') {
-                                        return `BTC: $${ctx.raw.toLocaleString()}`;
+                                        return 'BTC: $' + ctx.raw.toLocaleString();
                                     }
                                     const sign = ctx.raw >= 0 ? '+' : '';
-                                    return `${ctx.dataset.label}: ${sign}$${ctx.raw}B`;
+                                    return 'Net injection: ' + sign + ctx.raw + ' CNY bn';
                                 }
                             }
                         }
@@ -9585,24 +9966,25 @@
                     scales: {
                         x: {
                             type: 'time',
-                            stacked: true,
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: '#6b7280', maxTicksLimit: 10 }
+                            stacked: false,
+                            grid: { color: 'rgba(255,255,255,0.04)', lineWidth: 1 },
+                            ticks: { color: '#545c69', maxTicksLimit: 8, font: { size: 10 } }
                         },
                         y: {
                             type: 'linear',
                             position: 'left',
-                            stacked: true,
-                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            stacked: false,
+                            grid: { color: 'rgba(255,255,255,0.04)' },
                             ticks: {
-                                color: '#6b7280',
-                                callback: (v) => '$' + v + 'B'
+                                color: '#8b93a2',
+                                font: { size: 10, family: "'IBM Plex Mono', monospace" },
+                                callback: (v) => v + ' bn'
                             },
                             title: {
                                 display: true,
-                                text: 'Injections ($B)',
-                                color: '#6b7280',
-                                font: { size: 11 }
+                                text: 'Net injection (CNY billions)',
+                                color: '#8b93a2',
+                                font: { size: 10 }
                             }
                         },
                         y1: {
@@ -9611,6 +9993,7 @@
                             grid: { drawOnChartArea: false },
                             ticks: {
                                 color: '#f7931a',
+                                font: { size: 10, family: "'IBM Plex Mono', monospace" },
                                 callback: (v) => {
                                     if (v >= 1000) return '$' + (v/1000).toFixed(0) + 'K';
                                     return '$' + v;
@@ -9618,9 +10001,9 @@
                             },
                             title: {
                                 display: true,
-                                text: 'BTC Price',
+                                text: 'BTC',
                                 color: '#f7931a',
-                                font: { size: 11 }
+                                font: { size: 10 }
                             }
                         }
                     }
@@ -12195,7 +12578,7 @@
             }, { passive: true });
         });
         
-        console.log('%cFLOWTRACK v19.0', 'color:#50d2c1;font-weight:bold;font-size:14px;', 'build 2026-08-18 · visual v19.0');
+        console.log('%cFLOWTRACK v19.1', 'color:#50d2c1;font-weight:bold;font-size:14px;', 'build 2026-08-19 · visual v19.1');
         // UTC clock in top bar
         setInterval(() => {
             const el = document.getElementById('utcClock');
