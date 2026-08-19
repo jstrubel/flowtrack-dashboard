@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flowtrack | Crypto Market Intelligence v19.1</title>
+    <title>Flowtrack | Crypto Market Intelligence v19.2</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1036,7 +1036,7 @@
 
 
         /* ==================== v19 TERMINAL LAYER ==================== */
-        /* v19.1: clean TV chrome, 220px meters, China CNY net, risk/peg/HL chapters */
+        /* v19.2: Macro Chart.js / FRED live — no TV paywall tiles */
         :root {
             --ft-ink: #08090C;
             --ft-cyan: #00E5C7;
@@ -1167,7 +1167,7 @@
         .score-cell .score-read {
             font-size: 10px; color: var(--text-dim); margin: 3px 0 8px; line-height: 1.35;
         }
-        .score-cell .tv { height: 220px; margin: 0 -10px; }
+        .score-cell .tv { display: none; }
         .meter-row {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1183,7 +1183,33 @@
             text-transform: uppercase; color: var(--text);
         }
         .meter .meter-read { font-size: 10px; color: var(--text-dim); margin: 3px 0 6px; }
-        .meter .tv { height: 220px; margin: 0 -12px; }
+        .meter .tv { display: none; }
+        .meter-last, .score-last {
+            font-family: var(--mono);
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            line-height: 1.05;
+            font-variant-numeric: tabular-nums;
+            color: var(--text);
+            margin: 4px 0 2px;
+        }
+        .meter-delta, .score-delta {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--text-dim);
+            margin-bottom: 4px;
+            font-variant-numeric: tabular-nums;
+        }
+        .meter-chart, .score-chart {
+            height: 170px;
+            margin: 0 -12px;
+            padding: 8px 4px 2px;
+            border-top: 1px solid rgba(0,229,199,0.10);
+        }
+        .score-chart { margin: 0 -10px; }
+        .meter { padding: 10px 12px 8px; }
+        .score-cell { padding: 10px 10px 8px; }
         .ft-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 11px; }
         .ft-table thead th {
             position: sticky; top: 0; z-index: 2;
@@ -1245,8 +1271,8 @@
         }
         .risk-tape { grid-template-columns: repeat(4, minmax(0, 1fr)); }
         .dom-tape { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        .risk-tape .tv { height: 240px; margin: 0 -12px; }
-        .dom-tape .tv { height: 220px; margin: 0 -12px; }
+        .risk-tape .tv, .dom-tape .tv { display: none; }
+        #tab-hyperliquid .kpi-xl-val { font-size: 23px; }
         .peak-note {
             font-family: var(--mono);
             font-size: 10px;
@@ -1992,31 +2018,35 @@
             <div class="meter-row" style="margin-top: 12px;">
                 <div class="meter">
                     <div class="meter-name">WALCL</div>
-                    <div class="meter-read">Fed assets · adds liquidity when rising</div>
-                    <div class="tradingview-widget-container tv">
-                        <div id="fed-balance-sheet-chart" style="height:100%;"></div>
-                    </div>
+                    <div class="meter-read">Fed assets · $T · adds when rising</div>
+                    <div class="meter-last" id="walclLast">--</div>
+                    <div class="meter-delta" id="walclDelta">--</div>
+                    <div class="meter-chart"><canvas id="walclChart"></canvas></div>
+                    <div id="fed-balance-sheet-chart" class="hidden-id"></div>
                 </div>
                 <div class="meter">
                     <div class="meter-name">TGA</div>
-                    <div class="meter-read">Treasury cash · drains when rising</div>
-                    <div class="tradingview-widget-container tv">
-                        <div id="tga-chart" style="height:100%;"></div>
-                    </div>
+                    <div class="meter-read">Treasury cash · $T · drains when rising</div>
+                    <div class="meter-last" id="tgaLast">--</div>
+                    <div class="meter-delta" id="tgaDelta">--</div>
+                    <div class="meter-chart"><canvas id="tgaChart"></canvas></div>
+                    <div id="tga-chart" class="hidden-id"></div>
                 </div>
                 <div class="meter">
                     <div class="meter-name">RRP</div>
-                    <div class="meter-read">Overnight RRP · adds when falling</div>
-                    <div class="tradingview-widget-container tv">
-                        <div id="rrp-chart" style="height:100%;"></div>
-                    </div>
+                    <div class="meter-read">Overnight RRP · $B · adds when falling</div>
+                    <div class="meter-last" id="rrpLast">--</div>
+                    <div class="meter-delta" id="rrpDelta">--</div>
+                    <div class="meter-chart"><canvas id="rrpChart"></canvas></div>
+                    <div id="rrp-chart" class="hidden-id"></div>
                 </div>
                 <div class="meter">
                     <div class="meter-name">M2</div>
-                    <div class="meter-read">Broad money · monthly</div>
-                    <div class="tradingview-widget-container tv">
-                        <div id="m2-chart" style="height:100%;"></div>
-                    </div>
+                    <div class="meter-read">Broad money · $T · monthly</div>
+                    <div class="meter-last" id="m2Last">--</div>
+                    <div class="meter-delta" id="m2Delta">--</div>
+                    <div class="meter-chart"><canvas id="m2Chart"></canvas></div>
+                    <div id="m2-chart" class="hidden-id"></div>
                 </div>
             </div>
         </div>
@@ -2038,88 +2068,97 @@
             <div class="chapter-head">
                 <div class="chapter-kicker">03 · FX / Rates</div>
                 <h2 class="chapter-title">Macro Scoreboard</h2>
-                <p class="chapter-sub">Gold, curve, dollar proxy, yen, long bonds — live TradingView.</p>
+                <p class="chapter-sub">Gold, curve, EUR, yen, long bonds. FRED yields · Yahoo/Stooq prices. Unavailable cells stay blank — no TV paywall.</p>
             </div>
             <div class="scoreboard">
                 <div class="score-cell">
                     <div class="score-name">Gold</div>
-                    <div class="score-read">Safe haven · BTC "digital gold" tape</div>
-                    <div class="tradingview-widget-container tv">
-                        <div id="gold-chart" style="height:100%;"></div>
-                    </div>
+                    <div class="score-read">Safe haven · GC=F / Stooq</div>
+                    <div class="score-last" id="goldLast">--</div>
+                    <div class="meter-delta" id="goldDelta">--</div>
+                    <div class="score-chart"><canvas id="goldChartJs"></canvas></div>
+                    <div id="gold-chart" class="hidden-id"></div>
                 </div>
                 <div class="score-cell">
                     <div class="score-name">10s−2s</div>
-                    <div class="score-read">Below 0 = inverted · recession lead</div>
-                    <div class="tradingview-widget-container tv">
-                        <div id="yield-curve-chart" style="height:100%;"></div>
-                    </div>
+                    <div class="score-read">FRED T10Y2Y · below 0 = inverted</div>
+                    <div class="score-last" id="curveLast">--</div>
+                    <div class="meter-delta" id="curveDelta">--</div>
+                    <div class="score-chart"><canvas id="curveChartJs"></canvas></div>
+                    <div id="yield-curve-chart" class="hidden-id"></div>
                 </div>
                 <div class="score-cell">
                     <div class="score-name">EURUSD</div>
                     <div class="score-read">Dollar proxy · down = USD up</div>
-                    <div class="tradingview-widget-container tv">
-                        <div id="dxy-chart" style="height:100%;"></div>
-                    </div>
+                    <div class="score-last" id="eurusdLast">--</div>
+                    <div class="meter-delta" id="eurusdDelta">--</div>
+                    <div class="score-chart"><canvas id="eurusdChartJs"></canvas></div>
+                    <div id="dxy-chart" class="hidden-id"></div>
                 </div>
                 <div class="score-cell">
                     <div class="score-name">USDJPY</div>
                     <div class="score-read">Carry · sharp yen strength = risk-off</div>
-                    <div class="tradingview-widget-container tv">
-                        <div id="usdjpy-chart" style="height:100%;"></div>
-                    </div>
+                    <div class="score-last" id="usdjpyLast">--</div>
+                    <div class="meter-delta" id="usdjpyDelta">--</div>
+                    <div class="score-chart"><canvas id="usdjpyChartJs"></canvas></div>
+                    <div id="usdjpy-chart" class="hidden-id"></div>
                 </div>
                 <div class="score-cell">
                     <div class="score-name">TLT</div>
                     <div class="score-read">Long bonds · inverse of yields</div>
-                    <div class="tradingview-widget-container tv">
-                        <div id="us10y-chart" style="height:100%;"></div>
-                    </div>
+                    <div class="score-last" id="tltLast">--</div>
+                    <div class="meter-delta" id="tltDelta">--</div>
+                    <div class="score-chart"><canvas id="tltChartJs"></canvas></div>
+                    <div id="us10y-chart" class="hidden-id"></div>
                 </div>
             </div>
         </div>
 
         <div class="chapter">
             <div class="chapter-head">
-                <div class="chapter-kicker">05 · Risk tape</div>
+                <div class="chapter-kicker">04 · Risk tape</div>
                 <h2 class="chapter-title">Risk tape</h2>
-                <p class="chapter-sub">Dollar, equity vol, and the actual Treasury yield. TLT stays on the scoreboard as the bond ETF.</p>
+                <p class="chapter-sub">Dollar, equity vol, and Treasury yields. Yahoo DXY or FRED broad dollar — never a TradingView paywall.</p>
             </div>
             <div class="risk-tape">
                 <div class="meter">
-                    <div class="meter-name">DXY</div>
-                    <div class="meter-read">Dollar index</div>
-                    <div class="tradingview-widget-container tv">
-                        <div id="risk-dxy-chart" style="height:100%;"></div>
-                    </div>
+                    <div class="meter-name" id="riskDxyName">DXY</div>
+                    <div class="meter-read">Dollar index · Yahoo DX-Y.NYB</div>
+                    <div class="meter-last" id="riskDxyLast">--</div>
+                    <div class="meter-delta" id="riskDxyDelta">--</div>
+                    <div class="meter-chart"><canvas id="riskDxyChartJs"></canvas></div>
+                    <div id="risk-dxy-chart" class="hidden-id"></div>
                 </div>
                 <div class="meter">
                     <div class="meter-name">VIX</div>
-                    <div class="meter-read">Equity vol</div>
-                    <div class="tradingview-widget-container tv">
-                        <div id="risk-vix-chart" style="height:100%;"></div>
-                    </div>
+                    <div class="meter-read">Equity vol · FRED VIXCLS</div>
+                    <div class="meter-last" id="riskVixLast">--</div>
+                    <div class="meter-delta" id="riskVixDelta">--</div>
+                    <div class="meter-chart"><canvas id="riskVixChartJs"></canvas></div>
+                    <div id="risk-vix-chart" class="hidden-id"></div>
                 </div>
                 <div class="meter">
                     <div class="meter-name">US10Y</div>
-                    <div class="meter-read">10-year yield</div>
-                    <div class="tradingview-widget-container tv">
-                        <div id="risk-us10y-chart" style="height:100%;"></div>
-                    </div>
+                    <div class="meter-read">10-year yield · FRED DGS10</div>
+                    <div class="meter-last" id="riskUs10yLast">--</div>
+                    <div class="meter-delta" id="riskUs10yDelta">--</div>
+                    <div class="meter-chart"><canvas id="riskUs10yChartJs"></canvas></div>
+                    <div id="risk-us10y-chart" class="hidden-id"></div>
                 </div>
                 <div class="meter">
                     <div class="meter-name">US02Y</div>
-                    <div class="meter-read">2-year yield</div>
-                    <div class="tradingview-widget-container tv">
-                        <div id="risk-us02y-chart" style="height:100%;"></div>
-                    </div>
+                    <div class="meter-read">2-year yield · FRED DGS2</div>
+                    <div class="meter-last" id="riskUs02yLast">--</div>
+                    <div class="meter-delta" id="riskUs02yDelta">--</div>
+                    <div class="meter-chart"><canvas id="riskUs02yChartJs"></canvas></div>
+                    <div id="risk-us02y-chart" class="hidden-id"></div>
                 </div>
             </div>
         </div>
 
         <div class="chapter ft-quiet">
             <div class="chapter-head">
-                <div class="chapter-kicker">06 · Calendar</div>
+                <div class="chapter-kicker">05 · Calendar</div>
                 <h2 class="chapter-title">Economic Calendar</h2>
                 <p class="chapter-sub">FOMC · CPI · NFP · high-impact US / EU / JP releases</p>
             </div>
@@ -2156,7 +2195,7 @@
             <div class="chapter-head">
                 <div class="chapter-kicker">01 · Supply</div>
                 <h2 class="chapter-title">Stablecoin Market</h2>
-                <p class="chapter-sub">Aggregate float, dominance, and weekly/monthly change. CoinGecko + DefiLlama.</p>
+                <p class="chapter-sub">Aggregate float and weekly/monthly change. CoinGecko + DefiLlama.</p>
             </div>
             <div class="kpi-strip" style="grid-template-columns: repeat(6, minmax(0,1fr));">
                 <div class="kpi-xl" style="grid-column: span 2;">
@@ -2329,7 +2368,7 @@
             <div class="chapter-head">
                 <div class="chapter-kicker">07 · Peg tape</div>
                 <h2 class="chapter-title">Peg tape</h2>
-                <p class="chapter-sub">Deviation from $1 in basis points. Prices from the ranking payload — missing names are skipped, not invented.</p>
+                <p class="chapter-sub">Deviation from $1 in bps. Ranking snapshot + 90d peg vs $1 when CoinGecko prices exist.</p>
             </div>
             <div class="card" style="padding:0;">
                 <div class="ft-table-wrap">
@@ -2349,35 +2388,44 @@
                     </table>
                 </div>
             </div>
+            <div class="card" style="margin-top:12px;padding:14px 16px 10px;">
+                <div class="kpi-xl-label">Peg vs $1 · 90d</div>
+                <div style="height:170px;position:relative;">
+                    <canvas id="stablePegChart"></canvas>
+                </div>
+            </div>
         </div>
 
         <div class="chapter">
             <div class="chapter-head">
                 <div class="chapter-kicker">08 · Dominance tape</div>
                 <h2 class="chapter-title">Dominance tape</h2>
-                <p class="chapter-sub">USDT.D, USDC.D, BTC.D — clean TradingView tiles. Separate from the Crypto-tab widgets.</p>
+                <p class="chapter-sub">USDT / USDC share of crypto mcap from CoinGecko market caps. BTC.D Chart.js when total history exists; otherwise one CRYPTOCAP tile.</p>
             </div>
             <div class="dom-tape">
                 <div class="meter">
                     <div class="meter-name">USDT.D</div>
-                    <div class="meter-read">Tether share of crypto mcap</div>
-                    <div class="tradingview-widget-container tv">
-                        <div id="stable-usdt-d-chart" style="height:100%;"></div>
-                    </div>
+                    <div class="meter-read">Tether / total crypto mcap</div>
+                    <div class="meter-last" id="stableUsdtDLast">--</div>
+                    <div class="meter-delta" id="stableUsdtDDelta">--</div>
+                    <div class="meter-chart"><canvas id="stableUsdtDChart"></canvas></div>
+                    <div id="stable-usdt-d-chart" class="hidden-id"></div>
                 </div>
                 <div class="meter">
                     <div class="meter-name">USDC.D</div>
-                    <div class="meter-read">Circle share of crypto mcap</div>
-                    <div class="tradingview-widget-container tv">
-                        <div id="stable-usdc-d-chart" style="height:100%;"></div>
-                    </div>
+                    <div class="meter-read">Circle / total crypto mcap</div>
+                    <div class="meter-last" id="stableUsdcDLast">--</div>
+                    <div class="meter-delta" id="stableUsdcDDelta">--</div>
+                    <div class="meter-chart"><canvas id="stableUsdcDChart"></canvas></div>
+                    <div id="stable-usdc-d-chart" class="hidden-id"></div>
                 </div>
                 <div class="meter">
                     <div class="meter-name">BTC.D</div>
                     <div class="meter-read">Bitcoin dominance</div>
-                    <div class="tradingview-widget-container tv">
-                        <div id="stable-btc-d-chart" style="height:100%;"></div>
-                    </div>
+                    <div class="meter-last" id="stableBtcDLast">--</div>
+                    <div class="meter-delta" id="stableBtcDDelta">--</div>
+                    <div class="meter-chart" id="stableBtcDWrap"><canvas id="stableBtcDChart"></canvas></div>
+                    <div id="stable-btc-d-chart" class="hidden-id"></div>
                 </div>
             </div>
         </div>
@@ -2627,6 +2675,12 @@
                             <tr><td colspan="7" style="padding:20px;text-align:center;color:var(--text-muted);">Loading...</td></tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+            <div class="card" style="margin-top:12px;padding:14px 16px 10px;">
+                <div class="kpi-xl-label">OI mix — top markets by open interest</div>
+                <div style="height:220px;position:relative;">
+                    <canvas id="hlOiMixChart"></canvas>
                 </div>
             </div>
         </div>
@@ -2888,8 +2942,8 @@
     </div>
 
     <footer>
-        <p><strong>FLOWTRACK v19.1</strong> — Crypto Derivatives Intelligence</p>
-        <p style="margin-top: 6px;">Data from CoinGlass API, Binance Futures, CoinGecko, Coinalyze, TradingView</p>
+        <p><strong>FLOWTRACK v19.2</strong> — Crypto Derivatives Intelligence</p>
+        <p style="margin-top: 6px;">Data from FRED, Yahoo/Stooq, Binance, CoinGecko, DefiLlama, Hyperliquid, CoinGlass, Coinalyze, TradingView</p>
         <p style="margin-top: 6px;">Auto-refreshes every 60 seconds • Not financial advice</p>
     </footer>
     
@@ -3171,11 +3225,10 @@
         let stableTvInitialized = false;
         function initStableTV() {
             if (stableTvInitialized) return;
-            if (!document.getElementById('stable-usdt-d-chart')) return;
+            if (!document.getElementById('stableUsdtDChart') && !document.getElementById('stable-usdt-d-chart')) return;
             stableTvInitialized = true;
-            macroTV('stable-usdt-d-chart', { symbol: 'CRYPTOCAP:USDT.D', interval: 'W', range: 'ALL' });
-            macroTV('stable-usdc-d-chart', { symbol: 'CRYPTOCAP:USDC.D', interval: 'W', range: 'ALL' });
-            macroTV('stable-btc-d-chart', { symbol: 'CRYPTOCAP:BTC.D', interval: 'W', range: 'ALL' });
+            loadStableDominanceCharts();
+            loadStablePegChart();
         }
 
         const FEAR_GREED_API = 'https://api.alternative.me/fng';
@@ -3434,7 +3487,7 @@
             // Initialize macro charts when switching to macro tab
             if (tabName === 'macro') {
                 if (!macroChartsInitialized) setTimeout(initMacroCharts, 100);
-                else setTimeout(() => remountVisibleTV(), 150);
+                else setTimeout(() => loadMacroLive(false), 80);
             }
             
             // Initialize HYPE chart when switching to hyperliquid tab
@@ -8835,23 +8888,36 @@
             if (loadEl) loadEl.style.display = 'none';
             const ctx = document.getElementById(canvasId).getContext('2d');
             if (existing) existing.destroy();
+            const vals = data.map(d => d.v / 1e6);
+            const peakY = vals.length ? Math.max.apply(null, vals) : null;
+            const lastV = vals.length ? vals[vals.length - 1] : null;
             return new Chart(ctx, {
                 type: 'bar',
+                plugins: [hlPeakLinePlugin, ftEndLabelPlugin],
                 data: {
                     labels: data.map(d => new Date(d.t * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
-                    datasets: [{ data: data.map(d => d.v / 1e6), backgroundColor: color, borderRadius: 1 }]
+                    datasets: [{
+                        label: 'fees',
+                        data: vals,
+                        backgroundColor: color,
+                        borderRadius: 1,
+                        _endText: lastV != null ? ('$' + (lastV >= 1000 ? (lastV / 1000).toFixed(2) + 'B' : lastV.toFixed(1) + 'M')) : '',
+                        borderColor: '#50d2c1'
+                    }]
                 },
                 options: {
+                    _peakY: peakY,
                     responsive: true, maintainAspectRatio: false,
+                    layout: { padding: { right: 56, top: 8 } },
                     plugins: {
                         legend: { display: false },
                         tooltip: { callbacks: { label: c => ' $' + (c.parsed.y >= 1000 ? (c.parsed.y / 1000).toFixed(2) + 'B' : c.parsed.y.toFixed(1) + 'M') } }
                     },
                     scales: {
-                        x: { ticks: { color: '#545c69', maxTicksLimit: 10, font: { size: 10 } }, grid: { display: false } },
+                        x: { ticks: { color: '#545c69', maxTicksLimit: 10, font: { size: 10, family: "'IBM Plex Mono', monospace" } }, grid: { display: false }, border: { display: false } },
                         y: { ticks: { color: '#8b93a2', font: { size: 10, family: "'IBM Plex Mono', monospace" },
                                 callback: v => '$' + (v >= 1000 ? (v / 1000).toFixed(1) + 'B' : v + 'M') },
-                            grid: { color: 'rgba(40,46,58,0.3)' } }
+                            grid: { color: 'rgba(80,210,193,0.08)', drawBorder: false }, border: { display: false } }
                     }
                 }
             });
@@ -8874,31 +8940,36 @@
             const cum = sliced.map(d => { run += d.v; return { t: d.t, v: run }; });
             const ctx = canvas.getContext('2d');
             if (hlFeesCumChartInstance) hlFeesCumChartInstance.destroy();
+            const lastCum = cum.length ? cum[cum.length - 1].v / 1e6 : null;
             hlFeesCumChartInstance = new Chart(ctx, {
                 type: 'line',
+                plugins: [ftEndLabelPlugin],
                 data: {
                     labels: cum.map(d => new Date(d.t * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
                     datasets: [{
+                        label: 'cum',
                         data: cum.map(d => d.v / 1e6),
                         borderColor: '#50d2c1',
                         backgroundColor: 'rgba(80,210,193,0.16)',
                         fill: true,
-                        borderWidth: 1.5,
+                        borderWidth: 1.4,
                         pointRadius: 0,
-                        tension: 0.2
+                        tension: 0.18,
+                        _endText: lastCum != null ? ('$' + (lastCum >= 1000 ? (lastCum / 1000).toFixed(2) + 'B' : lastCum.toFixed(1) + 'M')) : ''
                     }]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
+                    layout: { padding: { right: 56, top: 6 } },
                     plugins: {
                         legend: { display: false },
                         tooltip: { callbacks: { label: c => ' $' + (c.parsed.y >= 1000 ? (c.parsed.y / 1000).toFixed(2) + 'B' : c.parsed.y.toFixed(1) + 'M') } }
                     },
                     scales: {
-                        x: { ticks: { color: '#545c69', maxTicksLimit: 8, font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+                        x: { ticks: { color: '#545c69', maxTicksLimit: 8, font: { size: 10, family: "'IBM Plex Mono', monospace" } }, grid: { color: 'rgba(80,210,193,0.08)', drawBorder: false }, border: { display: false } },
                         y: { ticks: { color: '#8b93a2', font: { size: 10, family: "'IBM Plex Mono', monospace" },
                                 callback: v => '$' + (v >= 1000 ? (v / 1000).toFixed(1) + 'B' : v + 'M') },
-                            grid: { color: 'rgba(40,46,58,0.3)' } }
+                            grid: { color: 'rgba(80,210,193,0.08)', drawBorder: false }, border: { display: false } }
                     }
                 }
             });
@@ -9087,6 +9158,7 @@
                 }).filter(r => r.vol > 0).sort((a, b) => b.vol - a.vol);
                 if (rows.length === 0) throw new Error('No market data');
                 renderHLFundingExtremes(rows);
+                renderHLOiMix(rows);
                 const top = rows.slice(0, 12);
                 
                 const px = v => v >= 1000 ? v.toLocaleString('en-US', { maximumFractionDigits: 0 }) : v >= 1 ? v.toFixed(2) : v.toPrecision(4);
@@ -9386,34 +9458,693 @@
             if (!compareChartsLoaded) loadComparisonCharts(7);
         }
 
+        // ==================== v19.2 MACRO LIVE (FRED + Yahoo + Chart.js) ====================
+        window._fredCache = window._fredCache || {};
+        window._macroLive = window._macroLive || { series: {}, loaded: false, loading: false, netLiq: null, netLiqLive: false, sources: {} };
+        window._macroPeriod = window._macroPeriod || '2y';
+        const _ftChartInst = {};
+
+        async function fetchFredCsv(id) {
+            if (window._fredCache[id] && window._fredCache[id].length) return window._fredCache[id];
+            const url = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=' + encodeURIComponent(id);
+            let text = null;
+            try {
+                const res = await fetchT(url, {}, 8000);
+                if (res.ok) {
+                    const t = await res.text();
+                    if (t && t.length > 40 && /DATE/i.test(t) && t.indexOf(',') >= 0) text = t;
+                }
+            } catch (e) { /* CORS expected */ }
+            if (!text) {
+                try {
+                    const res = await fetchWithProxy(url);
+                    const t = await res.text();
+                    if (t && t.length > 40 && /DATE/i.test(t)) text = t;
+                } catch (e) {
+                    throw new Error('FRED ' + id + ' unavailable');
+                }
+            }
+            const rows = [];
+            String(text).trim().split(/\r?\n/).forEach((line, i) => {
+                if (i === 0) return;
+                const parts = line.split(',');
+                if (parts.length < 2) return;
+                const date = (parts[0] || '').trim();
+                const raw = (parts[1] || '').trim();
+                if (!date || raw === '.' || raw === '') return;
+                const n = parseFloat(raw);
+                if (!isFinite(n)) return;
+                const t = Date.parse(date + 'T00:00:00Z');
+                if (!isFinite(t)) return;
+                rows.push({ date: date, t: t, v: n });
+            });
+            if (!rows.length) throw new Error('FRED ' + id + ' empty');
+            window._fredCache[id] = rows;
+            return rows;
+        }
+
+        async function fetchStooqRaw(sym, days) {
+            const fmt = function (d) { return d.toISOString().slice(0, 10).replace(/-/g, ''); };
+            const d2 = new Date(), d1 = new Date(Date.now() - (days + 10) * 86400e3);
+            const urls = [
+                'https://stooq.com/q/d/l/?s=' + sym + '&d1=' + fmt(d1) + '&d2=' + fmt(d2) + '&i=d',
+                'https://stooq.com/q/d/l/?s=' + sym + '&i=d',
+                'https://stooq.pl/q/d/l/?s=' + sym + '&i=d'
+            ];
+            let text = null;
+            for (let i = 0; i < urls.length; i++) {
+                try {
+                    const t = await fetchTextResilient(urls[i]);
+                    if (t && /Date/i.test(t) && t.indexOf(',') >= 0) { text = t; break; }
+                } catch (e) { /* next */ }
+            }
+            if (!text) throw new Error(sym + ': Stooq unavailable');
+            const out = text.trim().split('\n').slice(1).map(function (line) {
+                const parts = line.split(',');
+                const date = parts[0], close = parts[4] || parts[parts.length - 2];
+                const t = new Date(date + 'T21:00:00Z').getTime();
+                return { t: t, v: parseFloat(close), date: date };
+            }).filter(function (r) { return isFinite(r.v) && isFinite(r.t); });
+            if (!out.length) throw new Error(sym + ': empty Stooq series');
+            return out;
+        }
+
+        function yahooToDaily(points) {
+            const m = new Map();
+            (points || []).forEach(function (p) {
+                const t = Math.floor(p.x / 86400000) * 86400000;
+                m.set(t, p.p);
+            });
+            return [...m.entries()].sort(function (a, b) { return a[0] - b[0]; }).map(function (e) {
+                return { t: e[0], v: e[1], date: new Date(e[0]).toISOString().slice(0, 10) };
+            });
+        }
+
+        async function fetchMacroYahooDaily(symbol, days, stooqSym) {
+            try {
+                const pts = await fetchYahooHourly(symbol, days);
+                const daily = yahooToDaily(pts);
+                if (daily.length > 5) return daily;
+            } catch (e) {
+                console.warn('[Macro]', symbol, 'Yahoo failed:', e.message);
+            }
+            if (stooqSym) return fetchStooqRaw(stooqSym, days);
+            throw new Error(symbol + ' unavailable');
+        }
+
+        function lastOnOrBefore(series, t) {
+            if (!series || !series.length) return null;
+            let lo = 0, hi = series.length - 1, ans = null;
+            while (lo <= hi) {
+                const mid = (lo + hi) >> 1;
+                if (series[mid].t <= t) { ans = series[mid]; lo = mid + 1; }
+                else hi = mid - 1;
+            }
+            return ans;
+        }
+
+        function buildAlignedNetLiq(walclT, tgaT, rrpT) {
+            const tga = tgaT.slice().sort(function (a, b) { return a.t - b.t; });
+            const rrp = rrpT.slice().sort(function (a, b) { return a.t - b.t; });
+            const out = [];
+            walclT.forEach(function (w) {
+                const tg = lastOnOrBefore(tga, w.t);
+                const rr = lastOnOrBefore(rrp, w.t);
+                if (!tg || !rr) return;
+                out.push({ date: w.date, t: w.t, liquidity: w.v - tg.v - rr.v });
+            });
+            return out;
+        }
+
+        function filterMacroPeriod(series, period, latestTs) {
+            if (!series || !series.length) return [];
+            const latest = latestTs || series[series.length - 1].t;
+            let start = 0;
+            if (period === '1y') start = latest - 365 * 86400e3;
+            else if (period === '2y') start = latest - 2 * 365 * 86400e3;
+            else if (period === '3y') start = latest - 3 * 365 * 86400e3;
+            return series.filter(function (d) { return d.t >= start; });
+        }
+
+        function getMacroNetLiq() {
+            if (window._macroLive && window._macroLive.netLiq && window._macroLive.netLiq.length) {
+                return window._macroLive.netLiq;
+            }
+            const btc = window._macroLive && window._macroLive.series && window._macroLive.series.BTC;
+            return netLiquidityData.map(function (d) {
+                const t = Date.parse(d.date + 'T00:00:00Z');
+                let btcPx = d.btc;
+                if (btc && btc.length) {
+                    const hit = lastOnOrBefore(btc, t);
+                    if (hit) btcPx = hit.v;
+                }
+                return { date: d.date, t: t, liquidity: d.liquidity, btc: btcPx };
+            });
+        }
+
+        const ftEndLabelPlugin = {
+            id: 'ftEndLabel',
+            afterDatasetsDraw: function (chart) {
+                const ctx = chart.ctx, chartArea = chart.chartArea;
+                if (!chartArea) return;
+                ctx.save();
+                chart.data.datasets.forEach(function (ds, i) {
+                    if (!ds.label || ds.label === '_zero' || ds._hideEnd) return;
+                    const meta = chart.getDatasetMeta(i);
+                    if (!meta || meta.hidden || !meta.data.length) return;
+                    const last = meta.data[meta.data.length - 1];
+                    const pt = ds.data[ds.data.length - 1];
+                    if (!last || pt == null) return;
+                    const y = (typeof pt === 'object') ? pt.y : pt;
+                    if (!isFinite(y)) return;
+                    const fmt = ds._ftFmt || chart.options._ftFmt;
+                    const text = ds._endText || (fmt ? fmt(y) : String(y));
+                    ctx.font = "600 10px 'IBM Plex Mono', monospace";
+                    ctx.fillStyle = ds.borderColor || '#00E5C7';
+                    ctx.textBaseline = 'middle';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(text, Math.min(last.x + 6, chartArea.right + 2), last.y);
+                });
+                ctx.restore();
+            }
+        };
+
+        const hlPeakLinePlugin = {
+            id: 'hlPeakLine',
+            afterDraw: function (chart) {
+                const peak = chart.options._peakY;
+                if (peak == null || !chart.scales.y) return;
+                const y = chart.scales.y.getPixelForValue(peak);
+                const ctx = chart.ctx, chartArea = chart.chartArea;
+                if (!chartArea || !isFinite(y)) return;
+                ctx.save();
+                ctx.strokeStyle = 'rgba(80,210,193,0.45)';
+                ctx.setLineDash([4, 3]);
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(chartArea.left, y);
+                ctx.lineTo(chartArea.right, y);
+                ctx.stroke();
+                ctx.font = "600 10px 'IBM Plex Mono', monospace";
+                ctx.fillStyle = '#50d2c1';
+                ctx.textAlign = 'right';
+                ctx.fillText('peak', chartArea.right - 4, y - 4);
+                ctx.restore();
+            }
+        };
+
+        function markFtUnavailable(lastId, deltaId, canvasId) {
+            const last = document.getElementById(lastId);
+            const delta = document.getElementById(deltaId);
+            if (last) last.textContent = '--';
+            if (delta) { delta.textContent = 'unavailable'; delta.className = 'meter-delta'; }
+            if (canvasId && _ftChartInst[canvasId]) {
+                try { _ftChartInst[canvasId].destroy(); } catch (e) {}
+                _ftChartInst[canvasId] = null;
+            }
+        }
+
+        function paintFtLast(lastId, text, deltaId, dlt, deltaFmt) {
+            const last = document.getElementById(lastId);
+            const delta = document.getElementById(deltaId);
+            if (last) last.textContent = text;
+            if (delta) {
+                if (dlt == null || !isFinite(dlt)) { delta.textContent = '--'; delta.className = 'meter-delta'; return; }
+                const txt = deltaFmt ? deltaFmt(dlt) : ((dlt >= 0 ? '+' : '') + dlt.toFixed(2));
+                delta.textContent = txt + ' vs prior';
+                delta.className = 'meter-delta ' + (dlt >= 0 ? 'up' : 'down');
+            }
+        }
+
+        function renderFtArea(canvasId, series, opts) {
+            opts = opts || {};
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const period = opts.period || window._macroPeriod || '2y';
+            const filtered = filterMacroPeriod(series, period);
+            if (!filtered.length) {
+                markFtUnavailable(opts.lastId, opts.deltaId, canvasId);
+                return;
+            }
+            const last = filtered[filtered.length - 1];
+            const prev = filtered.length > 1 ? filtered[filtered.length - 2] : null;
+            const fmt = opts.fmt || function (v) { return String(v); };
+            paintFtLast(opts.lastId, fmt(last.v), opts.deltaId, prev ? (last.v - prev.v) : null, opts.deltaFmt || fmt);
+            if (opts.nameId && opts.name) {
+                const n = document.getElementById(opts.nameId);
+                if (n) n.textContent = opts.name;
+            }
+            if (_ftChartInst[canvasId]) { try { _ftChartInst[canvasId].destroy(); } catch (e) {} }
+            const ctx = canvas.getContext('2d');
+            const color = opts.color || '#00E5C7';
+            _ftChartInst[canvasId] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: opts.label || '',
+                        data: filtered.map(function (d) { return { x: d.t, y: d.v }; }),
+                        borderColor: color,
+                        backgroundColor: opts.fill || 'rgba(0,229,199,0.12)',
+                        borderWidth: 1.35,
+                        pointRadius: 0,
+                        pointHoverRadius: 3,
+                        tension: 0.14,
+                        fill: true,
+                        _ftFmt: fmt
+                    }]
+                },
+                plugins: [ftEndLabelPlugin],
+                options: {
+                    _ftFmt: fmt,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    parsing: false,
+                    layout: { padding: { right: 54, top: 4, bottom: 0 } },
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(8,9,12,0.92)',
+                            borderColor: 'rgba(0,229,199,0.25)',
+                            borderWidth: 1,
+                            titleFont: { family: "'IBM Plex Mono', monospace", size: 10 },
+                            bodyFont: { family: "'IBM Plex Mono', monospace", size: 11 },
+                            callbacks: {
+                                title: function (items) { return items.length ? new Date(items[0].parsed.x).toISOString().slice(0, 10) : ''; },
+                                label: function (c) { return ' ' + fmt(c.parsed.y); }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            ticks: {
+                                color: '#545c69', maxTicksLimit: 5,
+                                font: { size: 9, family: "'IBM Plex Mono', monospace" },
+                                callback: function (v) { return new Date(v).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }); }
+                            },
+                            grid: { color: 'rgba(0,229,199,0.045)', drawBorder: false },
+                            border: { display: false }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#8b93a2', maxTicksLimit: 4,
+                                font: { size: 9, family: "'IBM Plex Mono', monospace" },
+                                callback: function (v) { return fmt(v); }
+                            },
+                            grid: { color: 'rgba(0,229,199,0.045)', drawBorder: false },
+                            border: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function fmtT(v) { return '$' + (isFinite(v) ? v.toFixed(2) : '--') + 'T'; }
+        function fmtB(v) { return '$' + (isFinite(v) ? v.toFixed(1) : '--') + 'B'; }
+        function fmtPct(v) { return (isFinite(v) ? v.toFixed(2) : '--') + '%'; }
+        function fmtIdx(v) { return isFinite(v) ? v.toFixed(2) : '--'; }
+        function fmtFx(v) { return isFinite(v) ? v.toFixed(4) : '--'; }
+        function fmtJpy(v) { return isFinite(v) ? v.toFixed(2) : '--'; }
+        function fmtGold(v) { return isFinite(v) ? '$' + v.toFixed(0) : '--'; }
+        function fmtTlt(v) { return isFinite(v) ? v.toFixed(2) : '--'; }
+
+        function renderMacroComponentPanes(period) {
+            period = period || window._macroPeriod || '2y';
+            const S = (window._macroLive && window._macroLive.series) || {};
+            const pane = function (id, key, opt) {
+                if (S[key] && S[key].length) renderFtArea(id, S[key], Object.assign({ period: period }, opt));
+                else markFtUnavailable(opt.lastId, opt.deltaId, id);
+            };
+            pane('walclChart', 'WALCL', { lastId: 'walclLast', deltaId: 'walclDelta', fmt: fmtT, deltaFmt: fmtT, label: 'WALCL', color: '#00E5C7' });
+            pane('tgaChart', 'TGA', { lastId: 'tgaLast', deltaId: 'tgaDelta', fmt: fmtT, deltaFmt: fmtT, label: 'TGA', color: '#f7931a' });
+            pane('rrpChart', 'RRP', { lastId: 'rrpLast', deltaId: 'rrpDelta', fmt: fmtB, deltaFmt: fmtB, label: 'RRP', color: '#627eea' });
+            pane('m2Chart', 'M2', { lastId: 'm2Last', deltaId: 'm2Delta', fmt: fmtT, deltaFmt: fmtT, label: 'M2', color: '#50d2c1' });
+            pane('goldChartJs', 'GOLD', { lastId: 'goldLast', deltaId: 'goldDelta', fmt: fmtGold, deltaFmt: function (d) { return (d >= 0 ? '+' : '') + '$' + d.toFixed(0); }, label: 'Gold', color: '#f6c945' });
+            pane('curveChartJs', 'T10Y2Y', { lastId: 'curveLast', deltaId: 'curveDelta', fmt: fmtPct, label: '10s-2s', color: '#00E5C7' });
+            pane('eurusdChartJs', 'EURUSD', { lastId: 'eurusdLast', deltaId: 'eurusdDelta', fmt: fmtFx, label: 'EURUSD', color: '#627eea' });
+            pane('usdjpyChartJs', 'USDJPY', { lastId: 'usdjpyLast', deltaId: 'usdjpyDelta', fmt: fmtJpy, label: 'USDJPY', color: '#e8924a' });
+            pane('tltChartJs', 'TLT', { lastId: 'tltLast', deltaId: 'tltDelta', fmt: fmtTlt, label: 'TLT', color: '#9d8cff' });
+            const dxyName = S._dxyLabel || 'DXY';
+            pane('riskDxyChartJs', 'DXY', { lastId: 'riskDxyLast', deltaId: 'riskDxyDelta', fmt: fmtIdx, label: dxyName, nameId: 'riskDxyName', name: dxyName, color: '#00E5C7' });
+            pane('riskVixChartJs', 'VIX', { lastId: 'riskVixLast', deltaId: 'riskVixDelta', fmt: fmtIdx, label: 'VIX', color: '#f6465d' });
+            pane('riskUs10yChartJs', 'DGS10', { lastId: 'riskUs10yLast', deltaId: 'riskUs10yDelta', fmt: fmtPct, label: 'US10Y', color: '#f6c945' });
+            pane('riskUs02yChartJs', 'DGS2', { lastId: 'riskUs02yLast', deltaId: 'riskUs02yDelta', fmt: fmtPct, label: 'US02Y', color: '#e8924a' });
+        }
+
+        function renderAllMacroPanes(period) {
+            period = period || window._macroPeriod || '2y';
+            window._macroPeriod = period;
+            renderLiquidityBTCChart(period);
+            renderLiquidityROCChart(period);
+            renderMacroComponentPanes(period);
+        }
+
+        async function loadMacroLive(force) {
+            if (window._macroLive.loading) return;
+            if (window._macroLive.loaded && !force) {
+                renderAllMacroPanes(window._macroPeriod);
+                return;
+            }
+            window._macroLive.loading = true;
+            const days = 4000;
+            const settle = async function (key, job) {
+                try {
+                    const v = await job;
+                    if (v && v.length) {
+                        window._macroLive.series[key] = v;
+                        window._macroLive.sources[key] = 'ok';
+                        console.log('[Macro]', key, 'ok', v.length);
+                    } else {
+                        window._macroLive.sources[key] = 'empty';
+                    }
+                } catch (e) {
+                    window._macroLive.sources[key] = 'fail:' + (e && e.message ? e.message : e);
+                    console.warn('[Macro]', key, 'failed:', e && e.message);
+                }
+            };
+            await Promise.all([
+                settle('WALCL', fetchFredCsv('WALCL').then(function (s) { return s.map(function (d) { return { date: d.date, t: d.t, v: d.v / 1e6 }; }); })),
+                settle('TGA', fetchFredCsv('WTREGEN').then(function (s) { return s.map(function (d) { return { date: d.date, t: d.t, v: d.v / 1e6 }; }); })),
+                settle('RRP', fetchFredCsv('RRPONTSYD')),
+                settle('M2', fetchFredCsv('M2SL').then(function (s) { return s.map(function (d) { return { date: d.date, t: d.t, v: d.v / 1e3 }; }); })),
+                settle('DGS10', fetchFredCsv('DGS10')),
+                settle('DGS2', fetchFredCsv('DGS2')),
+                settle('T10Y2Y', fetchFredCsv('T10Y2Y')),
+                settle('VIX', fetchFredCsv('VIXCLS')),
+                settle('DTWEXBGS', fetchFredCsv('DTWEXBGS')),
+                settle('GOLD', fetchMacroYahooDaily('GC=F', days, 'gc.f')),
+                settle('EURUSD', fetchMacroYahooDaily('EURUSD=X', days, 'eurusd')),
+                settle('USDJPY', fetchMacroYahooDaily('JPY=X', days, 'jpyusd')),
+                settle('TLT', fetchMacroYahooDaily('TLT', days, 'tlt.us').catch(function () { return fetchStooqRaw('tlt.us', days); })),
+                settle('DXY', fetchMacroYahooDaily('DX-Y.NYB', days, 'dx.f')),
+                settle('VIXY', fetchMacroYahooDaily('^VIX', days, 'vix.us')),
+                settle('BTC', fetchBinanceDailyCloses(4000).then(function (rows) {
+                    return rows.map(function (r) { return { date: r.date, t: Date.parse(r.date + 'T00:00:00Z'), v: r.price }; });
+                }))
+            ]);
+            const S = window._macroLive.series;
+            if ((!S.DXY || !S.DXY.length) && S.DTWEXBGS && S.DTWEXBGS.length) {
+                S.DXY = S.DTWEXBGS;
+                S._dxyLabel = 'Broad dollar (DTWEXBGS)';
+                window._macroLive.sources.DXY = 'fred:DTWEXBGS';
+            } else if (S.DXY && S.DXY.length) {
+                S._dxyLabel = 'DXY';
+            }
+            if ((!S.VIX || !S.VIX.length) && S.VIXY && S.VIXY.length) {
+                S.VIX = S.VIXY;
+                window._macroLive.sources.VIX = 'yahoo:^VIX';
+            }
+            if (S.USDJPY && S.USDJPY.length) {
+                const lastJ = S.USDJPY[S.USDJPY.length - 1].v;
+                if (lastJ > 0 && lastJ < 1) {
+                    S.USDJPY = S.USDJPY.map(function (d) { return { date: d.date, t: d.t, v: 1 / d.v }; });
+                    window._macroLive.sources.USDJPY = (window._macroLive.sources.USDJPY || 'ok') + ':inverted';
+                }
+            }
+            if (S.WALCL && S.TGA && S.RRP) {
+                const rrpT = S.RRP.map(function (d) { return { date: d.date, t: d.t, v: d.v / 1e3 }; });
+                const net = buildAlignedNetLiq(S.WALCL, S.TGA, rrpT);
+                if (S.BTC && S.BTC.length) {
+                    net.forEach(function (d) {
+                        const b = lastOnOrBefore(S.BTC, d.t);
+                        if (b) d.btc = b.v;
+                    });
+                }
+                if (net.length > 8) {
+                    window._macroLive.netLiq = net;
+                    window._macroLive.netLiqLive = true;
+                    console.log('[Macro] net liq live', net.length, 'last', net[net.length - 1].date, net[net.length - 1].liquidity.toFixed(2) + 'T');
+                }
+            }
+            window._macroLive.loaded = true;
+            window._macroLive.loading = false;
+            renderAllMacroPanes(window._macroPeriod);
+        }
+
+        async function loadStableDominanceCharts() {
+            const days = 365;
+            let usdtMc = null, usdcMc = null, btcMc = null, totalHist = null, globalNow = null;
+            try {
+                const g = await cgFetch('/global', { cacheKey: 'cg_global_v192', ttlMs: 15 * 60 * 1000 });
+                globalNow = g && g.data && g.data.data ? g.data.data : (g && g.data);
+            } catch (e) { console.warn('[Stables] global failed', e.message); }
+            try {
+                const cap = await cgFetch('/global/market_cap_chart?days=' + days, { cacheKey: 'cg_mcap_chart', ttlMs: 30 * 60 * 1000 });
+                const rows = cap && cap.data && (cap.data.market_cap_chart || cap.data.total_market_cap || cap.data.market_caps);
+                if (Array.isArray(rows) && rows.length > 8) {
+                    totalHist = rows.map(function (r) {
+                        const t = Array.isArray(r) ? r[0] : (r.timestamp || r.t);
+                        const v = Array.isArray(r) ? r[1] : (r.market_cap || r.v);
+                        return { t: t, v: v };
+                    }).filter(function (d) { return isFinite(d.t) && isFinite(d.v) && d.v > 0; });
+                }
+            } catch (e) { console.warn('[Stables] market_cap_chart unavailable', e.message); }
+            const lastPerDay = function (mcaps) {
+                const m = new Map();
+                (mcaps || []).forEach(function (row) {
+                    const ts = row[0], v = row[1];
+                    if (!isFinite(ts) || !isFinite(v)) return;
+                    m.set(Math.floor(ts / 86400000) * 86400000, v);
+                });
+                return [...m.entries()].sort(function (a, b) { return a[0] - b[0]; }).map(function (e) {
+                    return { t: e[0], v: e[1], date: new Date(e[0]).toISOString().slice(0, 10) };
+                });
+            };
+            try {
+                const u = await cgFetch('/coins/tether/market_chart?vs_currency=usd&days=' + days, { cacheKey: 'usdt_mc_v192', ttlMs: 30 * 60 * 1000 });
+                usdtMc = lastPerDay(u && u.data && u.data.market_caps);
+            } catch (e) { console.warn('[Stables] USDT mcap failed', e.message); }
+            try {
+                const u = await cgFetch('/coins/usd-coin/market_chart?vs_currency=usd&days=' + days, { cacheKey: 'usdc_mc_v192', ttlMs: 30 * 60 * 1000 });
+                usdcMc = lastPerDay(u && u.data && u.data.market_caps);
+            } catch (e) { console.warn('[Stables] USDC mcap failed', e.message); }
+            try {
+                const u = await cgFetch('/coins/bitcoin/market_chart?vs_currency=usd&days=' + days, { cacheKey: 'btc_mc_v192', ttlMs: 30 * 60 * 1000 });
+                btcMc = lastPerDay(u && u.data && u.data.market_caps);
+            } catch (e) { console.warn('[Stables] BTC mcap failed', e.message); }
+
+            const totalNow = globalNow && globalNow.total_market_cap && globalNow.total_market_cap.usd;
+            const toDom = function (mcSeries) {
+                if (!mcSeries || !mcSeries.length) return null;
+                if (totalHist && totalHist.length) {
+                    const th = totalHist.slice().sort(function (a, b) { return a.t - b.t; });
+                    return mcSeries.map(function (d) {
+                        const tot = lastOnOrBefore(th, d.t);
+                        if (!tot || !tot.v) return null;
+                        return { t: d.t, v: d.v / tot.v * 100, date: d.date };
+                    }).filter(Boolean);
+                }
+                return null;
+            };
+            const usdtD = toDom(usdtMc);
+            const usdcD = toDom(usdcMc);
+            const btcD = toDom(btcMc);
+            const fmtDom = function (v) { return (isFinite(v) ? v.toFixed(2) : '--') + '%'; };
+            if (usdtD && usdtD.length) {
+                renderFtArea('stableUsdtDChart', usdtD, { period: '1y', lastId: 'stableUsdtDLast', deltaId: 'stableUsdtDDelta', fmt: fmtDom, label: 'USDT.D', color: '#26A17B' });
+            } else if (usdtMc && usdtMc.length && totalNow) {
+                const last = usdtMc[usdtMc.length - 1];
+                const prev = usdtMc.length > 1 ? usdtMc[usdtMc.length - 2] : null;
+                paintFtLast('stableUsdtDLast', fmtDom(last.v / totalNow * 100), 'stableUsdtDDelta', prev ? ((last.v - prev.v) / 1e9) : null, function (d) { return (d >= 0 ? '+' : '') + d.toFixed(1) + 'B mcap'; });
+                renderFtArea('stableUsdtDChart', usdtMc.map(function (d) { return { t: d.t, v: d.v / 1e9, date: d.date }; }), {
+                    period: '1y', lastId: 'stableUsdtDLast', deltaId: 'stableUsdtDDelta',
+                    fmt: function (v) { return '$' + v.toFixed(1) + 'B'; }, label: 'USDT mcap', color: '#26A17B'
+                });
+                paintFtLast('stableUsdtDLast', fmtDom(last.v / totalNow * 100), 'stableUsdtDDelta', null);
+                const sub = document.getElementById('stableUsdtDDelta');
+                if (sub) sub.textContent = 'last print vs live total mcap · history is mcap $B';
+            } else {
+                markFtUnavailable('stableUsdtDLast', 'stableUsdtDDelta', 'stableUsdtDChart');
+            }
+            if (usdcD && usdcD.length) {
+                renderFtArea('stableUsdcDChart', usdcD, { period: '1y', lastId: 'stableUsdcDLast', deltaId: 'stableUsdcDDelta', fmt: fmtDom, label: 'USDC.D', color: '#2775CA' });
+            } else if (usdcMc && usdcMc.length && totalNow) {
+                const last = usdcMc[usdcMc.length - 1];
+                renderFtArea('stableUsdcDChart', usdcMc.map(function (d) { return { t: d.t, v: d.v / 1e9, date: d.date }; }), {
+                    period: '1y', lastId: 'stableUsdcDLast', deltaId: 'stableUsdcDDelta',
+                    fmt: function (v) { return '$' + v.toFixed(1) + 'B'; }, label: 'USDC mcap', color: '#2775CA'
+                });
+                paintFtLast('stableUsdcDLast', fmtDom(last.v / totalNow * 100), 'stableUsdcDDelta', null);
+                const sub = document.getElementById('stableUsdcDDelta');
+                if (sub) sub.textContent = 'last print vs live total mcap · history is mcap $B';
+            } else {
+                markFtUnavailable('stableUsdcDLast', 'stableUsdcDDelta', 'stableUsdcDChart');
+            }
+            if (btcD && btcD.length) {
+                renderFtArea('stableBtcDChart', btcD, { period: '1y', lastId: 'stableBtcDLast', deltaId: 'stableBtcDDelta', fmt: fmtDom, label: 'BTC.D', color: '#f7931a' });
+            } else {
+                const wrap = document.getElementById('stableBtcDWrap');
+                const tv = document.getElementById('stable-btc-d-chart');
+                if (tv) {
+                    tv.classList.remove('hidden-id');
+                    tv.style.height = '170px';
+                    tv.style.position = 'relative';
+                    if (wrap) wrap.style.display = 'none';
+                    if (typeof macroTV === 'function') macroTV('stable-btc-d-chart', { symbol: 'CRYPTOCAP:BTC.D', interval: 'W', range: 'ALL' });
+                }
+                if (globalNow && globalNow.market_cap_percentage && globalNow.market_cap_percentage.btc != null) {
+                    paintFtLast('stableBtcDLast', fmtDom(globalNow.market_cap_percentage.btc), 'stableBtcDDelta', null);
+                    const sub = document.getElementById('stableBtcDDelta');
+                    if (sub) sub.textContent = 'live CoinGecko · history via CRYPTOCAP';
+                }
+            }
+        }
+
+        async function loadStablePegChart() {
+            const canvas = document.getElementById('stablePegChart');
+            if (!canvas) return;
+            const days = 90;
+            const ids = [
+                { id: 'tether', label: 'USDT', color: '#26A17B' },
+                { id: 'usd-coin', label: 'USDC', color: '#2775CA' },
+                { id: 'dai', label: 'DAI', color: '#F5AC37' }
+            ];
+            const series = [];
+            for (let i = 0; i < ids.length; i++) {
+                try {
+                    if (i) await new Promise(function (r) { setTimeout(r, 350); });
+                    const got = await cgFetch('/coins/' + ids[i].id + '/market_chart?vs_currency=usd&days=' + days, { cacheKey: 'peg_' + ids[i].id, ttlMs: 30 * 60 * 1000 });
+                    const prices = got && got.data && got.data.prices;
+                    if (!Array.isArray(prices) || prices.length < 8) continue;
+                    const m = new Map();
+                    prices.forEach(function (row) {
+                        const t = Math.floor(row[0] / 86400000) * 86400000;
+                        m.set(t, row[1]);
+                    });
+                    const data = [...m.entries()].sort(function (a, b) { return a[0] - b[0]; }).map(function (e) { return { x: e[0], y: e[1] }; });
+                    series.push({ label: ids[i].label, color: ids[i].color, data: data });
+                } catch (e) { console.warn('[Stables] peg', ids[i].label, e.message); }
+            }
+            if (!series.length) return;
+            if (_ftChartInst.stablePegChart) { try { _ftChartInst.stablePegChart.destroy(); } catch (e) {} }
+            _ftChartInst.stablePegChart = new Chart(canvas.getContext('2d'), {
+                type: 'line',
+                data: {
+                    datasets: series.map(function (s) {
+                        return {
+                            label: s.label,
+                            data: s.data,
+                            borderColor: s.color,
+                            backgroundColor: 'transparent',
+                            borderWidth: 1.3,
+                            pointRadius: 0,
+                            tension: 0.15,
+                            fill: false,
+                            _ftFmt: function (v) { return v.toFixed(4); }
+                        };
+                    }).concat([{
+                        label: '_zero',
+                        data: [{ x: series[0].data[0].x, y: 1 }, { x: series[0].data[series[0].data.length - 1].x, y: 1 }],
+                        borderColor: 'rgba(139,147,162,0.35)',
+                        borderWidth: 1,
+                        borderDash: [4, 4],
+                        pointRadius: 0,
+                        fill: false,
+                        _hideEnd: true
+                    }])
+                },
+                plugins: [ftEndLabelPlugin],
+                options: {
+                    responsive: true, maintainAspectRatio: false, parsing: false,
+                    layout: { padding: { right: 56, top: 4 } },
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(8,9,12,0.92)',
+                            callbacks: {
+                                title: function (items) { return items.length ? new Date(items[0].parsed.x).toISOString().slice(0, 10) : ''; },
+                                label: function (c) { return c.dataset.label === '_zero' ? null : ' ' + c.dataset.label + ' $' + c.parsed.y.toFixed(4); }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            ticks: {
+                                color: '#545c69', maxTicksLimit: 6,
+                                font: { size: 9, family: "'IBM Plex Mono', monospace" },
+                                callback: function (v) { return new Date(v).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+                            },
+                            grid: { color: 'rgba(0,229,199,0.045)', drawBorder: false },
+                            border: { display: false }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#8b93a2', maxTicksLimit: 5,
+                                font: { size: 9, family: "'IBM Plex Mono', monospace" },
+                                callback: function (v) { return '$' + Number(v).toFixed(3); }
+                            },
+                            grid: { color: 'rgba(0,229,199,0.045)', drawBorder: false },
+                            border: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderHLOiMix(rows) {
+            const canvas = document.getElementById('hlOiMixChart');
+            if (!canvas || !rows || !rows.length) return;
+            const ranked = rows.filter(function (r) { return r.oi > 0; }).sort(function (a, b) { return b.oi - a.oi; }).slice(0, 10);
+            if (!ranked.length) return;
+            const total = ranked.reduce(function (s, r) { return s + r.oi; }, 0);
+            if (!(total > 0)) return;
+            if (_ftChartInst.hlOiMixChart) { try { _ftChartInst.hlOiMixChart.destroy(); } catch (e) {} }
+            _ftChartInst.hlOiMixChart = new Chart(canvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ranked.map(function (r) { return r.coin; }),
+                    datasets: [{
+                        data: ranked.map(function (r) { return r.oi / total * 100; }),
+                        backgroundColor: ranked.map(function (r, i) { return i === 0 ? '#50d2c1' : 'rgba(80,210,193,0.35)'; }),
+                        borderRadius: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function (c) {
+                                    const r = ranked[c.dataIndex];
+                                    return ' ' + c.parsed.x.toFixed(1) + '% · ' + (typeof hlFmt === 'function' ? hlFmt(r.oi) : r.oi);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#8b93a2', font: { size: 10, family: "'IBM Plex Mono', monospace" }, callback: function (v) { return v.toFixed(0) + '%'; } },
+                            grid: { color: 'rgba(80,210,193,0.08)', drawBorder: false },
+                            border: { display: false }
+                        },
+                        y: {
+                            ticks: { color: '#c8cdd6', font: { size: 10, family: "'IBM Plex Mono', monospace" } },
+                            grid: { display: false },
+                            border: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
         // Initialize Macro Dashboard charts (separate to avoid loading when not visible)
         let macroChartsInitialized = false;
         function initMacroCharts() {
-            if (macroChartsInitialized) return;
+            if (macroChartsInitialized) {
+                renderAllMacroPanes(window._macroPeriod || '2y');
+                return;
+            }
             macroChartsInitialized = true;
-            
-            // Initialize Global Liquidity vs BTC chart
+            window._macroPeriod = window._macroPeriod || '2y';
             renderLiquidityBTCChart('2y');
-            
-            // Initialize Liquidity Rate of Change chart
-            setTimeout(() => renderLiquidityROCChart('2y'), 300);
-            
-            macroTV('fed-balance-sheet-chart', { symbol: 'FRED:WALCL', interval: 'W' });
-            macroTV('tga-chart', { symbol: 'FRED:WTREGEN', interval: 'W' });
-            macroTV('rrp-chart', { symbol: 'FRED:RRPONTSYD', interval: 'D' });
-            macroTV('m2-chart', { symbol: 'FRED:M2SL', interval: 'M' });
-            macroTV('yield-curve-chart', { symbol: 'FRED:T10Y2Y', interval: 'D' });
-            macroTV('gold-chart', { symbol: 'TVC:GOLD', interval: 'W', range: 'ALL' });
-            macroTV('usdjpy-chart', { symbol: 'FX:USDJPY', interval: 'D' });
-            macroTV('dxy-chart', { symbol: 'FX:EURUSD', interval: 'D' });
-            macroTV('us10y-chart', { symbol: 'NASDAQ:TLT', interval: 'D' });
-            macroTV('risk-dxy-chart', { symbol: 'TVC:DXY', interval: 'D' });
-            macroTV('risk-vix-chart', { symbol: 'TVC:VIX', interval: 'D' });
-            macroTV('risk-us10y-chart', { symbol: 'TVC:US10Y', interval: 'D' });
-            macroTV('risk-us02y-chart', { symbol: 'TVC:US02Y', interval: 'D' });
-            
-            // Initialize China Liquidity Chart
+            setTimeout(() => renderLiquidityROCChart('2y'), 200);
             setTimeout(() => renderChinaLiquidityChart('2y'), 400);
+            loadMacroLive(false);
         }
         
         // ==================== GLOBAL LIQUIDITY VS BITCOIN CHART ====================
@@ -9546,167 +10277,110 @@
         async function renderLiquidityBTCChart(period = 'all') {
             const chartContainer = document.getElementById('liquidity-btc-chart');
             if (!chartContainer) return;
-            
             const ctx = chartContainer.getContext('2d');
-            
-            if (liquidityBtcChart) {
-                liquidityBtcChart.destroy();
-            }
-            
-            // Get the most recent data point date as reference
-            const latestDataDate = new Date(netLiquidityData[netLiquidityData.length - 1].date);
+            if (liquidityBtcChart) liquidityBtcChart.destroy();
+
+            const srcAll = getMacroNetLiq();
+            const latestDataDate = new Date(srcAll[srcAll.length - 1].date);
             let startDate;
-            
-            // Calculate start date based on period relative to latest data
             switch (period) {
-                case '1y': 
-                    startDate = new Date(latestDataDate);
-                    startDate.setFullYear(startDate.getFullYear() - 1);
-                    break;
-                case '2y': 
-                    startDate = new Date(latestDataDate);
-                    startDate.setFullYear(startDate.getFullYear() - 2);
-                    break;
-                case '3y': 
-                    startDate = new Date(latestDataDate);
-                    startDate.setFullYear(startDate.getFullYear() - 3);
-                    break;
-                case 'all': 
-                    startDate = new Date(2015, 0, 1); // All data from 2015
-                    break;
-                default: 
-                    startDate = new Date(latestDataDate);
-                    startDate.setFullYear(startDate.getFullYear() - 1);
+                case '1y': startDate = new Date(latestDataDate); startDate.setFullYear(startDate.getFullYear() - 1); break;
+                case '2y': startDate = new Date(latestDataDate); startDate.setFullYear(startDate.getFullYear() - 2); break;
+                case '3y': startDate = new Date(latestDataDate); startDate.setFullYear(startDate.getFullYear() - 3); break;
+                case 'all': startDate = new Date(2015, 0, 1); break;
+                default: startDate = new Date(latestDataDate); startDate.setFullYear(startDate.getFullYear() - 1);
             }
-            
-            // Filter data by period
-            const filteredData = netLiquidityData.filter(d => new Date(d.date) >= startDate);
-            
-            const labels = filteredData.map(d => {
-                const date = new Date(d.date);
-                return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
-            });
-            const liquidityValues = filteredData.map(d => d.liquidity);
-            const btcValues = filteredData.map(d => d.btc);
-            
+            const filteredData = srcAll.filter(d => new Date(d.date) >= startDate);
+            if (!filteredData.length) return;
+
             liquidityBtcChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels,
                     datasets: [
                         {
-                            label: 'Net Liquidity ($T)',
-                            data: liquidityValues,
-                            borderColor: '#06b6d4',
-                            backgroundColor: 'rgba(6, 182, 212, 0.15)',
-                            borderWidth: 2.5,
+                            label: 'Net liq',
+                            data: filteredData.map(d => ({ x: d.t || Date.parse(d.date + 'T00:00:00Z'), y: d.liquidity })),
+                            borderColor: '#00E5C7',
+                            backgroundColor: 'rgba(0,229,199,0.12)',
+                            borderWidth: 1.5,
                             fill: true,
-                            tension: 0.4,
+                            tension: 0.16,
                             yAxisID: 'y',
-                            pointRadius: 2,
-                            pointHoverRadius: 6,
-                            pointBackgroundColor: '#06b6d4'
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            _ftFmt: v => '$' + v.toFixed(2) + 'T'
                         },
                         {
-                            label: 'Bitcoin ($)',
-                            data: btcValues,
+                            label: 'BTC',
+                            data: filteredData.map(d => ({ x: d.t || Date.parse(d.date + 'T00:00:00Z'), y: d.btc })),
                             borderColor: '#f7931a',
-                            backgroundColor: 'rgba(247, 147, 26, 0.1)',
-                            borderWidth: 2.5,
+                            backgroundColor: 'transparent',
+                            borderWidth: 1.4,
                             fill: false,
-                            tension: 0.4,
+                            tension: 0.16,
                             yAxisID: 'y1',
-                            pointRadius: 2,
-                            pointHoverRadius: 6,
-                            pointBackgroundColor: '#f7931a'
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            _ftFmt: v => '$' + (v >= 1000 ? (v / 1000).toFixed(1) + 'k' : String(v))
                         }
                     ]
                 },
+                plugins: [ftEndLabelPlugin],
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false
-                    },
+                    parsing: false,
+                    layout: { padding: { right: 72, top: 6 } },
+                    interaction: { mode: 'index', intersect: false },
                     plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: {
-                                color: '#9ca3af',
-                                font: { size: 11, weight: '500' },
-                                usePointStyle: true,
-                                pointStyle: 'circle',
-                                padding: 20
-                            }
-                        },
+                        legend: { display: false },
                         tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                            titleColor: '#e2e8f0',
-                            bodyColor: '#cbd5e1',
-                            borderColor: 'rgba(59, 130, 246, 0.3)',
+                            backgroundColor: 'rgba(8,9,12,0.92)',
+                            borderColor: 'rgba(0,229,199,0.25)',
                             borderWidth: 1,
-                            padding: 12,
-                            displayColors: true,
+                            titleFont: { family: "'IBM Plex Mono', monospace", size: 10 },
+                            bodyFont: { family: "'IBM Plex Mono', monospace", size: 11 },
                             callbacks: {
+                                title: items => items.length ? new Date(items[0].parsed.x).toISOString().slice(0, 10) : '',
                                 label: function(context) {
-                                    if (context.datasetIndex === 0) {
-                                        return ` Net Liquidity: $${context.parsed.y.toFixed(2)}T`;
-                                    } else {
-                                        return ` Bitcoin: $${context.parsed.y.toLocaleString()}`;
-                                    }
+                                    if (context.datasetIndex === 0) return ' Net liq: $' + context.parsed.y.toFixed(2) + 'T';
+                                    return ' BTC: $' + (context.parsed.y != null ? context.parsed.y.toLocaleString() : '--');
                                 }
                             }
                         }
                     },
                     scales: {
                         x: {
-                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                            ticks: { 
-                                color: '#6b7280', 
-                                font: { size: 10 },
-                                maxTicksLimit: 12
+                            type: 'linear',
+                            grid: { color: 'rgba(0,229,199,0.045)', drawBorder: false },
+                            border: { display: false },
+                            ticks: {
+                                color: '#545c69',
+                                font: { size: 10, family: "'IBM Plex Mono', monospace" },
+                                maxTicksLimit: 10,
+                                callback: v => new Date(v).toLocaleDateString('en-US', { month: 'short', year: '2-digit' })
                             }
                         },
                         y: {
                             type: 'linear',
-                            display: true,
                             position: 'left',
-                            title: {
-                                display: true,
-                                text: 'Net Liquidity ($T)',
-                                color: '#06b6d4',
-                                font: { size: 11, weight: '500' }
-                            },
-                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                            ticks: { 
-                                color: '#06b6d4', 
-                                font: { size: 10 },
-                                callback: function(value) { return '$' + value.toFixed(1) + 'T'; }
-                            },
-                            // Dynamic scaling based on data range
-                            suggestedMin: Math.floor(Math.min(...liquidityValues) * 10 - 2) / 10,
-                            suggestedMax: Math.ceil(Math.max(...liquidityValues) * 10 + 2) / 10
+                            grid: { color: 'rgba(0,229,199,0.045)', drawBorder: false },
+                            border: { display: false },
+                            ticks: {
+                                color: '#00E5C7',
+                                font: { size: 10, family: "'IBM Plex Mono', monospace" },
+                                callback: v => '$' + v.toFixed(1) + 'T'
+                            }
                         },
                         y1: {
                             type: 'linear',
-                            display: true,
                             position: 'right',
-                            title: {
-                                display: true,
-                                text: 'Bitcoin ($)',
-                                color: '#f7931a',
-                                font: { size: 11, weight: '500' }
-                            },
                             grid: { drawOnChartArea: false },
-                            ticks: { 
-                                color: '#f7931a', 
-                                font: { size: 10 },
-                                callback: function(value) { 
-                                    if (value >= 1000) return '$' + (value / 1000).toFixed(0) + 'K';
-                                    return '$' + value;
-                                }
+                            border: { display: false },
+                            ticks: {
+                                color: '#f7931a',
+                                font: { size: 10, family: "'IBM Plex Mono', monospace" },
+                                callback: v => v >= 1000 ? '$' + (v / 1000).toFixed(0) + 'k' : '$' + v
                             }
                         }
                     }
@@ -9716,7 +10390,7 @@
             updateMacroHero(filteredData);
         }
 
-        function updateMacroHero(filtered) {
+                function updateMacroHero(filtered) {
             const src = (filtered && filtered.length) ? filtered : netLiquidityData;
             if (!src || !src.length) return;
             const last = src[src.length - 1];
@@ -9730,7 +10404,10 @@
                 roc.textContent = (d >= 0 ? '+' : '') + d.toFixed(2) + 'T vs prior print';
                 roc.className = 'kpi-delta ' + (d >= 0 ? 'up' : 'down');
             }
-            if (asof) asof.textContent = 'As of ' + last.date + ' · WALCL − RRP − TGA';
+            if (asof) {
+                const live = window._macroLive && window._macroLive.netLiqLive;
+                asof.textContent = 'As of ' + last.date + (live ? ' · FRED live · WALCL − TGA − RRP' : ' · fallback tape · WALCL − TGA − RRP');
+            }
         }
         
         // Global Liquidity unified timeframe selector - syncs US and China charts
@@ -9740,9 +10417,11 @@
                 this.classList.add('active');
                 const period = this.dataset.globalLiquidityPeriod;
                 // Update all liquidity charts with same timeframe
+                window._macroPeriod = period;
                 renderLiquidityBTCChart(period);
                 renderLiquidityROCChart(period);
                 renderChinaLiquidityChart(period);
+                renderMacroComponentPanes(period);
             });
         });
         
@@ -9991,7 +10670,7 @@
             if (!ctx) return;
             
             // Sort data chronologically
-            let data = [...netLiquidityData].sort((a, b) => new Date(a.date) - new Date(b.date));
+            let data = [...getMacroNetLiq()].sort((a, b) => new Date(a.date) - new Date(b.date));
             
             // Get the most recent data point date as reference (same logic as main chart)
             const latestDataDate = new Date(data[data.length - 1].date);
@@ -10083,15 +10762,7 @@
                         intersect: false
                     },
                     plugins: {
-                        legend: { 
-                            display: true,
-                            position: 'top',
-                            labels: { 
-                                color: '#9ca3af',
-                                usePointStyle: true,
-                                padding: 15
-                            }
-                        },
+                        legend: { display: false },
                         tooltip: {
                             callbacks: {
                                 label: (ctx) => {
@@ -10108,11 +10779,11 @@
                     },
                     scales: {
                         x: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            grid: { color: 'rgba(0,229,199,0.045)', drawBorder: false },
                             ticks: { 
-                                color: '#6b7280', 
+                                color: '#545c69', 
                                 maxTicksLimit: 12,
-                                font: { size: 10 }
+                                font: { size: 10, family: "'IBM Plex Mono', monospace" }
                             }
                         },
                         y: {
@@ -11178,6 +11849,9 @@
                 safeCall(() => fetchStablecoinHistory('all'), 'StablecoinHistory', 25000);
                 safeCall(loadAltseason, 'Altseason', 20000);
                 safeCall(refreshHypeQuote, 'HypeQuote', 10000);
+                if (macroChartsInitialized) {
+                    safeCall(() => renderAllMacroPanes(window._macroPeriod || '2y'), 'MacroPanes', 8000);
+                }
             } finally {
                 window._ftRefreshing = false;
                 if (btn) { btn.disabled = false; btn.textContent = '↻ Refresh'; }
@@ -12535,7 +13209,7 @@
             }, { passive: true });
         });
         
-        console.log('%cFLOWTRACK v19.1', 'color:#50d2c1;font-weight:bold;font-size:14px;', 'build 2026-08-19 · visual v19.1');
+        console.log('%cFLOWTRACK v19.2', 'color:#50d2c1;font-weight:bold;font-size:14px;', 'build 2026-08-19 · Chart.js macro v19.2');
         // UTC clock in top bar
         setInterval(() => {
             const el = document.getElementById('utcClock');
