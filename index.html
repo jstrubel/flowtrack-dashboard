@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flowtrack | Crypto Market Intelligence v18.6</title>
+    <title>Flowtrack | Crypto Market Intelligence v19.0</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1034,6 +1034,220 @@
             .utc-clock { display: none; }
         }
 
+
+        /* ==================== v19 TERMINAL LAYER ==================== */
+        :root {
+            --ft-ink: #08090C;
+            --ft-cyan: #00E5C7;
+            --ft-cyan-dim: rgba(0, 229, 199, 0.14);
+            --ft-gold: #f7931a;
+            --ft-eth: #627eea;
+            --ft-sol: #14f195;
+            --ft-mint: #50d2c1;
+        }
+        .chapter { margin: 0 0 40px; }
+        .chapter-head { margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); position: relative; }
+        .chapter-head::after {
+            content: '';
+            position: absolute; left: 0; bottom: -1px; width: 56px; height: 1px;
+            background: var(--ft-cyan);
+        }
+        .chapter-kicker {
+            font-family: var(--mono);
+            font-size: 9px;
+            font-weight: 500;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--ft-cyan);
+            margin-bottom: 5px;
+        }
+        .chapter-title {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: var(--text);
+            line-height: 1.15;
+        }
+        .chapter-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 5px;
+            max-width: 68ch;
+        }
+        .kpi-strip {
+            display: grid;
+            grid-template-columns: repeat(8, minmax(0, 1fr));
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 18px;
+        }
+        .kpi-xl {
+            background: var(--panel);
+            padding: 14px 12px 13px;
+            min-width: 0;
+        }
+        .kpi-xl-label {
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .kpi-xl-val {
+            font-family: var(--mono);
+            font-size: 21px;
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            color: var(--text);
+            line-height: 1.1;
+            font-variant-numeric: tabular-nums;
+        }
+        .kpi-xl-sub, .kpi-delta {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--text-dim);
+            margin-top: 5px;
+            font-variant-numeric: tabular-nums;
+        }
+        .kpi-delta.up, .pos { color: var(--good); }
+        .kpi-delta.down, .neg { color: var(--bad); }
+        .hero-liq {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 20px;
+            align-items: stretch;
+            margin-bottom: 14px;
+        }
+        .hero-liq-num {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 8px 4px 8px 0;
+            border-right: 1px solid var(--border);
+        }
+        .hero-liq-num .kpi-xl-val { font-size: 42px; letter-spacing: -0.04em; }
+        .rail {
+            display: grid;
+            grid-template-columns: 1fr 228px;
+            gap: 16px;
+            align-items: stretch;
+        }
+        .rail-side {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .rail-kpi { background: var(--panel); padding: 14px 14px 13px; flex: 1; }
+        .scoreboard {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .score-cell { background: var(--panel); padding: 10px 10px 0; min-width: 0; }
+        .score-cell .score-name {
+            font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+            text-transform: uppercase; color: var(--text);
+        }
+        .score-cell .score-read {
+            font-size: 10px; color: var(--text-dim); margin: 3px 0 8px; line-height: 1.35;
+        }
+        .score-cell .tv { height: 148px; margin: 0 -10px; }
+        .meter-row {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .meter { background: var(--panel); padding: 10px 12px 0; min-width: 0; }
+        .meter .meter-name {
+            font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+            text-transform: uppercase; color: var(--text);
+        }
+        .meter .meter-read { font-size: 10px; color: var(--text-dim); margin: 3px 0 6px; }
+        .meter .tv { height: 128px; margin: 0 -12px; }
+        .ft-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 11px; }
+        .ft-table thead th {
+            position: sticky; top: 0; z-index: 2;
+            background: #0c0e13;
+            border-bottom: 1px solid var(--border);
+            padding: 7px 8px;
+            white-space: nowrap;
+        }
+        .ft-table td {
+            padding: 6px 8px;
+            border-bottom: 1px solid rgba(30,36,46,0.85);
+            font-variant-numeric: tabular-nums;
+        }
+        .ft-table-wrap { overflow: auto; max-height: 520px; }
+        .chart-compare { height: 300px !important; background: transparent !important; padding: 2px 8px 0 0 !important; }
+        .ft-compare { padding: 16px 16px 10px; }
+        .ft-compare .card-header { margin-bottom: 8px; padding-bottom: 8px; }
+        .ft-chart-load {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 12px; color: var(--text-muted); font-family: var(--mono);
+        }
+        .share-bar {
+            display: flex; height: 28px; overflow: hidden;
+            border: 1px solid var(--border); border-radius: 3px;
+        }
+        .share-seg {
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--mono); font-size: 10px; font-weight: 600; color: #fff;
+            min-width: 0; overflow: hidden;
+        }
+        .share-leg { display: flex; flex-wrap: wrap; gap: 14px 18px; margin-top: 12px; }
+        .share-leg-item { display: flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
+        .share-swatch { width: 8px; height: 8px; border-radius: 1px; }
+        .pane-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .line-end-label {
+            font-family: var(--mono); font-size: 10px; font-weight: 600;
+            letter-spacing: 0.02em; white-space: nowrap;
+        }
+        .ft-quiet .chapter-head::after { width: 28px; opacity: 0.45; }
+        .ft-quiet .chapter-title { font-size: 16px; font-weight: 600; }
+        #tab-macro .chapter-kicker,
+        #tab-stablecoins .chapter-kicker { color: var(--ft-cyan); }
+        #tab-hyperliquid .chapter-kicker { color: #50d2c1; }
+        #tab-hyperliquid .chapter-head::after { background: #50d2c1; }
+        #tab-macro .card,
+        #tab-stablecoins .card,
+        #tab-hyperliquid .card { border-radius: 3px; }
+        #tab-macro .section-header,
+        #tab-stablecoins .section-header,
+        #tab-hyperliquid .section-header { display: none; }
+        .hidden-id { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+        @media (max-width: 1300px) {
+            .kpi-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+            .hero-liq { grid-template-columns: 1fr; }
+            .hero-liq-num { border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 14px; }
+            .rail { grid-template-columns: 1fr; }
+            .scoreboard { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+        @media (max-width: 800px) {
+            .kpi-strip, .meter-row, .scoreboard, .pane-pair { grid-template-columns: 1fr; }
+            .chapter-title { font-size: 18px; }
+            .hero-liq-num .kpi-xl-val { font-size: 32px; }
+            .chart-compare { height: 260px !important; }
+        }
+
         /* ==================== HYPERLIQUID TAB THEME (v16) ==================== */
         /* Scoped variable overrides: everything inside the tab that uses var(--cyan/--accent) goes mint */
         #tab-hyperliquid {
@@ -1202,43 +1416,37 @@
                 <div class="section-title">Cross-Asset Performance</div>
             </div>
             
-            <!-- Cross-Asset Comparison (native, v16) -->
-            <div class="card">
+            <div class="card ft-compare">
                 <div class="card-header">
                     <div>
                         <div class="card-title">Cross-Asset Comparison</div>
-                        <div class="card-subtitle" id="crossAssetSubtitle">Normalized performance &bull; BTC &bull; ETH &bull; SPY &bull; QQQ &bull; IWM &bull; Hourly</div>
+                        <div class="card-subtitle" id="crossAssetSubtitle">Indexed performance &bull; BTC &bull; ETH &bull; SPY &bull; QQQ &bull; IWM</div>
                     </div>
                     <div class="time-btns">
                         <button class="time-btn active" onclick="updateCompareCharts(7, this)">7D</button>
                         <button class="time-btn" onclick="updateCompareCharts(30, this)">30D</button>
                     </div>
                 </div>
-                <div class="chart-container tall" style="position: relative;">
+                <div class="chart-container chart-compare" style="position: relative;">
                     <canvas id="crossAssetChart"></canvas>
-                    <div id="crossAssetLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                        <div style="font-size: 12px; color: var(--text-muted);">Loading market data...</div>
-                    </div>
+                    <div id="crossAssetLoading" class="ft-chart-load">Loading market data...</div>
                 </div>
             </div>
             
-            <!-- Crypto Leaders Comparison (native, v16) -->
-            <div class="card" style="margin-top: 16px;">
+            <div class="card ft-compare" style="margin-top: 14px;">
                 <div class="card-header">
                     <div>
                         <div class="card-title">Crypto Leaders Comparison</div>
-                        <div class="card-subtitle" id="cryptoLeadersSubtitle">Normalized performance &bull; BTC &bull; ETH &bull; SOL &bull; HYPE &bull; Hourly</div>
+                        <div class="card-subtitle" id="cryptoLeadersSubtitle">Indexed performance &bull; BTC &bull; ETH &bull; SOL &bull; HYPE</div>
                     </div>
                 </div>
-                <div class="chart-container tall" style="position: relative;">
+                <div class="chart-container chart-compare" style="position: relative;">
                     <canvas id="cryptoLeadersChart"></canvas>
-                    <div id="cryptoLeadersLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                        <div style="font-size: 12px; color: var(--text-muted);">Loading market data...</div>
-                    </div>
+                    <div id="cryptoLeadersLoading" class="ft-chart-load">Loading market data...</div>
                 </div>
             </div>
         </div>
-        
+
         <!-- Stablecoin Section -->
         <div class="section">
             <div class="section-header">
@@ -1725,22 +1933,136 @@
 
         <!-- MACRO DASHBOARD TAB -->
         <div id="tab-macro" class="tab-content">
-        
-        <!-- Economic Calendar Section -->
-        <div class="section">
-            <div class="section-header">
-                <div class="section-title">📅 Economic Calendar</div>
+
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">01 · Liquidity</div>
+                <h2 class="chapter-title">US Net Liquidity</h2>
+                <p class="chapter-sub">WALCL − RRP − TGA, overlaid on Bitcoin. Rising print = easier financial conditions.</p>
             </div>
-            
-            <div class="card">
-                <div class="card-header">
+            <div class="card" style="padding: 16px 18px 12px;">
+                <div class="hero-liq">
+                    <div class="hero-liq-num">
+                        <div class="kpi-xl-label">US Net Liquidity</div>
+                        <div class="kpi-xl-val" id="macroLiqHero">--</div>
+                        <div class="kpi-delta" id="macroLiqRoc">--</div>
+                        <div class="kpi-xl-sub" id="macroLiqAsOf">Fed weekly series</div>
+                    </div>
                     <div>
-                        <div class="card-title">Upcoming Macro Events</div>
-                        <div class="card-subtitle">FOMC, Rate Decisions, CPI, NFP & Major Economic Releases • TradingView Data</div>
+                        <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+                            <div class="time-btns">
+                                <button class="time-btn period-btn" data-global-liquidity-period="1y">1Y</button>
+                                <button class="time-btn period-btn" data-global-liquidity-period="2y">2Y</button>
+                                <button class="time-btn period-btn active" data-global-liquidity-period="all">ALL</button>
+                            </div>
+                        </div>
+                        <div style="height: 280px;">
+                            <canvas id="liquidity-btc-chart"></canvas>
+                        </div>
                     </div>
                 </div>
-                <div style="height: 450px; margin-top: 8px;">
-                    <!-- TradingView Economic Calendar Widget -->
+                <div style="height: 180px; margin-top: 8px; border-top: 1px solid var(--border); padding-top: 10px;">
+                    <canvas id="liquidityROCChart"></canvas>
+                </div>
+            </div>
+            <div class="meter-row" style="margin-top: 12px;">
+                <div class="meter">
+                    <div class="meter-name">WALCL</div>
+                    <div class="meter-read">Fed assets · adds liquidity when rising</div>
+                    <div class="tradingview-widget-container tv">
+                        <div id="fed-balance-sheet-chart" style="height:100%;"></div>
+                    </div>
+                </div>
+                <div class="meter">
+                    <div class="meter-name">TGA</div>
+                    <div class="meter-read">Treasury cash · drains when rising</div>
+                    <div class="tradingview-widget-container tv">
+                        <div id="tga-chart" style="height:100%;"></div>
+                    </div>
+                </div>
+                <div class="meter">
+                    <div class="meter-name">RRP</div>
+                    <div class="meter-read">Overnight RRP · adds when falling</div>
+                    <div class="tradingview-widget-container tv">
+                        <div id="rrp-chart" style="height:100%;"></div>
+                    </div>
+                </div>
+                <div class="meter">
+                    <div class="meter-name">M2</div>
+                    <div class="meter-read">Broad money · monthly</div>
+                    <div class="tradingview-widget-container tv">
+                        <div id="m2-chart" style="height:100%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">02 · China</div>
+                <h2 class="chapter-title">PBoC Liquidity</h2>
+                <p class="chapter-sub">MLF + reverse-repo injections vs Bitcoin. Same timeframe chips as US.</p>
+            </div>
+            <div class="card" style="padding: 14px 16px 10px;">
+                <div style="height: 320px;">
+                    <canvas id="chinaLiquidityChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">03 · FX / Rates</div>
+                <h2 class="chapter-title">Macro Scoreboard</h2>
+                <p class="chapter-sub">Gold, curve, dollar proxy, yen, long bonds — live TradingView.</p>
+            </div>
+            <div class="scoreboard">
+                <div class="score-cell">
+                    <div class="score-name">Gold</div>
+                    <div class="score-read">Safe haven · BTC "digital gold" tape</div>
+                    <div class="tradingview-widget-container tv">
+                        <div id="gold-chart" style="height:100%;"></div>
+                    </div>
+                </div>
+                <div class="score-cell">
+                    <div class="score-name">10s−2s</div>
+                    <div class="score-read">Below 0 = inverted · recession lead</div>
+                    <div class="tradingview-widget-container tv">
+                        <div id="yield-curve-chart" style="height:100%;"></div>
+                    </div>
+                </div>
+                <div class="score-cell">
+                    <div class="score-name">EURUSD</div>
+                    <div class="score-read">Dollar proxy · down = USD up</div>
+                    <div class="tradingview-widget-container tv">
+                        <div id="dxy-chart" style="height:100%;"></div>
+                    </div>
+                </div>
+                <div class="score-cell">
+                    <div class="score-name">USDJPY</div>
+                    <div class="score-read">Carry · sharp yen strength = risk-off</div>
+                    <div class="tradingview-widget-container tv">
+                        <div id="usdjpy-chart" style="height:100%;"></div>
+                    </div>
+                </div>
+                <div class="score-cell">
+                    <div class="score-name">TLT</div>
+                    <div class="score-read">Long bonds · inverse of yields</div>
+                    <div class="tradingview-widget-container tv">
+                        <div id="us10y-chart" style="height:100%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chapter ft-quiet">
+            <div class="chapter-head">
+                <div class="chapter-kicker">04 · Calendar</div>
+                <h2 class="chapter-title">Economic Calendar</h2>
+                <p class="chapter-sub">FOMC · CPI · NFP · high-impact US / EU / JP releases</p>
+            </div>
+            <div class="card" style="padding: 8px 10px 6px;">
+                <div style="height: 380px;">
                     <div class="tradingview-widget-container" style="height: 100%; width: 100%;">
                         <div class="tradingview-widget-container__widget" style="height: calc(100% - 32px); width: 100%;"></div>
                         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
@@ -1756,313 +2078,11 @@
                         </script>
                     </div>
                 </div>
-                <div style="margin-top: 12px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
-                    <div style="font-size: 12px; color: var(--text-muted);">
-                        <strong style="color: var(--text);">Key Events to Watch:</strong> 
-                        <span style="color: var(--bad);">High Impact</span> = FOMC, NFP, CPI - Often cause significant market volatility. 
-                        <span style="color: #f59e0b;">Medium Impact</span> = GDP, PMI, Retail Sales. 
-                        Plan positions around these dates.
-                    </div>
-                </div>
             </div>
         </div>
-        
-        <!-- Global Liquidity Section -->
-        <div class="section">
-            <div class="section-header">
-                <div class="section-title">Global Liquidity</div>
-            </div>
-            
-            <!-- Unified Time Period Selector -->
-            <div class="card" style="margin-bottom: 16px; padding: 12px 16px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-                    <div style="font-size: 13px; color: var(--text-muted);">
-                        <strong style="color: var(--text);">Timeframe:</strong> Synced across US & China liquidity charts
-                    </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="period-btn" data-global-liquidity-period="1y">1Y</button>
-                        <button class="period-btn" data-global-liquidity-period="2y">2Y</button>
-                        <button class="period-btn active" data-global-liquidity-period="all">ALL</button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- US LIQUIDITY SUBSECTION -->
-            <div style="margin-bottom: 8px; padding: 8px 0;">
-                <div style="font-size: 14px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 16px;"></span> US Net Liquidity (Federal Reserve)
-                </div>
-            </div>
-            
-            <!-- US Net Liquidity vs Bitcoin Chart -->
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">US Net Liquidity vs Bitcoin</div>
-                        <div class="card-subtitle">Fed Balance Sheet −RRP −TGA (Trillions USD)</div>
-                    </div>
-                </div>
-                <div style="height: 400px; margin-top: 12px;">
-                    <canvas id="liquidity-btc-chart"></canvas>
-                </div>
-                <div style="margin-top: 12px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
-                    <div style="font-size: 12px; color: var(--text-muted);">
-                        <strong style="color: var(--text);">Interpretation:</strong> Rising liquidity →Bullish for risk assets. 
-                        Watch RRP drawdowns (adds liquidity) and TGA buildups (drains liquidity). 
-                        <span style="color: var(--cyan);">●</span> Net Liquidity &nbsp;
-                        <span style="color: #f7931a;">●</span> Bitcoin
-                    </div>
-                </div>
-            </div>
-            
-            <!-- US Liquidity Rate of Change -->
-            <div class="card" style="margin-top: 16px;">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">US Liquidity Rate of Change</div>
-                        <div class="card-subtitle">Monthly change in Net Liquidity - Acceleration/deceleration signal</div>
-                    </div>
-                </div>
-                <div style="height: 300px; margin-top: 12px;">
-                    <canvas id="liquidityROCChart"></canvas>
-                </div>
-                <div style="margin-top: 12px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid var(--accent);">
-                    <div style="font-size: 12px; color: var(--text-muted);">
-                        <strong style="color: var(--text);">Key Signal:</strong> 
-                        <span style="color: var(--good);">Green bars</span> = Liquidity expanding (bullish). 
-                        <span style="color: var(--bad);">Red bars</span> = Liquidity contracting (bearish). 
-                        <span style="color: #f7931a;">Orange line</span> = BTC price overlay. Watch for sustained positive ROC preceding BTC rallies.
-                    </div>
-                </div>
-            </div>
-            
-            <!-- CHINA LIQUIDITY SUBSECTION -->
-            <div style="margin: 24px 0 8px 0; padding: 8px 0;">
-                <div style="font-size: 14px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 16px;"></span> China Liquidity (PBoC)
-                </div>
-            </div>
-            
-            <!-- PBoC Liquidity Injections Chart -->
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">PBoC Liquidity Injections vs Bitcoin</div>
-                        <div class="card-subtitle">Reverse Repo + MLF Operations (Billions USD)</div>
-                    </div>
-                </div>
-                <div style="height: 400px; margin-top: 12px;">
-                    <canvas id="chinaLiquidityChart"></canvas>
-                </div>
-                <div style="margin-top: 12px; padding: 12px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border-left: 3px solid #ef4444;">
-                    <div style="font-size: 12px; color: var(--text-muted);">
-                        <strong style="color: var(--text);">China Liquidity:</strong> 
-                        <span style="color: #3b82f6;">Blue bars</span> = MLF (Medium-term Lending Facility, 1-year loans). 
-                        <span style="color: #f59e0b;">Orange bars</span> = Reverse Repo (short-term injections). 
-                        <span style="color: #f7931a;">Line</span> = BTC price. Large injections often precede global risk-on moves.
-                    </div>
-                </div>
-            </div>
-            
-            <!-- LIQUIDITY COMPONENTS GRID -->
-            <div style="margin: 24px 0 8px 0; padding: 8px 0;">
-                <div style="font-size: 14px; font-weight: 600; color: var(--text);">Liquidity Components</div>
-            </div>
-            
-            <div class="grid-2" style="margin-top: 8px;">
-                <!-- Fed Balance Sheet -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">Fed Balance Sheet (WALCL)</div>
-                        <div class="card-subtitle">US Federal Reserve Total Assets • Weekly</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 350px;">
-                        <div id="fed-balance-sheet-chart" style="height: 100%;"></div>
-                    </div>
-                </div>
-                
-                <!-- Treasury General Account -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">Treasury General Account (TGA)</div>
-                        <div class="card-subtitle">US Treasury Cash Balance • Drains Liquidity When Rising</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 350px;">
-                        <div id="tga-chart" style="height: 100%;"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="grid-2" style="margin-top: 16px;">
-                <!-- Reverse Repo -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">Reverse Repo Facility (RRP)</div>
-                        <div class="card-subtitle">Overnight Reverse Repurchases • Adds Liquidity When Falling</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 350px;">
-                        <div id="rrp-chart" style="height: 100%;"></div>
-                    </div>
-                </div>
-                
-                <!-- US M2 Money Supply -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">M2 Money Supply</div>
-                        <div class="card-subtitle">Broad US Money Supply • Monthly</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 350px;">
-                        <div id="m2-chart" style="height: 100%;"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Combined Liquidity Components Reference -->
-            <div class="card" style="margin-top: 16px;">
-                <div class="card-header">
-                    <div class="card-title">Liquidity Components Reference</div>
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 12px;">
-                    <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid var(--accent);">
-                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">Fed Balance Sheet</div>
-                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">WALCL</div>
-                        <div style="font-size: 11px; color: var(--good); margin-top: 4px;">↑Adds Liquidity</div>
-                    </div>
-                    <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid var(--bad);">
-                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">Reverse Repo (RRP)</div>
-                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">RRPONTSYD</div>
-                        <div style="font-size: 11px; color: var(--bad); margin-top: 4px;">↑Drains Liquidity</div>
-                    </div>
-                    <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid var(--bad);">
-                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">Treasury Account</div>
-                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">TGA</div>
-                        <div style="font-size: 11px; color: var(--bad); margin-top: 4px;">↑Drains Liquidity</div>
-                    </div>
-                    <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid #3b82f6;">
-                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">MLF Operations</div>
-                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">MLF</div>
-                        <div style="font-size: 11px; color: var(--good); margin-top: 4px;">Adds Liquidity</div>
-                    </div>
-                    <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid #f59e0b;">
-                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">Reverse Repo</div>
-                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">7-Day RR</div>
-                        <div style="font-size: 11px; color: var(--good); margin-top: 4px;">Adds Liquidity</div>
-                    </div>
-                    <div style="padding: 14px; background: var(--bg-secondary); border-radius: 10px; border-left: 3px solid var(--cyan);">
-                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">M2 Money Supply</div>
-                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">M2SL</div>
-                        <div style="font-size: 11px; color: var(--good); margin-top: 4px;">↑Adds Liquidity</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Key Macro Indicators Section -->
-        <div class="section">
-            <div class="section-header">
-                <div class="section-title">Key Macro Indicators</div>
-            </div>
-            
-            <!-- Gold - Featured Large Chart -->
-            <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 16px;">
-                <div style="padding: 16px 18px 8px 18px;">
-                    <div class="card-title">Gold (XAU/USD)</div>
-                    <div class="card-subtitle">Safe haven asset - Inflation & uncertainty hedge</div>
-                </div>
-                <div class="tradingview-widget-container" style="height: 400px;">
-                    <div id="gold-chart" style="height: 100%;"></div>
-                </div>
-                <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
-                    <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
-                        <strong style="color: var(--text);">How to read:</strong> 
-                        <span style="color: var(--good);">Rising gold</span> = Flight to safety, inflation fears, or central bank buying (bullish for BTC narrative as "digital gold"). 
-                        <span style="color: var(--bad);">Falling gold</span> = Risk-on sentiment, rising real yields, or USD strength. 
-                        <strong>Key:</strong> Gold and BTC often move together during liquidity expansions. Divergence (gold up, BTC down) may signal macro stress where BTC trades more like a risk asset.
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 2x2 Grid for other macro indicators -->
-            <div class="grid-2">
-                <!-- Yield Curve 2s10s -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">Yield Curve (10Y - 2Y Spread)</div>
-                        <div class="card-subtitle">Treasury yield spread - Leading recession indicator</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 280px;">
-                        <div id="yield-curve-chart" style="height: 100%;"></div>
-                    </div>
-                    <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
-                        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
-                            <strong style="color: var(--text);">How to read:</strong> 
-                            <span style="color: var(--bad);">Below 0 (inverted)</span> = Recession signal (12-18 month lead). 
-                            <span style="color: var(--good);">Above 0</span> = Healthy economy. 
-                            <strong>Key:</strong> Steepening after inversion often signals recession is imminent.
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- EUR/USD as Dollar Strength Proxy -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">EUR/USD (Dollar Strength Proxy)</div>
-                        <div class="card-subtitle">Inverse correlation to DXY - When EUR/USD falls, dollar strengthens</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 280px;">
-                        <div id="dxy-chart" style="height: 100%;"></div>
-                    </div>
-                    <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
-                        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
-                            <strong style="color: var(--text);">How to read:</strong> 
-                            <span style="color: var(--bad);">Falling EUR/USD</span> = Dollar strengthening, typically bearish for BTC and risk assets. 
-                            <span style="color: var(--good);">Rising EUR/USD</span> = Dollar weakening, supportive for crypto. 
-                            <strong>Key:</strong> EUR is 57% of DXY, so EUR/USD is strong proxy for dollar direction.
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- USD/JPY -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">USD/JPY (Dollar-Yen)</div>
-                        <div class="card-subtitle">Yen carry trade indicator - Global risk sentiment</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 280px;">
-                        <div id="usdjpy-chart" style="height: 100%;"></div>
-                    </div>
-                    <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
-                        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
-                            <strong style="color: var(--text);">How to read:</strong> 
-                            <span style="color: var(--good);">Rising USD/JPY</span> = Yen weakening, carry trade flows into risk (bullish BTC). 
-                            <span style="color: var(--bad);">Falling USD/JPY (rapidly)</span> = Carry trade unwinding, risk-off. 
-                            <strong>Key:</strong> Rapid yen strength (>2-3% daily) = margin call cascade risk.
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- TLT Treasury Bond ETF -->
-                <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="padding: 16px 18px 8px 18px;">
-                        <div class="card-title">TLT (20+ Year Treasury Bond ETF)</div>
-                        <div class="card-subtitle">Long-term bonds - Inverse of yields, flight to safety indicator</div>
-                    </div>
-                    <div class="tradingview-widget-container" style="height: 280px;">
-                        <div id="us10y-chart" style="height: 100%;"></div>
-                    </div>
-                    <div style="padding: 12px 18px 16px 18px; background: var(--bg-secondary); border-top: 1px solid var(--border);">
-                        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
-                            <strong style="color: var(--text);">How to read:</strong> 
-                            <span style="color: var(--good);">Rising TLT</span> = Falling yields, easier financial conditions, bullish for risk assets. 
-                            <span style="color: var(--bad);">Falling TLT</span> = Rising yields, tighter conditions, bearish for BTC. 
-                            <strong>Key:</strong> TLT moves inverse to yields. Sharp TLT rallies often signal flight to safety.
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
+
         </div><!-- END MACRO TAB -->
+
 
         <!-- DERIVATIVES DATA TAB -->
 
@@ -2070,113 +2090,133 @@
         <!-- STABLECOINS TAB -->
         <div id="tab-stablecoins" class="tab-content">
 
-        <div class="section">
-            <div class="section-header">
-                <div class="section-title">Stablecoin Market Overview</div>
-                <div style="font-size:11px;color:var(--text-muted);">Source: CoinGecko &bull; Click Refresh to update</div>
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">01 · Supply</div>
+                <h2 class="chapter-title">Stablecoin Market</h2>
+                <p class="chapter-sub">Aggregate float, dominance, and weekly/monthly change. CoinGecko + DefiLlama.</p>
             </div>
-
-            <!-- 4 KPI cards -->
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:20px;">
-                <div style="background:var(--panel);padding:20px;border-radius:12px;border:1px solid var(--border);text-align:center;">
-                    <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Total Supply</div>
-                    <div id="stableTotalSupply" style="font-size:32px;font-weight:700;color:var(--text);">--</div>
-                    <div id="stableTabTotalChange" style="font-size:12px;color:var(--text-muted);margin-top:4px;">--</div>
+            <div class="kpi-strip" style="grid-template-columns: repeat(6, minmax(0,1fr));">
+                <div class="kpi-xl" style="grid-column: span 2;">
+                    <div class="kpi-xl-label">Total Supply</div>
+                    <div class="kpi-xl-val" id="stableTotalSupply">--</div>
+                    <div class="kpi-xl-sub" id="stableTabTotalChange">--</div>
                 </div>
-                <div style="background:var(--panel);padding:20px;border-radius:12px;border:1px solid var(--border);text-align:center;">
-                    <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">USDT Market Cap</div>
-                    <div id="usdtMarketCap" style="font-size:32px;font-weight:700;color:#26A17B;">--</div>
-                    <div id="usdtDominance" style="font-size:12px;color:var(--text-muted);margin-top:4px;">-- dominance</div>
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">7d Δ</div>
+                    <div class="kpi-xl-val" id="stableDelta7d">--</div>
+                    <div class="kpi-xl-sub">weighted supply</div>
                 </div>
-                <div style="background:var(--panel);padding:20px;border-radius:12px;border:1px solid var(--border);text-align:center;">
-                    <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">USDC Market Cap</div>
-                    <div id="usdcMarketCap" style="font-size:32px;font-weight:700;color:#2775CA;">--</div>
-                    <div id="usdcDominance" style="font-size:12px;color:var(--text-muted);margin-top:4px;">-- dominance</div>
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">30d Δ</div>
+                    <div class="kpi-xl-val" id="stableDelta30d">--</div>
+                    <div class="kpi-xl-sub">weighted supply</div>
                 </div>
-                <div style="background:var(--panel);padding:20px;border-radius:12px;border:1px solid var(--border);text-align:center;">
-                    <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Active Stablecoins</div>
-                    <div id="stableTabCount" style="font-size:32px;font-weight:700;color:var(--cyan);">--</div>
-                    <div id="stableTabCountSub" style="font-size:12px;color:var(--text-muted);margin-top:4px;">with &gt;$100M supply</div>
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">USDT.D</div>
+                    <div class="kpi-xl-val" id="usdtDominance">--</div>
+                    <div class="kpi-xl-sub" id="usdtMarketCap">--</div>
+                </div>
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">USDC.D</div>
+                    <div class="kpi-xl-val" id="usdcDominance">--</div>
+                    <div class="kpi-xl-sub" id="usdcMarketCap">--</div>
                 </div>
             </div>
+            <div class="hidden-id"><span id="stableTabCount">--</span><span id="stableTabCountSub"></span></div>
+        </div>
 
-            <!-- Full rankings table -->
-            <div class="card" style="margin-bottom:20px;">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">Stablecoin Rankings</div>
-                        <div class="card-subtitle">All major stablecoins ranked by market cap &bull; Source: CoinGecko</div>
-                    </div>
-                    <button class="time-btn" onclick="loadStablecoinTabData()" style="background:var(--accent);color:white;border-color:var(--accent);">&#8635; Refresh</button>
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">02 · Share</div>
+                <h2 class="chapter-title">Market Share</h2>
+                <p class="chapter-sub">Issuer mix as a stacked bar — not a pie.</p>
+            </div>
+            <div class="card" style="padding: 16px 18px;">
+                <div id="stableShareBar" class="share-bar">
+                    <div class="share-seg" style="flex:1;background:rgba(255,255,255,0.04);color:var(--text-dim);">Loading…</div>
                 </div>
-                <div style="overflow-x:auto;">
-                    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                <div id="stableShareLeg" class="share-leg"></div>
+                <div style="height: 0; overflow: hidden;"><canvas id="stableIssuerPieChart"></canvas></div>
+            </div>
+        </div>
+
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">03 · Rankings</div>
+                <h2 class="chapter-title">Stablecoin Rankings</h2>
+                <p class="chapter-sub">Major names by market cap · 24h / 7d / 30d supply change</p>
+            </div>
+            <div class="card" style="padding: 0;">
+                <div style="display:flex;justify-content:flex-end;padding:8px 10px 0;">
+                    <button class="time-btn" onclick="loadStablecoinTabData()">↻ Refresh</button>
+                </div>
+                <div class="ft-table-wrap">
+                    <table class="ft-table">
                         <thead>
-                            <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02);">
-                                <th style="text-align:left;padding:10px 12px;color:var(--text-muted);font-weight:600;">#</th>
-                                <th style="text-align:left;padding:10px 12px;color:var(--text-muted);font-weight:600;">Name</th>
-                                <th style="text-align:right;padding:10px 12px;color:var(--text-muted);font-weight:600;">Market Cap</th>
-                                <th style="text-align:right;padding:10px 12px;color:var(--text-muted);font-weight:600;">24h Supply &Delta;</th>
-                                <th style="text-align:right;padding:10px 12px;color:var(--text-muted);font-weight:600;">7d &Delta;</th>
-                                <th style="text-align:right;padding:10px 12px;color:var(--text-muted);font-weight:600;">30d &Delta;</th>
-                                <th style="text-align:right;padding:10px 12px;color:var(--text-muted);font-weight:600;">24h Volume</th>
-                                <th style="text-align:right;padding:10px 12px;color:var(--text-muted);font-weight:600;">Dominance</th>
-                                <th style="text-align:right;padding:10px 12px;color:var(--text-muted);font-weight:600;">Price</th>
+                            <tr>
+                                <th style="text-align:left;">#</th>
+                                <th style="text-align:left;">Name</th>
+                                <th style="text-align:right;">Mcap</th>
+                                <th style="text-align:right;">24h</th>
+                                <th style="text-align:right;">7d</th>
+                                <th style="text-align:right;">30d</th>
+                                <th style="text-align:right;">Volume</th>
+                                <th style="text-align:right;">Dom</th>
+                                <th style="text-align:right;">Price</th>
                             </tr>
                         </thead>
                         <tbody id="stableTabTableBody">
-                            <tr><td colspan="7" style="padding:24px;text-align:center;color:var(--text-muted);">Loading stablecoin data...</td></tr>
+                            <tr><td colspan="9" style="padding:24px;text-align:center;color:var(--text-muted);">Loading stablecoin data...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
+        </div>
 
-            <!-- History chart + issuer pie -->
-            <div class="grid-2" style="margin-bottom:20px;">
-                <div class="card">
-                    <div class="card-header">
-                        <div>
-                            <div class="card-title">Supply History</div>
-                            <div class="card-subtitle">USDT+USDC scaled to total &bull; CoinGecko</div>
-                        </div>
-                        <div class="time-selector">
-                            <button class="time-btn" onclick="loadStableTabHistory(90)">3M</button>
-                            <button class="time-btn" onclick="loadStableTabHistory(180)">6M</button>
-                            <button class="time-btn active" onclick="loadStableTabHistory(365)">1Y</button>
-                            <button class="time-btn" onclick="loadStableTabHistory(730)">2Y</button>
-                        </div>
-                    </div>
-                    <div style="height:280px;position:relative;">
-                        <canvas id="stableTabHistoryChart"></canvas>
-                        <div id="stableTabHistoryLoading" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--text-muted);font-size:12px;">Loading...</div>
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">04 · History</div>
+                <h2 class="chapter-title">Supply History + ROC</h2>
+                <p class="chapter-sub">Total float and 7-day rate of change. Same CoinGecko series.</p>
+            </div>
+            <div class="card" style="padding: 14px 16px 10px;">
+                <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+                    <div class="time-selector">
+                        <button class="time-btn" onclick="loadStableTabHistory(90)">3M</button>
+                        <button class="time-btn" onclick="loadStableTabHistory(180)">6M</button>
+                        <button class="time-btn active" onclick="loadStableTabHistory(365)">1Y</button>
+                        <button class="time-btn" onclick="loadStableTabHistory(730)">2Y</button>
                     </div>
                 </div>
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Supply by Issuer</div>
-                        <div class="card-subtitle">Market share by stablecoin issuer</div>
+                <div class="pane-pair">
+                    <div style="height:260px;position:relative;">
+                        <canvas id="stableTabHistoryChart"></canvas>
+                        <div id="stableTabHistoryLoading" class="ft-chart-load">Loading...</div>
                     </div>
-                    <div style="height:280px;position:relative;">
-                        <canvas id="stableIssuerPieChart"></canvas>
+                    <div style="height:260px;position:relative;">
+                        <canvas id="stableTabRocChart"></canvas>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Chain dist table + signal guide -->
-            <div class="grid-2" style="margin-bottom:20px;">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Chain Distribution &amp; Transfer Costs</div>
-                        <div class="card-subtitle">Live share by chain (DefiLlama) + approx. USDT transfer fee</div>
-                    </div>
-                    <div style="overflow-x:auto;">
-                        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">05 · Rails</div>
+                <h2 class="chapter-title">Chain Distribution</h2>
+                <p class="chapter-sub">Where the float sits. Transfer fee is approximate USDT cost.</p>
+            </div>
+            <div class="pane-pair">
+                <div class="card" style="padding: 0;">
+                    <div class="ft-table-wrap">
+                        <table class="ft-table">
                             <thead>
-                                <tr style="border-bottom:1px solid var(--border);">
-                                    <th style="text-align:left;padding:8px 10px;color:var(--text-muted);">Chain</th>
-                                    <th style="text-align:right;padding:8px 10px;color:var(--text-muted);">Est. Share</th>
-                                    <th style="text-align:right;padding:8px 10px;color:var(--text-muted);">Est. Supply</th>
-                                    <th style="text-align:right;padding:8px 10px;color:var(--text-muted);">USDT Fee</th>
+                                <tr>
+                                    <th style="text-align:left;">Chain</th>
+                                    <th style="text-align:right;">Share</th>
+                                    <th style="text-align:right;">Supply</th>
+                                    <th style="text-align:right;">USDT fee</th>
                                 </tr>
                             </thead>
                             <tbody id="stableChainTableBody">
@@ -2185,53 +2225,34 @@
                         </table>
                     </div>
                 </div>
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Stablecoin Signal Guide</div>
-                        <div class="card-subtitle">How to use stablecoin data for market timing</div>
-                    </div>
-                    <div style="display:flex;flex-direction:column;gap:10px;font-size:12px;">
-                        <div style="padding:12px;background:rgba(34,197,94,0.1);border-radius:8px;border-left:3px solid var(--good);">
-                            <div style="font-weight:600;color:var(--good);margin-bottom:6px;">Bullish Signals</div>
-                            <div style="color:var(--text-muted);line-height:1.7;">
-                                &bull; Total supply growing week-over-week<br>
-                                &bull; USDT.D falling (risk-on rotation)<br>
-                                &bull; Large USDT mints on TRON or Ethereum<br>
-                                &bull; Stablecoin inflows rising on exchanges
-                            </div>
-                        </div>
-                        <div style="padding:12px;background:rgba(239,68,68,0.1);border-radius:8px;border-left:3px solid var(--bad);">
-                            <div style="font-weight:600;color:var(--bad);margin-bottom:6px;">Bearish Signals</div>
-                            <div style="color:var(--text-muted);line-height:1.7;">
-                                &bull; Supply contracting (redemptions &gt; mints)<br>
-                                &bull; USDT.D rising sharply (flight to safety)<br>
-                                &bull; Large USDC burns or USDT redemptions<br>
-                                &bull; Stablecoin outflows from exchanges
-                            </div>
-                        </div>
-                    </div>
+                <div class="card" style="padding: 16px 18px;">
+                    <div class="kpi-xl-label">TRON</div>
+                    <div class="kpi-xl-val" id="tronSupply" style="color:#FF060A;">--</div>
+                    <div class="kpi-xl-sub">Est. stablecoin float on TRON</div>
+                    <div style="margin-top:16px;" class="kpi-xl-label">Share of all stables</div>
+                    <div class="kpi-xl-val" id="tronMarketShare">--</div>
+                    <div class="kpi-xl-sub">Live DefiLlama chain split when available</div>
                 </div>
             </div>
+        </div>
 
-            <!-- TRON highlight -->
-            <!-- Top Stablecoin Yields (v15) -->
-            <div class="card" style="margin-bottom:20px;">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">Top Stablecoin Yields</div>
-                        <div class="card-subtitle">Largest stablecoin pools by TVL &bull; Source: DefiLlama Yields &bull; APYs fluctuate &mdash; verify before depositing</div>
-                    </div>
-                </div>
-                <div style="overflow-x:auto;">
-                    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">06 · Yield</div>
+                <h2 class="chapter-title">Top Stablecoin Yields</h2>
+                <p class="chapter-sub">Largest pools by TVL · DefiLlama · APYs move — verify before depositing</p>
+            </div>
+            <div class="card" style="padding: 0;">
+                <div class="ft-table-wrap">
+                    <table class="ft-table">
                         <thead>
-                            <tr style="border-bottom:1px solid var(--border);">
-                                <th style="text-align:left;padding:8px 10px;color:var(--text-muted);">Pool</th>
-                                <th style="text-align:left;padding:8px 10px;color:var(--text-muted);">Project</th>
-                                <th style="text-align:left;padding:8px 10px;color:var(--text-muted);">Chain</th>
-                                <th style="text-align:right;padding:8px 10px;color:var(--text-muted);">TVL</th>
-                                <th style="text-align:right;padding:8px 10px;color:var(--text-muted);">APY</th>
-                                <th style="text-align:right;padding:8px 10px;color:var(--text-muted);">30d Avg APY</th>
+                            <tr>
+                                <th style="text-align:left;">Pool</th>
+                                <th style="text-align:left;">Project</th>
+                                <th style="text-align:left;">Chain</th>
+                                <th style="text-align:right;">TVL</th>
+                                <th style="text-align:right;">APY</th>
+                                <th style="text-align:right;">30d Avg</th>
                             </tr>
                         </thead>
                         <tbody id="stableYieldsTableBody">
@@ -2240,140 +2261,136 @@
                     </table>
                 </div>
             </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title" style="color:#FF060A;">TRON — The Stablecoin Highway</div>
-                        <div class="card-subtitle">~30% of all stablecoin supply, dominant for CEX transfers</div>
-                    </div>
-                    <div style="display:flex;gap:24px;align-items:center;">
-                        <div style="text-align:center;">
-                            <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;">Est. TRON Supply</div>
-                            <div id="tronSupply" style="font-size:22px;font-weight:700;color:#FF060A;">--</div>
-                        </div>
-                        <div style="text-align:center;">
-                            <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;">Market Share</div>
-                            <div id="tronMarketShare" style="font-size:22px;font-weight:700;color:var(--text);">~30%</div>
-                        </div>
-                    </div>
-                </div>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;font-size:12px;color:var(--text-muted);line-height:1.7;">
-                    <div>
-                        <div style="font-weight:600;color:var(--text);margin-bottom:6px;">Why TRON dominates transfers:</div>
-                        &bull; Tether's preferred minting chain<br>
-                        &bull; $0.09 fee vs $2-8 on Ethereum<br>
-                        &bull; Deep CEX integration (Binance, OKX, HTX)<br>
-                        &bull; ~$341B annual transfer volume
-                    </div>
-                    <div>
-                        <div style="font-weight:600;color:var(--text);margin-bottom:6px;">TRON as a market signal:</div>
-                        Large single-day USDT mints on TRON (&gt;$1B) often precede BTC buying pressure within 24-72 hours as stablecoins move onto exchanges.
-                    </div>
-                    <div>
-                        <div style="font-weight:600;color:var(--text);margin-bottom:6px;">Regulatory tailwinds (2025-26):</div>
-                        GENIUS Act providing clarity. PayPal, Visa, Stripe and Shopify now support stablecoins. New stablecoin-native chains (Plasma, Arc) growing.
-                    </div>
-                </div>
-            </div>
         </div>
 
         </div><!-- END STABLECOINS TAB -->
 
+
         <!-- HYPERLIQUID TAB -->
         <div id="tab-hyperliquid" class="tab-content">
-        
-        <div class="section">
-            <div class="section-header">
-                <div class="section-title">Hyperliquid Analytics</div>
+
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">01 · At a glance</div>
+                <h2 class="chapter-title">Hyperliquid</h2>
+                <p class="chapter-sub">Live perps, HIP-3, spot, HYPE, TVL, fees and P/S. Hyperliquid info API + DefiLlama.</p>
             </div>
-            
-            <!-- Hyperliquid at a Glance (v16) -->
-            <div class="grid-4" style="margin-bottom: 16px;">
-                <div class="market-card">
-                    <div class="market-label">Perps Volume (24h)</div>
-                    <div class="market-value" id="hlPerpVol24h">--</div>
-                    <div class="market-subtitle" id="hlPerpMarkets">-- markets</div>
+            <div class="kpi-strip">
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">Perps Vol 24h</div>
+                    <div class="kpi-xl-val" id="hlPerpVol24h">--</div>
+                    <div class="kpi-xl-sub" id="hlPerpMarkets">--</div>
                 </div>
-                <div class="market-card">
-                    <div class="market-label">Perps Open Interest</div>
-                    <div class="market-value" id="hlPerpOI">--</div>
-                    <div class="market-subtitle">Notional, all core markets</div>
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">Open Interest</div>
+                    <div class="kpi-xl-val" id="hlPerpOI">--</div>
+                    <div class="kpi-xl-sub">Core markets, notional</div>
                 </div>
-                <div class="market-card">
-                    <div class="market-label">HIP-3 Volume (24h)</div>
-                    <div class="market-value" id="hlHip3Vol24h">--</div>
-                    <div class="market-subtitle" id="hlHip3Dexes">-- builder DEXs</div>
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">HIP-3 Vol 24h</div>
+                    <div class="kpi-xl-val" id="hlHip3Vol24h">--</div>
+                    <div class="kpi-xl-sub" id="hlHip3Dexes">--</div>
                 </div>
-                <div class="market-card">
-                    <div class="market-label">Spot Volume (24h)</div>
-                    <div class="market-value" id="hlSpotVol24h">--</div>
-                    <div class="market-subtitle" id="hlSpotPairs">-- pairs</div>
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">Spot 24h</div>
+                    <div class="kpi-xl-val" id="hlSpotVol24h">--</div>
+                    <div class="kpi-xl-sub" id="hlSpotPairs">--</div>
                 </div>
-            </div>
-            <div class="grid-4" style="margin-bottom: 16px;">
-                <div class="market-card">
-                    <div class="market-label">HYPE Price</div>
-                    <div class="market-value" id="hlHypePrice">--</div>
-                    <div class="market-change" id="hlHypeChange">--</div>
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">HYPE</div>
+                    <div class="kpi-xl-val" id="hlHypePrice">--</div>
+                    <div class="kpi-xl-sub" id="hlHypeChange">--</div>
                 </div>
-                <div class="market-card">
-                    <div class="market-label">HyperEVM TVL</div>
-                    <div class="market-value" id="hlEvmTvl">--</div>
-                    <div class="market-subtitle">DeFi deployed on HyperEVM</div>
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">HyperEVM TVL</div>
+                    <div class="kpi-xl-val" id="hlEvmTvl">--</div>
+                    <div class="kpi-xl-sub">DefiLlama chain TVL</div>
                 </div>
-                <div class="market-card">
-                    <div class="market-label">HIP-3 Open Interest</div>
-                    <div class="market-value" id="hlHip3OI">--</div>
-                    <div class="market-subtitle" id="hlHip3TopDex">Top DEX: --</div>
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">Fees 24h</div>
+                    <div class="kpi-xl-val" id="hlGlanceFees">--</div>
+                    <div class="kpi-xl-sub">DefiLlama daily fees</div>
                 </div>
-                <div class="market-card">
-                    <div class="market-label">Total 24h Volume</div>
-                    <div class="market-value" id="hlTotalVol24h">--</div>
-                    <div class="market-subtitle">Perps + HIP-3 + Spot</div>
+                <div class="kpi-xl">
+                    <div class="kpi-xl-label">P/S</div>
+                    <div class="kpi-xl-val" id="hlGlancePS">--</div>
+                    <div class="kpi-xl-sub">Mcap / fee run-rate</div>
                 </div>
             </div>
-            
-            <div class="grid-2" style="margin-bottom: 20px;">
-                <div class="card">
-                    <div class="card-header">
-                        <div>
-                            <div class="card-title">24h Volume by Business Line</div>
-                            <div class="card-subtitle">Core perps &bull; HIP-3 builder perps &bull; Spot &bull; Live from Hyperliquid API</div>
-                        </div>
-                    </div>
-                    <div class="chart-container" style="position: relative; height: 260px;">
-                        <canvas id="hlBizMixChart"></canvas>
-                        <div id="hlBizMixLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                            <div style="font-size: 12px; color: var(--text-muted);">Loading...</div>
-                        </div>
+            <div class="hidden-id">
+                <span id="hlHip3OI">--</span>
+                <span id="hlHip3TopDex">--</span>
+                <span id="hlTotalVol24h">--</span>
+            </div>
+            <div class="card" style="padding: 14px 16px;">
+                <div class="kpi-xl-label" style="margin-bottom:10px;">24h volume mix</div>
+                <div id="hlBizRows"><div style="padding:12px 0;color:var(--text-muted);font-size:12px;">Loading...</div></div>
+                <div style="height:0;overflow:hidden;"><canvas id="hlBizMixChart"></canvas><div id="hlBizMixLoading"></div></div>
+            </div>
+        </div>
+
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">02 · Venues</div>
+                <h2 class="chapter-title">HL vs onchain perp venues</h2>
+                <p class="chapter-sub">Open interest across decentralized perp protocols. DefiLlama — not CEX OI. We do not have Binance/Bybit/OKX CEX books here.</p>
+            </div>
+            <div class="rail">
+                <div class="card" style="padding: 0;">
+                    <div class="ft-table-wrap">
+                        <table class="ft-table">
+                            <thead>
+                                <tr>
+                                    <th style="text-align:left;">#</th>
+                                    <th style="text-align:left;">Venue</th>
+                                    <th style="text-align:right;">OI</th>
+                                    <th style="text-align:right;">Share</th>
+                                    <th style="text-align:right;">HL / venue</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hlVenueTable">
+                                <tr><td colspan="5" style="padding:20px;text-align:center;color:var(--text-muted);">Loading onchain perp OI…</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                <div class="card">
-                    <div class="card-header">
-                        <div>
-                            <div class="card-title">Business Lines Breakdown</div>
-                            <div class="card-subtitle">Share of 24h volume across the Hyperliquid stack</div>
-                        </div>
+                <div class="card" style="padding: 12px 12px 8px;">
+                    <div class="chart-container" style="height: 280px; background:transparent; padding:0;">
+                        <canvas id="hlDexLeadersChart"></canvas>
+                        <div id="hlDexLeadersLoading" class="ft-chart-load">Loading…</div>
                     </div>
-                    <div id="hlBizRows">
-                        <div style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 12px;">Loading...</div>
-                    </div>
-                    <div style="margin-top: 14px; padding: 12px; background: rgba(80, 210, 193, 0.06); border-radius: 6px; border-left: 3px solid #50d2c1;">
-                        <div style="font-size: 12px; color: var(--text-muted);">
-                            <strong style="color: var(--text);">HIP-3 watch:</strong> Builder-deployed perp DEXs (stock perps, index perps) are Hyperliquid's newest growth vector.
-                            A rising HIP-3 share of total volume signals the platform expanding beyond crypto-native flow.
-                        </div>
-                    </div>
+                    <div id="hlDexShareNote" style="display:none;font-size:11px;color:var(--text-dim);margin-top:8px;font-family:var(--mono);"></div>
                 </div>
             </div>
-            
-            <!-- HYPE Price Chart -->
-            <div class="card" style="margin-bottom: 20px;">
+        </div>
+
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">03 · Relative</div>
+                <h2 class="chapter-title">HYPE vs majors</h2>
+                <p class="chapter-sub">Indexed to the start of the window. Same hourly series as Crypto Leaders.</p>
+            </div>
+            <div class="card ft-compare">
                 <div class="card-header">
                     <div>
-                        <div class="card-title">HYPE/USD Price History</div>
-                        <div class="card-subtitle">From TGE (Nov 29, 2024) • Hyperliquid + DefiLlama</div>
+                        <div class="card-title">Indexed relative performance</div>
+                        <div class="card-subtitle" id="hypeRelSubtitle">HYPE · BTC · ETH · SOL</div>
+                    </div>
+                    <div class="time-btns">
+                        <button class="time-btn active" onclick="updateCompareCharts(7, this)">7D</button>
+                        <button class="time-btn" onclick="updateCompareCharts(30, this)">30D</button>
+                    </div>
+                </div>
+                <div class="chart-container chart-compare" style="position:relative;">
+                    <canvas id="hypeRelChart"></canvas>
+                    <div id="hypeRelLoading" class="ft-chart-load">Loading…</div>
+                </div>
+            </div>
+            <div class="card" style="margin-top:12px;padding:14px 16px 8px;">
+                <div class="card-header" style="margin-bottom:8px;padding-bottom:8px;">
+                    <div>
+                        <div class="card-title">HYPE/USD</div>
+                        <div class="card-subtitle">From TGE · Hyperliquid + DefiLlama</div>
                     </div>
                     <div class="time-selector">
                         <button class="time-btn" onclick="loadHypePrice(30)">1M</button>
@@ -2382,80 +2399,70 @@
                         <button class="time-btn active" onclick="loadHypePrice(9999)">ALL</button>
                     </div>
                 </div>
-                <div class="chart-container tall" style="position: relative; height: 350px;">
+                <div class="chart-container" style="height:220px;background:transparent;padding:0;position:relative;">
                     <canvas id="hypePriceChart"></canvas>
-                    <div id="hypePriceLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                        <div style="font-size: 12px; color: var(--text-muted);">Loading HYPE price history...</div>
+                    <div id="hypePriceLoading" class="ft-chart-load">Loading HYPE price history...</div>
+                </div>
+                <div style="margin-top:10px;display:flex;gap:20px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;">
+                    <div>TGE <span id="hypeTgeDisplay">--</span></div>
+                    <div>ATH <span id="hypeAthDisplay" style="color:var(--good);">--</span></div>
+                    <div>Now <span id="hypeCurrentDisplay" style="color:#50d2c1;">--</span></div>
+                    <div>From TGE <span id="hypeFromTgeDisplay">--</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">04 · Revenue</div>
+                <h2 class="chapter-title">Protocol revenue</h2>
+                <p class="chapter-sub">Daily fees and perp volume. Run-rate and P/S use 30d average fees × 365.</p>
+            </div>
+            <div class="rail">
+                <div class="card" style="padding: 14px 16px 10px;">
+                    <div class="card-header" style="margin-bottom:8px;padding-bottom:8px;">
+                        <div>
+                            <div class="card-title">Daily fees</div>
+                            <div class="card-subtitle">DefiLlama</div>
+                        </div>
+                        <div class="time-btns">
+                            <button class="time-btn" onclick="updateHLFees(30, this)">1M</button>
+                            <button class="time-btn active" onclick="updateHLFees(90, this)">3M</button>
+                            <button class="time-btn" onclick="updateHLFees(180, this)">6M</button>
+                            <button class="time-btn" onclick="updateHLFees(0, this)">ALL</button>
+                        </div>
+                    </div>
+                    <div class="chart-container" style="height:280px;background:transparent;padding:0;position:relative;">
+                        <canvas id="hlFeesChart"></canvas>
+                        <div id="hlFeesLoading" class="ft-chart-load">Loading fee data...</div>
                     </div>
                 </div>
-                <div style="margin: 12px 16px 16px 16px; display: flex; gap: 20px; flex-wrap: wrap;">
-                    <div>
-                        <span style="font-size: 10px; color: var(--text-muted);">TGE Price:</span>
-                        <span id="hypeTgeDisplay" style="font-size: 12px; color: var(--text); margin-left: 4px;">--</span>
+                <div class="rail-side">
+                    <div class="rail-kpi">
+                        <div class="kpi-xl-label">Fees 24h</div>
+                        <div class="kpi-xl-val" id="hlFees24h" style="font-size:20px;">--</div>
                     </div>
-                    <div>
-                        <span style="font-size: 10px; color: var(--text-muted);">ATH:</span>
-                        <span id="hypeAthDisplay" style="font-size: 12px; color: var(--good); margin-left: 4px;">--</span>
+                    <div class="rail-kpi">
+                        <div class="kpi-xl-label">7d Daily Avg</div>
+                        <div class="kpi-xl-val" id="hlFees7dAvg" style="font-size:20px;">--</div>
                     </div>
-                    <div>
-                        <span style="font-size: 10px; color: var(--text-muted);">Current:</span>
-                        <span id="hypeCurrentDisplay" style="font-size: 12px; color: var(--cyan); margin-left: 4px;">--</span>
+                    <div class="rail-kpi">
+                        <div class="kpi-xl-label">Annualized</div>
+                        <div class="kpi-xl-val" id="hlFeesAnnualized" style="font-size:20px;">--</div>
+                        <div class="kpi-xl-sub">30d avg × 365</div>
                     </div>
-                    <div>
-                        <span style="font-size: 10px; color: var(--text-muted);">From TGE:</span>
-                        <span id="hypeFromTgeDisplay" style="font-size: 12px; color: var(--good); margin-left: 4px;">--</span>
+                    <div class="rail-kpi">
+                        <div class="kpi-xl-label">P/S</div>
+                        <div class="kpi-xl-val" id="hlPsRatio" style="font-size:20px;">--</div>
+                        <div class="kpi-xl-sub">HYPE mcap / run-rate</div>
                     </div>
                 </div>
             </div>
-            
-                        <!-- Protocol Revenue (v17) -->
-            <div class="card" style="margin-bottom: 20px;">
-                <div class="card-header">
+            <div class="card" style="margin-top:12px;padding:14px 16px 10px;">
+                <div class="card-header" style="margin-bottom:8px;padding-bottom:8px;">
                     <div>
-                        <div class="card-title">Protocol Revenue</div>
-                        <div class="card-subtitle">Daily fees generated across the Hyperliquid stack &bull; Source: DefiLlama</div>
-                    </div>
-                    <div class="time-btns">
-                        <button class="time-btn" onclick="updateHLFees(30, this)">1M</button>
-                        <button class="time-btn active" onclick="updateHLFees(90, this)">3M</button>
-                        <button class="time-btn" onclick="updateHLFees(180, this)">6M</button>
-                        <button class="time-btn" onclick="updateHLFees(0, this)">ALL</button>
-                    </div>
-                </div>
-                <div class="chart-container tall" style="position: relative;">
-                    <canvas id="hlFeesChart"></canvas>
-                    <div id="hlFeesLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                        <div style="font-size: 12px; color: var(--text-muted);">Loading fee data...</div>
-                    </div>
-                </div>
-                <div class="grid-4" style="margin-top: 14px;">
-                    <div class="market-card">
-                        <div class="market-label">Fees (24h)</div>
-                        <div class="market-value" id="hlFees24h" style="font-size: 15px;">--</div>
-                    </div>
-                    <div class="market-card">
-                        <div class="market-label">7d Daily Avg</div>
-                        <div class="market-value" id="hlFees7dAvg" style="font-size: 15px;">--</div>
-                    </div>
-                    <div class="market-card">
-                        <div class="market-label">Annualized Run-Rate</div>
-                        <div class="market-value" id="hlFeesAnnualized" style="font-size: 15px;">--</div>
-                        <div class="market-subtitle">30d avg &times; 365</div>
-                    </div>
-                    <div class="market-card">
-                        <div class="market-label">P/S Ratio</div>
-                        <div class="market-value" id="hlPsRatio" style="font-size: 15px;">--</div>
-                        <div class="market-subtitle">HYPE mcap / run-rate</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Daily Perp Volume (v17) -->
-            <div class="card" style="margin-bottom: 20px;">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">Daily Perp Volume</div>
-                        <div class="card-subtitle">Top 20 perp markets summed (&asymp;90%+ of flow) &bull; Source: Hyperliquid API</div>
+                        <div class="card-title">Daily perp volume</div>
+                        <div class="card-subtitle">Top 20 markets summed · Hyperliquid API</div>
                     </div>
                     <div class="time-btns">
                         <button class="time-btn" onclick="updateHLVolume(30, this)">1M</button>
@@ -2464,52 +2471,40 @@
                         <button class="time-btn" onclick="updateHLVolume(0, this)">6M+</button>
                     </div>
                 </div>
-                <div class="chart-container tall" style="position: relative;">
+                <div class="chart-container" style="height:220px;background:transparent;padding:0;position:relative;">
                     <canvas id="hlVolChart"></canvas>
-                    <div id="hlVolLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                        <div style="font-size: 12px; color: var(--text-muted);">Loading volume data...</div>
-                    </div>
+                    <div id="hlVolLoading" class="ft-chart-load">Loading volume data...</div>
                 </div>
-                <div class="grid-4" style="margin-top: 14px;">
-                    <div class="market-card">
-                        <div class="market-label">Yesterday</div>
-                        <div class="market-value" id="hlVolYesterday" style="font-size: 15px;">--</div>
-                    </div>
-                    <div class="market-card">
-                        <div class="market-label">7d Daily Avg</div>
-                        <div class="market-value" id="hlVol7dAvg" style="font-size: 15px;">--</div>
-                    </div>
-                    <div class="market-card">
-                        <div class="market-label">30d Total</div>
-                        <div class="market-value" id="hlVol30dTotal" style="font-size: 15px;">--</div>
-                    </div>
-                    <div class="market-card">
-                        <div class="market-label">Peak Day</div>
-                        <div class="market-value" id="hlVolPeak" style="font-size: 15px;">--</div>
-                    </div>
+                <div class="kpi-strip" style="grid-template-columns:repeat(4,minmax(0,1fr));margin:12px 0 0;border-radius:0;">
+                    <div class="kpi-xl"><div class="kpi-xl-label">Yesterday</div><div class="kpi-xl-val" id="hlVolYesterday" style="font-size:16px;">--</div></div>
+                    <div class="kpi-xl"><div class="kpi-xl-label">7d Avg</div><div class="kpi-xl-val" id="hlVol7dAvg" style="font-size:16px;">--</div></div>
+                    <div class="kpi-xl"><div class="kpi-xl-label">30d Total</div><div class="kpi-xl-val" id="hlVol30dTotal" style="font-size:16px;">--</div></div>
+                    <div class="kpi-xl"><div class="kpi-xl-label">Peak Day</div><div class="kpi-xl-val" id="hlVolPeak" style="font-size:16px;">--</div></div>
                 </div>
             </div>
-            
-            <!-- Top Perp Markets (v17) -->
-            <div class="card" style="margin-bottom: 20px;">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">Top Perp Markets</div>
-                        <div class="card-subtitle">Live from Hyperliquid &bull; Ranked by 24h volume &bull; Funding annualized from hourly rate</div>
-                    </div>
-                    <button class="time-btn" onclick="loadHLTopMarkets()">&#8635; Refresh</button>
+        </div>
+
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">05 · Markets</div>
+                <h2 class="chapter-title">Top perps</h2>
+                <p class="chapter-sub">Live from Hyperliquid · ranked by 24h volume · funding annualized from hourly rate</p>
+            </div>
+            <div class="card" style="padding:0;">
+                <div style="display:flex;justify-content:flex-end;padding:8px 10px 0;">
+                    <button class="time-btn" onclick="loadHLTopMarkets()">↻ Refresh</button>
                 </div>
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                <div class="ft-table-wrap">
+                    <table class="ft-table">
                         <thead>
-                            <tr style="border-bottom: 1px solid var(--border);">
-                                <th style="text-align:left;padding:8px 10px;color:var(--text-muted);">#</th>
-                                <th style="text-align:left;padding:8px 10px;color:var(--text-muted);">Market</th>
-                                <th style="text-align:right;padding:8px 10px;color:var(--text-muted);">Mark</th>
-                                <th style="text-align:right;padding:8px 10px;color:var(--text-muted);">24h Volume</th>
-                                <th style="text-align:right;padding:8px 10px;color:var(--text-muted);">Open Interest</th>
-                                <th style="text-align:right;padding:8px 10px;color:var(--text-muted);">Funding (APR)</th>
-                                <th style="text-align:right;padding:8px 10px;color:var(--text-muted);">Premium</th>
+                            <tr>
+                                <th style="text-align:left;">#</th>
+                                <th style="text-align:left;">Market</th>
+                                <th style="text-align:right;">Mark</th>
+                                <th style="text-align:right;">24h Vol</th>
+                                <th style="text-align:right;">OI</th>
+                                <th style="text-align:right;">Funding APR</th>
+                                <th style="text-align:right;">Premium</th>
                             </tr>
                         </thead>
                         <tbody id="hlTopMarketsBody">
@@ -2518,224 +2513,103 @@
                     </table>
                 </div>
             </div>
-            
-<!-- HYPE Supply Dynamics / AF Buyback Tracker -->
-            <div class="card" style="margin-bottom: 20px;">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">HYPE Tokenomics</div>
-                        <div class="card-subtitle">Live supply, staking &amp; Assistance Fund &bull; Hyperliquid API + CoinGecko</div>
-                    </div>
-                    <button class="time-btn" onclick="loadHypeTokenomics()">&#8635; Refresh</button>
+        </div>
+
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">06 · Supply</div>
+                <h2 class="chapter-title">Supply &amp; Assistance Fund</h2>
+                <p class="chapter-sub">Circulating, staked, AF holdings and the emissions path. 1B max supply.</p>
+            </div>
+            <div class="card" style="padding: 16px 16px 14px;">
+                <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+                    <button class="time-btn" onclick="loadHypeTokenomics()">↻ Refresh</button>
                 </div>
-                
-                <!-- Stat strip -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 18px;">
-                    <div class="hype-tok-stat"><div class="market-label">Price</div><div class="market-value" id="hypeTokPrice" style="font-size:16px;">--</div><div class="market-subtitle" id="hypeTokChange">--</div></div>
-                    <div class="hype-tok-stat"><div class="market-label">Market Cap</div><div class="market-value" id="hypeTokMcap" style="font-size:16px;">--</div><div class="market-subtitle">circulating</div></div>
-                    <div class="hype-tok-stat"><div class="market-label">FDV</div><div class="market-value" id="hypeTokFdv" style="font-size:16px;">--</div><div class="market-subtitle">1B total supply</div></div>
-                    <div class="hype-tok-stat"><div class="market-label">Circulating</div><div class="market-value" id="hypeTokCirc" style="font-size:16px;">--</div><div class="market-subtitle" id="hypeTokCircPct">--% of total</div></div>
-                    <div class="hype-tok-stat"><div class="market-label">Staked</div><div class="market-value" id="hypeTokStaked" style="font-size:16px;">--</div><div class="market-subtitle" id="hypeTokStakedPct">--% of circulating</div></div>
-                    <div class="hype-tok-stat"><div class="market-label">Assistance Fund</div><div class="market-value" id="hypeTokAF" style="font-size:16px; color:#50d2c1;">--</div><div class="market-subtitle" id="hypeTokAFVal">--</div></div>
+                <div class="kpi-strip" style="grid-template-columns:repeat(6,minmax(0,1fr));">
+                    <div class="kpi-xl hype-tok-stat"><div class="kpi-xl-label">Price</div><div class="kpi-xl-val" id="hypeTokPrice" style="font-size:16px;">--</div><div class="kpi-xl-sub" id="hypeTokChange">--</div></div>
+                    <div class="kpi-xl hype-tok-stat"><div class="kpi-xl-label">Market Cap</div><div class="kpi-xl-val" id="hypeTokMcap" style="font-size:16px;">--</div><div class="kpi-xl-sub">circulating</div></div>
+                    <div class="kpi-xl hype-tok-stat"><div class="kpi-xl-label">FDV</div><div class="kpi-xl-val" id="hypeTokFdv" style="font-size:16px;">--</div><div class="kpi-xl-sub">1B total</div></div>
+                    <div class="kpi-xl hype-tok-stat"><div class="kpi-xl-label">Circulating</div><div class="kpi-xl-val" id="hypeTokCirc" style="font-size:16px;">--</div><div class="kpi-xl-sub" id="hypeTokCircPct">--</div></div>
+                    <div class="kpi-xl hype-tok-stat"><div class="kpi-xl-label">Staked</div><div class="kpi-xl-val" id="hypeTokStaked" style="font-size:16px;">--</div><div class="kpi-xl-sub" id="hypeTokStakedPct">--</div></div>
+                    <div class="kpi-xl hype-tok-stat"><div class="kpi-xl-label">Assistance Fund</div><div class="kpi-xl-val" id="hypeTokAF" style="font-size:16px;color:#50d2c1;">--</div><div class="kpi-xl-sub" id="hypeTokAFVal">--</div></div>
                 </div>
-                
-                <!-- Supply composition bar -->
-                <div style="margin-bottom: 6px; display:flex; justify-content:space-between; align-items:baseline;">
-                    <div style="font-size:10px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim);">Supply Composition</div>
-                    <div style="font-size:10px; color:var(--text-dim); font-family:var(--mono);">1,000,000,000 HYPE total</div>
+                <div style="margin: 4px 0 6px; display:flex; justify-content:space-between; align-items:baseline;">
+                    <div class="kpi-xl-label" style="margin:0;">Supply composition</div>
+                    <div style="font-size:10px;color:var(--text-dim);font-family:var(--mono);">1,000,000,000 HYPE</div>
                 </div>
-                <div id="hypeTokBar" style="display:flex; height:22px; border-radius:5px; overflow:hidden; border:1px solid var(--border); margin-bottom:10px;">
+                <div id="hypeTokBar" style="display:flex; height:18px; border-radius:2px; overflow:hidden; border:1px solid var(--border); margin-bottom:10px;">
                     <div style="flex:1; background:rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--text-dim);">Loading...</div>
                 </div>
-                <div id="hypeTokChips" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;"></div>
-                
-                <!-- AF buyback strip -->
-                <div style="padding: 12px 14px; background: rgba(80, 210, 193, 0.05); border-radius: 6px; border-left: 3px solid #50d2c1;">
-                    <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
-                        <strong style="color: #50d2c1;">Assistance Fund flywheel:</strong> the overwhelming majority of protocol fees are used to buy HYPE on the open market,
-                        making the AF the largest single holder and a persistent bid under the token. Watch AF holdings growth vs. emissions
-                        in the schedule below &mdash; buybacks absorbing unlocks is the bull case in one chart.
-                    </div>
+                <div id="hypeTokChips" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;"></div>
+                <div style="height: 240px; margin-bottom: 12px;">
+                    <canvas id="hypeEmissionsChart"></canvas>
                 </div>
-            </div>
-            
-<!-- HYPE Emissions Schedule Chart -->
-            <div class="card" style="margin-bottom: 20px;">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">HYPE Token Emissions Schedule</div>
-                        <div class="card-subtitle">Projected circulating supply over time • ~10M HYPE/month to core contributors</div>
-                    </div>
-                </div>
-                <div style="padding: 16px;">
-                    <!-- Token Distribution Summary -->
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
-                        <div style="background: rgba(74, 222, 128, 0.15); border-radius: 8px; padding: 12px; text-align: center;">
-                            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Future Emissions</div>
-                            <div style="font-size: 20px; font-weight: 700; color: var(--good); margin-top: 4px;">38.89%</div>
-                            <div style="font-size: 10px; color: var(--text-dim);">Community Rewards</div>
-                        </div>
-                        <div style="background: rgba(99, 102, 241, 0.15); border-radius: 8px; padding: 12px; text-align: center;">
-                            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Genesis Airdrop</div>
-                            <div style="font-size: 20px; font-weight: 700; color: var(--accent); margin-top: 4px;">31.00%</div>
-                            <div style="font-size: 10px; color: var(--text-dim);">310M HYPE</div>
-                        </div>
-                        <div style="background: rgba(245, 158, 11, 0.15); border-radius: 8px; padding: 12px; text-align: center;">
-                            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Core Contributors</div>
-                            <div style="font-size: 20px; font-weight: 700; color: var(--orange); margin-top: 4px;">23.80%</div>
-                            <div style="font-size: 10px; color: var(--text-dim);">1yr cliff, 24mo vest</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Emissions Chart -->
-                    <div style="height: 280px; margin-bottom: 16px;">
-                        <canvas id="hypeEmissionsChart"></canvas>
-                    </div>
-                    
-                    <!-- Supply Stats -->
-                    <div class="grid-2" style="gap: 12px; margin-bottom: 16px;">
-                        <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 12px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 11px; color: var(--text-muted);">Total Supply</span>
-                                <span style="font-size: 14px; font-weight: 600; color: var(--text);">1,000,000,000</span>
-                            </div>
-                        </div>
-                        <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 12px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 11px; color: var(--text-muted);">Circulating</span>
-                                <span style="font-size: 14px; font-weight: 600; color: var(--text);">~333M (33.3%)</span>
-                            </div>
-                        </div>
-                        <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 12px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 11px; color: var(--text-muted);">Unlocked</span>
-                                <span style="font-size: 14px; font-weight: 600; color: var(--good);">~312M (31.2%)</span>
-                            </div>
-                        </div>
-                        <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 12px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 11px; color: var(--text-muted);">Still Locked</span>
-                                <span style="font-size: 14px; font-weight: 600; color: var(--bad);">~236M (23.6%)</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Key Notes -->
-                    <div style="background: rgba(248, 113, 113, 0.1); border-radius: 8px; padding: 12px; border-left: 3px solid var(--bad); margin-bottom: 12px;">
-                        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
-                            <strong style="color: var(--bad);">Key Unlock Event:</strong> Core contributor vesting began Nov 29, 2025. 
-                            ~10M HYPE/month (~$280M at current prices) over 24 months. Team has mostly restaked; 97% of fees go to buybacks.
-                        </div>
-                    </div>
-                    <div style="padding: 12px; background: rgba(74, 222, 128, 0.1); border-radius: 8px; border-left: 3px solid var(--good);">
-                        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
-                            <strong style="color: var(--good);">No VC Allocation:</strong> Unlike most projects, Hyperliquid raised no venture capital. 
-                            All tokens distributed to community & team only. No external investor unlocks to worry about.
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-                            <!-- Perp DEX Volume Leaders (v17) -->
-            <div class="card" style="margin-bottom: 20px;">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">Perp DEX Open Interest Leaders</div>
-                        <div class="card-subtitle">Open interest across decentralized perp venues &bull; Source: DefiLlama (free API)</div>
-                    </div>
-                </div>
-                <div class="chart-container tall" style="position: relative;">
-                    <canvas id="hlDexLeadersChart"></canvas>
-                    <div id="hlDexLeadersLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                        <div style="font-size: 12px; color: var(--text-muted);">Loading DEX comparison...</div>
-                    </div>
-                </div>
-                <div id="hlDexShareNote" style="margin-top: 12px; padding: 12px; background: rgba(80, 210, 193, 0.06); border-radius: 6px; border-left: 3px solid #50d2c1; font-size: 12px; color: var(--text-muted); display: none;"></div>
-            </div>
-            
-<!-- HIP-3 / XYZ Token Volume Section -->
-            <div class="card" style="margin-top: 20px;">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">HIP-3 Token Volumes (XYZ Perps)</div>
-                        <div class="card-subtitle">Builder-deployed perpetuals • 24H volume from Hyperliquid API</div>
-                    </div>
-                    <button onclick="loadHIP3Volumes(true)" style="background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; cursor: pointer;">
-                        ↻ Refresh
-                    </button>
-                </div>
-                <div style="padding: 16px;">
-                    <div id="hip3Loading" style="text-align: center; padding: 20px; color: var(--text-muted);">
-                        Loading HIP-3 volumes...
-                    </div>
-                    <div id="hip3Container" style="display: none;">
-                        <!-- Aggregate Stats -->
-                        <div class="grid-2" style="gap: 12px; margin-bottom: 16px;">
-                            <div style="background: rgba(6, 182, 212, 0.1); border-radius: 8px; padding: 16px; text-align: center;">
-                                <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Total XYZ Volume (24H)</div>
-                                <div id="hip3TotalVolume" style="font-size: 28px; font-weight: 800; color: var(--cyan); margin-top: 4px;">--</div>
-                            </div>
-                            <div style="background: rgba(74, 222, 128, 0.1); border-radius: 8px; padding: 16px; text-align: center;">
-                                <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Active Pairs (>$5M Vol)</div>
-                                <div id="hip3ActivePairs" style="font-size: 28px; font-weight: 800; color: var(--good); margin-top: 4px;">--</div>
-                            </div>
-                        </div>
-                        
-                        <!-- HIP-3 Volume History Chart -->
-                        <div style="margin-bottom: 16px; padding: 16px; background: rgba(255,255,255,0.02); border-radius: 8px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                <div>
-                                    <div style="font-size: 12px; font-weight: 600; color: var(--text);">HIP-3 Daily Volume History</div>
-                                    <div style="font-size: 10px; color: var(--text-muted);">tradeXYZ data from DefiLlama + local tracking</div>
-                                </div>
-                            </div>
-                            <div style="height: 200px; position: relative;">
-                                <canvas id="hip3VolumeHistoryChart"></canvas>
-                                <div id="hip3HistoryLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; color: var(--text-muted);">
-                                    Loading history...
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Volume Table -->
-                        <div style="overflow-x: auto;">
-                            <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
-                                <thead>
-                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                        <th style="text-align: left; padding: 10px 8px; color: var(--text-muted); font-weight: 500;">Symbol</th>
-                                        <th style="text-align: right; padding: 10px 8px; color: var(--text-muted); font-weight: 500;">Price</th>
-                                        <th style="text-align: right; padding: 10px 8px; color: var(--text-muted); font-weight: 500;">24H Change</th>
-                                        <th style="text-align: right; padding: 10px 8px; color: var(--text-muted); font-weight: 500;">24H Volume</th>
-                                        <th style="text-align: right; padding: 10px 8px; color: var(--text-muted); font-weight: 500;">Open Interest</th>
-                                        <th style="text-align: right; padding: 10px 8px; color: var(--text-muted); font-weight: 500;">Funding (8H)</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="hip3TableBody">
-                                    <tr><td colspan="6" style="padding:20px;text-align:center;color:var(--text-muted);">Waiting for Hyperliquid API…</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div id="hip3Error" style="display: none; text-align: center; padding: 20px; color: var(--bad);">
-                        Failed to load HIP-3 data. <button onclick="loadHIP3Volumes(true)" style="color: var(--accent); background: none; border: none; cursor: pointer; text-decoration: underline;">Retry</button>
-                    </div>
-                </div>
-                <div style="margin: 0 16px 16px 16px; padding: 12px; background: rgba(6, 182, 212, 0.1); border-radius: 8px; border-left: 3px solid var(--cyan);">
-                    <div style="font-size: 12px; color: var(--text-muted);">
-                        <strong style="color: var(--text);">About HIP-3:</strong> Builder-deployed perpetuals allow anyone with 500k HYPE staked to launch their own perp markets. 
-                        XYZ is the largest HIP-3 deployer, featuring stock perps like TSLA, NVDA, GOOGL and crypto index perps like XYZ100.
-                    </div>
+                <div class="kpi-strip" style="grid-template-columns:repeat(3,minmax(0,1fr));margin:0;">
+                    <div class="kpi-xl"><div class="kpi-xl-label">Future emissions</div><div class="kpi-xl-val" style="font-size:18px;color:var(--good);">38.89%</div><div class="kpi-xl-sub">Community rewards</div></div>
+                    <div class="kpi-xl"><div class="kpi-xl-label">Genesis airdrop</div><div class="kpi-xl-val" style="font-size:18px;">31.00%</div><div class="kpi-xl-sub">310M HYPE</div></div>
+                    <div class="kpi-xl"><div class="kpi-xl-label">Core contributors</div><div class="kpi-xl-val" style="font-size:18px;color:var(--orange);">23.80%</div><div class="kpi-xl-sub">1yr cliff, 24mo vest</div></div>
                 </div>
             </div>
         </div>
-        
+
+        <div class="chapter">
+            <div class="chapter-head">
+                <div class="chapter-kicker">07 · HIP-3</div>
+                <h2 class="chapter-title">Builder perps</h2>
+                <p class="chapter-sub">HIP-3 deployer volumes. Anyone with 500k HYPE staked can list a market.</p>
+            </div>
+            <div class="card" style="padding: 14px 16px;">
+                <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+                    <button class="time-btn" onclick="loadHIP3Volumes(true)">↻ Retry</button>
+                </div>
+                <div id="hip3Loading" style="text-align:center;padding:20px;color:var(--text-muted);font-family:var(--mono);font-size:12px;">Loading HIP-3 volumes...</div>
+                <div id="hip3Container" style="display:none;">
+                    <div class="kpi-strip" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+                        <div class="kpi-xl">
+                            <div class="kpi-xl-label">XYZ Volume 24h</div>
+                            <div class="kpi-xl-val" id="hip3TotalVolume">--</div>
+                        </div>
+                        <div class="kpi-xl">
+                            <div class="kpi-xl-label">Active pairs &gt;$5M</div>
+                            <div class="kpi-xl-val" id="hip3ActivePairs">--</div>
+                        </div>
+                    </div>
+                    <div style="height:200px;position:relative;margin-bottom:12px;">
+                        <canvas id="hip3VolumeHistoryChart"></canvas>
+                        <div id="hip3HistoryLoading" class="ft-chart-load">Loading history...</div>
+                    </div>
+                    <div class="ft-table-wrap">
+                        <table class="ft-table">
+                            <thead>
+                                <tr>
+                                    <th style="text-align:left;">Symbol</th>
+                                    <th style="text-align:right;">Price</th>
+                                    <th style="text-align:right;">24h</th>
+                                    <th style="text-align:right;">Volume</th>
+                                    <th style="text-align:right;">OI</th>
+                                    <th style="text-align:right;">Funding 8h</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hip3TableBody">
+                                <tr><td colspan="6" style="padding:20px;text-align:center;color:var(--text-muted);">Waiting for Hyperliquid API…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="hip3Error" style="display:none;text-align:center;padding:20px;color:var(--bad);font-family:var(--mono);font-size:12px;">
+                    Failed to load HIP-3 data. <button onclick="loadHIP3Volumes(true)" class="time-btn" style="margin-left:8px;">Retry</button>
+                </div>
+            </div>
+        </div>
+
         </div><!-- END HYPERLIQUID TAB -->
+
 
 
     </div>
 
     <footer>
-        <p><strong>FLOWTRACK v18.6</strong> — Crypto Derivatives Intelligence</p>
+        <p><strong>FLOWTRACK v19.0</strong> — Crypto Derivatives Intelligence</p>
         <p style="margin-top: 6px;">Data from CoinGlass API, Binance Futures, CoinGecko, Coinalyze, TradingView</p>
         <p style="margin-top: 6px;">Auto-refreshes every 60 seconds • Not financial advice</p>
     </footer>
@@ -2773,7 +2647,7 @@
             return fetch(resource, { ...opts, signal: ctrl.signal }).finally(() => clearTimeout(timer));
         }
 
-        // ==================== v18.6 RESILIENCE (CG / HYPE / TV) ====================
+        // ==================== v19.0 RESILIENCE (CG / HYPE / TV) ====================
         const FT_CG_LS_PREFIX = 'ft_cg_v186_';
         const _cgMem = new Map();
         let _cgBackoffUntil = 0;
@@ -3247,6 +3121,8 @@
                     if (!hypeEmissionsChartInstance) loadHypeEmissionsChart();
                     // HIP-3 builder volumes
                     loadHIP3Volumes();
+                    if (!compareChartsLoaded) loadComparisonCharts(compareDays || 7);
+                    else if (_compareGot && Object.keys(_compareGot).length) renderBothCompareCharts(_compareGot);
                 }, 100);
             }
             
@@ -3275,7 +3151,7 @@
         
         const STABLE_ISSUER_COLORS = {
             'USDT': '#26A17B', 'USDC': '#2775CA', 'DAI': '#F5AC37', 'BUSD': '#F0B90B',
-            'TUSD': '#002868', 'FRAX': '#000000', 'Others': '#6b7280'
+            'TUSD': '#002868', 'FRAX': '#000000', 'USDS': '#1a8cff', 'USDE': '#8884d8', 'PYUSD': '#0070e0', 'FDUSD': '#f0b90b', 'Others': '#6b7280'
         };
         
         function formatStableNum(num) {
@@ -3395,18 +3271,19 @@
             const usdc = stables.find(c => c.symbol === 'usdc');
             const bigOnes = stables.filter(c => c.market_cap > 1e8).length;
 
-            // KPI cards
+            // KPI strip
             document.getElementById('stableTotalSupply').textContent = '$' + formatStableNum(totalMcap);
-            document.getElementById('stableTabTotalChange').textContent = 'Total across all stablecoins';
-            document.getElementById('stableTabCount').textContent = bigOnes;
+            document.getElementById('stableTabTotalChange').textContent = bigOnes + ' names > $100M';
+            const countEl = document.getElementById('stableTabCount');
+            if (countEl) countEl.textContent = bigOnes;
 
             if (usdt) {
                 document.getElementById('usdtMarketCap').textContent = '$' + formatStableNum(usdt.market_cap);
-                document.getElementById('usdtDominance').textContent = (usdt.market_cap / totalMcap * 100).toFixed(1) + '% dominance';
+                document.getElementById('usdtDominance').textContent = (usdt.market_cap / totalMcap * 100).toFixed(1) + '%';
             }
             if (usdc) {
                 document.getElementById('usdcMarketCap').textContent = '$' + formatStableNum(usdc.market_cap);
-                document.getElementById('usdcDominance').textContent = (usdc.market_cap / totalMcap * 100).toFixed(1) + '% dominance';
+                document.getElementById('usdcDominance').textContent = (usdc.market_cap / totalMcap * 100).toFixed(1) + '%';
             }
 
             // TRON estimates based on total
@@ -3432,11 +3309,26 @@
                     }
                 });
                 console.log('[StableTab] DefiLlama deltas merged for', deltaMap.size, 'assets');
+                let w7 = 0, b7 = 0, w30 = 0, b30 = 0;
+                stables.forEach(c => {
+                    const d = deltaMap.get((c.symbol || '').toUpperCase());
+                    if (!d) return;
+                    if (d.d7 != null) { w7 += c.market_cap * d.d7; b7 += c.market_cap; }
+                    if (d.d30 != null) { w30 += c.market_cap * d.d30; b30 += c.market_cap; }
+                });
+                const paintDelta = (id, num) => {
+                    const el = document.getElementById(id);
+                    if (!el || num == null || !isFinite(num)) return;
+                    el.textContent = (num >= 0 ? '+' : '') + num.toFixed(2) + '%';
+                    el.className = 'kpi-xl-val ' + (num >= 0 ? 'pos' : 'neg');
+                };
+                if (b7) paintDelta('stableDelta7d', w7 / b7);
+                if (b30) paintDelta('stableDelta30d', w30 / b30);
             } catch (e) { console.warn('[StableTab] Delta merge failed:', e.message); }
             const deltaCell = v => {
-                if (v === null || v === undefined) return '<td style="padding:10px 12px;text-align:right;color:var(--text-dim);">—</td>';
+                if (v === null || v === undefined) return '<td style="text-align:right;color:var(--text-dim);">—</td>';
                 const color = Math.abs(v) < 0.25 ? 'var(--text-muted)' : v >= 0 ? 'var(--good)' : 'var(--bad)';
-                return `<td style="padding:10px 12px;text-align:right;color:${color};font-weight:600;">${(v >= 0 ? '+' : '') + v.toFixed(1)}%</td>`;
+                return `<td style="text-align:right;color:${color};">${(v >= 0 ? '+' : '') + v.toFixed(1)}%</td>`;
             };
 
             // Full rankings table
@@ -3574,34 +3466,34 @@
         }
         
         function renderStableIssuerPie(assets, total) {
-            const ctx = document.getElementById('stableIssuerPieChart');
-            if (!ctx) return;
-            if (stableIssuerPieChart) stableIssuerPieChart.destroy();
-            
             const issuerData = {};
             assets.forEach(a => {
                 const supply = a.circulating?.peggedUSD || 0;
-                const sym = ['USDT','USDC','DAI','BUSD','TUSD','FRAX'].includes(a.symbol) ? a.symbol : 'Others';
+                const sym = ['USDT','USDC','DAI','USDS','USDE','PYUSD','FDUSD'].includes(a.symbol) ? a.symbol : 'Others';
                 issuerData[sym] = (issuerData[sym] || 0) + supply;
             });
             const sorted = Object.entries(issuerData).sort((a,b) => b[1] - a[1]);
-            
-            stableIssuerPieChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: sorted.map(([n]) => n),
-                    datasets: [{ data: sorted.map(([,v]) => v), backgroundColor: sorted.map(([n]) => STABLE_ISSUER_COLORS[n] || '#6b7280'), borderWidth: 2, borderColor: 'rgba(0,0,0,0.3)' }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, cutout: '55%',
-                    plugins: {
-                        legend: { position: 'right', labels: { color: 'rgba(255,255,255,0.7)', padding: 10, font: { size: 11 }}},
-                        tooltip: { callbacks: { label: ctx => '$' + formatStableNum(ctx.raw) + ' (' + ((ctx.raw/total)*100).toFixed(1) + '%)' }}
-                    }
-                }
-            });
+            const colors = STABLE_ISSUER_COLORS;
+            const bar = document.getElementById('stableShareBar');
+            const leg = document.getElementById('stableShareLeg');
+            if (bar) {
+                bar.innerHTML = sorted.map(([n, v]) => {
+                    const pct = total > 0 ? (v / total * 100) : 0;
+                    const label = pct >= 8 ? n + ' ' + pct.toFixed(0) + '%' : '';
+                    return `<div class="share-seg" style="width:${pct}%;background:${colors[n] || '#6b7280'};" title="${n} ${pct.toFixed(1)}%">${label}</div>`;
+                }).join('');
+            }
+            if (leg) {
+                leg.innerHTML = sorted.map(([n, v]) => {
+                    const pct = total > 0 ? (v / total * 100) : 0;
+                    return `<div class="share-leg-item"><span class="share-swatch" style="background:${colors[n] || '#6b7280'};"></span>${n} ${pct.toFixed(1)}% · $${formatStableNum(v)}</div>`;
+                }).join('');
+            }
+            const ctx = document.getElementById('stableIssuerPieChart');
+            if (!ctx) return;
+            if (stableIssuerPieChart) { try { stableIssuerPieChart.destroy(); } catch (e) {} stableIssuerPieChart = null; }
         }
-        
+
         function renderStableChainTable(chains, total) {
             const tbody = document.getElementById('stableChainTableBody');
             if (!tbody) return;
@@ -3709,35 +3601,67 @@
             const ctx = document.getElementById('stableTabHistoryChart');
             if (!ctx || !data) return;
             if (stableTabHistoryChart) stableTabHistoryChart.destroy();
-            
-            // Hide loading indicator
+
             const loadingEl = document.getElementById('stableTabHistoryLoading');
             if (loadingEl) loadingEl.style.display = 'none';
-            
+
             const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
             const filtered = data.filter(d => d.date * 1000 >= cutoff);
-            
+            const totals = filtered.map(d => d._total !== undefined ? d._total : extractStableTotal(d));
+
             stableTabHistoryChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: filtered.map(d => new Date(d.date * 1000).toLocaleDateString()),
+                    labels: filtered.map(d => new Date(d.date * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
                     datasets: [{
                         label: 'Total Supply',
-                        data: filtered.map(d => d._total !== undefined ? d._total : extractStableTotal(d)),
-                        borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2
+                        data: totals,
+                        borderColor: '#00E5C7', backgroundColor: 'rgba(0,229,199,0.10)', fill: true, tension: 0.25, pointRadius: 0, borderWidth: 1.6
                     }]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false, interaction: { intersect: false, mode: 'index' },
                     plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => '$' + formatStableNum(ctx.raw) }}},
                     scales: {
-                        x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.5)', maxTicksLimit: 8 }},
-                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.5)', callback: v => '$' + formatStableNum(v) }}
+                        x: { grid: { color: 'rgba(0,229,199,0.04)', drawBorder: false }, ticks: { color: '#545c69', maxTicksLimit: 8, font: { size: 10, family: "'IBM Plex Mono', monospace" }}},
+                        y: { grid: { color: 'rgba(0,229,199,0.04)', drawBorder: false }, ticks: { color: '#8b93a2', font: { size: 10, family: "'IBM Plex Mono', monospace" }, callback: v => '$' + formatStableNum(v) }}
+                    }
+                }
+            });
+            renderStableTabROC(filtered, totals);
+        }
+
+        let stableTabRocChart = null;
+        function renderStableTabROC(filtered, totals) {
+            const ctx = document.getElementById('stableTabRocChart');
+            if (!ctx || !filtered || filtered.length < 8) return;
+            if (stableTabRocChart) stableTabRocChart.destroy();
+            const roc = [];
+            for (let i = 7; i < totals.length; i++) {
+                const prev = totals[i - 7], cur = totals[i];
+                if (prev > 0) roc.push({ label: new Date(filtered[i].date * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), v: (cur - prev) / 1e9 });
+            }
+            stableTabRocChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: roc.map(d => d.label),
+                    datasets: [{
+                        data: roc.map(d => d.v),
+                        backgroundColor: roc.map(d => d.v >= 0 ? 'rgba(46,189,133,0.7)' : 'rgba(246,70,93,0.7)'),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => (c.parsed.y >= 0 ? '+' : '') + '$' + c.parsed.y.toFixed(2) + 'B / 7d' } } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#545c69', maxTicksLimit: 8, font: { size: 10, family: "'IBM Plex Mono', monospace" } } },
+                        y: { grid: { color: 'rgba(0,229,199,0.04)' }, ticks: { color: '#8b93a2', font: { size: 10, family: "'IBM Plex Mono', monospace" }, callback: v => (v>=0?'+':'') + v.toFixed(1) + 'B' } }
                     }
                 }
             });
         }
-        
+
         async function loadTronVsEth(days) {
             try {
                 const [tronData, ethData] = await Promise.all([
@@ -8081,10 +8005,59 @@
         let crossAssetChartInstance = null;
         let cryptoLeadersChartInstance = null;
         
+
         const COMPARE_COLORS = {
             BTC: '#f7931a', ETH: '#627eea', SOL: '#14f195', HYPE: '#50d2c1',
             SPY: '#e8eaee', QQQ: '#4f7df9', IWM: '#9d8cff'
         };
+        const COMPARE_FILLS = {
+            BTC: 'rgba(247,147,26,0.10)', ETH: 'rgba(98,126,234,0.10)', SOL: 'rgba(20,241,149,0.08)',
+            HYPE: 'rgba(80,210,193,0.10)', SPY: 'rgba(232,234,238,0.06)', QQQ: 'rgba(79,125,249,0.08)',
+            IWM: 'rgba(157,140,255,0.08)'
+        };
+        let _compareGot = {};
+        let hypeRelChartInstance = null;
+
+        const lineEndLabelPlugin = {
+            id: 'lineEndLabel',
+            afterDatasetsDraw(chart) {
+                const { ctx, chartArea } = chart;
+                if (!chartArea) return;
+                ctx.save();
+                chart.data.datasets.forEach((ds, i) => {
+                    if (!ds.label || ds.label === '_zero') return;
+                    const meta = chart.getDatasetMeta(i);
+                    if (!meta || meta.hidden || !meta.data.length) return;
+                    const last = meta.data[meta.data.length - 1];
+                    const pt = ds.data[ds.data.length - 1];
+                    if (!last || !pt) return;
+                    const y = (typeof pt.y === 'number') ? pt.y : (pt || 0);
+                    if (!isFinite(y)) return;
+                    const sign = y >= 0 ? '+' : '';
+                    const text = ds.label + ' ' + sign + y.toFixed(1) + '%';
+                    ctx.font = "600 10px 'IBM Plex Mono', ui-monospace, monospace";
+                    ctx.fillStyle = ds.borderColor || '#e8eaee';
+                    ctx.textBaseline = 'middle';
+                    ctx.textAlign = 'left';
+                    let ty = last.y;
+                    ctx.fillText(text, Math.min(last.x + 8, chartArea.right + 4), ty);
+                });
+                ctx.restore();
+            }
+        };
+
+        function isUsableSeries(points) {
+            if (!Array.isArray(points) || points.length < 4) return false;
+            const ys = points.map(p => p.y).filter(Number.isFinite);
+            if (ys.length < 4) return false;
+            const mid = Math.ceil(ys.length / 2);
+            const first = ys.slice(0, mid);
+            const firstVar = Math.max(...first) - Math.min(...first);
+            const last = ys[ys.length - 1];
+            // Flat-then-cliff is the fake equity line we refuse to plot
+            if (firstVar < 0.08 && Math.abs(last - ys[0]) > 4) return false;
+            return true;
+        }
         
         async function fetchBinanceHourly(symbol, hours) {
             for (const host of ['https://api.binance.com', 'https://api.binance.us']) {
@@ -8202,57 +8175,92 @@
 
         function normalizeSeries(points) {
             const base = points[0].p;
+            if (!base) return [];
             return points.map(pt => ({ x: pt.x, y: ((pt.p - base) / base) * 100 }));
         }
-        
+
         function renderCompareChart(canvasId, loadingId, existing, series) {
+            const canvas = document.getElementById(canvasId);
             const loadEl = document.getElementById(loadingId);
-            if (series.length === 0) {
+            if (!canvas) return existing;
+            const usable = (series || []).filter(s => s && isUsableSeries(s.data));
+            if (usable.length === 0) {
                 console.error('[Compare]', canvasId, 'got no series for', compareDays, 'days');
-                if (loadEl) { loadEl.style.display = ''; loadEl.innerHTML = '<div style="font-size:12px;color:var(--bad);">Comparison data unavailable for this range \u2014 see console.</div>'; }
+                if (loadEl) { loadEl.style.display = ''; loadEl.textContent = 'Comparison data unavailable for this range.'; }
                 if (existing) { existing.destroy(); return null; }
                 return existing;
             }
             if (loadEl) loadEl.style.display = 'none';
-            const ctx = document.getElementById(canvasId).getContext('2d');
+            const ctx = canvas.getContext('2d');
             if (existing) existing.destroy();
-            const allX = series.flatMap(s => [s.data[0].x, s.data[s.data.length - 1].x]);
-            const zeroLine = { label: '_zero', data: [{ x: Math.min(...allX), y: 0 }, { x: Math.max(...allX), y: 0 }],
-                borderColor: 'rgba(139,147,162,0.35)', borderWidth: 1, borderDash: [5, 5], pointRadius: 0 };
+            const allX = usable.flatMap(s => [s.data[0].x, s.data[s.data.length - 1].x]);
+            const zeroLine = {
+                label: '_zero',
+                data: [{ x: Math.min(...allX), y: 0 }, { x: Math.max(...allX), y: 0 }],
+                borderColor: 'rgba(139,147,162,0.28)',
+                borderWidth: 1,
+                borderDash: [4, 4],
+                pointRadius: 0,
+                fill: false
+            };
             return new Chart(ctx, {
                 type: 'line',
                 data: {
-                    datasets: [...series.map(s => ({
-                        label: s.label, data: s.data, borderColor: s.color, borderWidth: 1.6,
-                        pointRadius: 0, tension: 0.15, spanGaps: true
+                    datasets: [...usable.map(s => ({
+                        label: s.label,
+                        data: s.data,
+                        borderColor: s.color,
+                        backgroundColor: COMPARE_FILLS[s.label] || 'rgba(0,229,199,0.08)',
+                        borderWidth: 1.5,
+                        pointRadius: 0,
+                        pointHoverRadius: 3,
+                        tension: 0.18,
+                        spanGaps: true,
+                        fill: true
                     })), zeroLine]
                 },
+                plugins: [lineEndLabelPlugin],
                 options: {
                     responsive: true, maintainAspectRatio: false, parsing: false,
                     interaction: { mode: 'nearest', axis: 'x', intersect: false },
+                    layout: { padding: { right: 78, top: 6, bottom: 0 } },
                     plugins: {
-                        legend: { labels: {
-                            color: '#8b93a2', font: { size: 10, family: "'IBM Plex Mono', monospace" }, boxWidth: 12,
-                            filter: item => item.text !== '_zero'
-                        } },
+                        legend: { display: false },
                         tooltip: {
+                            backgroundColor: 'rgba(8,9,12,0.92)',
+                            borderColor: 'rgba(0,229,199,0.25)',
+                            borderWidth: 1,
+                            titleFont: { family: "'IBM Plex Mono', monospace", size: 10 },
+                            bodyFont: { family: "'IBM Plex Mono', monospace", size: 11 },
                             callbacks: {
                                 title: items => items.length ? new Date(items[0].parsed.x).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric' }) : '',
-                                label: c => c.dataset.label === '_zero' ? null : ` ${c.dataset.label}: ${c.parsed.y >= 0 ? '+' : ''}${c.parsed.y.toFixed(2)}%`
+                                label: c => c.dataset.label === '_zero' ? null : ' ' + c.dataset.label + ': ' + (c.parsed.y >= 0 ? '+' : '') + c.parsed.y.toFixed(2) + '%'
                             }
                         }
                     },
                     scales: {
-                        x: { type: 'linear', ticks: { color: '#545c69', maxTicksLimit: 8, font: { size: 10 },
-                                callback: v => new Date(v).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) },
-                             grid: { color: 'rgba(40,46,58,0.3)' } },
-                        y: { ticks: { color: '#8b93a2', font: { size: 10, family: "'IBM Plex Mono', monospace" }, callback: v => (v >= 0 ? '+' : '') + v.toFixed(1) + '%' },
-                             grid: { color: 'rgba(40,46,58,0.3)' } }
+                        x: {
+                            type: 'linear',
+                            ticks: {
+                                color: '#545c69', maxTicksLimit: 8, font: { size: 10, family: "'IBM Plex Mono', monospace" },
+                                callback: v => new Date(v).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                            },
+                            grid: { color: 'rgba(0,229,199,0.045)', drawBorder: false },
+                            border: { display: false }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#8b93a2', font: { size: 10, family: "'IBM Plex Mono', monospace" },
+                                callback: v => (v >= 0 ? '+' : '') + v.toFixed(1) + '%'
+                            },
+                            grid: { color: 'rgba(0,229,199,0.045)', drawBorder: false },
+                            border: { display: false }
+                        }
                     }
                 }
             });
         }
-        
+
         let _compareRun = 0;
         async function loadComparisonCharts(days) {
             compareChartsLoaded = true;
@@ -8260,9 +8268,9 @@
             const runId = ++_compareRun;   // invalidates any still-pending older run
             const hours = compareDays * 24;
             console.log('[Compare] loading', compareDays, 'days');
-            ['crossAssetLoading', 'cryptoLeadersLoading'].forEach(id => {
+            ['crossAssetLoading', 'cryptoLeadersLoading', 'hypeRelLoading'].forEach(id => {
                 const el = document.getElementById(id);
-                if (el) { el.style.display = ''; el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);">Loading market data...</div>'; }
+                if (el) { el.style.display = ''; el.textContent = 'Loading market data...'; }
             });
             
             const delay = ms => new Promise(r => setTimeout(r, ms));
@@ -8271,8 +8279,13 @@
                 const keys = Object.keys(jobs);
                 const results = await Promise.allSettled(keys.map(k => jobs[k]));
                 results.forEach((r, i) => {
-                    if (r.status === 'fulfilled') got[keys[i]] = normalizeSeries(r.value);
-                    else console.warn('[Compare]', keys[i], 'failed:', r.reason?.message);
+                    if (r.status === 'fulfilled') {
+                        const n = normalizeSeries(r.value);
+                        if (isUsableSeries(n)) got[keys[i]] = n;
+                        else console.warn('[Compare]', keys[i], 'dropped: unusable / cliff series');
+                    } else {
+                        console.warn('[Compare]', keys[i], 'failed:', r.reason?.message);
+                    }
                 });
             };
             
@@ -8298,27 +8311,33 @@
         }
         
         function renderBothCompareCharts(got) {
+            _compareGot = got;
             const subtitle = (elId, wanted) => {
                 const el = document.getElementById(elId);
                 if (!el) return;
                 const okList = wanted.filter(k => got[k]);
                 const missing = wanted.filter(k => !got[k]);
-                el.innerHTML = 'Normalized performance \u2022 ' + okList.join(' \u2022 ') + ' \u2022 Hourly' +
+                el.innerHTML = 'Indexed · ' + okList.join(' · ') +
                     (missing.length === 0 ? ''
                         : (elId === 'crossAssetSubtitle' && missing.every(k => ['SPY','QQQ','IWM'].includes(k))
-                            ? ` <span style="color:var(--warn);">\u2014 equities unavailable</span>`
-                            : ` <span style="color:var(--warn);">\u2014 loading/unavailable: ${missing.join(', ')}</span>`));
+                            ? ' <span style="color:var(--warn);">— equities unavailable</span>'
+                            : ' <span style="color:var(--warn);">— ' + missing.join(', ') + ' unavailable</span>'));
             };
             subtitle('crossAssetSubtitle', ['BTC', 'ETH', 'SPY', 'QQQ', 'IWM']);
             subtitle('cryptoLeadersSubtitle', ['BTC', 'ETH', 'SOL', 'HYPE']);
-            
+            subtitle('hypeRelSubtitle', ['HYPE', 'BTC', 'ETH', 'SOL']);
+
             const mk = k => got[k] ? { label: k, color: COMPARE_COLORS[k], data: got[k] } : null;
             crossAssetChartInstance = renderCompareChart('crossAssetChart', 'crossAssetLoading', crossAssetChartInstance,
                 ['BTC', 'ETH', 'SPY', 'QQQ', 'IWM'].map(mk).filter(Boolean));
             cryptoLeadersChartInstance = renderCompareChart('cryptoLeadersChart', 'cryptoLeadersLoading', cryptoLeadersChartInstance,
                 ['BTC', 'ETH', 'SOL', 'HYPE'].map(mk).filter(Boolean));
+            if (document.getElementById('hypeRelChart')) {
+                hypeRelChartInstance = renderCompareChart('hypeRelChart', 'hypeRelLoading', hypeRelChartInstance,
+                    ['HYPE', 'BTC', 'ETH', 'SOL'].map(mk).filter(Boolean));
+            }
         }
-        
+
         function updateCompareCharts(days, btnEl) {
             const btn = btnEl || (typeof event !== 'undefined' && event ? event.target : null);
             if (btn && btn.parentElement) {
@@ -8465,8 +8484,13 @@
                 document.getElementById('hlFees24h').textContent = hlFmt(last.v);
                 document.getElementById('hlFees7dAvg').textContent = hlFmt(avg7);
                 document.getElementById('hlFeesAnnualized').textContent = hlFmt(annualized);
+                const gFees = document.getElementById('hlGlanceFees');
+                if (gFees) gFees.textContent = hlFmt(last.v);
                 if (hlHypeMcap && annualized > 0) {
-                    document.getElementById('hlPsRatio').textContent = (hlHypeMcap / annualized).toFixed(1) + 'x';
+                    const ps = (hlHypeMcap / annualized).toFixed(1) + 'x';
+                    document.getElementById('hlPsRatio').textContent = ps;
+                    const gPs = document.getElementById('hlGlancePS');
+                    if (gPs) gPs.textContent = ps;
                 }
             } catch (e) {
                 console.error('[HL Fees]', e.message);
@@ -8624,14 +8648,30 @@
                 
                 const total = protos.reduce((s, p) => s + p.val, 0);
                 const hl = protos.find(p => isHL(p.name));
+                const hlVal = hl ? hl.val : 0;
+                const tbody = document.getElementById('hlVenueTable');
+                if (tbody) {
+                    tbody.innerHTML = protos.map((p, i) => {
+                        const share = total > 0 ? (p.val / total * 100) : 0;
+                        const vs = (!isHL(p.name) && hlVal > 0) ? ((hlVal / p.val) * 100).toFixed(0) + '%' : '—';
+                        const nameStyle = isHL(p.name) ? 'color:#50d2c1;font-weight:600;' : '';
+                        return `<tr>
+                            <td style="color:var(--text-dim);">${i + 1}</td>
+                            <td style="${nameStyle}">${p.name}</td>
+                            <td style="text-align:right;">${hlFmt(p.val)}</td>
+                            <td style="text-align:right;color:var(--text-muted);">${share.toFixed(1)}%</td>
+                            <td style="text-align:right;color:var(--text-dim);">${vs}</td>
+                        </tr>`;
+                    }).join('');
+                }
                 const note = document.getElementById('hlDexShareNote');
                 if (note && hl) {
                     const rank = protos.indexOf(hl) + 1;
                     note.style.display = '';
-                    note.innerHTML = `<strong style="color:var(--text);">Hyperliquid:</strong> #${rank} perp DEX by open interest at ${hlFmt(hl.val)} \u2014 ` +
-                        `<strong style="color:#50d2c1;">${(hl.val / total * 100).toFixed(1)}%</strong> of the top-10 combined. ` +
-                        `OI measures capital committed, not churn \u2014 a stickier lead than volume.`;
+                    note.innerHTML = '#' + rank + ' onchain perp venue · ' + hlFmt(hl.val) + ' · ' +
+                        (hl.val / total * 100).toFixed(1) + '% of top-10 OI. Onchain venues only — not CEX books.';
                 }
+
             } catch (e) {
                 console.error('[HL DexLeaders]', e.message);
                 const el = document.getElementById('hlDexLeadersLoading');
@@ -8751,7 +8791,9 @@
             }
             if (loadEl) loadEl.style.display = 'none';
             
-            const ctx = document.getElementById('hlBizMixChart').getContext('2d');
+            const mixCanvas = document.getElementById('hlBizMixChart');
+            if (mixCanvas && mixCanvas.offsetHeight >= 40) {
+            const ctx = mixCanvas.getContext('2d');
             if (hlBizMixChartInstance) hlBizMixChartInstance.destroy();
             hlBizMixChartInstance = new Chart(ctx, {
                 type: 'doughnut',
@@ -8773,6 +8815,7 @@
                 }
             });
             
+            } // skip doughnut when canvas is collapsed
             const rows = [
                 { name: 'Core Perps', val: coreVol, color: '#50d2c1' },
                 { name: 'HIP-3 Perps', val: hip3Vol, color: '#97fce4' },
@@ -9325,6 +9368,24 @@
                 }
             });
             window.liquidityBtcChart = liquidityBtcChart;
+            updateMacroHero(filteredData);
+        }
+
+        function updateMacroHero(filtered) {
+            const src = (filtered && filtered.length) ? filtered : netLiquidityData;
+            if (!src || !src.length) return;
+            const last = src[src.length - 1];
+            const prev = src.length > 1 ? src[src.length - 2] : null;
+            const hero = document.getElementById('macroLiqHero');
+            const roc = document.getElementById('macroLiqRoc');
+            const asof = document.getElementById('macroLiqAsOf');
+            if (hero) hero.textContent = '$' + last.liquidity.toFixed(2) + 'T';
+            if (roc && prev) {
+                const d = last.liquidity - prev.liquidity;
+                roc.textContent = (d >= 0 ? '+' : '') + d.toFixed(2) + 'T vs prior print';
+                roc.className = 'kpi-delta ' + (d >= 0 ? 'up' : 'down');
+            }
+            if (asof) asof.textContent = 'As of ' + last.date + ' · WALCL − RRP − TGA';
         }
         
         // Global Liquidity unified timeframe selector - syncs US and China charts
@@ -12134,7 +12195,7 @@
             }, { passive: true });
         });
         
-        console.log('%cFLOWTRACK v18.6', 'color:#50d2c1;font-weight:bold;font-size:14px;', 'build 2026-08-18');
+        console.log('%cFLOWTRACK v19.0', 'color:#50d2c1;font-weight:bold;font-size:14px;', 'build 2026-08-18 · visual v19.0');
         // UTC clock in top bar
         setInterval(() => {
             const el = document.getElementById('utcClock');
