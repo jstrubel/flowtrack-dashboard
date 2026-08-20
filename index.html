@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flowtrack | Crypto Market Intelligence v19.2</title>
+    <title>Flowtrack | Crypto Market Intelligence v19.3</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -2131,7 +2131,7 @@
                 </div>
                 <div class="meter">
                     <div class="meter-name">VIX</div>
-                    <div class="meter-read">Equity vol · FRED VIXCLS</div>
+                    <div class="meter-read">Equity vol · Yahoo ^VIX</div>
                     <div class="meter-last" id="riskVixLast">--</div>
                     <div class="meter-delta" id="riskVixDelta">--</div>
                     <div class="meter-chart"><canvas id="riskVixChartJs"></canvas></div>
@@ -2139,7 +2139,7 @@
                 </div>
                 <div class="meter">
                     <div class="meter-name">US10Y</div>
-                    <div class="meter-read">10-year yield · FRED DGS10</div>
+                    <div class="meter-read">10-year yield · Yahoo ^TNX</div>
                     <div class="meter-last" id="riskUs10yLast">--</div>
                     <div class="meter-delta" id="riskUs10yDelta">--</div>
                     <div class="meter-chart"><canvas id="riskUs10yChartJs"></canvas></div>
@@ -2195,7 +2195,7 @@
             <div class="chapter-head">
                 <div class="chapter-kicker">01 · Supply</div>
                 <h2 class="chapter-title">Stablecoin Market</h2>
-                <p class="chapter-sub">Aggregate float and weekly/monthly change. CoinGecko + DefiLlama.</p>
+                <p class="chapter-sub">Aggregate float and weekly/monthly change. DefiLlama first · CoinGecko volume if it lands.</p>
             </div>
             <div class="kpi-strip" style="grid-template-columns: repeat(6, minmax(0,1fr));">
                 <div class="kpi-xl" style="grid-column: span 2;">
@@ -2279,7 +2279,7 @@
             <div class="chapter-head">
                 <div class="chapter-kicker">04 · History</div>
                 <h2 class="chapter-title">Supply History + ROC</h2>
-                <p class="chapter-sub">Total float and 7-day rate of change. Same CoinGecko series.</p>
+                <p class="chapter-sub">Total float and 7-day rate of change. DefiLlama stablecoincharts/all.</p>
             </div>
             <div class="card" style="padding: 14px 16px 10px;">
                 <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
@@ -2368,7 +2368,7 @@
             <div class="chapter-head">
                 <div class="chapter-kicker">07 · Peg tape</div>
                 <h2 class="chapter-title">Peg tape</h2>
-                <p class="chapter-sub">Deviation from $1 in bps. Ranking snapshot + 90d peg vs $1 when CoinGecko prices exist.</p>
+                <p class="chapter-sub">Deviation from $1 in bps. DefiLlama last print. No multi-call peg sparkline.</p>
             </div>
             <div class="card" style="padding:0;">
                 <div class="ft-table-wrap">
@@ -2400,12 +2400,12 @@
             <div class="chapter-head">
                 <div class="chapter-kicker">08 · Dominance tape</div>
                 <h2 class="chapter-title">Dominance tape</h2>
-                <p class="chapter-sub">USDT / USDC share of crypto mcap from CoinGecko market caps. BTC.D Chart.js when total history exists; otherwise one CRYPTOCAP tile.</p>
+                <p class="chapter-sub">USDT / USDC share of stable supply (DefiLlama). BTC.D from CoinGecko global when it lands; otherwise one CRYPTOCAP tile.</p>
             </div>
             <div class="dom-tape">
                 <div class="meter">
                     <div class="meter-name">USDT.D</div>
-                    <div class="meter-read">Tether / total crypto mcap</div>
+                    <div class="meter-read">Tether / total stable supply</div>
                     <div class="meter-last" id="stableUsdtDLast">--</div>
                     <div class="meter-delta" id="stableUsdtDDelta">--</div>
                     <div class="meter-chart"><canvas id="stableUsdtDChart"></canvas></div>
@@ -2413,7 +2413,7 @@
                 </div>
                 <div class="meter">
                     <div class="meter-name">USDC.D</div>
-                    <div class="meter-read">Circle / total crypto mcap</div>
+                    <div class="meter-read">Circle / total stable supply</div>
                     <div class="meter-last" id="stableUsdcDLast">--</div>
                     <div class="meter-delta" id="stableUsdcDDelta">--</div>
                     <div class="meter-chart"><canvas id="stableUsdcDChart"></canvas></div>
@@ -2942,7 +2942,7 @@
     </div>
 
     <footer>
-        <p><strong>FLOWTRACK v19.2</strong> — Crypto Derivatives Intelligence</p>
+        <p><strong>FLOWTRACK v19.3</strong> — Crypto Derivatives Intelligence</p>
         <p style="margin-top: 6px;">Data from FRED, Yahoo/Stooq, Binance, CoinGecko, DefiLlama, Hyperliquid, CoinGlass, Coinalyze, TradingView</p>
         <p style="margin-top: 6px;">Auto-refreshes every 60 seconds • Not financial advice</p>
     </footer>
@@ -2972,6 +2972,7 @@
         // Free Twelve Data key (twelvedata.com, free tier: 8 req/min) - direct CORS stock data,
         // no proxy needed. Makes SPY/QQQ/IWM load instantly and reliably.
         const TWELVEDATA_API_KEY = '';
+        const FRED_API_KEY = '00f384a64211e63e9cf2fee255cdebb2';
         
         // Fetch with a hard timeout so hung proxies can't stall the UI
         function fetchT(resource, opts = {}, ms = 8000) {
@@ -3555,10 +3556,15 @@
             for (const url of urls) {
                 try {
                     const res = await fetchT(url, {}, 10000);
-                    if (!res.ok) continue;
-                    const json = await res.json();
-                    if (!validator || validator(json)) return json;
-                } catch (e) { /* try next */ }
+                    if (res.ok) {
+                        const json = await res.json();
+                        if (!validator || validator(json)) return json;
+                    }
+                } catch (e) { /* try resilient */ }
+                try {
+                    const json = await fetchJsonResilient(url);
+                    if (json && (!validator || validator(json))) return json;
+                } catch (e) { /* try next url */ }
             }
             return null;
         }
@@ -3603,62 +3609,86 @@
         }
         
         async function loadStablecoinTabData() {
-            console.log('[StableTab] Loading...');
+            console.log('[StableTab] Loading (llama-first)...');
 
-            // DefiLlama supply deltas (7d/30d) — fetched in parallel, merged by symbol
-            const llamaPromise = fetchFirstSuccess([
-                'https://stablecoins.llama.fi/stablecoins?includePrices=true',
-                'https://api.llama.fi/stablecoins?includePrices=true',
-            ], d => Array.isArray(d?.peggedAssets)).catch(() => null);
+            let llama = null;
+            try {
+                llama = await fetchFirstSuccess([
+                    'https://stablecoins.llama.fi/stablecoins?includePrices=true',
+                    'https://api.llama.fi/stablecoins?includePrices=true',
+                ], function (d) { return Array.isArray(d && d.peggedAssets); });
+            } catch (e) { console.warn('[StableTab] llama stables failed', e && e.message); }
 
-            // Fetch from CoinGecko stablecoins category with retry
-            let stables = [];
+            // CoinGecko is enrichment only (volume). Never block the tab on CG 429s.
+            let cgBySym = new Map();
             try {
                 const got = await cgFetch(
                     '/coins/markets?vs_currency=usd&category=stablecoins&order=market_cap_desc&per_page=30&sparkline=false&price_change_percentage=24h',
                     { cacheKey: 'stables_markets_30', ttlMs: 15 * 60 * 1000 }
                 );
-                if (Array.isArray(got.data)) {
-                    stables = got.data.filter(s => s.market_cap > 5e7);
-                    console.log('[StableTab] CoinGecko loaded' + (got.cached ? ' (cached)' : '') + ':', stables.length, 'stablecoins');
+                if (Array.isArray(got && got.data)) {
+                    got.data.forEach(function (s) {
+                        if (s && s.symbol) cgBySym.set(String(s.symbol).toLowerCase(), s);
+                    });
+                    console.log('[StableTab] CG volume enrichment', cgBySym.size, got.cached ? '(cached)' : '');
                 }
-            } catch (e) { console.error('[StableTab] CoinGecko error:', e.message); }
+            } catch (e) { console.warn('[StableTab] CG enrichment skipped:', e && e.message); }
 
-            if (stables.length === 0) {
-                // CoinGecko rate-limited: rebuild rankings from the DefiLlama payload we already requested
-                try {
-                    const llama = await llamaPromise;
-                    stables = (llama?.peggedAssets || [])
-                        .map(a => ({
-                            name: a.name,
-                            symbol: (a.symbol || '').toLowerCase(),
-                            market_cap: a.circulating?.peggedUSD || 0,
-                            current_price: typeof a.price === 'number' ? a.price : 1,
-                            total_volume: null,
-                            market_cap_change_percentage_24h: (() => {
-                                const cur = a.circulating?.peggedUSD, prev = a.circulatingPrevDay?.peggedUSD;
-                                return (cur && prev) ? ((cur - prev) / prev) * 100 : 0;
-                            })(),
-                            image: ''
-                        }))
-                        .filter(s => s.market_cap > 5e7)
-                        .sort((a, b) => b.market_cap - a.market_cap)
-                        .slice(0, 30);
-                    if (stables.length > 0) console.log('[StableTab] Served rankings via DefiLlama fallback (CoinGecko rate-limited)');
-                } catch (e) { console.warn('[StableTab] DefiLlama fallback failed:', e.message); }
+            let stables = [];
+            if (llama && Array.isArray(llama.peggedAssets)) {
+                stables = llama.peggedAssets.map(function (a) {
+                    const sym = (a.symbol || '').toLowerCase();
+                    const cg = cgBySym.get(sym);
+                    const cur = (a.circulating && a.circulating.peggedUSD) || 0;
+                    const prev = a.circulatingPrevDay && a.circulatingPrevDay.peggedUSD;
+                    const price = (typeof a.price === 'number') ? a.price
+                        : (cg && typeof cg.current_price === 'number' ? cg.current_price : null);
+                    return {
+                        name: a.name,
+                        symbol: sym,
+                        market_cap: cur,
+                        current_price: price,
+                        total_volume: (cg && cg.total_volume != null) ? cg.total_volume : null,
+                        market_cap_change_percentage_24h: (cur && prev) ? ((cur - prev) / prev) * 100
+                            : (cg && cg.market_cap_change_percentage_24h) || 0,
+                        price_change_percentage_24h: cg && cg.price_change_percentage_24h,
+                        image: (cg && cg.image) || ''
+                    };
+                }).filter(function (s) { return s.market_cap > 5e7; })
+                  .sort(function (a, b) { return b.market_cap - a.market_cap; })
+                  .slice(0, 30);
+                console.log('[StableTab] Rankings from DefiLlama', stables.length);
+            } else if (cgBySym.size) {
+                stables = Array.from(cgBySym.values())
+                    .filter(function (s) { return s.market_cap > 5e7; })
+                    .sort(function (a, b) { return (b.market_cap || 0) - (a.market_cap || 0); })
+                    .slice(0, 30)
+                    .map(function (s) {
+                        return {
+                            name: s.name,
+                            symbol: (s.symbol || '').toLowerCase(),
+                            market_cap: s.market_cap,
+                            current_price: s.current_price,
+                            total_volume: s.total_volume,
+                            market_cap_change_percentage_24h: s.market_cap_change_percentage_24h,
+                            price_change_percentage_24h: s.price_change_percentage_24h,
+                            image: s.image || ''
+                        };
+                    });
+                console.log('[StableTab] Rankings from CoinGecko only', stables.length);
             }
+
             if (stables.length === 0) {
                 document.getElementById('stableTabTableBody').innerHTML =
                     '<tr><td colspan="9" style="padding:24px;text-align:center;color:var(--bad);">Failed to load data. Try refreshing.</td></tr>';
                 return;
             }
 
-            const totalMcap = stables.reduce((s, c) => s + (c.market_cap || 0), 0);
-            const usdt = stables.find(c => c.symbol === 'usdt');
-            const usdc = stables.find(c => c.symbol === 'usdc');
-            const bigOnes = stables.filter(c => c.market_cap > 1e8).length;
+            const totalMcap = stables.reduce(function (s, c) { return s + (c.market_cap || 0); }, 0);
+            const usdt = stables.find(function (c) { return c.symbol === 'usdt'; });
+            const usdc = stables.find(function (c) { return c.symbol === 'usdc'; });
+            const bigOnes = stables.filter(function (c) { return c.market_cap > 1e8; }).length;
 
-            // KPI strip
             document.getElementById('stableTotalSupply').textContent = '$' + formatStableNum(totalMcap);
             document.getElementById('stableTabTotalChange').textContent = bigOnes + ' names > $100M';
             const countEl = document.getElementById('stableTabCount');
@@ -3673,86 +3703,76 @@
                 document.getElementById('usdcDominance').textContent = (usdc.market_cap / totalMcap * 100).toFixed(1) + '%';
             }
 
-            // TRON estimates based on total
-            document.getElementById('tronSupply').textContent = '$' + formatStableNum(totalMcap * 0.30);
-            document.getElementById('tronMarketShare').textContent = '~30%';
-
-            // Load yields card (independent, non-blocking)
+            // TRON stays -- until live chain data lands. Never invent ~30%.
             loadStablecoinYields();
 
-            // Merge DefiLlama 7d/30d supply changes by symbol
             const deltaMap = new Map();
-            try {
-                const llama = await llamaPromise;
-                (llama?.peggedAssets || []).forEach(a => {
-                    const cur = a.circulating?.peggedUSD;
-                    const w = a.circulatingPrevWeek?.peggedUSD;
-                    const m = a.circulatingPrevMonth?.peggedUSD;
-                    if (cur && a.symbol) {
-                        deltaMap.set(a.symbol.toUpperCase(), {
-                            d7: w > 0 ? ((cur - w) / w) * 100 : null,
-                            d30: m > 0 ? ((cur - m) / m) * 100 : null
-                        });
-                    }
-                });
-                console.log('[StableTab] DefiLlama deltas merged for', deltaMap.size, 'assets');
-                let w7 = 0, b7 = 0, w30 = 0, b30 = 0;
-                stables.forEach(c => {
-                    const d = deltaMap.get((c.symbol || '').toUpperCase());
-                    if (!d) return;
-                    if (d.d7 != null) { w7 += c.market_cap * d.d7; b7 += c.market_cap; }
-                    if (d.d30 != null) { w30 += c.market_cap * d.d30; b30 += c.market_cap; }
-                });
-                const paintDelta = (id, num) => {
-                    const el = document.getElementById(id);
-                    if (!el || num == null || !isFinite(num)) return;
-                    el.textContent = (num >= 0 ? '+' : '') + num.toFixed(2) + '%';
-                    el.className = 'kpi-xl-val ' + (num >= 0 ? 'pos' : 'neg');
-                };
-                if (b7) paintDelta('stableDelta7d', w7 / b7);
-                if (b30) paintDelta('stableDelta30d', w30 / b30);
-            } catch (e) { console.warn('[StableTab] Delta merge failed:', e.message); }
-            const deltaCell = v => {
+            (llama && llama.peggedAssets ? llama.peggedAssets : []).forEach(function (a) {
+                const cur = a.circulating && a.circulating.peggedUSD;
+                const w = a.circulatingPrevWeek && a.circulatingPrevWeek.peggedUSD;
+                const m = a.circulatingPrevMonth && a.circulatingPrevMonth.peggedUSD;
+                if (cur && a.symbol) {
+                    deltaMap.set(String(a.symbol).toUpperCase(), {
+                        d7: w > 0 ? ((cur - w) / w) * 100 : null,
+                        d30: m > 0 ? ((cur - m) / m) * 100 : null
+                    });
+                }
+            });
+            console.log('[StableTab] DefiLlama deltas merged for', deltaMap.size, 'assets');
+            let w7 = 0, b7 = 0, w30 = 0, b30 = 0;
+            stables.forEach(function (c) {
+                const d = deltaMap.get((c.symbol || '').toUpperCase());
+                if (!d) return;
+                if (d.d7 != null) { w7 += c.market_cap * d.d7; b7 += c.market_cap; }
+                if (d.d30 != null) { w30 += c.market_cap * d.d30; b30 += c.market_cap; }
+            });
+            const paintDelta = function (id, num) {
+                const el = document.getElementById(id);
+                if (!el || num == null || !isFinite(num)) return;
+                el.textContent = (num >= 0 ? '+' : '') + num.toFixed(2) + '%';
+                el.className = 'kpi-xl-val ' + (num >= 0 ? 'pos' : 'neg');
+            };
+            if (b7) paintDelta('stableDelta7d', w7 / b7);
+            if (b30) paintDelta('stableDelta30d', w30 / b30);
+
+            const deltaCell = function (v) {
                 if (v === null || v === undefined) return '<td style="text-align:right;color:var(--text-dim);">—</td>';
                 const color = Math.abs(v) < 0.25 ? 'var(--text-muted)' : v >= 0 ? 'var(--good)' : 'var(--bad)';
-                return `<td style="text-align:right;color:${color};">${(v >= 0 ? '+' : '') + v.toFixed(1)}%</td>`;
+                return '<td style="text-align:right;color:' + color + ';">' + (v >= 0 ? '+' : '') + v.toFixed(1) + '%</td>';
             };
 
-            // Full rankings table
             const tbody = document.getElementById('stableTabTableBody');
-            tbody.innerHTML = stables.slice(0, 20).map((c, i) => {
-                const deltas = deltaMap.get(c.symbol.toUpperCase()) || {};
+            tbody.innerHTML = stables.slice(0, 20).map(function (c, i) {
+                const deltas = deltaMap.get((c.symbol || '').toUpperCase()) || {};
                 const chg = c.market_cap_change_percentage_24h ?? 0;
                 const chgColor = Math.abs(chg) < 0.1 ? 'var(--text-muted)' : chg >= 0 ? 'var(--good)' : 'var(--bad)';
                 const vol = c.total_volume;
                 const dom = (c.market_cap / totalMcap * 100).toFixed(2);
-                // Price deviation from $1 as color indicator
-                const price = c.current_price || 1;
-                const priceColor = Math.abs(price - 1) < 0.001 ? 'var(--good)' :
-                                   Math.abs(price - 1) < 0.005 ? 'var(--warn)' : 'var(--bad)';
-                return `<tr style="border-bottom:1px solid var(--border);">
-                    <td style="padding:10px 12px;color:var(--text-muted);">${i+1}</td>
-                    <td style="padding:10px 12px;">
-                        <div style="font-weight:600;">${c.name}</div>
-                        <div style="font-size:11px;color:var(--text-muted);">${c.symbol.toUpperCase()}</div>
-                    </td>
-                    <td style="padding:10px 12px;text-align:right;font-weight:600;">${formatCurrency(c.market_cap)}</td>
-                    <td style="padding:10px 12px;text-align:right;color:${chgColor};font-weight:600;">${(chg >= 0 ? '+' : '') + chg.toFixed(2)}%</td>
-                    ${deltaCell(deltas.d7)}
-                    ${deltaCell(deltas.d30)}
-                    <td style="padding:10px 12px;text-align:right;color:var(--text-muted);">${vol === null || vol === undefined ? '\u2014' : formatCurrency(vol)}</td>
-                    <td style="padding:10px 12px;text-align:right;color:var(--text-muted);">${dom}%</td>
-                    <td style="padding:10px 12px;text-align:right;font-weight:600;color:${priceColor};">$${price.toFixed(4)}</td>
-                </tr>`;
+                const price = (typeof c.current_price === 'number') ? c.current_price : null;
+                const priceColor = (price == null) ? 'var(--text-muted)'
+                    : Math.abs(price - 1) < 0.001 ? 'var(--good)'
+                    : Math.abs(price - 1) < 0.005 ? 'var(--warn)' : 'var(--bad)';
+                const priceTxt = (price == null) ? '—' : ('$' + price.toFixed(4));
+                return '<tr style="border-bottom:1px solid var(--border);">' +
+                    '<td style="padding:10px 12px;color:var(--text-muted);">' + (i + 1) + '</td>' +
+                    '<td style="padding:10px 12px;">' +
+                        '<div style="font-weight:600;">' + c.name + '</div>' +
+                        '<div style="font-size:11px;color:var(--text-muted);">' + (c.symbol || '').toUpperCase() + '</div>' +
+                    '</td>' +
+                    '<td style="padding:10px 12px;text-align:right;font-weight:600;">' + formatCurrency(c.market_cap) + '</td>' +
+                    '<td style="padding:10px 12px;text-align:right;color:' + chgColor + ';font-weight:600;">' + (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%</td>' +
+                    deltaCell(deltas.d7) +
+                    deltaCell(deltas.d30) +
+                    '<td style="padding:10px 12px;text-align:right;color:var(--text-muted);">' + (vol == null ? '\u2014' : formatCurrency(vol)) + '</td>' +
+                    '<td style="padding:10px 12px;text-align:right;color:var(--text-muted);">' + dom + '%</td>' +
+                    '<td style="padding:10px 12px;text-align:right;font-weight:600;color:' + priceColor + ';">' + priceTxt + '</td>' +
+                '</tr>';
             }).join('');
 
-            // Issuer pie chart
-            renderStableIssuerPie(stables.map(s => ({
-                symbol: s.symbol.toUpperCase(),
-                circulating: { peggedUSD: s.market_cap }
-            })), totalMcap);
+            renderStableIssuerPie(stables.map(function (s) {
+                return { symbol: (s.symbol || '').toUpperCase(), circulating: { peggedUSD: s.market_cap } };
+            }), totalMcap);
 
-            // Chain table: live distribution from DefiLlama, static estimates as fallback
             const CHAIN_META = {
                 'Ethereum': { color: '#627eea', fee: '~$2-8' },
                 'Tron':     { color: '#FF060A', fee: '~$0.09' },
@@ -3772,59 +3792,57 @@
                 const chains = await fetchFirstSuccess([
                     'https://stablecoins.llama.fi/stablecoinchains',
                     'https://api.llama.fi/stablecoinchains',
-                ], d => Array.isArray(d) && d.length > 3);
+                ], function (d) { return Array.isArray(d) && d.length > 3; });
                 if (chains) {
                     const withTotals = chains
-                        .map(c => ({ name: c.name, total: c.totalCirculatingUSD?.peggedUSD || 0 }))
-                        .filter(c => c.total > 0)
-                        .sort((a, b) => b.total - a.total);
-                    const grand = withTotals.reduce((s, c) => s + c.total, 0);
+                        .map(function (c) { return { name: c.name, total: (c.totalCirculatingUSD && c.totalCirculatingUSD.peggedUSD) || 0 }; })
+                        .filter(function (c) { return c.total > 0; })
+                        .sort(function (a, b) { return b.total - a.total; });
+                    const grand = withTotals.reduce(function (s, c) { return s + c.total; }, 0);
                     const top = withTotals.slice(0, 7);
-                    const othersTotal = grand - top.reduce((s, c) => s + c.total, 0);
-                    chainData = top.map(c => ({
-                        name: c.name,
-                        color: (CHAIN_META[c.name] || {}).color || '#6b7280',
-                        share: c.total / grand,
-                        fee: (CHAIN_META[c.name] || {}).fee || 'varies'
-                    }));
-                    chainData.push({ name: 'Others', color: '#6b7280', share: othersTotal / grand, fee: 'varies' });
-                    // Also update the TRON KPI cards with real numbers
-                    const tron = withTotals.find(c => c.name === 'Tron' || c.name === 'TRON');
-                    if (tron) {
+                    const othersTotal = grand - top.reduce(function (s, c) { return s + c.total; }, 0);
+                    chainData = top.map(function (c) {
+                        return {
+                            name: c.name,
+                            color: (CHAIN_META[c.name] || {}).color || '#6b7280',
+                            share: grand ? (c.total / grand) : 0,
+                            total: c.total,
+                            fee: (CHAIN_META[c.name] || {}).fee || 'varies'
+                        };
+                    });
+                    if (othersTotal > 0) chainData.push({ name: 'Others', color: '#6b7280', share: grand ? othersTotal / grand : 0, total: othersTotal, fee: 'varies' });
+                    const tron = withTotals.find(function (c) { return c.name === 'Tron' || c.name === 'TRON'; });
+                    if (tron && grand) {
                         document.getElementById('tronSupply').textContent = '$' + formatStableNum(tron.total);
                         document.getElementById('tronMarketShare').textContent = (tron.total / grand * 100).toFixed(1) + '%';
                     }
                     console.log('[StableTab] Live chain distribution loaded:', chainData.length, 'rows');
                 }
-            } catch (e) { console.warn('[StableTab] Chain distribution fetch failed:', e.message); }
-            if (!chainData) {
-                chainData = [
-                    { name: 'Ethereum', color: '#627eea', share: 0.52, fee: '~$2-8' },
-                    { name: 'TRON',     color: '#FF060A', share: 0.30, fee: '~$0.09' },
-                    { name: 'BSC',      color: '#F0B90B', share: 0.04, fee: '~$0.05' },
-                    { name: 'Solana',   color: '#14F195', share: 0.04, fee: '~$0.001' },
-                    { name: 'Arbitrum', color: '#28A0F0', share: 0.03, fee: '~$0.05' },
-                    { name: 'Base',     color: '#0052FF', share: 0.03, fee: '~$0.01' },
-                    { name: 'Others',   color: '#6b7280', share: 0.04, fee: 'varies' },
-                ];
+            } catch (e) { console.warn('[StableTab] Chain distribution fetch failed:', e && e.message); }
+
+            const chainBody = document.getElementById('stableChainTableBody');
+            if (chainData && chainData.length) {
+                chainBody.innerHTML = chainData.map(function (c) {
+                    const supply = (c.total != null) ? c.total : (totalMcap * c.share);
+                    return '<tr style="border-bottom:1px solid var(--border);">' +
+                        '<td style="padding:8px 10px;">' +
+                            '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + c.color + ';margin-right:8px;"></span>' +
+                            c.name +
+                        '</td>' +
+                        '<td style="padding:8px 10px;text-align:right;color:var(--text-muted);">' + (c.share * 100).toFixed(0) + '%</td>' +
+                        '<td style="padding:8px 10px;text-align:right;font-weight:600;">$' + formatStableNum(supply) + '</td>' +
+                        '<td style="padding:8px 10px;text-align:right;color:var(--cyan);">' + c.fee + '</td>' +
+                    '</tr>';
+                }).join('');
+            } else if (chainBody) {
+                chainBody.innerHTML = '<tr><td colspan="4" style="padding:16px;text-align:center;color:var(--text-muted);">Chain split unavailable</td></tr>';
             }
-            document.getElementById('stableChainTableBody').innerHTML = chainData.map(c => `
-                <tr style="border-bottom:1px solid var(--border);">
-                    <td style="padding:8px 10px;">
-                        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c.color};margin-right:8px;"></span>
-                        ${c.name}
-                    </td>
-                    <td style="padding:8px 10px;text-align:right;color:var(--text-muted);">${(c.share*100).toFixed(0)}%</td>
-                    <td style="padding:8px 10px;text-align:right;font-weight:600;">$${formatStableNum(totalMcap * c.share)}</td>
-                    <td style="padding:8px 10px;text-align:right;color:var(--cyan);">${c.fee}</td>
-                </tr>`).join('');
 
             renderStablePegTape(stables);
 
             stableTabDataLoaded = true;
 
-            // Load history chart after a longer delay (avoids CoinGecko rate limit)
-            setTimeout(() => loadStableTabHistory(365), 1500);
+            setTimeout(function () { loadStableTabHistory(365); }, 400);
         }
 
         function renderStablePegTape(stables) {
@@ -3962,80 +3980,35 @@
         
         async function loadStableTabHistory(days) {
             const loadingEl = document.getElementById('stableTabHistoryLoading');
-            
-            // Primary: DefiLlama total stablecoin supply history (exact, full history, CORS-enabled)
             try {
                 const dl = await fetchFirstSuccess([
                     'https://stablecoins.llama.fi/stablecoincharts/all',
                     'https://api.llama.fi/stablecoincharts/all',
-                ], d => Array.isArray(d) && d.length > 30);
+                ], function (d) { return Array.isArray(d) && d.length > 30; });
                 if (dl) {
+                    const nowSec = Date.now() / 1000 + 2 * 86400;
                     let data = dl
-                        .map(d => ({ date: Number(d.date), _total: extractStableTotal(d) }))
-                        .filter(d => d._total > 0 && isFinite(d.date))
-                        .sort((a, b) => a.date - b.date);
+                        .map(function (d) { return { date: Number(d.date), _total: extractStableTotal(d) }; })
+                        .filter(function (d) { return d._total > 0 && isFinite(d.date) && d.date <= nowSec; })
+                        .sort(function (a, b) { return a.date - b.date; });
                     if (days && days < 9000) {
                         const cutoff = Date.now() / 1000 - days * 86400;
-                        data = data.filter(d => d.date >= cutoff);
+                        data = data.filter(function (d) { return d.date >= cutoff; });
                     }
                     if (data.length > 10) {
-                        console.log('[StableTab] History loaded from DefiLlama:', data.length, 'days');
+                        console.log('[StableTab] History from llama stablecoincharts/all:', data.length, 'days');
                         renderStableTabHistoryChart(data, days);
                         if (loadingEl) loadingEl.style.display = 'none';
                         return;
                     }
                 }
-                console.warn('[StableTab] DefiLlama returned no usable data, falling back to CoinGecko');
+                throw new Error('no usable llama history');
             } catch (e) {
-                console.warn('[StableTab] DefiLlama failed:', e.message);
-            }
-            
-            // Fallback: CoinGecko USDT+USDC scaled (free plan: no interval=daily, max 365 days)
-            try {
-                const cgDays = (!days || days > 365) ? '365' : String(days);
-                
-                async function fetchChartRetry(url, retries = 2) {
-                    for (let i = 0; i <= retries; i++) {
-                        if (i > 0) await new Promise(r => setTimeout(r, 1500 * i));
-                        try {
-                            const res = await fetch(url, { headers: COINGECKO_HEADERS });
-                            if (res.status === 429) { console.warn('[StableTab] Rate limited, retry', i+1); continue; }
-                            if (res.ok) return await res.json();
-                            console.warn('[StableTab] HTTP', res.status, 'from CoinGecko');
-                        } catch (e) { if (i === retries) throw e; }
-                    }
-                    return null;
-                }
-                
-                const usdtData = await fetchChartRetry(
-                    `${COINGECKO_API}/coins/tether/market_chart?vs_currency=usd&days=${cgDays}`
-                );
-                if (!usdtData?.market_caps?.length) throw new Error('No USDT data');
-
-                await new Promise(r => setTimeout(r, 500));
-                const usdcData = await fetchChartRetry(
-                    `${COINGECKO_API}/coins/usd-coin/market_chart?vs_currency=usd&days=${cgDays}`
-                ) || { market_caps: [] };
-
-                // Last value per day per coin (short ranges return hourly points), then sum
-                const lastPerDay = (mcaps) => {
-                    const m = new Map();
-                    (mcaps || []).forEach(([ts, v]) => { m.set(Math.floor(ts / 86400000) * 86400000, v || 0); });
-                    return m;
-                };
-                const usdtMap = lastPerDay(usdtData.market_caps);
-                const usdcMap = lastPerDay(usdcData.market_caps);
-                const keys = [...new Set([...usdtMap.keys(), ...usdcMap.keys()])].sort((a, b) => a - b);
-                if (keys.length === 0) throw new Error('No data after merge');
-                const data = keys.map(k => ({ date: k / 1000, _total: ((usdtMap.get(k) || 0) + (usdcMap.get(k) || 0)) * 1.18 }));
-                renderStableTabHistoryChart(data, days);
-                if (loadingEl) loadingEl.style.display = 'none';
-            } catch (e) {
-                console.error('[StableTab] History error:', e.message);
+                console.warn('[StableTab] History llama failed:', e && e.message);
                 if (loadingEl) loadingEl.textContent = 'Failed to load chart data. Try refreshing.';
             }
         }
-        
+
         function renderStableTabHistoryChart(data, days) {
             const ctx = document.getElementById('stableTabHistoryChart');
             if (!ctx || !data) return;
@@ -9458,34 +9431,30 @@
             if (!compareChartsLoaded) loadComparisonCharts(7);
         }
 
-        // ==================== v19.2 MACRO LIVE (FRED + Yahoo + Chart.js) ====================
+        // ==================== v19.3 MACRO LIVE (FRED JSON + Yahoo + Chart.js) ====================
         window._fredCache = window._fredCache || {};
         window._macroLive = window._macroLive || { series: {}, loaded: false, loading: false, netLiq: null, netLiqLive: false, sources: {} };
         window._macroPeriod = window._macroPeriod || '2y';
         const _ftChartInst = {};
 
-        async function fetchFredCsv(id) {
-            if (window._fredCache[id] && window._fredCache[id].length) return window._fredCache[id];
-            const url = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=' + encodeURIComponent(id);
-            let text = null;
-            try {
-                const res = await fetchT(url, {}, 8000);
-                if (res.ok) {
-                    const t = await res.text();
-                    if (t && t.length > 40 && /DATE/i.test(t) && t.indexOf(',') >= 0) text = t;
-                }
-            } catch (e) { /* CORS expected */ }
-            if (!text) {
-                try {
-                    const res = await fetchWithProxy(url);
-                    const t = await res.text();
-                    if (t && t.length > 40 && /DATE/i.test(t)) text = t;
-                } catch (e) {
-                    throw new Error('FRED ' + id + ' unavailable');
-                }
-            }
+        function parseFredObservations(obs) {
             const rows = [];
-            String(text).trim().split(/\r?\n/).forEach((line, i) => {
+            (obs || []).forEach(function (o) {
+                const date = String((o && o.date) || '').trim();
+                const raw = String((o && o.value) != null ? o.value : '').trim();
+                if (!date || raw === '.' || raw === '') return;
+                const n = parseFloat(raw);
+                if (!isFinite(n)) return;
+                const t = Date.parse(date + 'T00:00:00Z');
+                if (!isFinite(t)) return;
+                rows.push({ date: date, t: t, v: n });
+            });
+            return rows;
+        }
+
+        function parseFredCsvText(text) {
+            const rows = [];
+            String(text || '').trim().split(/\r?\n/).forEach(function (line, i) {
                 if (i === 0) return;
                 const parts = line.split(',');
                 if (parts.length < 2) return;
@@ -9498,10 +9467,60 @@
                 if (!isFinite(t)) return;
                 rows.push({ date: date, t: t, v: n });
             });
-            if (!rows.length) throw new Error('FRED ' + id + ' empty');
-            window._fredCache[id] = rows;
             return rows;
         }
+
+        async function fetchFredSeries(id) {
+            if (window._fredCache[id] && window._fredCache[id].length) return window._fredCache[id];
+            if (typeof FRED_API_KEY === 'string' && FRED_API_KEY) {
+                const jsonUrl = 'https://api.stlouisfed.org/fred/series/observations?series_id=' +
+                    encodeURIComponent(id) + '&api_key=' + encodeURIComponent(FRED_API_KEY) +
+                    '&file_type=json&observation_start=2015-01-01&sort_order=asc';
+                try {
+                    const res = await fetchT(jsonUrl, {}, 8000);
+                    if (res.ok) {
+                        const j = await res.json();
+                        const rows = parseFredObservations(j && j.observations);
+                        if (rows.length) {
+                            window._fredCache[id] = rows;
+                            console.log('[Macro] FRED JSON direct', id, rows.length);
+                            return rows;
+                        }
+                    }
+                } catch (e) { /* CORS expected in browser */ }
+                try {
+                    let j = null;
+                    try {
+                        j = await fetchJsonResilient(jsonUrl, 180000);
+                    } catch (e2) {
+                        const res2 = await fetchWithProxy(jsonUrl);
+                        j = JSON.parse(await res2.text());
+                    }
+                    const rows = parseFredObservations(j && j.observations);
+                    if (rows.length) {
+                        window._fredCache[id] = rows;
+                        console.log('[Macro] FRED JSON proxy', id, rows.length);
+                        return rows;
+                    }
+                } catch (e) {
+                    console.warn('[Macro] FRED JSON', id, 'failed:', e && e.message);
+                }
+            }
+            const csvUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=' + encodeURIComponent(id);
+            try {
+                const t = await fetchTextResilient(csvUrl);
+                if (t && t.length > 40 && /DATE/i.test(t) && t.indexOf(',') >= 0) {
+                    const rows = parseFredCsvText(t);
+                    if (rows.length) {
+                        window._fredCache[id] = rows;
+                        console.log('[Macro] FRED CSV', id, rows.length);
+                        return rows;
+                    }
+                }
+            } catch (e) { /* fall through */ }
+            throw new Error('FRED ' + id + ' unavailable');
+        }
+        async function fetchFredCsv(id) { return fetchFredSeries(id); }
 
         async function fetchStooqRaw(sym, days) {
             const fmt = function (d) { return d.toISOString().slice(0, 10).replace(/-/g, ''); };
@@ -9550,6 +9569,56 @@
             }
             if (stooqSym) return fetchStooqRaw(stooqSym, days);
             throw new Error(symbol + ' unavailable');
+        }
+
+        async function fetchMacroBtcDaily() {
+            const urls = [
+                'https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=1000',
+                'https://api.binance.us/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=1000'
+            ];
+            const toRows = function (k) {
+                if (!Array.isArray(k) || k.length < 8) return null;
+                const out = k.map(function (c) {
+                    const t = Number(c[0]);
+                    const v = parseFloat(c[4]);
+                    if (!isFinite(t) || !isFinite(v)) return null;
+                    return { date: new Date(t).toISOString().slice(0, 10), t: t, v: v };
+                }).filter(Boolean);
+                return out.length > 8 ? out : null;
+            };
+            for (let i = 0; i < urls.length; i++) {
+                try {
+                    let k = null;
+                    try {
+                        const res = await fetchT(urls[i], {}, 8000);
+                        if (res.ok) k = await res.json();
+                    } catch (e) { /* try resilient */ }
+                    if (!toRows(k)) {
+                        try { k = await fetchJsonResilient(urls[i], 180000); } catch (e2) { k = null; }
+                    }
+                    const rows = toRows(k);
+                    if (rows) {
+                        console.log('[Macro] BTC via', urls[i].indexOf('binance.us') >= 0 ? 'binance.us' : 'binance.com', rows.length);
+                        return rows;
+                    }
+                } catch (e) {
+                    console.warn('[Macro] Binance klines failed', e && e.message);
+                }
+            }
+            try {
+                const rows = await fetchBinanceDailyCloses(1000);
+                if (rows && rows.length) {
+                    return rows.map(function (r) {
+                        return { date: r.date, t: Date.parse(r.date + 'T00:00:00Z'), v: r.price };
+                    }).filter(function (d) { return isFinite(d.t) && isFinite(d.v); });
+                }
+            } catch (e) { console.warn('[Macro] BTC compare fetch failed:', e && e.message); }
+            try {
+                const pts = await fetchYahooHourly('BTC-USD', 1500);
+                const daily = yahooToDaily(pts);
+                if (daily.length > 5) return daily;
+            } catch (e) { /* last resort */ }
+            throw new Error('BTC daily unavailable');
         }
 
         function lastOnOrBefore(series, t) {
@@ -9653,11 +9722,11 @@
             }
         };
 
-        function markFtUnavailable(lastId, deltaId, canvasId) {
+        function markFtUnavailable(lastId, deltaId, canvasId, msg) {
             const last = document.getElementById(lastId);
             const delta = document.getElementById(deltaId);
             if (last) last.textContent = '--';
-            if (delta) { delta.textContent = 'unavailable'; delta.className = 'meter-delta'; }
+            if (delta) { delta.textContent = msg || 'unavailable'; delta.className = 'meter-delta'; }
             if (canvasId && _ftChartInst[canvasId]) {
                 try { _ftChartInst[canvasId].destroy(); } catch (e) {}
                 _ftChartInst[canvasId] = null;
@@ -9774,12 +9843,12 @@
             const S = (window._macroLive && window._macroLive.series) || {};
             const pane = function (id, key, opt) {
                 if (S[key] && S[key].length) renderFtArea(id, S[key], Object.assign({ period: period }, opt));
-                else markFtUnavailable(opt.lastId, opt.deltaId, id);
+                else markFtUnavailable(opt.lastId, opt.deltaId, id, opt.failMsg);
             };
-            pane('walclChart', 'WALCL', { lastId: 'walclLast', deltaId: 'walclDelta', fmt: fmtT, deltaFmt: fmtT, label: 'WALCL', color: '#00E5C7' });
-            pane('tgaChart', 'TGA', { lastId: 'tgaLast', deltaId: 'tgaDelta', fmt: fmtT, deltaFmt: fmtT, label: 'TGA', color: '#f7931a' });
-            pane('rrpChart', 'RRP', { lastId: 'rrpLast', deltaId: 'rrpDelta', fmt: fmtB, deltaFmt: fmtB, label: 'RRP', color: '#627eea' });
-            pane('m2Chart', 'M2', { lastId: 'm2Last', deltaId: 'm2Delta', fmt: fmtT, deltaFmt: fmtT, label: 'M2', color: '#50d2c1' });
+            pane('walclChart', 'WALCL', { lastId: 'walclLast', deltaId: 'walclDelta', fmt: fmtT, deltaFmt: fmtT, label: 'WALCL', color: '#00E5C7', failMsg: 'FRED blocked — add API key' });
+            pane('tgaChart', 'TGA', { lastId: 'tgaLast', deltaId: 'tgaDelta', fmt: fmtT, deltaFmt: fmtT, label: 'TGA', color: '#f7931a', failMsg: 'FRED blocked — add API key' });
+            pane('rrpChart', 'RRP', { lastId: 'rrpLast', deltaId: 'rrpDelta', fmt: fmtB, deltaFmt: fmtB, label: 'RRP', color: '#627eea', failMsg: 'FRED blocked — add API key' });
+            pane('m2Chart', 'M2', { lastId: 'm2Last', deltaId: 'm2Delta', fmt: fmtT, deltaFmt: fmtT, label: 'M2', color: '#50d2c1', failMsg: 'FRED blocked — add API key' });
             pane('goldChartJs', 'GOLD', { lastId: 'goldLast', deltaId: 'goldDelta', fmt: fmtGold, deltaFmt: function (d) { return (d >= 0 ? '+' : '') + '$' + d.toFixed(0); }, label: 'Gold', color: '#f6c945' });
             pane('curveChartJs', 'T10Y2Y', { lastId: 'curveLast', deltaId: 'curveDelta', fmt: fmtPct, label: '10s-2s', color: '#00E5C7' });
             pane('eurusdChartJs', 'EURUSD', { lastId: 'eurusdLast', deltaId: 'eurusdDelta', fmt: fmtFx, label: 'EURUSD', color: '#627eea' });
@@ -9823,43 +9892,78 @@
                     console.warn('[Macro]', key, 'failed:', e && e.message);
                 }
             };
-            await Promise.all([
-                settle('WALCL', fetchFredCsv('WALCL').then(function (s) { return s.map(function (d) { return { date: d.date, t: d.t, v: d.v / 1e6 }; }); })),
-                settle('TGA', fetchFredCsv('WTREGEN').then(function (s) { return s.map(function (d) { return { date: d.date, t: d.t, v: d.v / 1e6 }; }); })),
-                settle('RRP', fetchFredCsv('RRPONTSYD')),
-                settle('M2', fetchFredCsv('M2SL').then(function (s) { return s.map(function (d) { return { date: d.date, t: d.t, v: d.v / 1e3 }; }); })),
-                settle('DGS10', fetchFredCsv('DGS10')),
-                settle('DGS2', fetchFredCsv('DGS2')),
-                settle('T10Y2Y', fetchFredCsv('T10Y2Y')),
-                settle('VIX', fetchFredCsv('VIXCLS')),
-                settle('DTWEXBGS', fetchFredCsv('DTWEXBGS')),
+            const scaleFred = function (id, div) {
+                return fetchFredSeries(id).then(function (s) {
+                    return s.map(function (d) { return { date: d.date, t: d.t, v: d.v / div }; });
+                });
+            };
+            const tnxToYield = function (series) {
+                if (!series || !series.length) return series;
+                const last = series[series.length - 1].v;
+                if (last > 20) return series.map(function (d) { return { date: d.date, t: d.t, v: d.v / 10 }; });
+                return series;
+            };
+            const yahooThenFred = async function (yahooSym, stooqSym, fredId, transform) {
+                try {
+                    const y = await fetchMacroYahooDaily(yahooSym, days, stooqSym);
+                    if (y && y.length > 5) return transform ? transform(y) : y;
+                } catch (e) { /* fall through */ }
+                if (fredId) {
+                    const f = await fetchFredSeries(fredId);
+                    if (yahooSym === 'DX-Y.NYB') window._macroLive.series._dxyLabel = 'Broad dollar (DTWEXBGS)';
+                    return transform ? transform(f) : f;
+                }
+                throw new Error(yahooSym + ' unavailable');
+            };
+            const fredThenYahoo = async function (fredId, yahooSym, stooqSym) {
+                try {
+                    const f = await fetchFredSeries(fredId);
+                    if (f && f.length) return f;
+                } catch (e) { /* fall through */ }
+                if (yahooSym) return fetchMacroYahooDaily(yahooSym, days, stooqSym);
+                throw new Error(fredId + ' unavailable');
+            };
+
+            await Promise.allSettled([
+                settle('WALCL', scaleFred('WALCL', 1e6)),
+                settle('TGA', scaleFred('WTREGEN', 1e6)),
+                settle('RRP', fetchFredSeries('RRPONTSYD')),
+                settle('M2', scaleFred('M2SL', 1e3)),
+                settle('T10Y2Y', fetchFredSeries('T10Y2Y')),
                 settle('GOLD', fetchMacroYahooDaily('GC=F', days, 'gc.f')),
                 settle('EURUSD', fetchMacroYahooDaily('EURUSD=X', days, 'eurusd')),
                 settle('USDJPY', fetchMacroYahooDaily('JPY=X', days, 'jpyusd')),
-                settle('TLT', fetchMacroYahooDaily('TLT', days, 'tlt.us').catch(function () { return fetchStooqRaw('tlt.us', days); })),
-                settle('DXY', fetchMacroYahooDaily('DX-Y.NYB', days, 'dx.f')),
-                settle('VIXY', fetchMacroYahooDaily('^VIX', days, 'vix.us')),
-                settle('BTC', fetchBinanceDailyCloses(4000).then(function (rows) {
-                    return rows.map(function (r) { return { date: r.date, t: Date.parse(r.date + 'T00:00:00Z'), v: r.price }; });
-                }))
+                settle('TLT', fetchMacroYahooDaily('TLT', days, 'tlt.us')),
+                settle('DXY', yahooThenFred('DX-Y.NYB', 'dx.f', 'DTWEXBGS')),
+                settle('VIX', yahooThenFred('^VIX', 'vix.us', 'VIXCLS')),
+                settle('DGS10', yahooThenFred('^TNX', null, 'DGS10', tnxToYield)),
+                settle('DGS2', fredThenYahoo('DGS2', '2YY=F', null)),
+                settle('BTC', fetchMacroBtcDaily())
             ]);
+
             const S = window._macroLive.series;
-            if ((!S.DXY || !S.DXY.length) && S.DTWEXBGS && S.DTWEXBGS.length) {
-                S.DXY = S.DTWEXBGS;
-                S._dxyLabel = 'Broad dollar (DTWEXBGS)';
-                window._macroLive.sources.DXY = 'fred:DTWEXBGS';
-            } else if (S.DXY && S.DXY.length) {
-                S._dxyLabel = 'DXY';
-            }
-            if ((!S.VIX || !S.VIX.length) && S.VIXY && S.VIXY.length) {
-                S.VIX = S.VIXY;
-                window._macroLive.sources.VIX = 'yahoo:^VIX';
+            if (S.DXY && S.DXY.length) {
+                S._dxyLabel = S._dxyLabel || 'DXY';
             }
             if (S.USDJPY && S.USDJPY.length) {
                 const lastJ = S.USDJPY[S.USDJPY.length - 1].v;
                 if (lastJ > 0 && lastJ < 1) {
                     S.USDJPY = S.USDJPY.map(function (d) { return { date: d.date, t: d.t, v: 1 / d.v }; });
                     window._macroLive.sources.USDJPY = (window._macroLive.sources.USDJPY || 'ok') + ':inverted';
+                }
+            }
+            if ((!S.T10Y2Y || !S.T10Y2Y.length) && S.DGS10 && S.DGS10.length && S.DGS2 && S.DGS2.length) {
+                const two = S.DGS2.slice().sort(function (a, b) { return a.t - b.t; });
+                const curve = [];
+                S.DGS10.forEach(function (d) {
+                    const t2 = lastOnOrBefore(two, d.t);
+                    if (!t2) return;
+                    curve.push({ date: d.date, t: d.t, v: d.v - t2.v });
+                });
+                if (curve.length > 5) {
+                    S.T10Y2Y = curve;
+                    window._macroLive.sources.T10Y2Y = 'derived:10y-2y';
+                    console.log('[Macro] T10Y2Y derived from 10Y-2Y', curve.length);
                 }
             }
             if (S.WALCL && S.TGA && S.RRP) {
@@ -9883,14 +9987,79 @@
         }
 
         async function loadStableDominanceCharts() {
-            const days = 365;
-            let usdtMc = null, usdcMc = null, btcMc = null, totalHist = null, globalNow = null;
+            const fmtDom = function (v) { return (isFinite(v) ? v.toFixed(2) : '--') + '%'; };
+            const fmtB = function (v) { return '$' + (isFinite(v) ? v.toFixed(1) : '--') + 'B'; };
+
+            let llamaAssets = null, llamaHist = null;
             try {
-                const g = await cgFetch('/global', { cacheKey: 'cg_global_v192', ttlMs: 15 * 60 * 1000 });
+                llamaAssets = await fetchFirstSuccess([
+                    'https://stablecoins.llama.fi/stablecoins?includePrices=true',
+                    'https://api.llama.fi/stablecoins?includePrices=true',
+                ], function (d) { return Array.isArray(d && d.peggedAssets); });
+            } catch (e) { console.warn('[Stables] llama assets failed', e && e.message); }
+            try {
+                llamaHist = await fetchFirstSuccess([
+                    'https://stablecoins.llama.fi/stablecoincharts/all',
+                    'https://api.llama.fi/stablecoincharts/all',
+                ], function (d) { return Array.isArray(d) && d.length > 30; });
+            } catch (e) { console.warn('[Stables] llama charts failed', e && e.message); }
+
+            const nowSec = Date.now() / 1000 + 2 * 86400;
+            const totalStableHist = (llamaHist || []).map(function (d) {
+                const sec = Number(d.date);
+                const v = extractStableTotal(d);
+                if (!(sec > 0) || sec > nowSec || !(v > 0)) return null;
+                return { t: sec * 1000, v: v / 1e9, date: new Date(sec * 1000).toISOString().slice(0, 10) };
+            }).filter(Boolean).sort(function (a, b) { return a.t - b.t; });
+
+            const assets = (llamaAssets && llamaAssets.peggedAssets) || [];
+            const totalNow = assets.reduce(function (s, a) { return s + ((a.circulating && a.circulating.peggedUSD) || 0); }, 0);
+            const findAsset = function (sym) {
+                return assets.find(function (a) { return String(a.symbol || '').toUpperCase() === sym; });
+            };
+            const usdt = findAsset('USDT');
+            const usdc = findAsset('USDC');
+
+            const paintShare = function (canvasId, lastId, deltaId, asset, label, color) {
+                const circ = asset && asset.circulating && asset.circulating.peggedUSD;
+                if (circ && totalNow > 0) {
+                    const pct = circ / totalNow * 100;
+                    if (totalStableHist.length > 8) {
+                        renderFtArea(canvasId, totalStableHist, {
+                            period: '1y', lastId: lastId, deltaId: deltaId,
+                            fmt: fmtB, label: 'Total stables', color: color
+                        });
+                    }
+                    paintFtLast(lastId, fmtDom(pct), deltaId, null);
+                    const sub = document.getElementById(deltaId);
+                    if (sub) sub.textContent = 'last print vs live stable supply · history is total stables $B';
+                    return true;
+                }
+                if (totalStableHist.length > 8) {
+                    renderFtArea(canvasId, totalStableHist, {
+                        period: '1y', lastId: lastId, deltaId: deltaId,
+                        fmt: fmtB, label: 'Total stables', color: color
+                    });
+                    const sub = document.getElementById(deltaId);
+                    if (sub) sub.textContent = 'total stables history · share unavailable';
+                    return true;
+                }
+                markFtUnavailable(lastId, deltaId, canvasId);
+                return false;
+            };
+            paintShare('stableUsdtDChart', 'stableUsdtDLast', 'stableUsdtDDelta', usdt, 'USDT.D', '#26A17B');
+            paintShare('stableUsdcDChart', 'stableUsdcDLast', 'stableUsdcDDelta', usdc, 'USDC.D', '#2775CA');
+
+            // BTC.D: CoinGecko global if it works; otherwise CRYPTOCAP:BTC.D
+            let globalNow = null, btcD = null;
+            try {
+                const g = await cgFetch('/global', { cacheKey: 'cg_global_v193', ttlMs: 15 * 60 * 1000 });
                 globalNow = g && g.data && g.data.data ? g.data.data : (g && g.data);
-            } catch (e) { console.warn('[Stables] global failed', e.message); }
+            } catch (e) { console.warn('[Stables] global failed', e && e.message); }
+
+            let totalHist = null, btcMc = null;
             try {
-                const cap = await cgFetch('/global/market_cap_chart?days=' + days, { cacheKey: 'cg_mcap_chart', ttlMs: 30 * 60 * 1000 });
+                const cap = await cgFetch('/global/market_cap_chart?days=365', { cacheKey: 'cg_mcap_chart', ttlMs: 30 * 60 * 1000 });
                 const rows = cap && cap.data && (cap.data.market_cap_chart || cap.data.total_market_cap || cap.data.market_caps);
                 if (Array.isArray(rows) && rows.length > 8) {
                     totalHist = rows.map(function (r) {
@@ -9899,77 +10068,27 @@
                         return { t: t, v: v };
                     }).filter(function (d) { return isFinite(d.t) && isFinite(d.v) && d.v > 0; });
                 }
-            } catch (e) { console.warn('[Stables] market_cap_chart unavailable', e.message); }
-            const lastPerDay = function (mcaps) {
+            } catch (e) { console.warn('[Stables] market_cap_chart unavailable', e && e.message); }
+            try {
+                const u = await cgFetch('/coins/bitcoin/market_chart?vs_currency=usd&days=365', { cacheKey: 'btc_mc_v193', ttlMs: 30 * 60 * 1000 });
                 const m = new Map();
-                (mcaps || []).forEach(function (row) {
+                ((u && u.data && u.data.market_caps) || []).forEach(function (row) {
                     const ts = row[0], v = row[1];
                     if (!isFinite(ts) || !isFinite(v)) return;
                     m.set(Math.floor(ts / 86400000) * 86400000, v);
                 });
-                return [...m.entries()].sort(function (a, b) { return a[0] - b[0]; }).map(function (e) {
+                btcMc = [...m.entries()].sort(function (a, b) { return a[0] - b[0]; }).map(function (e) {
                     return { t: e[0], v: e[1], date: new Date(e[0]).toISOString().slice(0, 10) };
                 });
-            };
-            try {
-                const u = await cgFetch('/coins/tether/market_chart?vs_currency=usd&days=' + days, { cacheKey: 'usdt_mc_v192', ttlMs: 30 * 60 * 1000 });
-                usdtMc = lastPerDay(u && u.data && u.data.market_caps);
-            } catch (e) { console.warn('[Stables] USDT mcap failed', e.message); }
-            try {
-                const u = await cgFetch('/coins/usd-coin/market_chart?vs_currency=usd&days=' + days, { cacheKey: 'usdc_mc_v192', ttlMs: 30 * 60 * 1000 });
-                usdcMc = lastPerDay(u && u.data && u.data.market_caps);
-            } catch (e) { console.warn('[Stables] USDC mcap failed', e.message); }
-            try {
-                const u = await cgFetch('/coins/bitcoin/market_chart?vs_currency=usd&days=' + days, { cacheKey: 'btc_mc_v192', ttlMs: 30 * 60 * 1000 });
-                btcMc = lastPerDay(u && u.data && u.data.market_caps);
-            } catch (e) { console.warn('[Stables] BTC mcap failed', e.message); }
+            } catch (e) { console.warn('[Stables] BTC mcap failed', e && e.message); }
 
-            const totalNow = globalNow && globalNow.total_market_cap && globalNow.total_market_cap.usd;
-            const toDom = function (mcSeries) {
-                if (!mcSeries || !mcSeries.length) return null;
-                if (totalHist && totalHist.length) {
-                    const th = totalHist.slice().sort(function (a, b) { return a.t - b.t; });
-                    return mcSeries.map(function (d) {
-                        const tot = lastOnOrBefore(th, d.t);
-                        if (!tot || !tot.v) return null;
-                        return { t: d.t, v: d.v / tot.v * 100, date: d.date };
-                    }).filter(Boolean);
-                }
-                return null;
-            };
-            const usdtD = toDom(usdtMc);
-            const usdcD = toDom(usdcMc);
-            const btcD = toDom(btcMc);
-            const fmtDom = function (v) { return (isFinite(v) ? v.toFixed(2) : '--') + '%'; };
-            if (usdtD && usdtD.length) {
-                renderFtArea('stableUsdtDChart', usdtD, { period: '1y', lastId: 'stableUsdtDLast', deltaId: 'stableUsdtDDelta', fmt: fmtDom, label: 'USDT.D', color: '#26A17B' });
-            } else if (usdtMc && usdtMc.length && totalNow) {
-                const last = usdtMc[usdtMc.length - 1];
-                const prev = usdtMc.length > 1 ? usdtMc[usdtMc.length - 2] : null;
-                paintFtLast('stableUsdtDLast', fmtDom(last.v / totalNow * 100), 'stableUsdtDDelta', prev ? ((last.v - prev.v) / 1e9) : null, function (d) { return (d >= 0 ? '+' : '') + d.toFixed(1) + 'B mcap'; });
-                renderFtArea('stableUsdtDChart', usdtMc.map(function (d) { return { t: d.t, v: d.v / 1e9, date: d.date }; }), {
-                    period: '1y', lastId: 'stableUsdtDLast', deltaId: 'stableUsdtDDelta',
-                    fmt: function (v) { return '$' + v.toFixed(1) + 'B'; }, label: 'USDT mcap', color: '#26A17B'
-                });
-                paintFtLast('stableUsdtDLast', fmtDom(last.v / totalNow * 100), 'stableUsdtDDelta', null);
-                const sub = document.getElementById('stableUsdtDDelta');
-                if (sub) sub.textContent = 'last print vs live total mcap · history is mcap $B';
-            } else {
-                markFtUnavailable('stableUsdtDLast', 'stableUsdtDDelta', 'stableUsdtDChart');
-            }
-            if (usdcD && usdcD.length) {
-                renderFtArea('stableUsdcDChart', usdcD, { period: '1y', lastId: 'stableUsdcDLast', deltaId: 'stableUsdcDDelta', fmt: fmtDom, label: 'USDC.D', color: '#2775CA' });
-            } else if (usdcMc && usdcMc.length && totalNow) {
-                const last = usdcMc[usdcMc.length - 1];
-                renderFtArea('stableUsdcDChart', usdcMc.map(function (d) { return { t: d.t, v: d.v / 1e9, date: d.date }; }), {
-                    period: '1y', lastId: 'stableUsdcDLast', deltaId: 'stableUsdcDDelta',
-                    fmt: function (v) { return '$' + v.toFixed(1) + 'B'; }, label: 'USDC mcap', color: '#2775CA'
-                });
-                paintFtLast('stableUsdcDLast', fmtDom(last.v / totalNow * 100), 'stableUsdcDDelta', null);
-                const sub = document.getElementById('stableUsdcDDelta');
-                if (sub) sub.textContent = 'last print vs live total mcap · history is mcap $B';
-            } else {
-                markFtUnavailable('stableUsdcDLast', 'stableUsdcDDelta', 'stableUsdcDChart');
+            if (btcMc && btcMc.length && totalHist && totalHist.length) {
+                const th = totalHist.slice().sort(function (a, b) { return a.t - b.t; });
+                btcD = btcMc.map(function (d) {
+                    const tot = lastOnOrBefore(th, d.t);
+                    if (!tot || !tot.v) return null;
+                    return { t: d.t, v: d.v / tot.v * 100, date: d.date };
+                }).filter(Boolean);
             }
             if (btcD && btcD.length) {
                 renderFtArea('stableBtcDChart', btcD, { period: '1y', lastId: 'stableBtcDLast', deltaId: 'stableBtcDDelta', fmt: fmtDom, label: 'BTC.D', color: '#f7931a' });
@@ -9992,96 +10111,11 @@
         }
 
         async function loadStablePegChart() {
+            // v19.3: llama tokens have circulating, not price history.
+            // Skip multi-id CoinGecko market_chart (429s). Peg table uses llama price.
             const canvas = document.getElementById('stablePegChart');
             if (!canvas) return;
-            const days = 90;
-            const ids = [
-                { id: 'tether', label: 'USDT', color: '#26A17B' },
-                { id: 'usd-coin', label: 'USDC', color: '#2775CA' },
-                { id: 'dai', label: 'DAI', color: '#F5AC37' }
-            ];
-            const series = [];
-            for (let i = 0; i < ids.length; i++) {
-                try {
-                    if (i) await new Promise(function (r) { setTimeout(r, 350); });
-                    const got = await cgFetch('/coins/' + ids[i].id + '/market_chart?vs_currency=usd&days=' + days, { cacheKey: 'peg_' + ids[i].id, ttlMs: 30 * 60 * 1000 });
-                    const prices = got && got.data && got.data.prices;
-                    if (!Array.isArray(prices) || prices.length < 8) continue;
-                    const m = new Map();
-                    prices.forEach(function (row) {
-                        const t = Math.floor(row[0] / 86400000) * 86400000;
-                        m.set(t, row[1]);
-                    });
-                    const data = [...m.entries()].sort(function (a, b) { return a[0] - b[0]; }).map(function (e) { return { x: e[0], y: e[1] }; });
-                    series.push({ label: ids[i].label, color: ids[i].color, data: data });
-                } catch (e) { console.warn('[Stables] peg', ids[i].label, e.message); }
-            }
-            if (!series.length) return;
-            if (_ftChartInst.stablePegChart) { try { _ftChartInst.stablePegChart.destroy(); } catch (e) {} }
-            _ftChartInst.stablePegChart = new Chart(canvas.getContext('2d'), {
-                type: 'line',
-                data: {
-                    datasets: series.map(function (s) {
-                        return {
-                            label: s.label,
-                            data: s.data,
-                            borderColor: s.color,
-                            backgroundColor: 'transparent',
-                            borderWidth: 1.3,
-                            pointRadius: 0,
-                            tension: 0.15,
-                            fill: false,
-                            _ftFmt: function (v) { return v.toFixed(4); }
-                        };
-                    }).concat([{
-                        label: '_zero',
-                        data: [{ x: series[0].data[0].x, y: 1 }, { x: series[0].data[series[0].data.length - 1].x, y: 1 }],
-                        borderColor: 'rgba(139,147,162,0.35)',
-                        borderWidth: 1,
-                        borderDash: [4, 4],
-                        pointRadius: 0,
-                        fill: false,
-                        _hideEnd: true
-                    }])
-                },
-                plugins: [ftEndLabelPlugin],
-                options: {
-                    responsive: true, maintainAspectRatio: false, parsing: false,
-                    layout: { padding: { right: 56, top: 4 } },
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(8,9,12,0.92)',
-                            callbacks: {
-                                title: function (items) { return items.length ? new Date(items[0].parsed.x).toISOString().slice(0, 10) : ''; },
-                                label: function (c) { return c.dataset.label === '_zero' ? null : ' ' + c.dataset.label + ' $' + c.parsed.y.toFixed(4); }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            type: 'linear',
-                            ticks: {
-                                color: '#545c69', maxTicksLimit: 6,
-                                font: { size: 9, family: "'IBM Plex Mono', monospace" },
-                                callback: function (v) { return new Date(v).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
-                            },
-                            grid: { color: 'rgba(0,229,199,0.045)', drawBorder: false },
-                            border: { display: false }
-                        },
-                        y: {
-                            ticks: {
-                                color: '#8b93a2', maxTicksLimit: 5,
-                                font: { size: 9, family: "'IBM Plex Mono', monospace" },
-                                callback: function (v) { return '$' + Number(v).toFixed(3); }
-                            },
-                            grid: { color: 'rgba(0,229,199,0.045)', drawBorder: false },
-                            border: { display: false }
-                        }
-                    }
-                }
-            });
+            console.log('[Stables] peg sparkline skipped — no price history without multi CG calls');
         }
 
         function renderHLOiMix(rows) {
@@ -13209,7 +13243,7 @@
             }, { passive: true });
         });
         
-        console.log('%cFLOWTRACK v19.2', 'color:#50d2c1;font-weight:bold;font-size:14px;', 'build 2026-08-19 · Chart.js macro v19.2');
+        console.log('%cFLOWTRACK v19.3', 'color:#50d2c1;font-weight:bold;font-size:14px;', 'build 2026-08-20 · llama-first stables · FRED JSON + Yahoo macro');
         // UTC clock in top bar
         setInterval(() => {
             const el = document.getElementById('utcClock');
