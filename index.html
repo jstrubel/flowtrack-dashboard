@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flowtrack | Crypto Market Intelligence v20.0</title>
+    <title>Flowtrack | Crypto Market Intelligence v20.1</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1851,13 +1851,14 @@
                 <div class="card-header">
                     <div>
                         <div class="card-title">Historical Altcoin Breadth</div>
-                        <div class="card-subtitle">% of top 100 Binance altcoins above their 200-day moving average</div>
+                        <div class="card-subtitle">% of top 100 Binance altcoins above their 200-day moving average · daily, 3Y+ when MAX</div>
                     </div>
                     <div class="time-btns">
                         <button class="time-btn" onclick="loadHistoricalBreadth(90)">3M</button>
                         <button class="time-btn" onclick="loadHistoricalBreadth(180)">6M</button>
                         <button class="time-btn active" onclick="loadHistoricalBreadth(365)">1Y</button>
-                        <button class="time-btn" onclick="loadHistoricalBreadth(600)">MAX</button>
+                        <button class="time-btn" onclick="loadHistoricalBreadth(1095)">3Y</button>
+                        <button class="time-btn" onclick="loadHistoricalBreadth(0)">MAX</button>
                     </div>
                 </div>
                 <div class="chart-container tall" style="position: relative;">
@@ -3114,7 +3115,7 @@
     </div>
 
     <footer>
-        <p><strong>FLOWTRACK v20.0</strong> — Crypto Derivatives Intelligence</p>
+        <p><strong>FLOWTRACK v20.1</strong> — Crypto Derivatives Intelligence</p>
         <p style="margin-top: 6px;">Data from FRED, Yahoo/Stooq, Binance, CoinGecko, DefiLlama, Hyperliquid, CoinGlass, Coinalyze, TradingView</p>
         <p style="margin-top: 6px;">Auto-refreshes every 60 seconds • Not financial advice</p>
     </footer>
@@ -6599,20 +6600,25 @@
         
         // ==================== HISTORICAL BREADTH ====================
         let historicalBreadthChart = null;
+        // Session cache of paginated daily klines. Invalidate only if empty or baseUrl changes.
+        let histBreadthKlineCache = { baseUrl: null, allKlines: null };
         
         async function loadHistoricalBreadth(days = 365) {
             const loadingEl = document.getElementById('histBreadthLoading');
             const progressEl = document.getElementById('histBreadthProgress');
             if (loadingEl) loadingEl.style.display = 'flex';
-            if (progressEl) progressEl.textContent = 'Connecting to exchange...';
             
-            // Update button states
+            const isMax = (days === 0 || days === 'max' || days === 'MAX');
+            
+            // Update button states (MAX = all computed history, not a 600-day cap)
             document.querySelectorAll('.card:has(#historicalBreadthChart) .time-btn').forEach(btn => {
                 btn.classList.remove('active');
-                if ((days === 90 && btn.textContent === '3M') ||
-                    (days === 180 && btn.textContent === '6M') ||
-                    (days === 365 && btn.textContent === '1Y') ||
-                    (days === 600 && btn.textContent === 'MAX')) {
+                const label = btn.textContent.trim();
+                if ((days === 90 && label === '3M') ||
+                    (days === 180 && label === '6M') ||
+                    (days === 365 && label === '1Y') ||
+                    (days === 1095 && label === '3Y') ||
+                    (isMax && label === 'MAX')) {
                     btn.classList.add('active');
                 }
             });
@@ -6629,6 +6635,36 @@
                     clearTimeout(id);
                     throw e;
                 }
+            };
+            
+            const utcDateKey = (ms) => new Date(ms).toISOString().slice(0, 10);
+            
+            // Two pages of 1000 daily klines (~1500–2000 candles) via startTime/endTime.
+            // Breadth on day T needs 200 prior closes, so we fetch warmup + ≥3Y of prices.
+            const fetchPaginatedKlines = async (baseUrl, symbol) => {
+                const TARGET_DAYS = 2000;
+                const now = Date.now();
+                let startTime = now - TARGET_DAYS * 86400000;
+                const endTime = now + 86400000;
+                const pages = [];
+                for (let page = 0; page < 2; page++) {
+                    const url = `${baseUrl}/api/v3/klines?symbol=${symbol}&interval=1d&limit=1000&startTime=${startTime}&endTime=${endTime}`;
+                    const res = await fetchWithTimeout(url);
+                    if (!res.ok) break;
+                    const data = await res.json();
+                    if (!Array.isArray(data) || data.length === 0) break;
+                    pages.push(data);
+                    if (data.length < 1000) break;
+                    startTime = data[data.length - 1][0] + 1;
+                    if (startTime >= endTime) break;
+                }
+                const byTime = new Map();
+                for (const page of pages) {
+                    for (const k of page) {
+                        byTime.set(k[0], { time: k[0], close: parseFloat(k[4]) });
+                    }
+                }
+                return Array.from(byTime.values()).sort((a, b) => a.time - b.time);
             };
             
             try {
@@ -6653,71 +6689,76 @@
                     'TRBUSDT', 'OMGUSDT', 'KSMUSDT', 'CELOUSDT', 'OCEANUSDT', 'FETUSDT'
                 ];
                 
-                // Test which API works
-                let baseUrl = null;
-                try {
-                    const testRes = await fetchWithTimeout('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=5', 5000);
-                    if (testRes.ok) baseUrl = 'https://api.binance.com';
-                } catch (e) {
-                    console.log('Binance.com blocked');
+                let baseUrl = histBreadthKlineCache.baseUrl;
+                let allKlines = histBreadthKlineCache.allKlines;
+                const cacheHit = !!(allKlines && baseUrl && Object.keys(allKlines).length);
+                
+                if (progressEl) {
+                    progressEl.textContent = cacheHit ? 'Using cached klines...' : 'Connecting to exchange...';
                 }
                 
-                if (!baseUrl) {
+                if (!cacheHit) {
+                    baseUrl = null;
                     try {
-                        const testRes = await fetchWithTimeout('https://api.binance.us/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=5', 5000);
-                        if (testRes.ok) baseUrl = 'https://api.binance.us';
+                        const testRes = await fetchWithTimeout('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=5', 5000);
+                        if (testRes.ok) baseUrl = 'https://api.binance.com';
                     } catch (e) {
-                        console.log('Binance.us also blocked');
+                        console.log('Binance.com blocked');
                     }
-                }
-                
-                if (!baseUrl) {
-                    if (loadingEl) {
-                        loadingEl.innerHTML = '<div style="color: var(--warn); font-size: 12px;">Exchange API not accessible</div>';
-                    }
-                    return;
-                }
-                
-                if (progressEl) progressEl.textContent = `Using ${baseUrl.includes('.us') ? 'Binance US' : 'Binance'}...`;
-                
-                // We need 200 extra days for the SMA calculation
-                // Fetch maximum 1000 days (Binance limit) to ensure we have recent data
-                const fetchDays = 1000; // Always fetch max to ensure we get most recent
-                const allKlines = {};
-                let fetchedCount = 0;
-                
-                // Fetch in batches
-                const batchSize = 10;
-                for (let i = 0; i < HIST_ALTS.length; i += batchSize) {
-                    const batch = HIST_ALTS.slice(i, i + batchSize);
                     
-                    await Promise.all(batch.map(async (symbol) => {
+                    if (!baseUrl) {
                         try {
-                            const res = await fetchWithTimeout(
-                                `${baseUrl}/api/v3/klines?symbol=${symbol}&interval=1d&limit=${fetchDays}`
-                            );
-                            if (res.ok) {
-                                const data = await res.json();
-                                // Binance returns oldest first, newest last
-                                if (data.length >= 250) {
-                                    allKlines[symbol] = data.map(k => ({
-                                        time: k[0], // Open time in ms
-                                        close: parseFloat(k[4])
-                                    }));
+                            const testRes = await fetchWithTimeout('https://api.binance.us/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=5', 5000);
+                            if (testRes.ok) baseUrl = 'https://api.binance.us';
+                        } catch (e) {
+                            console.log('Binance.us also blocked');
+                        }
+                    }
+                    
+                    if (!baseUrl) {
+                        if (loadingEl) {
+                            loadingEl.innerHTML = '<div style="color: var(--warn); font-size: 12px;">Exchange API not accessible</div>';
+                        }
+                        return;
+                    }
+                    
+                    // Host changed vs a stale cache — drop it
+                    if (histBreadthKlineCache.baseUrl && histBreadthKlineCache.baseUrl !== baseUrl) {
+                        histBreadthKlineCache = { baseUrl: null, allKlines: null };
+                    }
+                    
+                    if (progressEl) progressEl.textContent = `Using ${baseUrl.includes('.us') ? 'Binance US' : 'Binance'}...`;
+                    
+                    allKlines = {};
+                    let fetchedCount = 0;
+                    
+                    // Fetch in batches
+                    const batchSize = 10;
+                    for (let i = 0; i < HIST_ALTS.length; i += batchSize) {
+                        const batch = HIST_ALTS.slice(i, i + batchSize);
+                        
+                        await Promise.all(batch.map(async (symbol) => {
+                            try {
+                                const merged = await fetchPaginatedKlines(baseUrl, symbol);
+                                // Need ≥200 daily closes to form a 200-DMA
+                                if (merged.length >= 200) {
+                                    allKlines[symbol] = merged;
                                     fetchedCount++;
                                 }
+                            } catch (e) {
+                                // Skip failed symbols
                             }
-                        } catch (e) {
-                            // Skip failed symbols
+                        }));
+                        
+                        if (progressEl) progressEl.textContent = `Fetched ${fetchedCount}/${HIST_ALTS.length} coins...`;
+                        
+                        // Rate limit protection
+                        if (i + batchSize < HIST_ALTS.length) {
+                            await new Promise(r => setTimeout(r, 100));
                         }
-                    }));
-                    
-                    if (progressEl) progressEl.textContent = `Fetched ${fetchedCount}/${HIST_ALTS.length} coins...`;
-                    
-                    // Rate limit protection
-                    if (i + batchSize < HIST_ALTS.length) {
-                        await new Promise(r => setTimeout(r, 100));
                     }
+                    
+                    histBreadthKlineCache = { baseUrl, allKlines };
                 }
                 
                 const symbols = Object.keys(allKlines);
@@ -6732,27 +6773,38 @@
                 
                 if (progressEl) progressEl.textContent = 'Calculating breadth...';
                 
-                // Find the date range - use the MAXIMUM length to get most recent data
-                // Each coin may have different amounts of data
+                // Find the date range — use the MAXIMUM length to get most recent data
                 const lengths = symbols.map(s => allKlines[s].length);
                 const maxLen = Math.max(...lengths);
                 
-                // Get reference dates from a coin with max data
                 const refSymbol = symbols.find(s => allKlines[s].length === maxLen);
                 const refKlines = allKlines[refSymbol];
                 
-                // Debug: show actual dates from API
                 const firstDate = new Date(refKlines[0].time);
                 const lastDate = new Date(refKlines[maxLen-1].time);
                 console.log(`Reference coin ${refSymbol}: ${maxLen} candles from ${firstDate.toLocaleDateString()} to ${lastDate.toLocaleDateString()}`);
                 
-                // Calculate breadth for each day
-                // We want to show the most recent `days` worth of breadth
+                // Index each coin by UTC date key + rolling 200-SMA so the inner loop is O(1)
+                const coinIndex = {};
+                for (const symbol of symbols) {
+                    const klines = allKlines[symbol];
+                    const byDay = new Map();
+                    const sma200 = new Array(klines.length);
+                    let sum = 0;
+                    for (let i = 0; i < klines.length; i++) {
+                        byDay.set(utcDateKey(klines[i].time), i);
+                        sum += klines[i].close;
+                        if (i >= 200) sum -= klines[i - 200].close;
+                        sma200[i] = i >= 199 ? sum / 200 : null;
+                    }
+                    coinIndex[symbol] = { klines, byDay, sma200 };
+                }
+                
                 const breadthHistory = [];
                 
-                // Start from 199 days into the longest dataset (need 200 days for SMA)
-                // End at the most recent day
-                const startDay = Math.max(199, maxLen - 1 - days);
+                // 200-DMA warmup: first computable breadth is index 199.
+                // MAX = all computed history (never cap at 600).
+                const startDay = isMax ? 199 : Math.max(199, maxLen - 1 - days);
                 const endDay = maxLen - 1;
                 
                 console.log(`Calculating breadth from index ${startDay} (${new Date(refKlines[startDay].time).toLocaleDateString()}) to ${endDay} (${new Date(refKlines[endDay].time).toLocaleDateString()})`);
@@ -6761,35 +6813,18 @@
                     let aboveCount = 0;
                     let totalCount = 0;
                     
-                    // Get the target timestamp for this day
                     const targetTime = refKlines[dayIdx].time;
+                    const targetKey = utcDateKey(targetTime);
                     
                     for (const symbol of symbols) {
-                        const klines = allKlines[symbol];
-                        
-                        // Find the index in this coin's data that matches this timestamp
-                        // (coins may have different start dates)
-                        let coinDayIdx = -1;
-                        for (let k = klines.length - 1; k >= 0; k--) {
-                            if (Math.abs(klines[k].time - targetTime) < 86400000) { // Within 1 day
-                                coinDayIdx = k;
-                                break;
-                            }
-                        }
-                        
-                        if (coinDayIdx < 199) continue; // Not enough history for SMA
-                        
-                        // Calculate 200-day SMA
-                        const smaStart = coinDayIdx - 199;
-                        let sum = 0;
-                        for (let j = smaStart; j <= coinDayIdx; j++) {
-                            sum += klines[j].close;
-                        }
-                        const sma200 = sum / 200;
-                        const currentPrice = klines[coinDayIdx].close;
+                        const idx = coinIndex[symbol];
+                        const coinDayIdx = idx.byDay.get(targetKey);
+                        if (coinDayIdx == null || coinDayIdx < 199) continue;
+                        const sma = idx.sma200[coinDayIdx];
+                        if (sma == null) continue;
                         
                         totalCount++;
-                        if (currentPrice > sma200) {
+                        if (idx.klines[coinDayIdx].close > sma) {
                             aboveCount++;
                         }
                     }
@@ -6806,7 +6841,6 @@
                 
                 console.log(`Calculated ${breadthHistory.length} days of breadth`);
                 
-                // Debug: log first and last few values
                 if (breadthHistory.length > 0) {
                     const first = breadthHistory[0];
                     const last = breadthHistory[breadthHistory.length - 1];
@@ -13901,7 +13935,7 @@
             }, { passive: true });
         });
         
-        console.log('%cFLOWTRACK v20.0', 'color:#50d2c1;font-weight:bold;font-size:14px;', 'build 2026-08-20 · Macro terminal · buybacks + oil + dollar vs gold/BTC');
+        console.log('%cFLOWTRACK v20.1', 'color:#50d2c1;font-weight:bold;font-size:14px;', 'build 2026-08-20 · Macro terminal · buybacks + oil + dollar vs gold/BTC');
         // UTC clock in top bar
         setInterval(() => {
             const el = document.getElementById('utcClock');
